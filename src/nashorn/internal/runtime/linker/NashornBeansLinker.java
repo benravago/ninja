@@ -23,9 +23,9 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.linker;
+package nashorn.internal.runtime.linker;
 
-import static jdk.nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.lookup.Lookup.MH;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -33,27 +33,27 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.function.Supplier;
-import jdk.dynalink.CallSiteDescriptor;
-import jdk.dynalink.NamedOperation;
-import jdk.dynalink.Operation;
-import jdk.dynalink.SecureLookupSupplier;
-import jdk.dynalink.StandardNamespace;
-import jdk.dynalink.StandardOperation;
-import jdk.dynalink.beans.BeansLinker;
-import jdk.dynalink.linker.ConversionComparator.Comparison;
-import jdk.dynalink.linker.GuardedInvocation;
-import jdk.dynalink.linker.GuardingDynamicLinker;
-import jdk.dynalink.linker.LinkRequest;
-import jdk.dynalink.linker.LinkerServices;
-import jdk.dynalink.linker.MethodHandleTransformer;
-import jdk.dynalink.linker.support.DefaultInternalObjectFilter;
-import jdk.dynalink.linker.support.Lookup;
-import jdk.dynalink.linker.support.SimpleLinkRequest;
-import jdk.nashorn.api.scripting.ScriptUtils;
-import jdk.nashorn.internal.runtime.ConsString;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.options.Options;
+import dynalink.CallSiteDescriptor;
+import dynalink.NamedOperation;
+import dynalink.Operation;
+import dynalink.SecureLookupSupplier;
+import dynalink.StandardNamespace;
+import dynalink.StandardOperation;
+import dynalink.beans.BeansLinker;
+import dynalink.linker.ConversionComparator.Comparison;
+import dynalink.linker.GuardedInvocation;
+import dynalink.linker.GuardingDynamicLinker;
+import dynalink.linker.LinkRequest;
+import dynalink.linker.LinkerServices;
+import dynalink.linker.MethodHandleTransformer;
+import dynalink.linker.support.DefaultInternalObjectFilter;
+import dynalink.linker.support.Lookup;
+import dynalink.linker.support.SimpleLinkRequest;
+import nashorn.api.scripting.ScriptUtils;
+import nashorn.internal.runtime.ConsString;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.options.Options;
 
 /**
  * This linker delegates to a {@code BeansLinker} but passes it a special linker services object that has a modified

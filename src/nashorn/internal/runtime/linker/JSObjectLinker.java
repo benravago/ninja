@@ -23,30 +23,30 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.linker;
+package nashorn.internal.runtime.linker;
 
-import static jdk.nashorn.internal.runtime.JSType.isString;
+import static nashorn.internal.runtime.JSType.isString;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.Map;
 import java.util.Objects;
-import jdk.dynalink.CallSiteDescriptor;
-import jdk.dynalink.Operation;
-import jdk.dynalink.StandardOperation;
-import jdk.dynalink.linker.GuardedInvocation;
-import jdk.dynalink.linker.LinkRequest;
-import jdk.dynalink.linker.LinkerServices;
-import jdk.dynalink.linker.TypeBasedGuardingDynamicLinker;
-import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import jdk.nashorn.internal.lookup.MethodHandleFactory;
-import jdk.nashorn.internal.lookup.MethodHandleFunctionality;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.objects.Global;
+import dynalink.CallSiteDescriptor;
+import dynalink.Operation;
+import dynalink.StandardOperation;
+import dynalink.linker.GuardedInvocation;
+import dynalink.linker.LinkRequest;
+import dynalink.linker.LinkerServices;
+import dynalink.linker.TypeBasedGuardingDynamicLinker;
+import nashorn.api.scripting.JSObject;
+import nashorn.api.scripting.ScriptObjectMirror;
+import nashorn.internal.lookup.MethodHandleFactory;
+import nashorn.internal.lookup.MethodHandleFunctionality;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.objects.Global;
 
 /**
  * A Dynalink linker to handle web browser built-in JS (DOM etc.) objects as well

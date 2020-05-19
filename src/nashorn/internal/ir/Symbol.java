@@ -23,7 +23,7 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -32,10 +32,10 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
-import jdk.nashorn.internal.codegen.types.Type;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.Debug;
-import jdk.nashorn.internal.runtime.options.Options;
+import nashorn.internal.codegen.types.Type;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.Debug;
+import nashorn.internal.runtime.options.Options;
 
 /**
  * Symbol is a symbolic address for a value ("variable" if you wish). Identifiers in JavaScript source, as well as

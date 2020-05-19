@@ -44,7 +44,7 @@ ScriptEngine nashornEngine = new ScriptEngineManager().getEngineByName("nashorn"
 </pre>
  *
  * and then use it just as you would any other JSR-223 script engine. See
- * {@link jdk.nashorn.api.scripting} package for details.
+ * {@link nashorn.api.scripting} package for details.
  * <h2>Compatibility</h2>
  * Nashorn is 100% compliant with the
  * <a href="http://www.ecma-international.org/publications/standards/Ecma-262.htm"
@@ -135,33 +135,22 @@ ScriptEngine nashornEngine = new ScriptEngineManager().getEngineByName("nashorn"
  * non-standard built-in objects:
  * {@code JSAdapter}, {@code JavaImporter}, {@code Packages}
  *
- * @deprecated Nashorn JavaScript script engine and APIs, and the jjs tool
- * are deprecated with the intent to remove them in a future release.
- *
  * @provides javax.script.ScriptEngineFactory
  * @moduleGraph
  * @since 9
  */
-@Deprecated(since="11", forRemoval=true)
-module jdk.scripting.nashorn {
+module nashorn {
     requires java.logging;
-    requires jdk.dynalink;
+    requires dynalink;
+    requires codegen;
 
     requires transitive java.scripting;
 
-    exports jdk.nashorn.api.scripting;
-    exports jdk.nashorn.api.tree;
-
-    exports jdk.nashorn.internal.runtime to
-        jdk.scripting.nashorn.shell;
-    exports jdk.nashorn.internal.objects to
-        jdk.scripting.nashorn.shell;
-    exports jdk.nashorn.tools to
-        jdk.scripting.nashorn.shell;
+    exports nashorn.api.scripting;
 
     provides javax.script.ScriptEngineFactory with
-        jdk.nashorn.api.scripting.NashornScriptEngineFactory;
+        nashorn.api.scripting.NashornScriptEngineFactory;
 
-    provides jdk.dynalink.linker.GuardingDynamicLinkerExporter with
-        jdk.nashorn.api.linker.NashornLinkerExporter;
+    provides dynalink.linker.GuardingDynamicLinkerExporter with
+        nashorn.api.linker.NashornLinkerExporter;
 }

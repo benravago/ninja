@@ -23,9 +23,9 @@
  * questions.
  */
 
-package jdk.nashorn.internal.lookup;
+package nashorn.internal.lookup;
 
-import static jdk.nashorn.internal.runtime.JSType.isString;
+import static nashorn.internal.runtime.JSType.isString;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -38,13 +38,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.Debug;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.logging.DebugLogger;
-import jdk.nashorn.internal.runtime.logging.Loggable;
-import jdk.nashorn.internal.runtime.logging.Logger;
-import jdk.nashorn.internal.runtime.options.Options;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.Debug;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.logging.DebugLogger;
+import nashorn.internal.runtime.logging.Loggable;
+import nashorn.internal.runtime.logging.Logger;
+import nashorn.internal.runtime.options.Options;
 
 /**
  * This class is abstraction for all method handle, switchpoint and method type

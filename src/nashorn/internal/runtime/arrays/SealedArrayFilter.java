@@ -23,12 +23,12 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.arrays;
+package nashorn.internal.runtime.arrays;
 
-import static jdk.nashorn.internal.runtime.ECMAErrors.typeError;
+import static nashorn.internal.runtime.ECMAErrors.typeError;
 
-import jdk.nashorn.internal.objects.Global;
-import jdk.nashorn.internal.runtime.PropertyDescriptor;
+import nashorn.internal.objects.Global;
+import nashorn.internal.runtime.PropertyDescriptor;
 
 /**
  * ArrayData after the array has been sealed by Object.seal call.

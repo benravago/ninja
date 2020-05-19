@@ -23,12 +23,12 @@
  * questions.
  */
 
-package jdk.nashorn.internal.objects;
+package nashorn.internal.objects;
 
-import static jdk.nashorn.internal.lookup.Lookup.MH;
-import static jdk.nashorn.internal.runtime.ECMAErrors.typeError;
-import static jdk.nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
-import static jdk.nashorn.internal.runtime.UnwarrantedOptimismException.INVALID_PROGRAM_POINT;
+import static nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.runtime.ECMAErrors.typeError;
+import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
+import static nashorn.internal.runtime.UnwarrantedOptimismException.INVALID_PROGRAM_POINT;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -36,21 +36,21 @@ import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import jdk.dynalink.CallSiteDescriptor;
-import jdk.dynalink.linker.GuardedInvocation;
-import jdk.dynalink.linker.LinkRequest;
-import jdk.nashorn.internal.lookup.Lookup;
-import jdk.nashorn.internal.objects.annotations.Constructor;
-import jdk.nashorn.internal.objects.annotations.ScriptClass;
-import jdk.nashorn.internal.runtime.FindProperty;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.PropertyMap;
-import jdk.nashorn.internal.runtime.ScriptFunction;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.arrays.ArrayLikeIterator;
-import jdk.nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
-import jdk.nashorn.internal.scripts.JO;
+import dynalink.CallSiteDescriptor;
+import dynalink.linker.GuardedInvocation;
+import dynalink.linker.LinkRequest;
+import nashorn.internal.lookup.Lookup;
+import nashorn.internal.objects.annotations.Constructor;
+import nashorn.internal.objects.annotations.ScriptClass;
+import nashorn.internal.runtime.FindProperty;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.PropertyMap;
+import nashorn.internal.runtime.ScriptFunction;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.arrays.ArrayLikeIterator;
+import nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
+import nashorn.internal.scripts.JO;
 
 /**
  * This class is the implementation of the Nashorn-specific global object named {@code JSAdapter}. It can be thought of

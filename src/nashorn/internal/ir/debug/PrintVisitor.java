@@ -23,36 +23,36 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir.debug;
+package nashorn.internal.ir.debug;
 
 import java.util.List;
-import jdk.nashorn.internal.ir.BinaryNode;
-import jdk.nashorn.internal.ir.Block;
-import jdk.nashorn.internal.ir.BlockStatement;
-import jdk.nashorn.internal.ir.BreakNode;
-import jdk.nashorn.internal.ir.CaseNode;
-import jdk.nashorn.internal.ir.CatchNode;
-import jdk.nashorn.internal.ir.ContinueNode;
-import jdk.nashorn.internal.ir.ExpressionStatement;
-import jdk.nashorn.internal.ir.ForNode;
-import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.ir.IdentNode;
-import jdk.nashorn.internal.ir.IfNode;
-import jdk.nashorn.internal.ir.JoinPredecessor;
-import jdk.nashorn.internal.ir.JoinPredecessorExpression;
-import jdk.nashorn.internal.ir.LabelNode;
-import jdk.nashorn.internal.ir.LocalVariableConversion;
-import jdk.nashorn.internal.ir.Node;
-import jdk.nashorn.internal.ir.SplitNode;
-import jdk.nashorn.internal.ir.Statement;
-import jdk.nashorn.internal.ir.SwitchNode;
-import jdk.nashorn.internal.ir.ThrowNode;
-import jdk.nashorn.internal.ir.TryNode;
-import jdk.nashorn.internal.ir.UnaryNode;
-import jdk.nashorn.internal.ir.VarNode;
-import jdk.nashorn.internal.ir.WhileNode;
-import jdk.nashorn.internal.ir.WithNode;
-import jdk.nashorn.internal.ir.visitor.SimpleNodeVisitor;
+import nashorn.internal.ir.BinaryNode;
+import nashorn.internal.ir.Block;
+import nashorn.internal.ir.BlockStatement;
+import nashorn.internal.ir.BreakNode;
+import nashorn.internal.ir.CaseNode;
+import nashorn.internal.ir.CatchNode;
+import nashorn.internal.ir.ContinueNode;
+import nashorn.internal.ir.ExpressionStatement;
+import nashorn.internal.ir.ForNode;
+import nashorn.internal.ir.FunctionNode;
+import nashorn.internal.ir.IdentNode;
+import nashorn.internal.ir.IfNode;
+import nashorn.internal.ir.JoinPredecessor;
+import nashorn.internal.ir.JoinPredecessorExpression;
+import nashorn.internal.ir.LabelNode;
+import nashorn.internal.ir.LocalVariableConversion;
+import nashorn.internal.ir.Node;
+import nashorn.internal.ir.SplitNode;
+import nashorn.internal.ir.Statement;
+import nashorn.internal.ir.SwitchNode;
+import nashorn.internal.ir.ThrowNode;
+import nashorn.internal.ir.TryNode;
+import nashorn.internal.ir.UnaryNode;
+import nashorn.internal.ir.VarNode;
+import nashorn.internal.ir.WhileNode;
+import nashorn.internal.ir.WithNode;
+import nashorn.internal.ir.visitor.SimpleNodeVisitor;
 
 /**
  * Print out the AST as human readable source code.

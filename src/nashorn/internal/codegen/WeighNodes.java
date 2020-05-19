@@ -23,42 +23,42 @@
  * questions.
  */
 
-package jdk.nashorn.internal.codegen;
+package nashorn.internal.codegen;
 
 import java.util.List;
 import java.util.Map;
-import jdk.nashorn.internal.ir.AccessNode;
-import jdk.nashorn.internal.ir.BinaryNode;
-import jdk.nashorn.internal.ir.Block;
-import jdk.nashorn.internal.ir.BreakNode;
-import jdk.nashorn.internal.ir.CallNode;
-import jdk.nashorn.internal.ir.CatchNode;
-import jdk.nashorn.internal.ir.ContinueNode;
-import jdk.nashorn.internal.ir.ExpressionStatement;
-import jdk.nashorn.internal.ir.ForNode;
-import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.ir.IdentNode;
-import jdk.nashorn.internal.ir.IfNode;
-import jdk.nashorn.internal.ir.IndexNode;
-import jdk.nashorn.internal.ir.JumpToInlinedFinally;
-import jdk.nashorn.internal.ir.LexicalContext;
-import jdk.nashorn.internal.ir.LiteralNode;
-import jdk.nashorn.internal.ir.LiteralNode.ArrayLiteralNode;
-import jdk.nashorn.internal.ir.Node;
-import jdk.nashorn.internal.ir.ObjectNode;
-import jdk.nashorn.internal.ir.PropertyNode;
-import jdk.nashorn.internal.ir.ReturnNode;
-import jdk.nashorn.internal.ir.RuntimeNode;
-import jdk.nashorn.internal.ir.SplitNode;
-import jdk.nashorn.internal.ir.Splittable;
-import jdk.nashorn.internal.ir.SwitchNode;
-import jdk.nashorn.internal.ir.ThrowNode;
-import jdk.nashorn.internal.ir.TryNode;
-import jdk.nashorn.internal.ir.UnaryNode;
-import jdk.nashorn.internal.ir.VarNode;
-import jdk.nashorn.internal.ir.WhileNode;
-import jdk.nashorn.internal.ir.WithNode;
-import jdk.nashorn.internal.ir.visitor.NodeOperatorVisitor;
+import nashorn.internal.ir.AccessNode;
+import nashorn.internal.ir.BinaryNode;
+import nashorn.internal.ir.Block;
+import nashorn.internal.ir.BreakNode;
+import nashorn.internal.ir.CallNode;
+import nashorn.internal.ir.CatchNode;
+import nashorn.internal.ir.ContinueNode;
+import nashorn.internal.ir.ExpressionStatement;
+import nashorn.internal.ir.ForNode;
+import nashorn.internal.ir.FunctionNode;
+import nashorn.internal.ir.IdentNode;
+import nashorn.internal.ir.IfNode;
+import nashorn.internal.ir.IndexNode;
+import nashorn.internal.ir.JumpToInlinedFinally;
+import nashorn.internal.ir.LexicalContext;
+import nashorn.internal.ir.LiteralNode;
+import nashorn.internal.ir.LiteralNode.ArrayLiteralNode;
+import nashorn.internal.ir.Node;
+import nashorn.internal.ir.ObjectNode;
+import nashorn.internal.ir.PropertyNode;
+import nashorn.internal.ir.ReturnNode;
+import nashorn.internal.ir.RuntimeNode;
+import nashorn.internal.ir.SplitNode;
+import nashorn.internal.ir.Splittable;
+import nashorn.internal.ir.SwitchNode;
+import nashorn.internal.ir.ThrowNode;
+import nashorn.internal.ir.TryNode;
+import nashorn.internal.ir.UnaryNode;
+import nashorn.internal.ir.VarNode;
+import nashorn.internal.ir.WhileNode;
+import nashorn.internal.ir.WithNode;
+import nashorn.internal.ir.visitor.NodeOperatorVisitor;
 
 
 /**

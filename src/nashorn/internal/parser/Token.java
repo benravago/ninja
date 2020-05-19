@@ -23,11 +23,11 @@
  * questions.
  */
 
-package jdk.nashorn.internal.parser;
+package nashorn.internal.parser;
 
-import static jdk.nashorn.internal.parser.TokenKind.LITERAL;
+import static nashorn.internal.parser.TokenKind.LITERAL;
 
-import jdk.nashorn.internal.runtime.Source;
+import nashorn.internal.runtime.Source;
 
 /**
  * A token is a 64 bit long value that represents a basic parse/lex unit.

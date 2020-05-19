@@ -23,30 +23,30 @@
  * questions.
  */
 
-package jdk.nashorn.tools;
+package nashorn.tools;
 
-import jdk.nashorn.api.scripting.NashornException;
-import jdk.nashorn.internal.codegen.Compiler;
-import jdk.nashorn.internal.codegen.Compiler.CompilationPhases;
-import jdk.nashorn.internal.ir.Expression;
-import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.ir.debug.ASTWriter;
-import jdk.nashorn.internal.ir.debug.PrintVisitor;
-import jdk.nashorn.internal.objects.Global;
-import jdk.nashorn.internal.objects.NativeSymbol;
-import jdk.nashorn.internal.parser.Parser;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.ErrorManager;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.Property;
-import jdk.nashorn.internal.runtime.ScriptEnvironment;
-import jdk.nashorn.internal.runtime.ScriptFunction;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.ScriptingFunctions;
-import jdk.nashorn.internal.runtime.Symbol;
-import jdk.nashorn.internal.runtime.arrays.ArrayLikeIterator;
-import jdk.nashorn.internal.runtime.options.Options;
+import nashorn.api.scripting.NashornException;
+import nashorn.internal.codegen.Compiler;
+import nashorn.internal.codegen.Compiler.CompilationPhases;
+import nashorn.internal.ir.Expression;
+import nashorn.internal.ir.FunctionNode;
+import nashorn.internal.ir.debug.ASTWriter;
+import nashorn.internal.ir.debug.PrintVisitor;
+import nashorn.internal.objects.Global;
+import nashorn.internal.objects.NativeSymbol;
+import nashorn.internal.parser.Parser;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.ErrorManager;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.Property;
+import nashorn.internal.runtime.ScriptEnvironment;
+import nashorn.internal.runtime.ScriptFunction;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.ScriptingFunctions;
+import nashorn.internal.runtime.Symbol;
+import nashorn.internal.runtime.arrays.ArrayLikeIterator;
+import nashorn.internal.runtime.options.Options;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -69,7 +69,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import static jdk.nashorn.internal.runtime.Source.sourceFor;
+import static nashorn.internal.runtime.Source.sourceFor;
 
 /**
  * Command line Shell for processing JavaScript files.
@@ -79,7 +79,7 @@ public class Shell implements PartialParser {
     /**
      * Resource name for properties file
      */
-    private static final String MESSAGE_RESOURCE = "jdk.nashorn.tools.resources.Shell";
+    private static final String MESSAGE_RESOURCE = "nashorn.tools.resources.Shell";
     /**
      * Shell message bundle.
      */
@@ -170,9 +170,6 @@ public class Shell implements PartialParser {
 
         final Global global = context.createGlobal();
         final ScriptEnvironment env = context.getEnv();
-        if (!env._no_deprecation_warning) {
-            System.err.println("Warning: The jjs tool is planned to be removed from a future JDK release");
-        }
         final List<String> files = env.getFiles();
         if (files.isEmpty()) {
             return readEvalPrint(context, global);
@@ -180,10 +177,6 @@ public class Shell implements PartialParser {
 
         if (env._compile_only) {
             return compileScripts(context, global, files);
-        }
-
-        if (env._fx) {
-            return runFXScripts(context, global, files);
         }
 
         return runScripts(context, global, files);
@@ -255,13 +248,13 @@ public class Shell implements PartialParser {
      * will be broken down into single arguments; whitespace is used as separator.
      * <p>
      * Shebang mode is entered regardless of whether the script is actually run directly from the shell, or indirectly
-     * via the {@code jjs} executable. It is the user's / script author's responsibility to ensure that the arguments
+     * via the {@code njs} executable. It is the user's / script author's responsibility to ensure that the arguments
      * given on the shebang line do not lead to a malformed argument sequence. In particular, the shebang arguments
      * should not contain any whitespace for purposes other than separating arguments, as the different platforms deal
      * with whitespace in different and incompatible ways.
      * <p>
      * @implNote Example:<ul>
-     * <li>Shebang line in {@code script.js}: {@code #!/path/to/jjs --language=es6}</li>
+     * <li>Shebang line in {@code script.js}: {@code #!/path/to/njs --language=es6}</li>
      * <li>Command line: {@code ./script.js arg2}</li>
      * <li>{@code args} array passed to Nashorn: {@code --language=es6,./script.js,arg}</li>
      * <li>Required canonicalized arguments array: {@code --language=es6,./script.js,--,arg2}</li>
@@ -458,46 +451,6 @@ public class Shell implements PartialParser {
                     return RUNTIME_ERROR;
                 }
             }
-        } finally {
-            context.getOut().flush();
-            context.getErr().flush();
-            if (globalChanged) {
-                Context.setGlobal(oldGlobal);
-            }
-        }
-
-        return SUCCESS;
-    }
-
-    /**
-     * Runs launches "fx:bootstrap.js" with the given JavaScript files provided
-     * as arguments.
-     *
-     * @param context the nashorn context
-     * @param global the global scope
-     * @param files the list of script files to provide
-     *
-     * @return error code
-     * @throws IOException when any script file read results in I/O error
-     */
-    private static int runFXScripts(final Context context, final Global global, final List<String> files) throws IOException {
-        final Global oldGlobal = Context.getGlobal();
-        final boolean globalChanged = (oldGlobal != global);
-        try {
-            if (globalChanged) {
-                Context.setGlobal(global);
-            }
-
-            global.addOwnProperty("$GLOBAL", Property.NOT_ENUMERABLE, global);
-            global.addOwnProperty("$SCRIPTS", Property.NOT_ENUMERABLE, files);
-            context.load(global, "fx:bootstrap.js");
-        } catch (final NashornException e) {
-            context.getErrorManager().error(e.toString());
-            if (context.getEnv()._dump_on_error) {
-                e.printStackTrace(context.getErr());
-            }
-
-            return RUNTIME_ERROR;
         } finally {
             context.getOut().flush();
             context.getErr().flush();

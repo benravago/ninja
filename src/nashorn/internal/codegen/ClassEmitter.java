@@ -23,34 +23,34 @@
  * questions.
  */
 
-package jdk.nashorn.internal.codegen;
+package nashorn.internal.codegen;
 
-import static jdk.internal.org.objectweb.asm.Opcodes.ACC_FINAL;
-import static jdk.internal.org.objectweb.asm.Opcodes.ACC_PRIVATE;
-import static jdk.internal.org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static jdk.internal.org.objectweb.asm.Opcodes.ACC_STATIC;
-import static jdk.internal.org.objectweb.asm.Opcodes.ACC_SUPER;
-import static jdk.internal.org.objectweb.asm.Opcodes.ACC_VARARGS;
-import static jdk.internal.org.objectweb.asm.Opcodes.H_INVOKEINTERFACE;
-import static jdk.internal.org.objectweb.asm.Opcodes.H_INVOKESPECIAL;
-import static jdk.internal.org.objectweb.asm.Opcodes.H_INVOKESTATIC;
-import static jdk.internal.org.objectweb.asm.Opcodes.H_INVOKEVIRTUAL;
-import static jdk.internal.org.objectweb.asm.Opcodes.H_NEWINVOKESPECIAL;
-import static jdk.internal.org.objectweb.asm.Opcodes.V1_7;
-import static jdk.nashorn.internal.codegen.CompilerConstants.CLINIT;
-import static jdk.nashorn.internal.codegen.CompilerConstants.CONSTANTS;
-import static jdk.nashorn.internal.codegen.CompilerConstants.GET_ARRAY_PREFIX;
-import static jdk.nashorn.internal.codegen.CompilerConstants.GET_ARRAY_SUFFIX;
-import static jdk.nashorn.internal.codegen.CompilerConstants.GET_MAP;
-import static jdk.nashorn.internal.codegen.CompilerConstants.GET_STRING;
-import static jdk.nashorn.internal.codegen.CompilerConstants.INIT;
-import static jdk.nashorn.internal.codegen.CompilerConstants.SET_MAP;
-import static jdk.nashorn.internal.codegen.CompilerConstants.SOURCE;
-import static jdk.nashorn.internal.codegen.CompilerConstants.STRICT_MODE;
-import static jdk.nashorn.internal.codegen.CompilerConstants.className;
-import static jdk.nashorn.internal.codegen.CompilerConstants.methodDescriptor;
-import static jdk.nashorn.internal.codegen.CompilerConstants.typeDescriptor;
-import static jdk.nashorn.internal.codegen.CompilerConstants.virtualCallNoLookup;
+import static org.objectweb.asm.Opcodes.ACC_FINAL;
+import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
+import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
+import static org.objectweb.asm.Opcodes.ACC_STATIC;
+import static org.objectweb.asm.Opcodes.ACC_SUPER;
+import static org.objectweb.asm.Opcodes.ACC_VARARGS;
+import static org.objectweb.asm.Opcodes.H_INVOKEINTERFACE;
+import static org.objectweb.asm.Opcodes.H_INVOKESPECIAL;
+import static org.objectweb.asm.Opcodes.H_INVOKESTATIC;
+import static org.objectweb.asm.Opcodes.H_INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.H_NEWINVOKESPECIAL;
+import static org.objectweb.asm.Opcodes.V1_7;
+import static nashorn.internal.codegen.CompilerConstants.CLINIT;
+import static nashorn.internal.codegen.CompilerConstants.CONSTANTS;
+import static nashorn.internal.codegen.CompilerConstants.GET_ARRAY_PREFIX;
+import static nashorn.internal.codegen.CompilerConstants.GET_ARRAY_SUFFIX;
+import static nashorn.internal.codegen.CompilerConstants.GET_MAP;
+import static nashorn.internal.codegen.CompilerConstants.GET_STRING;
+import static nashorn.internal.codegen.CompilerConstants.INIT;
+import static nashorn.internal.codegen.CompilerConstants.SET_MAP;
+import static nashorn.internal.codegen.CompilerConstants.SOURCE;
+import static nashorn.internal.codegen.CompilerConstants.STRICT_MODE;
+import static nashorn.internal.codegen.CompilerConstants.className;
+import static nashorn.internal.codegen.CompilerConstants.methodDescriptor;
+import static nashorn.internal.codegen.CompilerConstants.typeDescriptor;
+import static nashorn.internal.codegen.CompilerConstants.virtualCallNoLookup;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
@@ -60,18 +60,18 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
-import jdk.internal.org.objectweb.asm.ClassWriter;
-import jdk.internal.org.objectweb.asm.MethodVisitor;
-import jdk.internal.org.objectweb.asm.util.TraceClassVisitor;
-import jdk.nashorn.internal.codegen.types.Type;
-import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.ir.debug.NashornClassReader;
-import jdk.nashorn.internal.ir.debug.NashornTextifier;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.PropertyMap;
-import jdk.nashorn.internal.runtime.RewriteException;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.Source;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.util.TraceClassVisitor;
+import nashorn.internal.codegen.types.Type;
+import nashorn.internal.ir.FunctionNode;
+import nashorn.internal.ir.debug.NashornClassReader;
+import nashorn.internal.ir.debug.NashornTextifier;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.PropertyMap;
+import nashorn.internal.runtime.RewriteException;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.Source;
 
 /**
  * The interface responsible for speaking to ASM, emitting classes,
@@ -207,7 +207,7 @@ public class ClassEmitter {
         this.unitClassName        = unitClassName;
         this.constantMethodNeeded = new HashSet<>();
 
-        cw.visit(V1_7, ACC_PUBLIC | ACC_SUPER, unitClassName, null, pathName(jdk.nashorn.internal.scripts.JS.class.getName()), null);
+        cw.visit(V1_7, ACC_PUBLIC | ACC_SUPER, unitClassName, null, pathName(nashorn.internal.scripts.JS.class.getName()), null);
         cw.visitSource(sourceName, null);
 
         defineCommonStatics(strictMode);
@@ -420,7 +420,7 @@ public class ClassEmitter {
             final MethodEmitter initMethod = init(EnumSet.of(Flag.PRIVATE));
             initMethod.begin();
             initMethod.load(Type.OBJECT, 0);
-            initMethod.newInstance(jdk.nashorn.internal.scripts.JS.class);
+            initMethod.newInstance(nashorn.internal.scripts.JS.class);
             initMethod.returnVoid();
             initMethod.end();
 

@@ -23,15 +23,15 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.linker;
+package nashorn.internal.runtime.linker;
 
-import static jdk.internal.org.objectweb.asm.Opcodes.ACC_FINAL;
-import static jdk.internal.org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static jdk.internal.org.objectweb.asm.Opcodes.ACC_STATIC;
-import static jdk.internal.org.objectweb.asm.Opcodes.ACC_SUPER;
-import static jdk.internal.org.objectweb.asm.Opcodes.ALOAD;
-import static jdk.internal.org.objectweb.asm.Opcodes.RETURN;
-import static jdk.nashorn.internal.runtime.ECMAErrors.typeError;
+import static org.objectweb.asm.Opcodes.ACC_FINAL;
+import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
+import static org.objectweb.asm.Opcodes.ACC_STATIC;
+import static org.objectweb.asm.Opcodes.ACC_SUPER;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.RETURN;
+import static nashorn.internal.runtime.ECMAErrors.typeError;
 
 import java.lang.invoke.CallSite;
 import java.lang.invoke.ConstantCallSite;
@@ -48,18 +48,18 @@ import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
 import java.security.SecureClassLoader;
 import java.util.Objects;
-import jdk.internal.org.objectweb.asm.ClassWriter;
-import jdk.internal.org.objectweb.asm.Opcodes;
-import jdk.internal.org.objectweb.asm.Type;
-import jdk.internal.org.objectweb.asm.commons.InstructionAdapter;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import jdk.nashorn.internal.objects.Global;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.ECMAException;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.ScriptFunction;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.InstructionAdapter;
+import nashorn.api.scripting.ScriptObjectMirror;
+import nashorn.internal.objects.Global;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.ECMAException;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.ScriptFunction;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.ScriptRuntime;
 
 /**
  * Provides static utility services to generated Java adapter classes.

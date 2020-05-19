@@ -23,18 +23,18 @@
  * questions.
  */
 
-package jdk.nashorn.internal.objects;
+package nashorn.internal.objects;
 
-import static jdk.nashorn.internal.runtime.ScriptRuntime.sameValue;
+import static nashorn.internal.runtime.ScriptRuntime.sameValue;
 
 import java.util.Objects;
-import jdk.nashorn.internal.objects.annotations.Property;
-import jdk.nashorn.internal.objects.annotations.ScriptClass;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.PropertyDescriptor;
-import jdk.nashorn.internal.runtime.PropertyMap;
-import jdk.nashorn.internal.runtime.ScriptFunction;
-import jdk.nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.objects.annotations.Property;
+import nashorn.internal.objects.annotations.ScriptClass;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.PropertyDescriptor;
+import nashorn.internal.runtime.PropertyMap;
+import nashorn.internal.runtime.ScriptFunction;
+import nashorn.internal.runtime.ScriptObject;
 
 /**
  * Data Property descriptor is used to represent attributes an object property

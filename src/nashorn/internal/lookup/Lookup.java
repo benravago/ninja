@@ -23,16 +23,16 @@
  * questions.
  */
 
-package jdk.nashorn.internal.lookup;
+package nashorn.internal.lookup;
 
-import static jdk.nashorn.internal.runtime.ECMAErrors.typeError;
-import static jdk.nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
+import static nashorn.internal.runtime.ECMAErrors.typeError;
+import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.ScriptRuntime;
 
 /**
  * MethodHandle Lookup management for Nashorn.

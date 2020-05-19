@@ -23,9 +23,9 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.arrays;
+package nashorn.internal.runtime.arrays;
 
-import static jdk.nashorn.internal.codegen.CompilerConstants.staticCall;
+import static nashorn.internal.codegen.CompilerConstants.staticCall;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -34,16 +34,16 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import jdk.dynalink.CallSiteDescriptor;
-import jdk.dynalink.linker.GuardedInvocation;
-import jdk.dynalink.linker.LinkRequest;
-import jdk.nashorn.internal.codegen.CompilerConstants;
-import jdk.nashorn.internal.codegen.types.Type;
-import jdk.nashorn.internal.objects.Global;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.PropertyDescriptor;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.UnwarrantedOptimismException;
+import dynalink.CallSiteDescriptor;
+import dynalink.linker.GuardedInvocation;
+import dynalink.linker.LinkRequest;
+import nashorn.internal.codegen.CompilerConstants;
+import nashorn.internal.codegen.types.Type;
+import nashorn.internal.objects.Global;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.PropertyDescriptor;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.UnwarrantedOptimismException;
 
 /**
  * ArrayData - abstraction for wrapping array elements

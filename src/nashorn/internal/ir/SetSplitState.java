@@ -23,11 +23,11 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
-import jdk.nashorn.internal.codegen.CompilerConstants;
-import jdk.nashorn.internal.ir.visitor.NodeVisitor;
-import jdk.nashorn.internal.runtime.Scope;
+import nashorn.internal.codegen.CompilerConstants;
+import nashorn.internal.ir.visitor.NodeVisitor;
+import nashorn.internal.runtime.Scope;
 
 /**
  * Synthetic AST node that represents loading of the scope object and invocation of the {@link Scope#setSplitState(int)}

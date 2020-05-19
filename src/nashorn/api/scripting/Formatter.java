@@ -23,7 +23,7 @@
  * questions.
  */
 
-package jdk.nashorn.api.scripting;
+package nashorn.api.scripting;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

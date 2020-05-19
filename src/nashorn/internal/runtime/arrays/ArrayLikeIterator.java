@@ -23,13 +23,13 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.arrays;
+package nashorn.internal.runtime.arrays;
 
 import java.util.Iterator;
 import java.util.List;
-import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.ScriptObject;
+import nashorn.api.scripting.JSObject;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.ScriptObject;
 
 /**
  * Superclass for array iterators

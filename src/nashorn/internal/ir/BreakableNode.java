@@ -23,9 +23,9 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
-import jdk.nashorn.internal.codegen.Label;
+import nashorn.internal.codegen.Label;
 
 /**
  * This class represents a node from which control flow can execute

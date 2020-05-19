@@ -23,9 +23,9 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
-import jdk.nashorn.internal.ir.visitor.NodeVisitor;
+import nashorn.internal.ir.visitor.NodeVisitor;
 
 abstract class LexicalContextExpression extends Expression implements LexicalContextNode {
     private static final long serialVersionUID = 1L;

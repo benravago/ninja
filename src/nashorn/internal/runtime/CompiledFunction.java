@@ -22,11 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
-import static jdk.nashorn.internal.lookup.Lookup.MH;
-import static jdk.nashorn.internal.runtime.UnwarrantedOptimismException.INVALID_PROGRAM_POINT;
-import static jdk.nashorn.internal.runtime.UnwarrantedOptimismException.isValid;
+import static nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.runtime.UnwarrantedOptimismException.INVALID_PROGRAM_POINT;
+import static nashorn.internal.runtime.UnwarrantedOptimismException.isValid;
 
 import java.lang.invoke.CallSite;
 import java.lang.invoke.MethodHandle;
@@ -43,17 +43,17 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import jdk.dynalink.linker.GuardedInvocation;
-import jdk.nashorn.internal.codegen.Compiler;
-import jdk.nashorn.internal.codegen.Compiler.CompilationPhases;
-import jdk.nashorn.internal.codegen.TypeMap;
-import jdk.nashorn.internal.codegen.types.ArrayType;
-import jdk.nashorn.internal.codegen.types.Type;
-import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.objects.annotations.SpecializedFunction.LinkLogic;
-import jdk.nashorn.internal.runtime.events.RecompilationEvent;
-import jdk.nashorn.internal.runtime.linker.Bootstrap;
-import jdk.nashorn.internal.runtime.logging.DebugLogger;
+import dynalink.linker.GuardedInvocation;
+import nashorn.internal.codegen.Compiler;
+import nashorn.internal.codegen.Compiler.CompilationPhases;
+import nashorn.internal.codegen.TypeMap;
+import nashorn.internal.codegen.types.ArrayType;
+import nashorn.internal.codegen.types.Type;
+import nashorn.internal.ir.FunctionNode;
+import nashorn.internal.objects.annotations.SpecializedFunction.LinkLogic;
+import nashorn.internal.runtime.events.RecompilationEvent;
+import nashorn.internal.runtime.linker.Bootstrap;
+import nashorn.internal.runtime.logging.DebugLogger;
 
 /**
  * An version of a JavaScript function, native or JavaScript.

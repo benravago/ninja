@@ -23,7 +23,7 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir.debug;
+package nashorn.internal.ir.debug;
 
 import java.lang.reflect.Field;
 import java.util.ArrayDeque;
@@ -33,20 +33,20 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import jdk.nashorn.internal.ir.BinaryNode;
-import jdk.nashorn.internal.ir.Block;
-import jdk.nashorn.internal.ir.Expression;
-import jdk.nashorn.internal.ir.IdentNode;
-import jdk.nashorn.internal.ir.Node;
-import jdk.nashorn.internal.ir.Statement;
-import jdk.nashorn.internal.ir.Symbol;
-import jdk.nashorn.internal.ir.Terminal;
-import jdk.nashorn.internal.ir.TernaryNode;
-import jdk.nashorn.internal.ir.annotations.Ignore;
-import jdk.nashorn.internal.ir.annotations.Reference;
-import jdk.nashorn.internal.parser.Token;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.Debug;
+import nashorn.internal.ir.BinaryNode;
+import nashorn.internal.ir.Block;
+import nashorn.internal.ir.Expression;
+import nashorn.internal.ir.IdentNode;
+import nashorn.internal.ir.Node;
+import nashorn.internal.ir.Statement;
+import nashorn.internal.ir.Symbol;
+import nashorn.internal.ir.Terminal;
+import nashorn.internal.ir.TernaryNode;
+import nashorn.internal.ir.annotations.Ignore;
+import nashorn.internal.ir.annotations.Reference;
+import nashorn.internal.parser.Token;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.Debug;
 
 /**
  * AST-as-text visualizer. Sometimes you want tree form and not source

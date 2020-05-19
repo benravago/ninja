@@ -23,22 +23,22 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.linker;
+package nashorn.internal.runtime.linker;
 
-import static jdk.nashorn.internal.runtime.ECMAErrors.typeError;
+import static nashorn.internal.runtime.ECMAErrors.typeError;
 
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
-import jdk.dynalink.CallSiteDescriptor;
-import jdk.dynalink.StandardNamespace;
-import jdk.dynalink.StandardOperation;
-import jdk.dynalink.linker.GuardedInvocation;
-import jdk.dynalink.linker.LinkRequest;
-import jdk.dynalink.linker.LinkerServices;
-import jdk.dynalink.linker.TypeBasedGuardingDynamicLinker;
-import jdk.nashorn.api.scripting.ClassFilter;
-import jdk.nashorn.internal.objects.Global;
-import jdk.nashorn.internal.runtime.Context;
+import dynalink.CallSiteDescriptor;
+import dynalink.StandardNamespace;
+import dynalink.StandardOperation;
+import dynalink.linker.GuardedInvocation;
+import dynalink.linker.LinkRequest;
+import dynalink.linker.LinkerServices;
+import dynalink.linker.TypeBasedGuardingDynamicLinker;
+import nashorn.api.scripting.ClassFilter;
+import nashorn.internal.objects.Global;
+import nashorn.internal.runtime.Context;
 
 /**
  * Check java reflection permission for java reflective and java.lang.invoke access from scripts

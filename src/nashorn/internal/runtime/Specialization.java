@@ -23,11 +23,11 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
 import java.lang.invoke.MethodHandle;
-import jdk.nashorn.internal.objects.annotations.SpecializedFunction;
-import jdk.nashorn.internal.objects.annotations.SpecializedFunction.LinkLogic;
+import nashorn.internal.objects.annotations.SpecializedFunction;
+import nashorn.internal.objects.annotations.SpecializedFunction.LinkLogic;
 
 /**
  * Specialization info for a {@link SpecializedFunction}

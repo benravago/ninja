@@ -23,7 +23,7 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -33,13 +33,13 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.logging.Level;
-import jdk.nashorn.internal.codegen.Namespace;
-import jdk.nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
-import jdk.nashorn.internal.runtime.options.KeyValueOption;
-import jdk.nashorn.internal.runtime.options.LoggingOption;
-import jdk.nashorn.internal.runtime.options.LoggingOption.LoggerInfo;
-import jdk.nashorn.internal.runtime.options.Option;
-import jdk.nashorn.internal.runtime.options.Options;
+import nashorn.internal.codegen.Namespace;
+import nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
+import nashorn.internal.runtime.options.KeyValueOption;
+import nashorn.internal.runtime.options.LoggingOption;
+import nashorn.internal.runtime.options.LoggingOption.LoggerInfo;
+import nashorn.internal.runtime.options.Option;
+import nashorn.internal.runtime.options.Options;
 
 /**
  * Script environment consists of command line options, arguments, script files
@@ -99,17 +99,11 @@ public final class ScriptEnvironment {
     /** Show full Nashorn version */
     public final boolean _fullversion;
 
-    /** Launch using as fx application */
-    public final boolean _fx;
-
     /** Use single Global instance per jsr223 engine instance. */
     public final boolean _global_per_engine;
 
     /** Enable experimental ECMAScript 6 features. */
     public final boolean _es6;
-
-    /** do not show deprecation warning for nashorn engine and jjs usage. */
-    public final boolean _no_deprecation_warning;
 
     /** Number of times a dynamic call site has to be relinked before it is
      * considered unstable (and thus should be linked as if it were megamorphic).
@@ -273,7 +267,6 @@ public final class ScriptEnvironment {
         } else {
             _function_statement = FunctionStatementBehavior.ACCEPT;
         }
-        _fx                   = options.getBoolean("fx");
         _global_per_engine    = options.getBoolean("global.per.engine");
         _optimistic_types     = options.getBoolean("optimistic.types");
         final boolean lazy_compilation = options.getBoolean("lazy.compilation");
@@ -308,7 +301,6 @@ public final class ScriptEnvironment {
         _strict               = options.getBoolean("strict");
         _version              = options.getBoolean("version");
         _verify_code          = options.getBoolean("verify.code");
-        _no_deprecation_warning = options.getBoolean("no.deprecation.warning");
 
         final int configuredUrt = options.getInteger("unstable.relink.threshold");
         // The default for this property is -1, so we can easily detect when

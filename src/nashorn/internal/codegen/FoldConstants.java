@@ -23,36 +23,36 @@
  * questions.
  */
 
-package jdk.nashorn.internal.codegen;
+package nashorn.internal.codegen;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import jdk.nashorn.internal.codegen.types.Type;
-import jdk.nashorn.internal.ir.BinaryNode;
-import jdk.nashorn.internal.ir.Block;
-import jdk.nashorn.internal.ir.BlockStatement;
-import jdk.nashorn.internal.ir.CaseNode;
-import jdk.nashorn.internal.ir.EmptyNode;
-import jdk.nashorn.internal.ir.Expression;
-import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.ir.IfNode;
-import jdk.nashorn.internal.ir.LiteralNode;
-import jdk.nashorn.internal.ir.LiteralNode.ArrayLiteralNode;
-import jdk.nashorn.internal.ir.Node;
-import jdk.nashorn.internal.ir.Statement;
-import jdk.nashorn.internal.ir.SwitchNode;
-import jdk.nashorn.internal.ir.TernaryNode;
-import jdk.nashorn.internal.ir.UnaryNode;
-import jdk.nashorn.internal.ir.VarNode;
-import jdk.nashorn.internal.ir.visitor.SimpleNodeVisitor;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.logging.DebugLogger;
-import jdk.nashorn.internal.runtime.logging.Loggable;
-import jdk.nashorn.internal.runtime.logging.Logger;
+import nashorn.internal.codegen.types.Type;
+import nashorn.internal.ir.BinaryNode;
+import nashorn.internal.ir.Block;
+import nashorn.internal.ir.BlockStatement;
+import nashorn.internal.ir.CaseNode;
+import nashorn.internal.ir.EmptyNode;
+import nashorn.internal.ir.Expression;
+import nashorn.internal.ir.FunctionNode;
+import nashorn.internal.ir.IfNode;
+import nashorn.internal.ir.LiteralNode;
+import nashorn.internal.ir.LiteralNode.ArrayLiteralNode;
+import nashorn.internal.ir.Node;
+import nashorn.internal.ir.Statement;
+import nashorn.internal.ir.SwitchNode;
+import nashorn.internal.ir.TernaryNode;
+import nashorn.internal.ir.UnaryNode;
+import nashorn.internal.ir.VarNode;
+import nashorn.internal.ir.visitor.SimpleNodeVisitor;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.logging.DebugLogger;
+import nashorn.internal.runtime.logging.Loggable;
+import nashorn.internal.runtime.logging.Logger;
 
 /**
  * Simple constant folding pass, executed before IR is starting to be lowered.

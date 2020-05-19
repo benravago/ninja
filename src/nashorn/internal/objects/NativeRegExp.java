@@ -23,35 +23,35 @@
  * questions.
  */
 
-package jdk.nashorn.internal.objects;
+package nashorn.internal.objects;
 
-import static jdk.nashorn.internal.runtime.ECMAErrors.typeError;
-import static jdk.nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
+import static nashorn.internal.runtime.ECMAErrors.typeError;
+import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
 
 import java.lang.invoke.MethodHandle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
-import jdk.nashorn.internal.objects.annotations.Attribute;
-import jdk.nashorn.internal.objects.annotations.Constructor;
-import jdk.nashorn.internal.objects.annotations.Function;
-import jdk.nashorn.internal.objects.annotations.Getter;
-import jdk.nashorn.internal.objects.annotations.Property;
-import jdk.nashorn.internal.objects.annotations.ScriptClass;
-import jdk.nashorn.internal.objects.annotations.SpecializedFunction;
-import jdk.nashorn.internal.objects.annotations.Where;
-import jdk.nashorn.internal.runtime.BitVector;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.ParserException;
-import jdk.nashorn.internal.runtime.PropertyMap;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.linker.Bootstrap;
-import jdk.nashorn.internal.runtime.regexp.RegExp;
-import jdk.nashorn.internal.runtime.regexp.RegExpFactory;
-import jdk.nashorn.internal.runtime.regexp.RegExpMatcher;
-import jdk.nashorn.internal.runtime.regexp.RegExpResult;
+import nashorn.internal.objects.annotations.Attribute;
+import nashorn.internal.objects.annotations.Constructor;
+import nashorn.internal.objects.annotations.Function;
+import nashorn.internal.objects.annotations.Getter;
+import nashorn.internal.objects.annotations.Property;
+import nashorn.internal.objects.annotations.ScriptClass;
+import nashorn.internal.objects.annotations.SpecializedFunction;
+import nashorn.internal.objects.annotations.Where;
+import nashorn.internal.runtime.BitVector;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.ParserException;
+import nashorn.internal.runtime.PropertyMap;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.linker.Bootstrap;
+import nashorn.internal.runtime.regexp.RegExp;
+import nashorn.internal.runtime.regexp.RegExpFactory;
+import nashorn.internal.runtime.regexp.RegExpMatcher;
+import nashorn.internal.runtime.regexp.RegExpResult;
 
 /**
  * ECMA 15.10 RegExp Objects.

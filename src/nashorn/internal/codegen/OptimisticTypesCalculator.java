@@ -23,39 +23,39 @@
  * questions.
  */
 
-package jdk.nashorn.internal.codegen;
+package nashorn.internal.codegen;
 
-import static jdk.nashorn.internal.runtime.UnwarrantedOptimismException.isValid;
+import static nashorn.internal.runtime.UnwarrantedOptimismException.isValid;
 
 import java.util.ArrayDeque;
 import java.util.BitSet;
 import java.util.Deque;
-import jdk.nashorn.internal.ir.AccessNode;
-import jdk.nashorn.internal.ir.BinaryNode;
-import jdk.nashorn.internal.ir.CallNode;
-import jdk.nashorn.internal.ir.CatchNode;
-import jdk.nashorn.internal.ir.Expression;
-import jdk.nashorn.internal.ir.ExpressionStatement;
-import jdk.nashorn.internal.ir.ForNode;
-import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.ir.IdentNode;
-import jdk.nashorn.internal.ir.IfNode;
-import jdk.nashorn.internal.ir.IndexNode;
-import jdk.nashorn.internal.ir.JoinPredecessorExpression;
-import jdk.nashorn.internal.ir.LiteralNode;
-import jdk.nashorn.internal.ir.LoopNode;
-import jdk.nashorn.internal.ir.Node;
-import jdk.nashorn.internal.ir.ObjectNode;
-import jdk.nashorn.internal.ir.Optimistic;
-import jdk.nashorn.internal.ir.PropertyNode;
-import jdk.nashorn.internal.ir.Symbol;
-import jdk.nashorn.internal.ir.TernaryNode;
-import jdk.nashorn.internal.ir.UnaryNode;
-import jdk.nashorn.internal.ir.VarNode;
-import jdk.nashorn.internal.ir.WhileNode;
-import jdk.nashorn.internal.ir.visitor.SimpleNodeVisitor;
-import jdk.nashorn.internal.parser.TokenType;
-import jdk.nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.ir.AccessNode;
+import nashorn.internal.ir.BinaryNode;
+import nashorn.internal.ir.CallNode;
+import nashorn.internal.ir.CatchNode;
+import nashorn.internal.ir.Expression;
+import nashorn.internal.ir.ExpressionStatement;
+import nashorn.internal.ir.ForNode;
+import nashorn.internal.ir.FunctionNode;
+import nashorn.internal.ir.IdentNode;
+import nashorn.internal.ir.IfNode;
+import nashorn.internal.ir.IndexNode;
+import nashorn.internal.ir.JoinPredecessorExpression;
+import nashorn.internal.ir.LiteralNode;
+import nashorn.internal.ir.LoopNode;
+import nashorn.internal.ir.Node;
+import nashorn.internal.ir.ObjectNode;
+import nashorn.internal.ir.Optimistic;
+import nashorn.internal.ir.PropertyNode;
+import nashorn.internal.ir.Symbol;
+import nashorn.internal.ir.TernaryNode;
+import nashorn.internal.ir.UnaryNode;
+import nashorn.internal.ir.VarNode;
+import nashorn.internal.ir.WhileNode;
+import nashorn.internal.ir.visitor.SimpleNodeVisitor;
+import nashorn.internal.parser.TokenType;
+import nashorn.internal.runtime.ScriptObject;
 
 /**
  * Assigns optimistic types to expressions that can have them. This class mainly contains logic for which expressions

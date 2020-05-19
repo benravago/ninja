@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package jdk.nashorn.internal.codegen;
+package nashorn.internal.codegen;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ import java.util.BitSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import jdk.nashorn.internal.codegen.types.Type;
+import nashorn.internal.codegen.types.Type;
 
 /**
  * Abstraction for labels, separating a label from the underlying
@@ -497,7 +497,7 @@ public final class Label implements Serializable {
     private transient Label.Stack stack;
 
     /** ASM representation of this label */
-    private transient jdk.internal.org.objectweb.asm.Label label;
+    private transient org.objectweb.asm.Label label;
 
     /** Id for debugging purposes, remove if footprint becomes unmanageable */
     private final int id;
@@ -529,9 +529,9 @@ public final class Label implements Serializable {
         this.id   = label.id;
     }
 
-    jdk.internal.org.objectweb.asm.Label getLabel() {
+    org.objectweb.asm.Label getLabel() {
         if (this.label == null) {
-            this.label = new jdk.internal.org.objectweb.asm.Label();
+            this.label = new org.objectweb.asm.Label();
         }
         return label;
     }

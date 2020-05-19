@@ -23,10 +23,10 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.arrays;
+package nashorn.internal.runtime.arrays;
 
-import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.internal.runtime.JSType;
+import nashorn.api.scripting.JSObject;
+import nashorn.internal.runtime.JSType;
 
 /**
  * Reverse iterator over a ScriptObjectMirror

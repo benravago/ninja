@@ -23,13 +23,13 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
-import static jdk.nashorn.internal.parser.TokenType.RETURN;
-import static jdk.nashorn.internal.parser.TokenType.YIELD;
+import static nashorn.internal.parser.TokenType.RETURN;
+import static nashorn.internal.parser.TokenType.YIELD;
 
-import jdk.nashorn.internal.ir.annotations.Immutable;
-import jdk.nashorn.internal.ir.visitor.NodeVisitor;
+import nashorn.internal.ir.annotations.Immutable;
+import nashorn.internal.ir.visitor.NodeVisitor;
 
 /**
  * IR representation for RETURN or YIELD statements.

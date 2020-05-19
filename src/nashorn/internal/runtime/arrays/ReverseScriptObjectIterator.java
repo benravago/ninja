@@ -23,10 +23,10 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.arrays;
+package nashorn.internal.runtime.arrays;
 
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.ScriptObject;
 
 /**
  * Reverse iterator over a map

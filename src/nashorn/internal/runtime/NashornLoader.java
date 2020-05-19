@@ -23,7 +23,7 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
 import java.io.File;
 import java.io.InputStream;
@@ -46,16 +46,16 @@ import java.security.SecureClassLoader;
  * Superclass for Nashorn class loader classes.
  */
 abstract class NashornLoader extends SecureClassLoader {
-    protected static final String OBJECTS_PKG        = "jdk.nashorn.internal.objects";
-    protected static final String RUNTIME_PKG        = "jdk.nashorn.internal.runtime";
-    protected static final String RUNTIME_ARRAYS_PKG = "jdk.nashorn.internal.runtime.arrays";
-    protected static final String RUNTIME_LINKER_PKG = "jdk.nashorn.internal.runtime.linker";
-    protected static final String SCRIPTS_PKG        = "jdk.nashorn.internal.scripts";
-    protected static final String OBJECTS_PKG_INTERNAL        = "jdk/nashorn/internal/objects";
-    protected static final String RUNTIME_PKG_INTERNAL        = "jdk/nashorn/internal/runtime";
-    protected static final String RUNTIME_ARRAYS_PKG_INTERNAL = "jdk/nashorn/internal/runtime/arrays";
-    protected static final String RUNTIME_LINKER_PKG_INTERNAL = "jdk/nashorn/internal/runtime/linker";
-    protected static final String SCRIPTS_PKG_INTERNAL        = "jdk/nashorn/internal/scripts";
+    protected static final String OBJECTS_PKG        = "nashorn.internal.objects";
+    protected static final String RUNTIME_PKG        = "nashorn.internal.runtime";
+    protected static final String RUNTIME_ARRAYS_PKG = "nashorn.internal.runtime.arrays";
+    protected static final String RUNTIME_LINKER_PKG = "nashorn.internal.runtime.linker";
+    protected static final String SCRIPTS_PKG        = "nashorn.internal.scripts";
+    protected static final String OBJECTS_PKG_INTERNAL        = "nashorn/internal/objects";
+    protected static final String RUNTIME_PKG_INTERNAL        = "nashorn/internal/runtime";
+    protected static final String RUNTIME_ARRAYS_PKG_INTERNAL = "nashorn/internal/runtime/arrays";
+    protected static final String RUNTIME_LINKER_PKG_INTERNAL = "nashorn/internal/runtime/linker";
+    protected static final String SCRIPTS_PKG_INTERNAL        = "nashorn/internal/scripts";
 
     static final Module NASHORN_MODULE = Context.class.getModule();
 

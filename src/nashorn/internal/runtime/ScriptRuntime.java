@@ -23,16 +23,16 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
-import static jdk.nashorn.internal.codegen.CompilerConstants.staticCall;
-import static jdk.nashorn.internal.codegen.CompilerConstants.staticCallNoLookup;
-import static jdk.nashorn.internal.runtime.ECMAErrors.rangeError;
-import static jdk.nashorn.internal.runtime.ECMAErrors.referenceError;
-import static jdk.nashorn.internal.runtime.ECMAErrors.syntaxError;
-import static jdk.nashorn.internal.runtime.ECMAErrors.typeError;
-import static jdk.nashorn.internal.runtime.JSType.isRepresentableAsInt;
-import static jdk.nashorn.internal.runtime.JSType.isString;
+import static nashorn.internal.codegen.CompilerConstants.staticCall;
+import static nashorn.internal.codegen.CompilerConstants.staticCallNoLookup;
+import static nashorn.internal.runtime.ECMAErrors.rangeError;
+import static nashorn.internal.runtime.ECMAErrors.referenceError;
+import static nashorn.internal.runtime.ECMAErrors.syntaxError;
+import static nashorn.internal.runtime.ECMAErrors.typeError;
+import static nashorn.internal.runtime.JSType.isRepresentableAsInt;
+import static nashorn.internal.runtime.JSType.isString;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -45,23 +45,23 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import jdk.dynalink.beans.BeansLinker;
-import jdk.dynalink.beans.StaticClass;
-import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import jdk.nashorn.internal.codegen.ApplySpecialization;
-import jdk.nashorn.internal.codegen.CompilerConstants;
-import jdk.nashorn.internal.codegen.CompilerConstants.Call;
-import jdk.nashorn.internal.ir.debug.JSONWriter;
-import jdk.nashorn.internal.objects.AbstractIterator;
-import jdk.nashorn.internal.objects.Global;
-import jdk.nashorn.internal.objects.NativeObject;
-import jdk.nashorn.internal.objects.NativeJava;
-import jdk.nashorn.internal.objects.NativeArray;
-import jdk.nashorn.internal.parser.Lexer;
-import jdk.nashorn.internal.runtime.arrays.ArrayIndex;
-import jdk.nashorn.internal.runtime.linker.Bootstrap;
-import jdk.nashorn.internal.runtime.linker.InvokeByName;
+import dynalink.beans.BeansLinker;
+import dynalink.beans.StaticClass;
+import nashorn.api.scripting.JSObject;
+import nashorn.api.scripting.ScriptObjectMirror;
+import nashorn.internal.codegen.ApplySpecialization;
+import nashorn.internal.codegen.CompilerConstants;
+import nashorn.internal.codegen.CompilerConstants.Call;
+import nashorn.internal.ir.debug.JSONWriter;
+import nashorn.internal.objects.AbstractIterator;
+import nashorn.internal.objects.Global;
+import nashorn.internal.objects.NativeObject;
+import nashorn.internal.objects.NativeJava;
+import nashorn.internal.objects.NativeArray;
+import nashorn.internal.parser.Lexer;
+import nashorn.internal.runtime.arrays.ArrayIndex;
+import nashorn.internal.runtime.linker.Bootstrap;
+import nashorn.internal.runtime.linker.InvokeByName;
 
 /**
  * Utilities to be called by JavaScript runtime API and generated classes.

@@ -23,21 +23,21 @@
  * questions.
  */
 
-package jdk.nashorn.internal.objects;
+package nashorn.internal.objects;
 
-import static jdk.nashorn.internal.lookup.Lookup.MH;
-import static jdk.nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
+import static nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Arrays;
-import jdk.nashorn.internal.runtime.AccessorProperty;
-import jdk.nashorn.internal.runtime.Property;
-import jdk.nashorn.internal.runtime.PropertyMap;
-import jdk.nashorn.internal.runtime.ScriptFunction;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.arrays.ArrayData;
+import nashorn.internal.runtime.AccessorProperty;
+import nashorn.internal.runtime.Property;
+import nashorn.internal.runtime.PropertyMap;
+import nashorn.internal.runtime.ScriptFunction;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.arrays.ArrayData;
 
 /**
  * ECMA 10.6 Arguments Object.

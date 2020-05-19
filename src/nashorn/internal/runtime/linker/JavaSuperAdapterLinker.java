@@ -23,24 +23,24 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.linker;
+package nashorn.internal.runtime.linker;
 
-import static jdk.dynalink.StandardNamespace.METHOD;
-import static jdk.dynalink.StandardOperation.GET;
-import static jdk.nashorn.internal.runtime.linker.JavaAdapterBytecodeGenerator.SUPER_PREFIX;
+import static dynalink.StandardNamespace.METHOD;
+import static dynalink.StandardOperation.GET;
+import static nashorn.internal.runtime.linker.JavaAdapterBytecodeGenerator.SUPER_PREFIX;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import jdk.dynalink.CallSiteDescriptor;
-import jdk.dynalink.Operation;
-import jdk.dynalink.beans.BeansLinker;
-import jdk.dynalink.linker.GuardedInvocation;
-import jdk.dynalink.linker.LinkRequest;
-import jdk.dynalink.linker.LinkerServices;
-import jdk.dynalink.linker.TypeBasedGuardingDynamicLinker;
-import jdk.dynalink.linker.support.Lookup;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
+import dynalink.CallSiteDescriptor;
+import dynalink.Operation;
+import dynalink.beans.BeansLinker;
+import dynalink.linker.GuardedInvocation;
+import dynalink.linker.LinkRequest;
+import dynalink.linker.LinkerServices;
+import dynalink.linker.TypeBasedGuardingDynamicLinker;
+import dynalink.linker.support.Lookup;
+import nashorn.internal.runtime.ScriptRuntime;
 
 /**
  * A linker for instances of {@code JavaSuperAdapter}. Only links {@code getMethod} calls, by forwarding them to the

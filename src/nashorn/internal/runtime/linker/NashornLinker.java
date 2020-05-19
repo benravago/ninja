@@ -23,9 +23,9 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.linker;
+package nashorn.internal.runtime.linker;
 
-import static jdk.nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.lookup.Lookup.MH;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -41,27 +41,27 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.function.Supplier;
 import javax.script.Bindings;
-import jdk.dynalink.CallSiteDescriptor;
-import jdk.dynalink.SecureLookupSupplier;
-import jdk.dynalink.linker.ConversionComparator;
-import jdk.dynalink.linker.GuardedInvocation;
-import jdk.dynalink.linker.GuardingTypeConverterFactory;
-import jdk.dynalink.linker.LinkRequest;
-import jdk.dynalink.linker.LinkerServices;
-import jdk.dynalink.linker.TypeBasedGuardingDynamicLinker;
-import jdk.dynalink.linker.support.Guards;
-import jdk.dynalink.linker.support.Lookup;
-import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import jdk.nashorn.api.scripting.ScriptUtils;
-import jdk.nashorn.internal.codegen.CompilerConstants.Call;
-import jdk.nashorn.internal.objects.NativeArray;
-import jdk.nashorn.internal.runtime.AccessControlContextFactory;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.ListAdapter;
-import jdk.nashorn.internal.runtime.ScriptFunction;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.Undefined;
+import dynalink.CallSiteDescriptor;
+import dynalink.SecureLookupSupplier;
+import dynalink.linker.ConversionComparator;
+import dynalink.linker.GuardedInvocation;
+import dynalink.linker.GuardingTypeConverterFactory;
+import dynalink.linker.LinkRequest;
+import dynalink.linker.LinkerServices;
+import dynalink.linker.TypeBasedGuardingDynamicLinker;
+import dynalink.linker.support.Guards;
+import dynalink.linker.support.Lookup;
+import nashorn.api.scripting.JSObject;
+import nashorn.api.scripting.ScriptObjectMirror;
+import nashorn.api.scripting.ScriptUtils;
+import nashorn.internal.codegen.CompilerConstants.Call;
+import nashorn.internal.objects.NativeArray;
+import nashorn.internal.runtime.AccessControlContextFactory;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.ListAdapter;
+import nashorn.internal.runtime.ScriptFunction;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.Undefined;
 
 /**
  * This is the main dynamic linker for Nashorn. It is used for linking all {@link ScriptObject} and its subclasses (this

@@ -23,9 +23,9 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
-import static jdk.nashorn.internal.runtime.ECMAErrors.uriError;
+import static nashorn.internal.runtime.ECMAErrors.uriError;
 
 /**
  * URI handling global functions. ECMA 15.1.3 URI Handling Function Properties

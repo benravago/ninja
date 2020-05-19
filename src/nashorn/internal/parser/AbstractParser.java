@@ -23,25 +23,25 @@
  * questions.
  */
 
-package jdk.nashorn.internal.parser;
+package nashorn.internal.parser;
 
-import static jdk.nashorn.internal.parser.TokenType.COMMENT;
-import static jdk.nashorn.internal.parser.TokenType.DIRECTIVE_COMMENT;
-import static jdk.nashorn.internal.parser.TokenType.EOF;
-import static jdk.nashorn.internal.parser.TokenType.EOL;
-import static jdk.nashorn.internal.parser.TokenType.IDENT;
+import static nashorn.internal.parser.TokenType.COMMENT;
+import static nashorn.internal.parser.TokenType.DIRECTIVE_COMMENT;
+import static nashorn.internal.parser.TokenType.EOF;
+import static nashorn.internal.parser.TokenType.EOL;
+import static nashorn.internal.parser.TokenType.IDENT;
 import java.util.HashMap;
 import java.util.Map;
-import jdk.nashorn.internal.ir.IdentNode;
-import jdk.nashorn.internal.ir.LiteralNode;
-import jdk.nashorn.internal.parser.Lexer.LexerToken;
-import jdk.nashorn.internal.parser.Lexer.RegexToken;
-import jdk.nashorn.internal.runtime.ECMAErrors;
-import jdk.nashorn.internal.runtime.ErrorManager;
-import jdk.nashorn.internal.runtime.JSErrorType;
-import jdk.nashorn.internal.runtime.ParserException;
-import jdk.nashorn.internal.runtime.Source;
-import jdk.nashorn.internal.runtime.regexp.RegExpFactory;
+import nashorn.internal.ir.IdentNode;
+import nashorn.internal.ir.LiteralNode;
+import nashorn.internal.parser.Lexer.LexerToken;
+import nashorn.internal.parser.Lexer.RegexToken;
+import nashorn.internal.runtime.ECMAErrors;
+import nashorn.internal.runtime.ErrorManager;
+import nashorn.internal.runtime.JSErrorType;
+import nashorn.internal.runtime.ParserException;
+import nashorn.internal.runtime.Source;
+import nashorn.internal.runtime.regexp.RegExpFactory;
 
 /**
  * Base class for parsers.

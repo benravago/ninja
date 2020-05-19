@@ -23,7 +23,7 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
 import java.security.AccessControlContext;
 import java.security.Permission;

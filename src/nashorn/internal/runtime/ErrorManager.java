@@ -23,12 +23,12 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
-import static jdk.nashorn.internal.runtime.ECMAErrors.rangeError;
+import static nashorn.internal.runtime.ECMAErrors.rangeError;
 
 import java.io.PrintWriter;
-import jdk.nashorn.internal.parser.Token;
+import nashorn.internal.parser.Token;
 
 /**
  * Handles JavaScript error reporting.

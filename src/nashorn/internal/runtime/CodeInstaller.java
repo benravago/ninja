@@ -23,11 +23,11 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
 import java.util.Collection;
 import java.util.Map;
-import jdk.nashorn.internal.codegen.ClassEmitter;
+import nashorn.internal.codegen.ClassEmitter;
 
 /**
  * Interface for installing classes passed to the compiler.

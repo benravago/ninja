@@ -23,23 +23,23 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import jdk.nashorn.internal.codegen.types.ArrayType;
-import jdk.nashorn.internal.codegen.types.Type;
-import jdk.nashorn.internal.ir.annotations.Ignore;
-import jdk.nashorn.internal.ir.annotations.Immutable;
-import jdk.nashorn.internal.ir.visitor.NodeVisitor;
-import jdk.nashorn.internal.objects.NativeArray;
-import jdk.nashorn.internal.parser.Lexer.LexerToken;
-import jdk.nashorn.internal.parser.Token;
-import jdk.nashorn.internal.parser.TokenType;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.Undefined;
+import nashorn.internal.codegen.types.ArrayType;
+import nashorn.internal.codegen.types.Type;
+import nashorn.internal.ir.annotations.Ignore;
+import nashorn.internal.ir.annotations.Immutable;
+import nashorn.internal.ir.visitor.NodeVisitor;
+import nashorn.internal.objects.NativeArray;
+import nashorn.internal.parser.Lexer.LexerToken;
+import nashorn.internal.parser.Token;
+import nashorn.internal.parser.TokenType;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.Undefined;
 
 /**
  * Literal nodes represent JavaScript values.

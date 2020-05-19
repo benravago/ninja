@@ -23,15 +23,15 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
-import static jdk.nashorn.internal.lookup.Lookup.MH;
-import static jdk.nashorn.internal.runtime.UnwarrantedOptimismException.isValid;
+import static nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.runtime.UnwarrantedOptimismException.isValid;
 
 import java.lang.invoke.MethodHandle;
-import jdk.dynalink.linker.LinkRequest;
-import jdk.nashorn.internal.codegen.ObjectClassGenerator;
-import jdk.nashorn.internal.objects.Global;
+import dynalink.linker.LinkRequest;
+import nashorn.internal.codegen.ObjectClassGenerator;
+import nashorn.internal.objects.Global;
 
 /**
  * This class represents the result from a find property search.

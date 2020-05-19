@@ -23,9 +23,9 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
-import jdk.nashorn.internal.codegen.types.Type;
+import nashorn.internal.codegen.types.Type;
 
 /**
  * Class describing one or more local variable conversions that needs to be performed on entry to a control flow join

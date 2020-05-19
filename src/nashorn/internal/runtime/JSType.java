@@ -23,11 +23,11 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
-import static jdk.nashorn.internal.codegen.CompilerConstants.staticCall;
-import static jdk.nashorn.internal.lookup.Lookup.MH;
-import static jdk.nashorn.internal.runtime.ECMAErrors.typeError;
+import static nashorn.internal.codegen.CompilerConstants.staticCall;
+import static nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.runtime.ECMAErrors.typeError;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -35,17 +35,17 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import jdk.dynalink.SecureLookupSupplier;
-import jdk.dynalink.beans.StaticClass;
-import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.internal.codegen.CompilerConstants.Call;
-import jdk.nashorn.internal.codegen.types.Type;
-import jdk.nashorn.internal.objects.Global;
-import jdk.nashorn.internal.objects.NativeSymbol;
-import jdk.nashorn.internal.parser.Lexer;
-import jdk.nashorn.internal.runtime.arrays.ArrayLikeIterator;
-import jdk.nashorn.internal.runtime.doubleconv.DoubleConversion;
-import jdk.nashorn.internal.runtime.linker.Bootstrap;
+import dynalink.SecureLookupSupplier;
+import dynalink.beans.StaticClass;
+import nashorn.api.scripting.JSObject;
+import nashorn.internal.codegen.CompilerConstants.Call;
+import nashorn.internal.codegen.types.Type;
+import nashorn.internal.objects.Global;
+import nashorn.internal.objects.NativeSymbol;
+import nashorn.internal.parser.Lexer;
+import nashorn.internal.runtime.arrays.ArrayLikeIterator;
+import nashorn.internal.runtime.doubleconv.DoubleConversion;
+import nashorn.internal.runtime.linker.Bootstrap;
 
 /**
  * Representation for ECMAScript types - this maps directly to the ECMA script standard

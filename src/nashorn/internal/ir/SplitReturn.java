@@ -23,10 +23,10 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
-import jdk.nashorn.internal.ir.annotations.Ignore;
-import jdk.nashorn.internal.ir.visitor.NodeVisitor;
+import nashorn.internal.ir.annotations.Ignore;
+import nashorn.internal.ir.visitor.NodeVisitor;
 
 /**
  * Synthetic AST node that represents return from a split fragment of a split function for control flow reasons (break

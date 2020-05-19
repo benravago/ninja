@@ -23,25 +23,25 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.linker;
+package nashorn.internal.runtime.linker;
 
-import static jdk.nashorn.internal.runtime.JSType.isString;
-import static jdk.nashorn.internal.runtime.linker.BrowserJSObjectLinker.JSObjectHandles.JSOBJECT_CALL;
-import static jdk.nashorn.internal.runtime.linker.BrowserJSObjectLinker.JSObjectHandles.JSOBJECT_GETMEMBER;
-import static jdk.nashorn.internal.runtime.linker.BrowserJSObjectLinker.JSObjectHandles.JSOBJECT_GETSLOT;
-import static jdk.nashorn.internal.runtime.linker.BrowserJSObjectLinker.JSObjectHandles.JSOBJECT_SETMEMBER;
-import static jdk.nashorn.internal.runtime.linker.BrowserJSObjectLinker.JSObjectHandles.JSOBJECT_SETSLOT;
+import static nashorn.internal.runtime.JSType.isString;
+import static nashorn.internal.runtime.linker.BrowserJSObjectLinker.JSObjectHandles.JSOBJECT_CALL;
+import static nashorn.internal.runtime.linker.BrowserJSObjectLinker.JSObjectHandles.JSOBJECT_GETMEMBER;
+import static nashorn.internal.runtime.linker.BrowserJSObjectLinker.JSObjectHandles.JSOBJECT_GETSLOT;
+import static nashorn.internal.runtime.linker.BrowserJSObjectLinker.JSObjectHandles.JSOBJECT_SETMEMBER;
+import static nashorn.internal.runtime.linker.BrowserJSObjectLinker.JSObjectHandles.JSOBJECT_SETSLOT;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import jdk.dynalink.CallSiteDescriptor;
-import jdk.dynalink.linker.GuardedInvocation;
-import jdk.dynalink.linker.LinkRequest;
-import jdk.dynalink.linker.LinkerServices;
-import jdk.dynalink.linker.TypeBasedGuardingDynamicLinker;
-import jdk.nashorn.internal.lookup.MethodHandleFactory;
-import jdk.nashorn.internal.lookup.MethodHandleFunctionality;
-import jdk.nashorn.internal.runtime.JSType;
+import dynalink.CallSiteDescriptor;
+import dynalink.linker.GuardedInvocation;
+import dynalink.linker.LinkRequest;
+import dynalink.linker.LinkerServices;
+import dynalink.linker.TypeBasedGuardingDynamicLinker;
+import nashorn.internal.lookup.MethodHandleFactory;
+import nashorn.internal.lookup.MethodHandleFunctionality;
+import nashorn.internal.runtime.JSType;
 
 /**
  * A Dynalink linker to handle web browser built-in JS (DOM etc.) objects.

@@ -23,9 +23,9 @@
  * questions.
  */
 
-package jdk.nashorn.api.scripting;
+package nashorn.api.scripting;
 
-import static jdk.nashorn.internal.runtime.Source.sourceFor;
+import static nashorn.internal.runtime.Source.sourceFor;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -51,15 +51,15 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
-import jdk.nashorn.internal.objects.Global;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.ErrorManager;
-import jdk.nashorn.internal.runtime.ScriptFunction;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.Source;
-import jdk.nashorn.internal.runtime.linker.JavaAdapterFactory;
-import jdk.nashorn.internal.runtime.options.Options;
+import nashorn.internal.objects.Global;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.ErrorManager;
+import nashorn.internal.runtime.ScriptFunction;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.Source;
+import nashorn.internal.runtime.linker.JavaAdapterFactory;
+import nashorn.internal.runtime.options.Options;
 
 /**
  * JSR-223 compliant script engine for Nashorn. Instances are not created directly, but rather returned through
@@ -67,12 +67,8 @@ import jdk.nashorn.internal.runtime.options.Options;
  * {@link Invocable} interfaces, allowing for efficient precompilation and repeated execution of scripts.
  * @see NashornScriptEngineFactory
  *
- * @deprecated Nashorn JavaScript script engine and APIs, and the jjs tool
- * are deprecated with the intent to remove them in a future release.
- *
  * @since 1.8u40
  */
-@Deprecated(since="11", forRemoval=true)
 public final class NashornScriptEngine extends AbstractScriptEngine implements Compilable, Invocable {
     /**
      * Key used to associate Nashorn global object mirror with arbitrary Bindings instance.
@@ -100,7 +96,7 @@ public final class NashornScriptEngine extends AbstractScriptEngine implements C
     private final Global              global;
 
     // Nashorn script engine error message management
-    private static final String MESSAGES_RESOURCE = "jdk.nashorn.api.scripting.resources.Messages";
+    private static final String MESSAGES_RESOURCE = "nashorn.api.scripting.resources.Messages";
 
     private static final ResourceBundle MESSAGES_BUNDLE;
     static {
@@ -138,10 +134,6 @@ public final class NashornScriptEngine extends AbstractScriptEngine implements C
                 }
             }
         }, CREATE_CONTEXT_ACC_CTXT);
-
-        if (!nashornContext.getEnv()._no_deprecation_warning) {
-            System.err.println("Warning: Nashorn engine is planned to be removed from a future JDK release");
-        }
 
         // cache this option that is used often
         this._global_per_engine = nashornContext.getEnv()._global_per_engine;

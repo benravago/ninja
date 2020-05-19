@@ -23,27 +23,27 @@
  * questions.
  */
 
-package jdk.nashorn.internal.codegen.types;
+package nashorn.internal.codegen.types;
 
-import static jdk.internal.org.objectweb.asm.Opcodes.DADD;
-import static jdk.internal.org.objectweb.asm.Opcodes.DCMPG;
-import static jdk.internal.org.objectweb.asm.Opcodes.DCMPL;
-import static jdk.internal.org.objectweb.asm.Opcodes.DCONST_0;
-import static jdk.internal.org.objectweb.asm.Opcodes.DCONST_1;
-import static jdk.internal.org.objectweb.asm.Opcodes.DDIV;
-import static jdk.internal.org.objectweb.asm.Opcodes.DLOAD;
-import static jdk.internal.org.objectweb.asm.Opcodes.DMUL;
-import static jdk.internal.org.objectweb.asm.Opcodes.DNEG;
-import static jdk.internal.org.objectweb.asm.Opcodes.DREM;
-import static jdk.internal.org.objectweb.asm.Opcodes.DRETURN;
-import static jdk.internal.org.objectweb.asm.Opcodes.DSTORE;
-import static jdk.internal.org.objectweb.asm.Opcodes.DSUB;
-import static jdk.nashorn.internal.codegen.CompilerConstants.staticCallNoLookup;
-import static jdk.nashorn.internal.runtime.JSType.UNDEFINED_DOUBLE;
+import static org.objectweb.asm.Opcodes.DADD;
+import static org.objectweb.asm.Opcodes.DCMPG;
+import static org.objectweb.asm.Opcodes.DCMPL;
+import static org.objectweb.asm.Opcodes.DCONST_0;
+import static org.objectweb.asm.Opcodes.DCONST_1;
+import static org.objectweb.asm.Opcodes.DDIV;
+import static org.objectweb.asm.Opcodes.DLOAD;
+import static org.objectweb.asm.Opcodes.DMUL;
+import static org.objectweb.asm.Opcodes.DNEG;
+import static org.objectweb.asm.Opcodes.DREM;
+import static org.objectweb.asm.Opcodes.DRETURN;
+import static org.objectweb.asm.Opcodes.DSTORE;
+import static org.objectweb.asm.Opcodes.DSUB;
+import static nashorn.internal.codegen.CompilerConstants.staticCallNoLookup;
+import static nashorn.internal.runtime.JSType.UNDEFINED_DOUBLE;
 
-import jdk.internal.org.objectweb.asm.MethodVisitor;
-import jdk.nashorn.internal.codegen.CompilerConstants;
-import jdk.nashorn.internal.runtime.JSType;
+import org.objectweb.asm.MethodVisitor;
+import nashorn.internal.codegen.CompilerConstants;
+import nashorn.internal.runtime.JSType;
 
 class NumberType extends NumericType {
     private static final long serialVersionUID = 1L;

@@ -23,11 +23,11 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.linker;
+package nashorn.internal.runtime.linker;
 
-import static jdk.nashorn.internal.lookup.Lookup.MH;
-import static jdk.nashorn.internal.runtime.ECMAErrors.typeError;
-import static jdk.nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
+import static nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.runtime.ECMAErrors.typeError;
+import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -35,23 +35,23 @@ import java.lang.invoke.MethodType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
-import jdk.dynalink.CallSiteDescriptor;
-import jdk.dynalink.NamedOperation;
-import jdk.dynalink.Operation;
-import jdk.dynalink.beans.BeansLinker;
-import jdk.dynalink.beans.StaticClass;
-import jdk.dynalink.linker.GuardedInvocation;
-import jdk.dynalink.linker.GuardingDynamicLinker;
-import jdk.dynalink.linker.GuardingTypeConverterFactory;
-import jdk.dynalink.linker.LinkRequest;
-import jdk.dynalink.linker.LinkerServices;
-import jdk.dynalink.linker.support.Guards;
-import jdk.dynalink.linker.support.Lookup;
-import jdk.nashorn.internal.codegen.types.Type;
-import jdk.nashorn.internal.runtime.ECMAException;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.UnwarrantedOptimismException;
+import dynalink.CallSiteDescriptor;
+import dynalink.NamedOperation;
+import dynalink.Operation;
+import dynalink.beans.BeansLinker;
+import dynalink.beans.StaticClass;
+import dynalink.linker.GuardedInvocation;
+import dynalink.linker.GuardingDynamicLinker;
+import dynalink.linker.GuardingTypeConverterFactory;
+import dynalink.linker.LinkRequest;
+import dynalink.linker.LinkerServices;
+import dynalink.linker.support.Guards;
+import dynalink.linker.support.Lookup;
+import nashorn.internal.codegen.types.Type;
+import nashorn.internal.runtime.ECMAException;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.UnwarrantedOptimismException;
 
 /**
  * Nashorn bottom linker; used as a last-resort catch-all linker for all linking requests that fall through all other

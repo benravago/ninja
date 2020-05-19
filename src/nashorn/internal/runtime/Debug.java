@@ -23,15 +23,15 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
-import static jdk.nashorn.internal.parser.TokenType.EOF;
+import static nashorn.internal.parser.TokenType.EOF;
 
-import jdk.nashorn.api.scripting.NashornException;
-import jdk.nashorn.internal.parser.Lexer;
-import jdk.nashorn.internal.parser.Token;
-import jdk.nashorn.internal.parser.TokenStream;
-import jdk.nashorn.internal.parser.TokenType;
+import nashorn.api.scripting.NashornException;
+import nashorn.internal.parser.Lexer;
+import nashorn.internal.parser.Token;
+import nashorn.internal.parser.TokenStream;
+import nashorn.internal.parser.TokenType;
 
 /**
  * Utilities for debugging Nashorn.

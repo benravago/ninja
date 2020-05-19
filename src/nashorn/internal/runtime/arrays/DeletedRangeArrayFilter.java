@@ -23,10 +23,10 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.arrays;
+package nashorn.internal.runtime.arrays;
 
 import java.lang.reflect.Array;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.ScriptRuntime;
 
 /**
  * This filter handles the deletion of array elements.

@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -36,10 +36,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import jdk.nashorn.internal.codegen.CompileUnit;
-import jdk.nashorn.internal.runtime.logging.DebugLogger;
-import jdk.nashorn.internal.runtime.logging.Loggable;
-import jdk.nashorn.internal.runtime.logging.Logger;
+import nashorn.internal.codegen.CompileUnit;
+import nashorn.internal.runtime.logging.DebugLogger;
+import nashorn.internal.runtime.logging.Loggable;
+import nashorn.internal.runtime.logging.Logger;
 
 /**
  * Simple wallclock timing framework

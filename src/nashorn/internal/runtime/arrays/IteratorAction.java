@@ -23,14 +23,14 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.arrays;
+package nashorn.internal.runtime.arrays;
 
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.linker.Bootstrap;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.linker.Bootstrap;
 
 /**
- * Helper class for the various map/apply functions in {@link jdk.nashorn.internal.objects.NativeArray}.
+ * Helper class for the various map/apply functions in {@link nashorn.internal.objects.NativeArray}.
  * @param <T> element type of results from application callback
  */
 public abstract class IteratorAction<T> {

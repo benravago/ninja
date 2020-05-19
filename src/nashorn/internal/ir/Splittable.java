@@ -23,11 +23,11 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
 import java.io.Serializable;
 import java.util.List;
-import jdk.nashorn.internal.codegen.CompileUnit;
+import nashorn.internal.codegen.CompileUnit;
 
 /**
  * An interface for splittable expressions.

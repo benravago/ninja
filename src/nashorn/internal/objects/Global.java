@@ -23,13 +23,13 @@
  * questions.
  */
 
-package jdk.nashorn.internal.objects;
+package nashorn.internal.objects;
 
-import static jdk.nashorn.internal.lookup.Lookup.MH;
-import static jdk.nashorn.internal.runtime.ECMAErrors.referenceError;
-import static jdk.nashorn.internal.runtime.ECMAErrors.typeError;
-import static jdk.nashorn.internal.runtime.JSType.isString;
-import static jdk.nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
+import static nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.runtime.ECMAErrors.referenceError;
+import static nashorn.internal.runtime.ECMAErrors.typeError;
+import static nashorn.internal.runtime.JSType.isString;
+import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -47,42 +47,42 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
-import jdk.dynalink.CallSiteDescriptor;
-import jdk.dynalink.linker.GuardedInvocation;
-import jdk.dynalink.linker.LinkRequest;
-import jdk.nashorn.api.scripting.ClassFilter;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import jdk.nashorn.internal.lookup.Lookup;
-import jdk.nashorn.internal.objects.annotations.Attribute;
-import jdk.nashorn.internal.objects.annotations.Getter;
-import jdk.nashorn.internal.objects.annotations.Property;
-import jdk.nashorn.internal.objects.annotations.ScriptClass;
-import jdk.nashorn.internal.objects.annotations.Setter;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.ECMAErrors;
-import jdk.nashorn.internal.runtime.FindProperty;
-import jdk.nashorn.internal.runtime.GlobalConstants;
-import jdk.nashorn.internal.runtime.GlobalFunctions;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.NativeJavaPackage;
-import jdk.nashorn.internal.runtime.PropertyDescriptor;
-import jdk.nashorn.internal.runtime.PropertyMap;
-import jdk.nashorn.internal.runtime.Scope;
-import jdk.nashorn.internal.runtime.ScriptEnvironment;
-import jdk.nashorn.internal.runtime.ScriptFunction;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.ScriptingFunctions;
-import jdk.nashorn.internal.runtime.Specialization;
-import jdk.nashorn.internal.runtime.Symbol;
-import jdk.nashorn.internal.runtime.arrays.ArrayData;
-import jdk.nashorn.internal.runtime.linker.Bootstrap;
-import jdk.nashorn.internal.runtime.linker.InvokeByName;
-import jdk.nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
-import jdk.nashorn.internal.runtime.regexp.RegExpResult;
-import jdk.nashorn.internal.scripts.JD;
-import jdk.nashorn.internal.scripts.JO;
-import jdk.nashorn.tools.ShellFunctions;
+import dynalink.CallSiteDescriptor;
+import dynalink.linker.GuardedInvocation;
+import dynalink.linker.LinkRequest;
+import nashorn.api.scripting.ClassFilter;
+import nashorn.api.scripting.ScriptObjectMirror;
+import nashorn.internal.lookup.Lookup;
+import nashorn.internal.objects.annotations.Attribute;
+import nashorn.internal.objects.annotations.Getter;
+import nashorn.internal.objects.annotations.Property;
+import nashorn.internal.objects.annotations.ScriptClass;
+import nashorn.internal.objects.annotations.Setter;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.ECMAErrors;
+import nashorn.internal.runtime.FindProperty;
+import nashorn.internal.runtime.GlobalConstants;
+import nashorn.internal.runtime.GlobalFunctions;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.NativeJavaPackage;
+import nashorn.internal.runtime.PropertyDescriptor;
+import nashorn.internal.runtime.PropertyMap;
+import nashorn.internal.runtime.Scope;
+import nashorn.internal.runtime.ScriptEnvironment;
+import nashorn.internal.runtime.ScriptFunction;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.ScriptingFunctions;
+import nashorn.internal.runtime.Specialization;
+import nashorn.internal.runtime.Symbol;
+import nashorn.internal.runtime.arrays.ArrayData;
+import nashorn.internal.runtime.linker.Bootstrap;
+import nashorn.internal.runtime.linker.InvokeByName;
+import nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
+import nashorn.internal.runtime.regexp.RegExpResult;
+import nashorn.internal.scripts.JD;
+import nashorn.internal.scripts.JO;
+import nashorn.tools.ShellFunctions;
 
 /**
  * Representation of global scope.
@@ -94,7 +94,7 @@ public final class Global extends Scope {
     // This serves as placeholder value used in place of a location property (__FILE__, __DIR__, __LINE__)
     private static final Object LOCATION_PLACEHOLDER = new Object();
 
-    private static final String PACKAGE_PREFIX = "jdk.nashorn.internal.objects.";
+    private static final String PACKAGE_PREFIX = "nashorn.internal.objects.";
 
     private InvokeByName TO_STRING;
     private InvokeByName VALUE_OF;
@@ -903,10 +903,6 @@ public final class Global extends Scope {
     @Property(attributes = Attribute.NOT_ENUMERABLE)
     public volatile Object java;
 
-    /** Nashorn extension: Java access - global.javafx */
-    @Property(attributes = Attribute.NOT_ENUMERABLE)
-    public volatile Object javafx;
-
     /** Nashorn extension: Java access - global.javax */
     @Property(attributes = Attribute.NOT_ENUMERABLE)
     public volatile Object javax;
@@ -1029,7 +1025,6 @@ public final class Global extends Scope {
     private ScriptObject   builtinCom;
     private ScriptObject   builtinEdu;
     private ScriptObject   builtinJava;
-    private ScriptObject   builtinJavafx;
     private ScriptObject   builtinJavax;
     private ScriptObject   builtinOrg;
     private ScriptFunction builtinJavaImporter;
@@ -2404,7 +2399,7 @@ public final class Global extends Scope {
     }
 
     @Override
-    public void addBoundProperties(final ScriptObject source, final jdk.nashorn.internal.runtime.Property[] properties) {
+    public void addBoundProperties(final ScriptObject source, final nashorn.internal.runtime.Property[] properties) {
         PropertyMap ownMap = getMap();
         LexicalScope lexScope = null;
         PropertyMap lexicalMap = null;
@@ -2414,16 +2409,16 @@ public final class Global extends Scope {
             lexScope = (LexicalScope) getLexicalScope();
             lexicalMap = lexScope.getMap();
 
-            for (final jdk.nashorn.internal.runtime.Property property : properties) {
+            for (final nashorn.internal.runtime.Property property : properties) {
                 if (property.isLexicalBinding()) {
                     hasLexicalDefinitions = true;
                 }
                 // ES6 15.1.8 steps 6. and 7.
-                final jdk.nashorn.internal.runtime.Property globalProperty = ownMap.findProperty(property.getKey());
+                final nashorn.internal.runtime.Property globalProperty = ownMap.findProperty(property.getKey());
                 if (globalProperty != null && !globalProperty.isConfigurable() && property.isLexicalBinding()) {
                     throw ECMAErrors.syntaxError("redeclare.variable", property.getKey().toString());
                 }
-                final jdk.nashorn.internal.runtime.Property lexicalProperty = lexicalMap.findProperty(property.getKey());
+                final nashorn.internal.runtime.Property lexicalProperty = lexicalMap.findProperty(property.getKey());
                 if (lexicalProperty != null && !property.isConfigurable()) {
                     throw ECMAErrors.syntaxError("redeclare.variable", property.getKey().toString());
                 }
@@ -2431,7 +2426,7 @@ public final class Global extends Scope {
         }
 
         final boolean extensible = isExtensible();
-        for (final jdk.nashorn.internal.runtime.Property property : properties) {
+        for (final nashorn.internal.runtime.Property property : properties) {
             if (property.isLexicalBinding()) {
                 assert lexScope != null;
                 lexicalMap = lexScope.addBoundProperty(lexicalMap, source, property, true);
@@ -2511,7 +2506,7 @@ public final class Global extends Scope {
     }
 
     /**
-     * Adds jjs shell interactive mode builtin functions to global scope.
+     * Adds njs shell interactive mode builtin functions to global scope.
      */
     public void addShellBuiltins() {
         Object value = ScriptFunction.createBuiltin("input", ShellFunctions.INPUT);
@@ -2643,7 +2638,6 @@ public final class Global extends Scope {
             this.delete("com", false);
             this.delete("edu", false);
             this.delete("java", false);
-            this.delete("javafx", false);
             this.delete("javax", false);
             this.delete("org", false);
         }
@@ -2754,7 +2748,6 @@ public final class Global extends Scope {
         this.builtinCom = new NativeJavaPackage("com", objectProto);
         this.builtinEdu = new NativeJavaPackage("edu", objectProto);
         this.builtinJava = new NativeJavaPackage("java", objectProto);
-        this.builtinJavafx = new NativeJavaPackage("javafx", objectProto);
         this.builtinJavax = new NativeJavaPackage("javax", objectProto);
         this.builtinOrg = new NativeJavaPackage("org", objectProto);
     }
@@ -2818,7 +2811,6 @@ public final class Global extends Scope {
         this.com               = this.builtinCom;
         this.edu               = this.builtinEdu;
         this.java              = this.builtinJava;
-        this.javafx            = this.builtinJavafx;
         this.javax             = this.builtinJavax;
         this.org               = this.builtinOrg;
         this.math              = this.builtinMath;
@@ -2916,8 +2908,8 @@ public final class Global extends Scope {
         }
     }
 
-    private List<jdk.nashorn.internal.runtime.Property> extractBuiltinProperties(final String name, final ScriptObject func) {
-        final List<jdk.nashorn.internal.runtime.Property> list = new ArrayList<>();
+    private List<nashorn.internal.runtime.Property> extractBuiltinProperties(final String name, final ScriptObject func) {
+        final List<nashorn.internal.runtime.Property> list = new ArrayList<>();
 
         list.addAll(Arrays.asList(func.getMap().getProperties()));
 
@@ -2928,7 +2920,7 @@ public final class Global extends Scope {
             }
         }
 
-        final jdk.nashorn.internal.runtime.Property prop = getProperty(name);
+        final nashorn.internal.runtime.Property prop = getProperty(name);
         if (prop != null) {
             list.add(prop);
         }
@@ -2950,7 +2942,7 @@ public final class Global extends Scope {
 
         //get all builtin properties in this builtin object and register switchpoints keyed on the propery name,
         //one overwrite destroys all for now, e.g. Function.prototype.apply = 17; also destroys Function.prototype.call etc
-        for (final jdk.nashorn.internal.runtime.Property prop : extractBuiltinProperties(name, func)) {
+        for (final nashorn.internal.runtime.Property prop : extractBuiltinProperties(name, func)) {
             prop.setBuiltinSwitchPoint(sp);
         }
     }
@@ -2997,8 +2989,8 @@ public final class Global extends Scope {
         // Function valued properties of Function.prototype were not properly
         // initialized. Because, these were created before global.function and
         // global.object were not initialized.
-        jdk.nashorn.internal.runtime.Property[] properties = getFunctionPrototype().getMap().getProperties();
-        for (final jdk.nashorn.internal.runtime.Property property : properties) {
+        nashorn.internal.runtime.Property[] properties = getFunctionPrototype().getMap().getProperties();
+        for (final nashorn.internal.runtime.Property property : properties) {
             final Object key = property.getKey();
             final Object value = builtinFunction.get(key);
 
@@ -3014,7 +3006,7 @@ public final class Global extends Scope {
 
         // For function valued properties of Object and Object.prototype, make
         // sure prototype's proto chain ends with Object.prototype
-        for (final jdk.nashorn.internal.runtime.Property property : builtinObject.getMap().getProperties()) {
+        for (final nashorn.internal.runtime.Property property : builtinObject.getMap().getProperties()) {
             final Object key = property.getKey();
             final Object value = builtinObject.get(key);
 
@@ -3029,7 +3021,7 @@ public final class Global extends Scope {
 
         properties = getObjectPrototype().getMap().getProperties();
 
-        for (final jdk.nashorn.internal.runtime.Property property : properties) {
+        for (final nashorn.internal.runtime.Property property : properties) {
             final Object key   = property.getKey();
             if (key.equals("constructor")) {
                 continue;
@@ -3088,7 +3080,7 @@ public final class Global extends Scope {
         }
 
         @Override
-        protected PropertyMap addBoundProperty(final PropertyMap propMap, final ScriptObject source, final jdk.nashorn.internal.runtime.Property property, final boolean extensible) {
+        protected PropertyMap addBoundProperty(final PropertyMap propMap, final ScriptObject source, final nashorn.internal.runtime.Property property, final boolean extensible) {
             // We override this method just to make it callable by Global
             return super.addBoundProperty(propMap, source, property, extensible);
         }

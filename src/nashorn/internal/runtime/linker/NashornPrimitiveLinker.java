@@ -23,25 +23,25 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.linker;
+package nashorn.internal.runtime.linker;
 
-import static jdk.nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.lookup.Lookup.MH;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.util.function.Supplier;
-import jdk.dynalink.linker.ConversionComparator;
-import jdk.dynalink.linker.GuardedInvocation;
-import jdk.dynalink.linker.GuardingTypeConverterFactory;
-import jdk.dynalink.linker.LinkRequest;
-import jdk.dynalink.linker.LinkerServices;
-import jdk.dynalink.linker.TypeBasedGuardingDynamicLinker;
-import jdk.dynalink.linker.support.TypeUtilities;
-import jdk.nashorn.internal.objects.Global;
-import jdk.nashorn.internal.runtime.ConsString;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.Symbol;
+import dynalink.linker.ConversionComparator;
+import dynalink.linker.GuardedInvocation;
+import dynalink.linker.GuardingTypeConverterFactory;
+import dynalink.linker.LinkRequest;
+import dynalink.linker.LinkerServices;
+import dynalink.linker.TypeBasedGuardingDynamicLinker;
+import dynalink.linker.support.TypeUtilities;
+import nashorn.internal.objects.Global;
+import nashorn.internal.runtime.ConsString;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.Symbol;
 
 /**
  * Internal linker for String, Boolean, and Number objects, only ever used by Nashorn engine and not exposed to other
@@ -96,7 +96,7 @@ final class NashornPrimitiveLinker implements TypeBasedGuardingDynamicLinker, Gu
      * @param sourceType the source type to convert from
      * @param targetType1 one candidate target type
      * @param targetType2 another candidate target type
-     * @return one of {@link jdk.dynalink.linker.ConversionComparator.Comparison} values signifying which
+     * @return one of {@link dynalink.linker.ConversionComparator.Comparison} values signifying which
      * target type should be favored for conversion.
      */
     @Override

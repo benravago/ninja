@@ -23,30 +23,30 @@
  * questions.
  */
 
-package jdk.nashorn.internal.codegen;
+package nashorn.internal.codegen;
 
-import static jdk.nashorn.internal.runtime.Property.NOT_CONFIGURABLE;
-import static jdk.nashorn.internal.runtime.Property.NOT_ENUMERABLE;
-import static jdk.nashorn.internal.runtime.Property.NOT_WRITABLE;
+import static nashorn.internal.runtime.Property.NOT_CONFIGURABLE;
+import static nashorn.internal.runtime.Property.NOT_ENUMERABLE;
+import static nashorn.internal.runtime.Property.NOT_WRITABLE;
 
 import java.lang.invoke.MethodType;
-import jdk.nashorn.internal.codegen.types.Type;
-import jdk.nashorn.internal.ir.AccessNode;
-import jdk.nashorn.internal.ir.CallNode;
-import jdk.nashorn.internal.ir.Expression;
-import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.ir.IdentNode;
-import jdk.nashorn.internal.ir.IndexNode;
-import jdk.nashorn.internal.ir.Optimistic;
-import jdk.nashorn.internal.objects.ArrayBufferView;
-import jdk.nashorn.internal.objects.NativeArray;
-import jdk.nashorn.internal.runtime.FindProperty;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.Property;
-import jdk.nashorn.internal.runtime.RecompilableScriptFunctionData;
-import jdk.nashorn.internal.runtime.ScriptFunction;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.codegen.types.Type;
+import nashorn.internal.ir.AccessNode;
+import nashorn.internal.ir.CallNode;
+import nashorn.internal.ir.Expression;
+import nashorn.internal.ir.FunctionNode;
+import nashorn.internal.ir.IdentNode;
+import nashorn.internal.ir.IndexNode;
+import nashorn.internal.ir.Optimistic;
+import nashorn.internal.objects.ArrayBufferView;
+import nashorn.internal.objects.NativeArray;
+import nashorn.internal.runtime.FindProperty;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.Property;
+import nashorn.internal.runtime.RecompilableScriptFunctionData;
+import nashorn.internal.runtime.ScriptFunction;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.ScriptRuntime;
 
 /**
  * Functionality for using a runtime scope to look up value types.

@@ -23,16 +23,16 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
-import static jdk.nashorn.internal.codegen.CompilerConstants.staticCallNoLookup;
-import static jdk.nashorn.internal.codegen.CompilerConstants.virtualField;
-import static jdk.nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
+import static nashorn.internal.codegen.CompilerConstants.staticCallNoLookup;
+import static nashorn.internal.codegen.CompilerConstants.virtualField;
+import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
 
 import javax.script.ScriptException;
-import jdk.nashorn.api.scripting.NashornException;
-import jdk.nashorn.internal.codegen.CompilerConstants.Call;
-import jdk.nashorn.internal.codegen.CompilerConstants.FieldAccess;
+import nashorn.api.scripting.NashornException;
+import nashorn.internal.codegen.CompilerConstants.Call;
+import nashorn.internal.codegen.CompilerConstants.FieldAccess;
 
 /**
  * Exception used to implement ECMAScript "throw" from scripts. The actual thrown

@@ -23,7 +23,7 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.options;
+package nashorn.internal.runtime.options;
 
 import java.util.Collections;
 import java.util.HashMap;

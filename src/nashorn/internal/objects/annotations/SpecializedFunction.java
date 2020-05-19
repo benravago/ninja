@@ -23,17 +23,17 @@
  * questions.
  */
 
-package jdk.nashorn.internal.objects.annotations;
+package nashorn.internal.objects.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.invoke.MethodHandle;
-import jdk.dynalink.CallSiteDescriptor;
-import jdk.dynalink.linker.LinkRequest;
-import jdk.nashorn.internal.runtime.ScriptFunction;
-import jdk.nashorn.internal.runtime.UnwarrantedOptimismException;
+import dynalink.CallSiteDescriptor;
+import dynalink.linker.LinkRequest;
+import nashorn.internal.runtime.ScriptFunction;
+import nashorn.internal.runtime.UnwarrantedOptimismException;
 
 /**
  * The SpecializedFunction annotation is used to flag more type specific

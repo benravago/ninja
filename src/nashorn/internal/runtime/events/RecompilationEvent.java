@@ -23,12 +23,12 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.events;
+package nashorn.internal.runtime.events;
 
 import java.util.logging.Level;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.RecompilableScriptFunctionData;
-import jdk.nashorn.internal.runtime.RewriteException;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.RecompilableScriptFunctionData;
+import nashorn.internal.runtime.RewriteException;
 
 /**
  * Subclass of runtime event for {@link RewriteException}. In order not

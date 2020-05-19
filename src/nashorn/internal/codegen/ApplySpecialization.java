@@ -23,10 +23,10 @@
  * questions.
  */
 
-package jdk.nashorn.internal.codegen;
+package nashorn.internal.codegen;
 
-import static jdk.nashorn.internal.codegen.CompilerConstants.ARGUMENTS_VAR;
-import static jdk.nashorn.internal.codegen.CompilerConstants.EXPLODED_ARGUMENT_PREFIX;
+import static nashorn.internal.codegen.CompilerConstants.ARGUMENTS_VAR;
+import static nashorn.internal.codegen.CompilerConstants.EXPLODED_ARGUMENT_PREFIX;
 
 import java.lang.invoke.MethodType;
 import java.net.URL;
@@ -36,19 +36,19 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import jdk.nashorn.internal.ir.AccessNode;
-import jdk.nashorn.internal.ir.CallNode;
-import jdk.nashorn.internal.ir.Expression;
-import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.ir.IdentNode;
-import jdk.nashorn.internal.ir.Node;
-import jdk.nashorn.internal.ir.visitor.SimpleNodeVisitor;
-import jdk.nashorn.internal.objects.Global;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.logging.DebugLogger;
-import jdk.nashorn.internal.runtime.logging.Loggable;
-import jdk.nashorn.internal.runtime.logging.Logger;
-import jdk.nashorn.internal.runtime.options.Options;
+import nashorn.internal.ir.AccessNode;
+import nashorn.internal.ir.CallNode;
+import nashorn.internal.ir.Expression;
+import nashorn.internal.ir.FunctionNode;
+import nashorn.internal.ir.IdentNode;
+import nashorn.internal.ir.Node;
+import nashorn.internal.ir.visitor.SimpleNodeVisitor;
+import nashorn.internal.objects.Global;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.logging.DebugLogger;
+import nashorn.internal.runtime.logging.Loggable;
+import nashorn.internal.runtime.logging.Logger;
+import nashorn.internal.runtime.options.Options;
 
 /**
  * An optimization that attempts to turn applies into calls. This pattern

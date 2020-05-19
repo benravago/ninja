@@ -23,23 +23,23 @@
  * questions.
  */
 
-package jdk.nashorn.internal.objects;
+package nashorn.internal.objects;
 
 import java.lang.invoke.MethodHandle;
-import jdk.nashorn.internal.objects.annotations.Attribute;
-import jdk.nashorn.internal.objects.annotations.Constructor;
-import jdk.nashorn.internal.objects.annotations.Function;
-import jdk.nashorn.internal.objects.annotations.Getter;
-import jdk.nashorn.internal.objects.annotations.ScriptClass;
-import jdk.nashorn.internal.objects.annotations.Where;
-import jdk.nashorn.internal.runtime.PropertyMap;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.Undefined;
-import jdk.nashorn.internal.runtime.linker.Bootstrap;
+import nashorn.internal.objects.annotations.Attribute;
+import nashorn.internal.objects.annotations.Constructor;
+import nashorn.internal.objects.annotations.Function;
+import nashorn.internal.objects.annotations.Getter;
+import nashorn.internal.objects.annotations.ScriptClass;
+import nashorn.internal.objects.annotations.Where;
+import nashorn.internal.runtime.PropertyMap;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.Undefined;
+import nashorn.internal.runtime.linker.Bootstrap;
 
-import static jdk.nashorn.internal.objects.NativeMap.convertKey;
-import static jdk.nashorn.internal.runtime.ECMAErrors.typeError;
+import static nashorn.internal.objects.NativeMap.convertKey;
+import static nashorn.internal.runtime.ECMAErrors.typeError;
 
 /**
  * This implements the ECMA6 Set object.

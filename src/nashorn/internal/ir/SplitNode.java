@@ -23,14 +23,14 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
 import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectOutputStream;
-import jdk.nashorn.internal.codegen.CompileUnit;
-import jdk.nashorn.internal.ir.annotations.Immutable;
-import jdk.nashorn.internal.ir.visitor.NodeVisitor;
+import nashorn.internal.codegen.CompileUnit;
+import nashorn.internal.ir.annotations.Immutable;
+import nashorn.internal.ir.visitor.NodeVisitor;
 
 /**
  * Node indicating code is split across classes.

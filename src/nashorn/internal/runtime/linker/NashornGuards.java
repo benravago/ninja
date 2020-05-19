@@ -23,23 +23,23 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.linker;
+package nashorn.internal.runtime.linker;
 
-import static jdk.nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.lookup.Lookup.MH;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.ref.WeakReference;
-import jdk.dynalink.CallSiteDescriptor;
-import jdk.dynalink.linker.LinkRequest;
-import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.internal.objects.Global;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.Property;
-import jdk.nashorn.internal.runtime.PropertyMap;
-import jdk.nashorn.internal.runtime.ScriptFunction;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.options.Options;
+import dynalink.CallSiteDescriptor;
+import dynalink.linker.LinkRequest;
+import nashorn.api.scripting.JSObject;
+import nashorn.internal.objects.Global;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.Property;
+import nashorn.internal.runtime.PropertyMap;
+import nashorn.internal.runtime.ScriptFunction;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.options.Options;
 
 /**
  * Constructor of method handles used to guard call sites.

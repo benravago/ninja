@@ -23,11 +23,11 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
-import jdk.nashorn.internal.codegen.types.Type;
-import jdk.nashorn.internal.ir.annotations.Immutable;
-import jdk.nashorn.internal.ir.visitor.NodeVisitor;
+import nashorn.internal.codegen.types.Type;
+import nashorn.internal.ir.annotations.Immutable;
+import nashorn.internal.ir.visitor.NodeVisitor;
 
 /**
  * IR representation for an error expression.

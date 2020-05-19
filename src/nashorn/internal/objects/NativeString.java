@@ -23,12 +23,12 @@
  * questions.
  */
 
-package jdk.nashorn.internal.objects;
+package nashorn.internal.objects;
 
-import static jdk.nashorn.internal.lookup.Lookup.MH;
-import static jdk.nashorn.internal.runtime.ECMAErrors.typeError;
-import static jdk.nashorn.internal.runtime.JSType.isRepresentableAsInt;
-import static jdk.nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
+import static nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.runtime.ECMAErrors.typeError;
+import static nashorn.internal.runtime.JSType.isRepresentableAsInt;
+import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -41,29 +41,29 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import jdk.dynalink.CallSiteDescriptor;
-import jdk.dynalink.linker.GuardedInvocation;
-import jdk.dynalink.linker.LinkRequest;
-import jdk.nashorn.internal.lookup.MethodHandleFactory.LookupException;
-import jdk.nashorn.internal.objects.annotations.Attribute;
-import jdk.nashorn.internal.objects.annotations.Constructor;
-import jdk.nashorn.internal.objects.annotations.Function;
-import jdk.nashorn.internal.objects.annotations.Getter;
-import jdk.nashorn.internal.objects.annotations.ScriptClass;
-import jdk.nashorn.internal.objects.annotations.SpecializedFunction;
-import jdk.nashorn.internal.objects.annotations.SpecializedFunction.LinkLogic;
-import jdk.nashorn.internal.objects.annotations.Where;
-import jdk.nashorn.internal.runtime.ConsString;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.OptimisticBuiltins;
-import jdk.nashorn.internal.runtime.PropertyMap;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.arrays.ArrayIndex;
-import jdk.nashorn.internal.runtime.linker.Bootstrap;
-import jdk.nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
-import jdk.nashorn.internal.runtime.linker.NashornGuards;
-import jdk.nashorn.internal.runtime.linker.PrimitiveLookup;
+import dynalink.CallSiteDescriptor;
+import dynalink.linker.GuardedInvocation;
+import dynalink.linker.LinkRequest;
+import nashorn.internal.lookup.MethodHandleFactory.LookupException;
+import nashorn.internal.objects.annotations.Attribute;
+import nashorn.internal.objects.annotations.Constructor;
+import nashorn.internal.objects.annotations.Function;
+import nashorn.internal.objects.annotations.Getter;
+import nashorn.internal.objects.annotations.ScriptClass;
+import nashorn.internal.objects.annotations.SpecializedFunction;
+import nashorn.internal.objects.annotations.SpecializedFunction.LinkLogic;
+import nashorn.internal.objects.annotations.Where;
+import nashorn.internal.runtime.ConsString;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.OptimisticBuiltins;
+import nashorn.internal.runtime.PropertyMap;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.arrays.ArrayIndex;
+import nashorn.internal.runtime.linker.Bootstrap;
+import nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
+import nashorn.internal.runtime.linker.NashornGuards;
+import nashorn.internal.runtime.linker.PrimitiveLookup;
 
 
 /**

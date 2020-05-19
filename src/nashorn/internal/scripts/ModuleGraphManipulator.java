@@ -23,16 +23,16 @@
  * questions.
  */
 
-package jdk.nashorn.internal.scripts;
+package nashorn.internal.scripts;
 
-import jdk.nashorn.api.scripting.JSObject;
+import nashorn.api.scripting.JSObject;
 
 /**
  * Nashorn's StructureLoader and ScriptLoader instances load
  * this class in the respective dynamic modules created. This
  * class is never loaded by Nashorn's own class loader. The
  * .class bytes of this class are loaded as resource by the
- * {@link jdk.nashorn.internal.runtime.NashornLoader} class. This class
+ * {@link nashorn.internal.runtime.NashornLoader} class. This class
  * exists in this package because nashorn structures and scripts
  * modules use this package name for the only exported package
  * from those modules.

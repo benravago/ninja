@@ -23,7 +23,7 @@
  * questions.
  */
 
-package jdk.nashorn.api.scripting;
+package nashorn.api.scripting;
 
 import java.nio.ByteBuffer;
 import java.security.AccessControlContext;
@@ -43,27 +43,23 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import javax.script.Bindings;
-import jdk.nashorn.internal.objects.Global;
-import jdk.nashorn.internal.runtime.ConsString;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.ECMAException;
-import jdk.nashorn.internal.runtime.JSONListAdapter;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.ScriptFunction;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.arrays.ArrayData;
-import jdk.nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
+import nashorn.internal.objects.Global;
+import nashorn.internal.runtime.ConsString;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.ECMAException;
+import nashorn.internal.runtime.JSONListAdapter;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.ScriptFunction;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.arrays.ArrayData;
+import nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
 
 /**
  * Mirror object that wraps a given Nashorn Script object.
  *
- * @deprecated Nashorn JavaScript script engine and APIs, and the jjs tool
- * are deprecated with the intent to remove them in a future release.
- *
  * @since 1.8u40
  */
-@Deprecated(since="11", forRemoval=true)
 public final class ScriptObjectMirror extends AbstractJSObject implements Bindings {
     private static AccessControlContext getContextAccCtxt() {
         final Permissions perms = new Permissions();
@@ -888,15 +884,6 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
         } else if (((String)key).length() == 0) {
             throw new IllegalArgumentException("key can not be empty");
         }
-    }
-
-    @Override @Deprecated
-    public double toNumber() {
-        return inGlobal(new Callable<Double>() {
-            @Override public Double call() {
-                return JSType.toNumber(sobj);
-            }
-        });
     }
 
     @Override

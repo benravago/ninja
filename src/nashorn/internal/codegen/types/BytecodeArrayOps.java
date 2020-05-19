@@ -23,9 +23,9 @@
  * questions.
  */
 
-package jdk.nashorn.internal.codegen.types;
+package nashorn.internal.codegen.types;
 
-import jdk.internal.org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.MethodVisitor;
 
 /**
  * Array operations, not supported by all ops

@@ -23,9 +23,9 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.linker;
+package nashorn.internal.runtime.linker;
 
-import static jdk.nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.lookup.Lookup.MH;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -44,14 +44,14 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
-import jdk.dynalink.DynamicLinker;
-import jdk.dynalink.linker.GuardedInvocation;
-import jdk.dynalink.support.ChainedCallSite;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.Debug;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.options.Options;
+import dynalink.DynamicLinker;
+import dynalink.linker.GuardedInvocation;
+import dynalink.support.ChainedCallSite;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.Debug;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.options.Options;
 
 
 /**

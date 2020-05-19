@@ -23,33 +23,33 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
-import static jdk.nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE_PROFILE;
-import static jdk.nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE_STRICT;
-import static jdk.nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE_TRACE;
-import static jdk.nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE_TRACE_ENTEREXIT;
-import static jdk.nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE_TRACE_MISSES;
-import static jdk.nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE_TRACE_VALUES;
+import static nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE_PROFILE;
+import static nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE_STRICT;
+import static nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE_TRACE;
+import static nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE_TRACE_ENTEREXIT;
+import static nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE_TRACE_MISSES;
+import static nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE_TRACE_VALUES;
 
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import jdk.nashorn.internal.codegen.CompileUnit;
-import jdk.nashorn.internal.codegen.Compiler;
-import jdk.nashorn.internal.codegen.CompilerConstants;
-import jdk.nashorn.internal.codegen.Namespace;
-import jdk.nashorn.internal.codegen.types.Type;
-import jdk.nashorn.internal.ir.annotations.Ignore;
-import jdk.nashorn.internal.ir.annotations.Immutable;
-import jdk.nashorn.internal.ir.visitor.NodeVisitor;
-import jdk.nashorn.internal.parser.Token;
-import jdk.nashorn.internal.runtime.RecompilableScriptFunctionData;
-import jdk.nashorn.internal.runtime.ScriptFunction;
-import jdk.nashorn.internal.runtime.Source;
-import jdk.nashorn.internal.runtime.UserAccessorProperty;
-import jdk.nashorn.internal.runtime.linker.LinkerCallSite;
+import nashorn.internal.codegen.CompileUnit;
+import nashorn.internal.codegen.Compiler;
+import nashorn.internal.codegen.CompilerConstants;
+import nashorn.internal.codegen.Namespace;
+import nashorn.internal.codegen.types.Type;
+import nashorn.internal.ir.annotations.Ignore;
+import nashorn.internal.ir.annotations.Immutable;
+import nashorn.internal.ir.visitor.NodeVisitor;
+import nashorn.internal.parser.Token;
+import nashorn.internal.runtime.RecompilableScriptFunctionData;
+import nashorn.internal.runtime.ScriptFunction;
+import nashorn.internal.runtime.Source;
+import nashorn.internal.runtime.UserAccessorProperty;
+import nashorn.internal.runtime.linker.LinkerCallSite;
 
 /**
  * IR representation for function (or script.)

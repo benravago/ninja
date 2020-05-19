@@ -23,20 +23,20 @@
  * questions.
  */
 
-package jdk.nashorn.internal.codegen.types;
+package nashorn.internal.codegen.types;
 
-import static jdk.internal.org.objectweb.asm.Opcodes.I2D;
-import static jdk.internal.org.objectweb.asm.Opcodes.I2L;
-import static jdk.internal.org.objectweb.asm.Opcodes.ICONST_0;
-import static jdk.internal.org.objectweb.asm.Opcodes.ICONST_1;
-import static jdk.internal.org.objectweb.asm.Opcodes.ILOAD;
-import static jdk.internal.org.objectweb.asm.Opcodes.IRETURN;
-import static jdk.internal.org.objectweb.asm.Opcodes.ISTORE;
-import static jdk.nashorn.internal.codegen.CompilerConstants.staticCallNoLookup;
-import static jdk.nashorn.internal.runtime.JSType.UNDEFINED_INT;
+import static org.objectweb.asm.Opcodes.I2D;
+import static org.objectweb.asm.Opcodes.I2L;
+import static org.objectweb.asm.Opcodes.ICONST_0;
+import static org.objectweb.asm.Opcodes.ICONST_1;
+import static org.objectweb.asm.Opcodes.ILOAD;
+import static org.objectweb.asm.Opcodes.IRETURN;
+import static org.objectweb.asm.Opcodes.ISTORE;
+import static nashorn.internal.codegen.CompilerConstants.staticCallNoLookup;
+import static nashorn.internal.runtime.JSType.UNDEFINED_INT;
 
-import jdk.internal.org.objectweb.asm.MethodVisitor;
-import jdk.nashorn.internal.codegen.CompilerConstants;
+import org.objectweb.asm.MethodVisitor;
+import nashorn.internal.codegen.CompilerConstants;
 
 /**
  * The boolean type class

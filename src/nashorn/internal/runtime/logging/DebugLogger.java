@@ -23,7 +23,7 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.logging;
+package nashorn.internal.runtime.logging;
 
 import java.io.PrintWriter;
 import java.security.AccessControlContext;
@@ -38,12 +38,12 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.LoggingPermission;
-import jdk.nashorn.internal.objects.Global;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.ScriptFunction;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.events.RuntimeEvent;
+import nashorn.internal.objects.Global;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.ScriptFunction;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.events.RuntimeEvent;
 
 /**
  * Wrapper class for Logging system. This is how you are supposed to register a logger and use it

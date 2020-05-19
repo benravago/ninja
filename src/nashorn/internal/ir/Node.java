@@ -23,14 +23,14 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import jdk.nashorn.internal.ir.visitor.NodeVisitor;
-import jdk.nashorn.internal.parser.Token;
-import jdk.nashorn.internal.parser.TokenType;
+import nashorn.internal.ir.visitor.NodeVisitor;
+import nashorn.internal.parser.Token;
+import nashorn.internal.parser.TokenType;
 
 /**
  * Nodes are used to compose Abstract Syntax Trees.

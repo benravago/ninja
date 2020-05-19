@@ -23,12 +23,12 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import jdk.nashorn.internal.codegen.Label;
+import nashorn.internal.codegen.Label;
 
 /**
  * A loop node, for example a while node, do while node or for node

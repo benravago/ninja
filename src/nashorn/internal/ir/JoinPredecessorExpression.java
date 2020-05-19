@@ -23,10 +23,10 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
-import jdk.nashorn.internal.codegen.types.Type;
-import jdk.nashorn.internal.ir.visitor.NodeVisitor;
+import nashorn.internal.codegen.types.Type;
+import nashorn.internal.ir.visitor.NodeVisitor;
 
 /**
  * A wrapper for an expression that is in a position to be a join predecessor.

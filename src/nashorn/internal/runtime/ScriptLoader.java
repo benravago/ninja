@@ -23,7 +23,7 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
 import java.lang.module.ModuleDescriptor;
 import java.lang.module.ModuleDescriptor.Modifier;
@@ -36,7 +36,7 @@ import java.util.Set;
  *
  */
 final class ScriptLoader extends NashornLoader {
-    private static final String NASHORN_PKG_PREFIX = "jdk.nashorn.internal.";
+    private static final String NASHORN_PKG_PREFIX = "nashorn.internal.";
 
     private volatile boolean structureAccessAdded;
     private final Context context;
@@ -54,7 +54,7 @@ final class ScriptLoader extends NashornLoader {
         this.context = context;
 
         // new scripts module, it's specific exports and read-edges
-        scriptModule = createModule("jdk.scripting.nashorn.scripts");
+        scriptModule = createModule("scripting.nashorn.scripts");
 
         // specific exports from nashorn to new scripts module
         NASHORN_MODULE.addExports(OBJECTS_PKG, scriptModule);
@@ -75,14 +75,6 @@ final class ScriptLoader extends NashornLoader {
                     .requires(NASHORN_MODULE.getName())
                     .requires(structMod.getName())
                     .packages(Set.of(SCRIPTS_PKG));
-
-        if (Context.javaSqlFound) {
-            builder.requires("java.sql");
-        }
-
-        if (Context.javaSqlRowsetFound) {
-            builder.requires("java.sql.rowset");
-        }
 
         final ModuleDescriptor descriptor = builder.build();
 

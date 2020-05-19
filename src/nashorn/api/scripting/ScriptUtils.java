@@ -23,26 +23,22 @@
  * questions.
  */
 
-package jdk.nashorn.api.scripting;
+package nashorn.api.scripting;
 
 import java.lang.invoke.MethodHandle;
-import jdk.dynalink.beans.StaticClass;
-import jdk.dynalink.linker.LinkerServices;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.ScriptFunction;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.linker.Bootstrap;
+import dynalink.beans.StaticClass;
+import dynalink.linker.LinkerServices;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.ScriptFunction;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.linker.Bootstrap;
 
 /**
  * Utilities that are to be called from script code.
  *
- * @deprecated Nashorn JavaScript script engine and APIs, and the jjs tool
- * are deprecated with the intent to remove them in a future release.
- *
  * @since 1.8u40
  */
-@Deprecated(since="11", forRemoval=true)
 public final class ScriptUtils {
     private ScriptUtils() {}
 

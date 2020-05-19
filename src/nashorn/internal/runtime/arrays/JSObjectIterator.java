@@ -23,11 +23,11 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.arrays;
+package nashorn.internal.runtime.arrays;
 
 import java.util.NoSuchElementException;
-import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.internal.runtime.JSType;
+import nashorn.api.scripting.JSObject;
+import nashorn.internal.runtime.JSType;
 
 /**
  * Iterator over a ScriptObjectMirror

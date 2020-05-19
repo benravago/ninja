@@ -23,10 +23,10 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
-import jdk.nashorn.internal.codegen.types.Type;
-import jdk.nashorn.internal.runtime.UnwarrantedOptimismException;
+import nashorn.internal.codegen.types.Type;
+import nashorn.internal.runtime.UnwarrantedOptimismException;
 
 /**
  * Common superclass for all expression nodes. Expression nodes can have

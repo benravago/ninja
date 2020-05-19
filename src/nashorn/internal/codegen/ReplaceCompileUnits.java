@@ -23,18 +23,18 @@
  * questions.
  */
 
-package jdk.nashorn.internal.codegen;
+package nashorn.internal.codegen;
 
 import java.util.ArrayList;
 import java.util.List;
-import jdk.nashorn.internal.ir.CompileUnitHolder;
-import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.ir.LiteralNode;
-import jdk.nashorn.internal.ir.LiteralNode.ArrayLiteralNode;
-import jdk.nashorn.internal.ir.Node;
-import jdk.nashorn.internal.ir.ObjectNode;
-import jdk.nashorn.internal.ir.Splittable;
-import jdk.nashorn.internal.ir.visitor.SimpleNodeVisitor;
+import nashorn.internal.ir.CompileUnitHolder;
+import nashorn.internal.ir.FunctionNode;
+import nashorn.internal.ir.LiteralNode;
+import nashorn.internal.ir.LiteralNode.ArrayLiteralNode;
+import nashorn.internal.ir.Node;
+import nashorn.internal.ir.ObjectNode;
+import nashorn.internal.ir.Splittable;
+import nashorn.internal.ir.visitor.SimpleNodeVisitor;
 
 /**
  * Base class for a node visitor that replaces {@link CompileUnit}s in {@link CompileUnitHolder}s.

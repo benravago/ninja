@@ -23,12 +23,12 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
-import jdk.nashorn.internal.codegen.types.Type;
-import jdk.nashorn.internal.ir.annotations.Immutable;
-import jdk.nashorn.internal.ir.visitor.NodeVisitor;
-import jdk.nashorn.internal.parser.TokenType;
+import nashorn.internal.codegen.types.Type;
+import nashorn.internal.ir.annotations.Immutable;
+import nashorn.internal.ir.visitor.NodeVisitor;
+import nashorn.internal.parser.TokenType;
 
 /**
  * TernaryNode represent the ternary operator {@code ?:}. Note that for control-flow calculation reasons its branch

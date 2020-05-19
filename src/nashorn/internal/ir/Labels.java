@@ -23,10 +23,10 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
 import java.util.List;
-import jdk.nashorn.internal.codegen.Label;
+import nashorn.internal.codegen.Label;
 
 /**
  * Interface that can be used to get a list of all labels in a node

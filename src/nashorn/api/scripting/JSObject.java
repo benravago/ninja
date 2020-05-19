@@ -23,11 +23,11 @@
  * questions.
  */
 
-package jdk.nashorn.api.scripting;
+package nashorn.api.scripting;
 
 import java.util.Collection;
 import java.util.Set;
-import jdk.nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.JSType;
 
 /**
  * This interface can be implemented by an arbitrary Java class. Nashorn will
@@ -35,12 +35,8 @@ import jdk.nashorn.internal.runtime.JSType;
  * operations like obj[i], obj.foo, obj.func(), delete obj.foo will be delegated
  * to appropriate method call of this interface.
  *
- * @deprecated Nashorn JavaScript script engine and APIs, and the jjs tool
- * are deprecated with the intent to remove them in a future release.
- *
  * @since 1.8u40
  */
-@Deprecated(since="11", forRemoval=true)
 public interface JSObject {
     /**
      * Call this object as a JavaScript function. This is equivalent to
@@ -188,17 +184,6 @@ public interface JSObject {
      * @return if this mirror wraps a ECMAScript array object
      */
     public boolean isArray();
-
-    /**
-     * Returns this object's numeric value.
-     *
-     * @return this object's numeric value.
-     * @deprecated use {@link #getDefaultValue(Class)} with {@link Number} hint instead.
-     */
-    @Deprecated
-    default double toNumber() {
-        return JSType.toNumber(JSType.toPrimitive(this, Number.class));
-    }
 
     /**
      * Implements this object's {@code [[DefaultValue]]} method as per ECMAScript 5.1 section 8.6.2.

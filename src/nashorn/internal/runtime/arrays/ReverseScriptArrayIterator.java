@@ -23,9 +23,9 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.arrays;
+package nashorn.internal.runtime.arrays;
 
-import jdk.nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.ScriptObject;
 
 /**
  * Reverse iterator over a NativeArray

@@ -23,7 +23,7 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
 /**
  * Can a node be an assignment under certain circumstances?

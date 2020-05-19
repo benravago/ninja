@@ -23,25 +23,25 @@
  * questions.
  */
 
-package jdk.nashorn.internal.objects;
+package nashorn.internal.objects;
 
-import static jdk.nashorn.internal.lookup.Lookup.MH;
-import static jdk.nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
+import static nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import jdk.nashorn.api.scripting.NashornException;
-import jdk.nashorn.internal.objects.annotations.Attribute;
-import jdk.nashorn.internal.objects.annotations.Constructor;
-import jdk.nashorn.internal.objects.annotations.Function;
-import jdk.nashorn.internal.objects.annotations.Property;
-import jdk.nashorn.internal.objects.annotations.ScriptClass;
-import jdk.nashorn.internal.objects.annotations.Where;
-import jdk.nashorn.internal.runtime.ECMAException;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.PropertyMap;
-import jdk.nashorn.internal.runtime.ScriptFunction;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
+import nashorn.api.scripting.NashornException;
+import nashorn.internal.objects.annotations.Attribute;
+import nashorn.internal.objects.annotations.Constructor;
+import nashorn.internal.objects.annotations.Function;
+import nashorn.internal.objects.annotations.Property;
+import nashorn.internal.objects.annotations.ScriptClass;
+import nashorn.internal.objects.annotations.Where;
+import nashorn.internal.runtime.ECMAException;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.PropertyMap;
+import nashorn.internal.runtime.ScriptFunction;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.ScriptRuntime;
 
 /**
  * ECMA 15.11 Error Objects

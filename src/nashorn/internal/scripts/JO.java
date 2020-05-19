@@ -23,10 +23,10 @@
  * questions.
  */
 
-package jdk.nashorn.internal.scripts;
+package nashorn.internal.scripts;
 
-import jdk.nashorn.internal.runtime.PropertyMap;
-import jdk.nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.PropertyMap;
+import nashorn.internal.runtime.ScriptObject;
 
 /**
  * Empty object class for object-only fields.
@@ -63,8 +63,8 @@ public class JO extends ScriptObject {
 
     /**
      * Constructor that takes a pre-initialized spill pool. Used by
-     * {@link jdk.nashorn.internal.codegen.SpillObjectCreator} and
-     * {@link jdk.nashorn.internal.parser.JSONParser} for initializing object literals
+     * {@link nashorn.internal.codegen.SpillObjectCreator} and
+     * {@link nashorn.internal.parser.JSONParser} for initializing object literals
      *
      * @param map            property map
      * @param primitiveSpill primitive spill pool

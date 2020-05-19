@@ -23,18 +23,18 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
-import static jdk.nashorn.internal.codegen.Compiler.SCRIPTS_PACKAGE;
-import static jdk.nashorn.internal.codegen.Compiler.binaryName;
-import static jdk.nashorn.internal.codegen.CompilerConstants.JS_OBJECT_DUAL_FIELD_PREFIX;
-import static jdk.nashorn.internal.codegen.CompilerConstants.JS_OBJECT_SINGLE_FIELD_PREFIX;
+import static nashorn.internal.codegen.Compiler.SCRIPTS_PACKAGE;
+import static nashorn.internal.codegen.Compiler.binaryName;
+import static nashorn.internal.codegen.CompilerConstants.JS_OBJECT_DUAL_FIELD_PREFIX;
+import static nashorn.internal.codegen.CompilerConstants.JS_OBJECT_SINGLE_FIELD_PREFIX;
 
 import java.lang.module.ModuleDescriptor;
 import java.lang.module.ModuleDescriptor.Modifier;
 import java.security.ProtectionDomain;
 import java.util.Set;
-import jdk.nashorn.internal.codegen.ObjectClassGenerator;
+import nashorn.internal.codegen.ObjectClassGenerator;
 
 /**
  * Responsible for on the fly construction of structure classes.
@@ -52,7 +52,7 @@ final class StructureLoader extends NashornLoader {
         super(parent);
 
         // new structures module, it's exports, read edges
-        structuresModule = createModule("jdk.scripting.nashorn.structures");
+        structuresModule = createModule("scripting.nashorn.structures");
 
         // specific exports from nashorn to the structures module
         NASHORN_MODULE.addExports(SCRIPTS_PKG, structuresModule);

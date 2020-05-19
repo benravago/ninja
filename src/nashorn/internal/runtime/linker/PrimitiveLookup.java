@@ -23,29 +23,29 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.linker;
+package nashorn.internal.runtime.linker;
 
-import static jdk.nashorn.internal.lookup.Lookup.MH;
-import static jdk.nashorn.internal.runtime.ECMAErrors.typeError;
+import static nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.runtime.ECMAErrors.typeError;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.SwitchPoint;
-import jdk.dynalink.CallSiteDescriptor;
-import jdk.dynalink.linker.GuardedInvocation;
-import jdk.dynalink.linker.LinkRequest;
-import jdk.dynalink.linker.support.Guards;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.FindProperty;
-import jdk.nashorn.internal.runtime.GlobalConstants;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
+import dynalink.CallSiteDescriptor;
+import dynalink.linker.GuardedInvocation;
+import dynalink.linker.LinkRequest;
+import dynalink.linker.support.Guards;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.FindProperty;
+import nashorn.internal.runtime.GlobalConstants;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.ScriptRuntime;
 
 /**
  * Implements lookup of methods to link for dynamic operations on JavaScript primitive values (booleans, strings, and
- * numbers). This class is only public so it can be accessed by classes in the {@code jdk.nashorn.internal.objects}
+ * numbers). This class is only public so it can be accessed by classes in the {@code nashorn.internal.objects}
  * package.
  */
 public final class PrimitiveLookup {

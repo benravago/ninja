@@ -23,7 +23,7 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.linker;
+package nashorn.internal.runtime.linker;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -37,12 +37,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import jdk.dynalink.beans.StaticClass;
-import jdk.nashorn.internal.codegen.DumpBytecode;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.ScriptFunction;
-import jdk.nashorn.internal.runtime.ScriptObject;
+import dynalink.beans.StaticClass;
+import nashorn.internal.codegen.DumpBytecode;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.ScriptFunction;
+import nashorn.internal.runtime.ScriptObject;
 
 /**
  * This class encapsulates the bytecode of the adapter class and can be used to load it into the JVM as an actual Class.
@@ -104,8 +104,8 @@ final class JavaAdapterClassLoader {
 
             {
                 // specific exports from nashorn to the new adapter module
-                NASHORN_MODULE.addExports("jdk.nashorn.internal.runtime", adapterModule);
-                NASHORN_MODULE.addExports("jdk.nashorn.internal.runtime.linker", adapterModule);
+                NASHORN_MODULE.addExports("nashorn.internal.runtime", adapterModule);
+                NASHORN_MODULE.addExports("nashorn.internal.runtime.linker", adapterModule);
 
                 // nashorn should be be able to read methods of classes loaded in adapter module
                 NASHORN_MODULE.addReads(adapterModule);
@@ -143,7 +143,7 @@ final class JavaAdapterClassLoader {
                             return Context.getContext();
                         }
                     }, GET_CONTEXT_ACC_CTXT);
-                    DumpBytecode.dumpBytecode(ctx.getEnv(), ctx.getLogger(jdk.nashorn.internal.codegen.Compiler.class), classBytes, name);
+                    DumpBytecode.dumpBytecode(ctx.getEnv(), ctx.getLogger(nashorn.internal.codegen.Compiler.class), classBytes, name);
                     return defineClass(name, classBytes, 0, classBytes.length, protectionDomain);
                 }
                 throw new ClassNotFoundException(name);

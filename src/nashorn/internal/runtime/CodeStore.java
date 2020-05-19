@@ -23,7 +23,7 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -38,12 +38,12 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Map;
-import jdk.nashorn.internal.codegen.OptimisticTypesPersistence;
-import jdk.nashorn.internal.codegen.types.Type;
-import jdk.nashorn.internal.runtime.logging.DebugLogger;
-import jdk.nashorn.internal.runtime.logging.Loggable;
-import jdk.nashorn.internal.runtime.logging.Logger;
-import jdk.nashorn.internal.runtime.options.Options;
+import nashorn.internal.codegen.OptimisticTypesPersistence;
+import nashorn.internal.codegen.types.Type;
+import nashorn.internal.runtime.logging.DebugLogger;
+import nashorn.internal.runtime.logging.Loggable;
+import nashorn.internal.runtime.logging.Logger;
+import nashorn.internal.runtime.options.Options;
 
 /**
  * A code cache for persistent caching of compiled scripts.

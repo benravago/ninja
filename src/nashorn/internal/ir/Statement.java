@@ -23,7 +23,7 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
 /**
  * Statement is something that becomes code and can be stepped past. A block is

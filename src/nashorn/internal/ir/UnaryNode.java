@@ -23,22 +23,22 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
-import static jdk.nashorn.internal.parser.TokenType.BIT_NOT;
-import static jdk.nashorn.internal.parser.TokenType.DECPOSTFIX;
-import static jdk.nashorn.internal.parser.TokenType.INCPOSTFIX;
-import static jdk.nashorn.internal.runtime.UnwarrantedOptimismException.INVALID_PROGRAM_POINT;
+import static nashorn.internal.parser.TokenType.BIT_NOT;
+import static nashorn.internal.parser.TokenType.DECPOSTFIX;
+import static nashorn.internal.parser.TokenType.INCPOSTFIX;
+import static nashorn.internal.runtime.UnwarrantedOptimismException.INVALID_PROGRAM_POINT;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import jdk.nashorn.internal.codegen.types.Type;
-import jdk.nashorn.internal.ir.annotations.Ignore;
-import jdk.nashorn.internal.ir.annotations.Immutable;
-import jdk.nashorn.internal.ir.visitor.NodeVisitor;
-import jdk.nashorn.internal.parser.Token;
-import jdk.nashorn.internal.parser.TokenType;
+import nashorn.internal.codegen.types.Type;
+import nashorn.internal.ir.annotations.Ignore;
+import nashorn.internal.ir.annotations.Immutable;
+import nashorn.internal.ir.visitor.NodeVisitor;
+import nashorn.internal.parser.Token;
+import nashorn.internal.parser.TokenType;
 
 /**
  * UnaryNode nodes represent single operand operations.

@@ -23,28 +23,28 @@
  * questions.
  */
 
-package jdk.nashorn.internal.objects;
+package nashorn.internal.objects;
 
-import static jdk.nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
+import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
 
 import java.io.PrintWriter;
 import java.util.LinkedList;
 import java.util.Objects;
-import jdk.nashorn.internal.objects.annotations.Attribute;
-import jdk.nashorn.internal.objects.annotations.Function;
-import jdk.nashorn.internal.objects.annotations.ScriptClass;
-import jdk.nashorn.internal.objects.annotations.Where;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.PropertySwitchPoints;
-import jdk.nashorn.internal.runtime.PropertyMap;
-import jdk.nashorn.internal.runtime.Scope;
-import jdk.nashorn.internal.runtime.ScriptFunction;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.events.RuntimeEvent;
-import jdk.nashorn.internal.runtime.linker.LinkerCallSite;
-import jdk.nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
+import nashorn.internal.objects.annotations.Attribute;
+import nashorn.internal.objects.annotations.Function;
+import nashorn.internal.objects.annotations.ScriptClass;
+import nashorn.internal.objects.annotations.Where;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.PropertySwitchPoints;
+import nashorn.internal.runtime.PropertyMap;
+import nashorn.internal.runtime.Scope;
+import nashorn.internal.runtime.ScriptFunction;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.events.RuntimeEvent;
+import nashorn.internal.runtime.linker.LinkerCallSite;
+import nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
 
 /**
  * Nashorn specific debug utils. This is meant for Nashorn developers.

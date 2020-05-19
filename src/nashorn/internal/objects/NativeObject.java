@@ -23,15 +23,15 @@
  * questions.
  */
 
-package jdk.nashorn.internal.objects;
+package nashorn.internal.objects;
 
-import static jdk.dynalink.StandardNamespace.METHOD;
-import static jdk.dynalink.StandardNamespace.PROPERTY;
-import static jdk.dynalink.StandardOperation.GET;
-import static jdk.dynalink.StandardOperation.SET;
-import static jdk.nashorn.internal.lookup.Lookup.MH;
-import static jdk.nashorn.internal.runtime.ECMAErrors.typeError;
-import static jdk.nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
+import static dynalink.StandardNamespace.METHOD;
+import static dynalink.StandardNamespace.PROPERTY;
+import static dynalink.StandardOperation.GET;
+import static dynalink.StandardOperation.SET;
+import static nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.runtime.ECMAErrors.typeError;
+import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -43,34 +43,34 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import jdk.dynalink.CallSiteDescriptor;
-import jdk.dynalink.Operation;
-import jdk.dynalink.beans.BeansLinker;
-import jdk.dynalink.beans.StaticClass;
-import jdk.dynalink.linker.GuardedInvocation;
-import jdk.dynalink.linker.GuardingDynamicLinker;
-import jdk.dynalink.linker.LinkRequest;
-import jdk.dynalink.linker.support.SimpleLinkRequest;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import jdk.nashorn.internal.lookup.Lookup;
-import jdk.nashorn.internal.objects.annotations.Attribute;
-import jdk.nashorn.internal.objects.annotations.Constructor;
-import jdk.nashorn.internal.objects.annotations.Function;
-import jdk.nashorn.internal.objects.annotations.ScriptClass;
-import jdk.nashorn.internal.objects.annotations.Where;
-import jdk.nashorn.internal.runtime.AccessorProperty;
-import jdk.nashorn.internal.runtime.ECMAException;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.Property;
-import jdk.nashorn.internal.runtime.PropertyMap;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.arrays.ArrayData;
-import jdk.nashorn.internal.runtime.arrays.ArrayIndex;
-import jdk.nashorn.internal.runtime.linker.Bootstrap;
-import jdk.nashorn.internal.runtime.linker.InvokeByName;
-import jdk.nashorn.internal.runtime.linker.NashornBeansLinker;
-import jdk.nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
+import dynalink.CallSiteDescriptor;
+import dynalink.Operation;
+import dynalink.beans.BeansLinker;
+import dynalink.beans.StaticClass;
+import dynalink.linker.GuardedInvocation;
+import dynalink.linker.GuardingDynamicLinker;
+import dynalink.linker.LinkRequest;
+import dynalink.linker.support.SimpleLinkRequest;
+import nashorn.api.scripting.ScriptObjectMirror;
+import nashorn.internal.lookup.Lookup;
+import nashorn.internal.objects.annotations.Attribute;
+import nashorn.internal.objects.annotations.Constructor;
+import nashorn.internal.objects.annotations.Function;
+import nashorn.internal.objects.annotations.ScriptClass;
+import nashorn.internal.objects.annotations.Where;
+import nashorn.internal.runtime.AccessorProperty;
+import nashorn.internal.runtime.ECMAException;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.Property;
+import nashorn.internal.runtime.PropertyMap;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.arrays.ArrayData;
+import nashorn.internal.runtime.arrays.ArrayIndex;
+import nashorn.internal.runtime.linker.Bootstrap;
+import nashorn.internal.runtime.linker.InvokeByName;
+import nashorn.internal.runtime.linker.NashornBeansLinker;
+import nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
 
 /**
  * ECMA 15.2 Object objects

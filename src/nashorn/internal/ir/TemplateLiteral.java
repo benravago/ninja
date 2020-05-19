@@ -23,12 +23,12 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
 import java.util.Collections;
 import java.util.List;
-import jdk.nashorn.internal.codegen.types.Type;
-import jdk.nashorn.internal.ir.visitor.NodeVisitor;
+import nashorn.internal.codegen.types.Type;
+import nashorn.internal.ir.visitor.NodeVisitor;
 
 /**
  * Represents ES6 template string expression. Note that this Node class is used

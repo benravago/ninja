@@ -23,17 +23,17 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
-import static jdk.internal.org.objectweb.asm.Opcodes.V1_7;
-import static jdk.nashorn.internal.codegen.CompilerConstants.CONSTANTS;
-import static jdk.nashorn.internal.codegen.CompilerConstants.CREATE_PROGRAM_FUNCTION;
-import static jdk.nashorn.internal.codegen.CompilerConstants.SOURCE;
-import static jdk.nashorn.internal.codegen.CompilerConstants.STRICT_MODE;
-import static jdk.nashorn.internal.runtime.CodeStore.newCodeStore;
-import static jdk.nashorn.internal.runtime.ECMAErrors.typeError;
-import static jdk.nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
-import static jdk.nashorn.internal.runtime.Source.sourceFor;
+import static org.objectweb.asm.Opcodes.V1_7;
+import static nashorn.internal.codegen.CompilerConstants.CONSTANTS;
+import static nashorn.internal.codegen.CompilerConstants.CREATE_PROGRAM_FUNCTION;
+import static nashorn.internal.codegen.CompilerConstants.SOURCE;
+import static nashorn.internal.codegen.CompilerConstants.STRICT_MODE;
+import static nashorn.internal.runtime.CodeStore.newCodeStore;
+import static nashorn.internal.runtime.ECMAErrors.typeError;
+import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
+import static nashorn.internal.runtime.Source.sourceFor;
 
 import java.io.File;
 import java.io.InputStream;
@@ -84,31 +84,31 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.script.ScriptEngine;
-import jdk.dynalink.DynamicLinker;
-import jdk.internal.org.objectweb.asm.ClassReader;
-import jdk.internal.org.objectweb.asm.ClassWriter;
-import jdk.internal.org.objectweb.asm.Opcodes;
-import jdk.internal.org.objectweb.asm.util.CheckClassAdapter;
-import jdk.nashorn.api.scripting.ClassFilter;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import jdk.nashorn.internal.WeakValueCache;
-import jdk.nashorn.internal.codegen.Compiler;
-import jdk.nashorn.internal.codegen.Compiler.CompilationPhases;
-import jdk.nashorn.internal.codegen.ObjectClassGenerator;
-import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.ir.debug.ASTWriter;
-import jdk.nashorn.internal.ir.debug.PrintVisitor;
-import jdk.nashorn.internal.lookup.MethodHandleFactory;
-import jdk.nashorn.internal.objects.Global;
-import jdk.nashorn.internal.parser.Parser;
-import jdk.nashorn.internal.runtime.events.RuntimeEvent;
-import jdk.nashorn.internal.runtime.linker.Bootstrap;
-import jdk.nashorn.internal.runtime.logging.DebugLogger;
-import jdk.nashorn.internal.runtime.logging.Loggable;
-import jdk.nashorn.internal.runtime.logging.Logger;
-import jdk.nashorn.internal.runtime.options.LoggingOption.LoggerInfo;
-import jdk.nashorn.internal.runtime.options.Options;
-import jdk.internal.misc.Unsafe;
+import dynalink.DynamicLinker;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.util.CheckClassAdapter;
+import nashorn.api.scripting.ClassFilter;
+import nashorn.api.scripting.ScriptObjectMirror;
+import nashorn.internal.WeakValueCache;
+import nashorn.internal.codegen.Compiler;
+import nashorn.internal.codegen.Compiler.CompilationPhases;
+import nashorn.internal.codegen.ObjectClassGenerator;
+import nashorn.internal.ir.FunctionNode;
+import nashorn.internal.ir.debug.ASTWriter;
+import nashorn.internal.ir.debug.PrintVisitor;
+import nashorn.internal.lookup.MethodHandleFactory;
+import nashorn.internal.objects.Global;
+import nashorn.internal.parser.Parser;
+import nashorn.internal.runtime.events.RuntimeEvent;
+import nashorn.internal.runtime.linker.Bootstrap;
+import nashorn.internal.runtime.logging.DebugLogger;
+import nashorn.internal.runtime.logging.Loggable;
+import nashorn.internal.runtime.logging.Logger;
+import nashorn.internal.runtime.options.LoggingOption.LoggerInfo;
+import nashorn.internal.runtime.options.Options;
+import nashorn.internal.scripts.JS;
 
 /**
  * This class manages the global state of execution. Context is immutable.
@@ -147,7 +147,6 @@ public final class Context {
 
     // nashorn load psuedo URL prefixes
     private static final String LOAD_CLASSPATH = "classpath:";
-    private static final String LOAD_FX = "fx:";
     private static final String LOAD_NASHORN = "nashorn:";
 
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
@@ -318,7 +317,7 @@ public final class Context {
     private final WeakValueCache<CodeSource, Class<?>> anonymousHostClasses = new WeakValueCache<>();
 
     private static final class AnonymousContextCodeInstaller extends ContextCodeInstaller {
-        private static final Unsafe UNSAFE = Unsafe.getUnsafe();
+        private static MethodHandles.Lookup LOOKUP_IN;
         private static final String ANONYMOUS_HOST_CLASS_NAME = Compiler.SCRIPTS_PACKAGE.replace('/', '.') + ".AnonymousHost";
         private static final byte[] ANONYMOUS_HOST_CLASS_BYTES = getAnonymousHostClassBytes();
 
@@ -332,9 +331,19 @@ public final class Context {
         @Override
         public Class<?> install(final String className, final byte[] bytecode) {
             ANONYMOUS_INSTALLED_SCRIPT_COUNT.increment();
-            return UNSAFE.defineAnonymousClass(hostClass, bytecode, null);
+            try {
+                if (LOOKUP_IN == null) {
+                    LOOKUP_IN = LOOKUP.in(JS.class);
+                }
+                return LOOKUP_IN.defineHiddenClass(bytecode, false).lookupClass();
+            } catch (Exception e) {
+                return uncheck(e);
+            }
         }
 
+        @SuppressWarnings("unchecked")
+        private static <T extends Throwable,V> V uncheck(Exception e) throws T { throw (T)e; }
+        
         @Override
         public CodeInstaller getOnDemandCompilationInstaller() {
             // This code loader can be indefinitely reused for on-demand recompilations for the same code source.
@@ -371,15 +380,6 @@ public final class Context {
     // A factory for linking global properties as constant method handles. It is created when the first Global
     // is created, and invalidated forever once the second global is created.
     private final AtomicReference<GlobalConstants> globalConstantsRef = new AtomicReference<>();
-
-    // Are java.sql, java.sql.rowset modules found in the system?
-    static final boolean javaSqlFound, javaSqlRowsetFound;
-
-    static {
-        final ModuleLayer boot = ModuleLayer.boot();
-        javaSqlFound = boot.findModule("java.sql").isPresent();
-        javaSqlRowsetFound = boot.findModule("java.sql.rowset").isPresent();
-    }
 
     /**
      * Get the current global scope
@@ -912,8 +912,7 @@ public final class Context {
             } else {
                 final File file = new File(srcStr);
                 if (srcStr.indexOf(':') != -1) {
-                    if ((source = loadInternal(srcStr, LOAD_NASHORN, "resources/")) == null &&
-                        (source = loadInternal(srcStr, LOAD_FX, "resources/fx/")) == null) {
+                    if ((source = loadInternal(srcStr, LOAD_NASHORN, "resources/")) == null) {
                         URL url;
                         try {
                             //check for malformed url. if malformed, it may still be a valid file
@@ -1041,7 +1040,7 @@ public final class Context {
      * @see AccessorProperty
      * @see ScriptObject
      *
-     * @param fullName  full name of class, e.g. jdk.nashorn.internal.objects.JO2P1 contains 2 fields and 1 parameter.
+     * @param fullName  full name of class, e.g. nashorn.internal.objects.JO2P1 contains 2 fields and 1 parameter.
      *
      * @return the {@code Class<?>} for this structure
      *
@@ -1150,7 +1149,7 @@ public final class Context {
 
     /**
      * Lookup a Java class. This is used for JSR-223 stuff linking in from
-     * {@code jdk.nashorn.internal.objects.NativeJava} and {@code jdk.nashorn.internal.runtime.NativeJavaPackage}
+     * {@code nashorn.internal.objects.NativeJava} and {@code nashorn.internal.runtime.NativeJavaPackage}
      *
      * @param fullName full name of class to load
      *

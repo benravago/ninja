@@ -23,28 +23,28 @@
  * questions.
  */
 
-package jdk.nashorn.internal.parser;
+package nashorn.internal.parser;
 
 import java.util.ArrayList;
 import java.util.List;
-import jdk.nashorn.internal.codegen.ObjectClassGenerator;
-import jdk.nashorn.internal.objects.Global;
-import jdk.nashorn.internal.runtime.ECMAErrors;
-import jdk.nashorn.internal.runtime.ErrorManager;
-import jdk.nashorn.internal.runtime.JSErrorType;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.ParserException;
-import jdk.nashorn.internal.runtime.Property;
-import jdk.nashorn.internal.runtime.PropertyMap;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.Source;
-import jdk.nashorn.internal.runtime.SpillProperty;
-import jdk.nashorn.internal.runtime.arrays.ArrayData;
-import jdk.nashorn.internal.runtime.arrays.ArrayIndex;
-import jdk.nashorn.internal.scripts.JD;
-import jdk.nashorn.internal.scripts.JO;
+import nashorn.internal.codegen.ObjectClassGenerator;
+import nashorn.internal.objects.Global;
+import nashorn.internal.runtime.ECMAErrors;
+import nashorn.internal.runtime.ErrorManager;
+import nashorn.internal.runtime.JSErrorType;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.ParserException;
+import nashorn.internal.runtime.Property;
+import nashorn.internal.runtime.PropertyMap;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.Source;
+import nashorn.internal.runtime.SpillProperty;
+import nashorn.internal.runtime.arrays.ArrayData;
+import nashorn.internal.runtime.arrays.ArrayIndex;
+import nashorn.internal.scripts.JD;
+import nashorn.internal.scripts.JO;
 
-import static jdk.nashorn.internal.parser.TokenType.STRING;
+import static nashorn.internal.parser.TokenType.STRING;
 
 /**
  * Parses JSON text and returns the corresponding IR node. This is derived from

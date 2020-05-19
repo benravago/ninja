@@ -22,17 +22,17 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
-import static jdk.nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.lookup.Lookup.MH;
 
 import java.io.Serializable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.ref.WeakReference;
-import jdk.nashorn.internal.codegen.Compiler;
-import jdk.nashorn.internal.codegen.CompilerConstants;
-import jdk.nashorn.internal.codegen.ObjectClassGenerator;
+import nashorn.internal.codegen.Compiler;
+import nashorn.internal.codegen.CompilerConstants;
+import nashorn.internal.codegen.ObjectClassGenerator;
 
 /**
  * Encapsulates the allocation strategy for a function when used as a constructor.

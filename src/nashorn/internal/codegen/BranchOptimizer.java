@@ -23,21 +23,21 @@
  * questions.
  */
 
-package jdk.nashorn.internal.codegen;
+package nashorn.internal.codegen;
 
-import static jdk.nashorn.internal.codegen.Condition.EQ;
-import static jdk.nashorn.internal.codegen.Condition.GE;
-import static jdk.nashorn.internal.codegen.Condition.GT;
-import static jdk.nashorn.internal.codegen.Condition.LE;
-import static jdk.nashorn.internal.codegen.Condition.LT;
-import static jdk.nashorn.internal.codegen.Condition.NE;
-import static jdk.nashorn.internal.parser.TokenType.NOT;
+import static nashorn.internal.codegen.Condition.EQ;
+import static nashorn.internal.codegen.Condition.GE;
+import static nashorn.internal.codegen.Condition.GT;
+import static nashorn.internal.codegen.Condition.LE;
+import static nashorn.internal.codegen.Condition.LT;
+import static nashorn.internal.codegen.Condition.NE;
+import static nashorn.internal.parser.TokenType.NOT;
 
-import jdk.nashorn.internal.ir.BinaryNode;
-import jdk.nashorn.internal.ir.Expression;
-import jdk.nashorn.internal.ir.JoinPredecessorExpression;
-import jdk.nashorn.internal.ir.LocalVariableConversion;
-import jdk.nashorn.internal.ir.UnaryNode;
+import nashorn.internal.ir.BinaryNode;
+import nashorn.internal.ir.Expression;
+import nashorn.internal.ir.JoinPredecessorExpression;
+import nashorn.internal.ir.LocalVariableConversion;
+import nashorn.internal.ir.UnaryNode;
 
 /**
  * Branch optimizer for CodeGenerator. Given a jump condition this helper

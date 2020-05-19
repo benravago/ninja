@@ -23,15 +23,15 @@
  * questions.
  */
 
-package jdk.nashorn.internal.codegen;
+package nashorn.internal.codegen;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import jdk.nashorn.internal.runtime.ECMAErrors;
-import jdk.nashorn.internal.runtime.ScriptEnvironment;
-import jdk.nashorn.internal.runtime.logging.DebugLogger;
+import nashorn.internal.runtime.ECMAErrors;
+import nashorn.internal.runtime.ScriptEnvironment;
+import nashorn.internal.runtime.logging.DebugLogger;
 
 /**
  * Class that facilitates printing bytecode and dumping it to disk.

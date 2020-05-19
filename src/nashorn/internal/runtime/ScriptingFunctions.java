@@ -23,11 +23,11 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
-import static jdk.nashorn.internal.lookup.Lookup.MH;
-import static jdk.nashorn.internal.runtime.ECMAErrors.typeError;
-import static jdk.nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
+import static nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.runtime.ECMAErrors.typeError;
+import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -44,8 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
-import jdk.nashorn.internal.objects.NativeArray;
-import static jdk.nashorn.internal.runtime.ECMAErrors.rangeError;
+import nashorn.internal.objects.NativeArray;
+import static nashorn.internal.runtime.ECMAErrors.rangeError;
 
 /**
  * Global functions supported only in scripting mode.
@@ -218,7 +218,7 @@ public final class ScriptingFunctions {
     }
 
     // Implementation for pluggable "readLine" functionality
-    // Used by jjs interactive mode
+    // Used by njs interactive mode
 
     private static Function<String, String> readLineHelper;
 

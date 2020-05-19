@@ -23,15 +23,15 @@
  * questions.
  */
 
-package jdk.nashorn.internal.codegen;
+package nashorn.internal.codegen;
 
-import static jdk.nashorn.internal.codegen.CompilerConstants.SCOPE;
+import static nashorn.internal.codegen.CompilerConstants.SCOPE;
 
 import java.util.List;
-import jdk.nashorn.internal.codegen.types.Type;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.PropertyMap;
-import jdk.nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.codegen.types.Type;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.PropertyMap;
+import nashorn.internal.runtime.ScriptObject;
 
 /**
  * Base class for object creation code generation.

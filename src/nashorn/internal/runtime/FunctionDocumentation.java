@@ -23,7 +23,7 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -34,7 +34,7 @@ import java.util.ResourceBundle;
 final class FunctionDocumentation {
     private FunctionDocumentation() {}
 
-    private static final String DOCS_RESOURCE = "jdk.nashorn.internal.runtime.resources.Functions";
+    private static final String DOCS_RESOURCE = "nashorn.internal.runtime.resources.Functions";
 
     private static final ResourceBundle FUNC_DOCS;
     static {

@@ -23,7 +23,7 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir;
+package nashorn.internal.ir;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -33,9 +33,9 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import jdk.nashorn.internal.codegen.Label;
-import jdk.nashorn.internal.ir.annotations.Immutable;
-import jdk.nashorn.internal.ir.visitor.NodeVisitor;
+import nashorn.internal.codegen.Label;
+import nashorn.internal.ir.annotations.Immutable;
+import nashorn.internal.ir.visitor.NodeVisitor;
 
 /**
  * IR representation for a list of statements.

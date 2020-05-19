@@ -29,12 +29,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package jdk.nashorn.api.linker;
+package nashorn.api.linker;
 
 import java.util.List;
-import jdk.dynalink.linker.GuardingDynamicLinker;
-import jdk.dynalink.linker.GuardingDynamicLinkerExporter;
-import jdk.nashorn.internal.runtime.linker.Bootstrap;
+import dynalink.linker.GuardingDynamicLinker;
+import dynalink.linker.GuardingDynamicLinkerExporter;
+import nashorn.internal.runtime.linker.Bootstrap;
 
 /**
  * This linker exporter is a service provider that exports Nashorn Dynalink
@@ -42,7 +42,6 @@ import jdk.nashorn.internal.runtime.linker.Bootstrap;
  * can use the linkers exported by this provider to support tight integration
  * of Nashorn objects.
  */
-@Deprecated(since="11", forRemoval=true)
 public final class NashornLinkerExporter extends GuardingDynamicLinkerExporter {
     /**
      * The default constructor.

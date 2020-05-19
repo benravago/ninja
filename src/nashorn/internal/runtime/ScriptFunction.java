@@ -22,13 +22,13 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
-import static jdk.nashorn.internal.codegen.CompilerConstants.virtualCallNoLookup;
-import static jdk.nashorn.internal.lookup.Lookup.MH;
-import static jdk.nashorn.internal.runtime.ECMAErrors.typeError;
-import static jdk.nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
-import static jdk.nashorn.internal.runtime.UnwarrantedOptimismException.INVALID_PROGRAM_POINT;
+import static nashorn.internal.codegen.CompilerConstants.virtualCallNoLookup;
+import static nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.runtime.ECMAErrors.typeError;
+import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
+import static nashorn.internal.runtime.UnwarrantedOptimismException.INVALID_PROGRAM_POINT;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -45,21 +45,21 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.LongAdder;
-import jdk.dynalink.CallSiteDescriptor;
-import jdk.dynalink.SecureLookupSupplier;
-import jdk.dynalink.linker.GuardedInvocation;
-import jdk.dynalink.linker.LinkRequest;
-import jdk.dynalink.linker.support.Guards;
-import jdk.nashorn.internal.codegen.ApplySpecialization;
-import jdk.nashorn.internal.codegen.Compiler;
-import jdk.nashorn.internal.codegen.CompilerConstants.Call;
-import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.objects.Global;
-import jdk.nashorn.internal.objects.NativeFunction;
-import jdk.nashorn.internal.objects.annotations.SpecializedFunction.LinkLogic;
-import jdk.nashorn.internal.runtime.linker.Bootstrap;
-import jdk.nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
-import jdk.nashorn.internal.runtime.logging.DebugLogger;
+import dynalink.CallSiteDescriptor;
+import dynalink.SecureLookupSupplier;
+import dynalink.linker.GuardedInvocation;
+import dynalink.linker.LinkRequest;
+import dynalink.linker.support.Guards;
+import nashorn.internal.codegen.ApplySpecialization;
+import nashorn.internal.codegen.Compiler;
+import nashorn.internal.codegen.CompilerConstants.Call;
+import nashorn.internal.ir.FunctionNode;
+import nashorn.internal.objects.Global;
+import nashorn.internal.objects.NativeFunction;
+import nashorn.internal.objects.annotations.SpecializedFunction.LinkLogic;
+import nashorn.internal.runtime.linker.Bootstrap;
+import nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
+import nashorn.internal.runtime.logging.DebugLogger;
 
 /**
  * Runtime representation of a JavaScript function. This class has only private

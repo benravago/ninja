@@ -23,31 +23,31 @@
  * questions.
  */
 
-package jdk.nashorn.internal.codegen;
+package nashorn.internal.codegen;
 
-import static jdk.nashorn.internal.codegen.CompilerConstants.SPLIT_PREFIX;
+import static nashorn.internal.codegen.CompilerConstants.SPLIT_PREFIX;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import jdk.nashorn.internal.ir.Block;
-import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.ir.LiteralNode;
-import jdk.nashorn.internal.ir.LiteralNode.ArrayLiteralNode;
-import jdk.nashorn.internal.ir.Node;
-import jdk.nashorn.internal.ir.ObjectNode;
-import jdk.nashorn.internal.ir.PropertyNode;
-import jdk.nashorn.internal.ir.SplitNode;
-import jdk.nashorn.internal.ir.Splittable;
-import jdk.nashorn.internal.ir.Statement;
-import jdk.nashorn.internal.ir.VarNode;
-import jdk.nashorn.internal.ir.visitor.SimpleNodeVisitor;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.logging.DebugLogger;
-import jdk.nashorn.internal.runtime.logging.Loggable;
-import jdk.nashorn.internal.runtime.logging.Logger;
-import jdk.nashorn.internal.runtime.options.Options;
+import nashorn.internal.ir.Block;
+import nashorn.internal.ir.FunctionNode;
+import nashorn.internal.ir.LiteralNode;
+import nashorn.internal.ir.LiteralNode.ArrayLiteralNode;
+import nashorn.internal.ir.Node;
+import nashorn.internal.ir.ObjectNode;
+import nashorn.internal.ir.PropertyNode;
+import nashorn.internal.ir.SplitNode;
+import nashorn.internal.ir.Splittable;
+import nashorn.internal.ir.Statement;
+import nashorn.internal.ir.VarNode;
+import nashorn.internal.ir.visitor.SimpleNodeVisitor;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.logging.DebugLogger;
+import nashorn.internal.runtime.logging.Loggable;
+import nashorn.internal.runtime.logging.Logger;
+import nashorn.internal.runtime.options.Options;
 
 /**
  * Split the IR into smaller compile units.

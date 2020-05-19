@@ -23,28 +23,28 @@
  * questions.
  */
 
-package jdk.nashorn.internal.codegen;
+package nashorn.internal.codegen;
 
-import static jdk.nashorn.internal.runtime.logging.DebugLogger.quote;
+import static nashorn.internal.runtime.logging.DebugLogger.quote;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import jdk.nashorn.internal.ir.Block;
-import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.ir.IdentNode;
-import jdk.nashorn.internal.ir.LexicalContext;
-import jdk.nashorn.internal.ir.Node;
-import jdk.nashorn.internal.ir.Symbol;
-import jdk.nashorn.internal.ir.WithNode;
-import jdk.nashorn.internal.ir.visitor.SimpleNodeVisitor;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.RecompilableScriptFunctionData;
-import jdk.nashorn.internal.runtime.logging.DebugLogger;
-import jdk.nashorn.internal.runtime.logging.Loggable;
-import jdk.nashorn.internal.runtime.logging.Logger;
+import nashorn.internal.ir.Block;
+import nashorn.internal.ir.FunctionNode;
+import nashorn.internal.ir.IdentNode;
+import nashorn.internal.ir.LexicalContext;
+import nashorn.internal.ir.Node;
+import nashorn.internal.ir.Symbol;
+import nashorn.internal.ir.WithNode;
+import nashorn.internal.ir.visitor.SimpleNodeVisitor;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.RecompilableScriptFunctionData;
+import nashorn.internal.runtime.logging.DebugLogger;
+import nashorn.internal.runtime.logging.Loggable;
+import nashorn.internal.runtime.logging.Logger;
 
 /**
  * Establishes depth of scope for non local symbols at the start of method.

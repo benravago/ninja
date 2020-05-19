@@ -23,17 +23,17 @@
  * questions.
  */
 
-package jdk.nashorn.internal.objects;
+package nashorn.internal.objects;
 
-import jdk.nashorn.internal.objects.annotations.Function;
-import jdk.nashorn.internal.objects.annotations.ScriptClass;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.PropertyMap;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.Undefined;
+import nashorn.internal.objects.annotations.Function;
+import nashorn.internal.objects.annotations.ScriptClass;
+import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.PropertyMap;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.Undefined;
 
-import static jdk.nashorn.internal.runtime.ECMAErrors.typeError;
+import static nashorn.internal.runtime.ECMAErrors.typeError;
 
 @ScriptClass("ArrayIterator")
 public class ArrayIterator extends AbstractIterator {

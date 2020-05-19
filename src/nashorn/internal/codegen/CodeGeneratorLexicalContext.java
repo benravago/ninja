@@ -23,7 +23,7 @@
  * questions.
  */
 
-package jdk.nashorn.internal.codegen;
+package nashorn.internal.codegen;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -31,16 +31,16 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
-import jdk.nashorn.internal.IntDeque;
-import jdk.nashorn.internal.codegen.types.Type;
-import jdk.nashorn.internal.ir.Block;
-import jdk.nashorn.internal.ir.Expression;
-import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.ir.LexicalContext;
-import jdk.nashorn.internal.ir.LexicalContextNode;
-import jdk.nashorn.internal.ir.Node;
-import jdk.nashorn.internal.ir.Symbol;
-import jdk.nashorn.internal.ir.WithNode;
+import nashorn.internal.IntDeque;
+import nashorn.internal.codegen.types.Type;
+import nashorn.internal.ir.Block;
+import nashorn.internal.ir.Expression;
+import nashorn.internal.ir.FunctionNode;
+import nashorn.internal.ir.LexicalContext;
+import nashorn.internal.ir.LexicalContextNode;
+import nashorn.internal.ir.Node;
+import nashorn.internal.ir.Symbol;
+import nashorn.internal.ir.WithNode;
 
 /**
  * A lexical context that also tracks if we have any dynamic scopes in the context. Such scopes can have new

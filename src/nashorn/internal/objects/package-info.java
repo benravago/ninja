@@ -23,7 +23,7 @@
  * questions.
  */
 
-package jdk.nashorn.internal.objects;
+package nashorn.internal.objects;
 
 /**
  * Classes from this package should never be directly referred from

@@ -23,9 +23,9 @@
  * questions.
  */
 
-package jdk.nashorn.internal.ir.visitor;
+package nashorn.internal.ir.visitor;
 
-import jdk.nashorn.internal.ir.LexicalContext;
+import nashorn.internal.ir.LexicalContext;
 
 /**
  * Convenience base class for a {@link NodeVisitor} with a plain {@link LexicalContext}.

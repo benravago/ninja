@@ -23,11 +23,11 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
-import jdk.nashorn.api.scripting.NashornException;
-import jdk.nashorn.internal.objects.Global;
-import jdk.nashorn.internal.parser.Token;
+import nashorn.api.scripting.NashornException;
+import nashorn.internal.objects.Global;
+import nashorn.internal.parser.Token;
 
 /**
  * ECMAScript parser exceptions.

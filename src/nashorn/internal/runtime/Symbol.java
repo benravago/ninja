@@ -23,10 +23,10 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime;
+package nashorn.internal.runtime;
 
 import java.io.Serializable;
-import jdk.nashorn.internal.objects.NativeSymbol;
+import nashorn.internal.objects.NativeSymbol;
 
 /**
  * This class represents a unique, non-String Object property key as defined in ECMAScript 6.

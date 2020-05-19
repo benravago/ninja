@@ -23,15 +23,15 @@
  * questions.
  */
 
-package jdk.nashorn.internal.codegen;
+package nashorn.internal.codegen;
 
-import static jdk.nashorn.internal.codegen.CompilerConstants.ARGUMENTS;
-import static jdk.nashorn.internal.codegen.CompilerConstants.CALLEE;
-import static jdk.nashorn.internal.codegen.CompilerConstants.RETURN;
-import static jdk.nashorn.internal.codegen.CompilerConstants.SCOPE;
-import static jdk.nashorn.internal.codegen.CompilerConstants.THIS;
-import static jdk.nashorn.internal.codegen.CompilerConstants.VARARGS;
-import static jdk.nashorn.internal.runtime.logging.DebugLogger.quote;
+import static nashorn.internal.codegen.CompilerConstants.ARGUMENTS;
+import static nashorn.internal.codegen.CompilerConstants.CALLEE;
+import static nashorn.internal.codegen.CompilerConstants.RETURN;
+import static nashorn.internal.codegen.CompilerConstants.SCOPE;
+import static nashorn.internal.codegen.CompilerConstants.THIS;
+import static nashorn.internal.codegen.CompilerConstants.VARARGS;
+import static nashorn.internal.runtime.logging.DebugLogger.quote;
 
 import java.io.File;
 import java.lang.invoke.MethodType;
@@ -49,24 +49,24 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.logging.Level;
-import jdk.nashorn.internal.codegen.types.Type;
-import jdk.nashorn.internal.ir.Expression;
-import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.ir.Optimistic;
-import jdk.nashorn.internal.runtime.CodeInstaller;
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.ErrorManager;
-import jdk.nashorn.internal.runtime.FunctionInitializer;
-import jdk.nashorn.internal.runtime.ParserException;
-import jdk.nashorn.internal.runtime.RecompilableScriptFunctionData;
-import jdk.nashorn.internal.runtime.ScriptEnvironment;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.ScriptRuntime;
-import jdk.nashorn.internal.runtime.Source;
-import jdk.nashorn.internal.runtime.linker.NameCodec;
-import jdk.nashorn.internal.runtime.logging.DebugLogger;
-import jdk.nashorn.internal.runtime.logging.Loggable;
-import jdk.nashorn.internal.runtime.logging.Logger;
+import nashorn.internal.codegen.types.Type;
+import nashorn.internal.ir.Expression;
+import nashorn.internal.ir.FunctionNode;
+import nashorn.internal.ir.Optimistic;
+import nashorn.internal.runtime.CodeInstaller;
+import nashorn.internal.runtime.Context;
+import nashorn.internal.runtime.ErrorManager;
+import nashorn.internal.runtime.FunctionInitializer;
+import nashorn.internal.runtime.ParserException;
+import nashorn.internal.runtime.RecompilableScriptFunctionData;
+import nashorn.internal.runtime.ScriptEnvironment;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.runtime.Source;
+import nashorn.internal.runtime.linker.NameCodec;
+import nashorn.internal.runtime.logging.DebugLogger;
+import nashorn.internal.runtime.logging.Loggable;
+import nashorn.internal.runtime.logging.Logger;
 
 /**
  * Responsible for converting JavaScripts to java byte code. Main entry
@@ -78,10 +78,10 @@ import jdk.nashorn.internal.runtime.logging.Logger;
 public final class Compiler implements Loggable {
 
     /** Name of the scripts package */
-    public static final String SCRIPTS_PACKAGE = "jdk/nashorn/internal/scripts";
+    public static final String SCRIPTS_PACKAGE = "nashorn/internal/scripts";
 
     /** Name of the objects package */
-    public static final String OBJECTS_PACKAGE = "jdk/nashorn/internal/objects";
+    public static final String OBJECTS_PACKAGE = "nashorn/internal/objects";
 
     private final ScriptEnvironment env;
 

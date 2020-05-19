@@ -23,19 +23,19 @@
  * questions.
  */
 
-package jdk.nashorn.internal.codegen;
+package nashorn.internal.codegen;
 
-import static jdk.nashorn.internal.runtime.arrays.ArrayIndex.getArrayIndex;
-import static jdk.nashorn.internal.runtime.arrays.ArrayIndex.isValidArrayIndex;
+import static nashorn.internal.runtime.arrays.ArrayIndex.getArrayIndex;
+import static nashorn.internal.runtime.arrays.ArrayIndex.isValidArrayIndex;
 
 import java.util.ArrayList;
 import java.util.List;
-import jdk.nashorn.internal.ir.Symbol;
-import jdk.nashorn.internal.runtime.AccessorProperty;
-import jdk.nashorn.internal.runtime.Property;
-import jdk.nashorn.internal.runtime.PropertyMap;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.SpillProperty;
+import nashorn.internal.ir.Symbol;
+import nashorn.internal.runtime.AccessorProperty;
+import nashorn.internal.runtime.Property;
+import nashorn.internal.runtime.PropertyMap;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.SpillProperty;
 
 /**
  * Class that creates PropertyMap sent to script object constructors.

@@ -23,26 +23,26 @@
  * questions.
  */
 
-package jdk.nashorn.internal.runtime.linker;
+package nashorn.internal.runtime.linker;
 
-import static jdk.internal.org.objectweb.asm.Opcodes.ACC_FINAL;
-import static jdk.internal.org.objectweb.asm.Opcodes.ACC_PRIVATE;
-import static jdk.internal.org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static jdk.internal.org.objectweb.asm.Opcodes.ACC_STATIC;
-import static jdk.internal.org.objectweb.asm.Opcodes.ACC_SUPER;
-import static jdk.internal.org.objectweb.asm.Opcodes.ACC_VARARGS;
-import static jdk.internal.org.objectweb.asm.Opcodes.ALOAD;
-import static jdk.internal.org.objectweb.asm.Opcodes.ASTORE;
-import static jdk.internal.org.objectweb.asm.Opcodes.D2F;
-import static jdk.internal.org.objectweb.asm.Opcodes.H_INVOKESTATIC;
-import static jdk.internal.org.objectweb.asm.Opcodes.INVOKESPECIAL;
-import static jdk.internal.org.objectweb.asm.Opcodes.I2B;
-import static jdk.internal.org.objectweb.asm.Opcodes.I2S;
-import static jdk.internal.org.objectweb.asm.Opcodes.RETURN;
-import static jdk.nashorn.internal.codegen.CompilerConstants.interfaceCallNoLookup;
-import static jdk.nashorn.internal.codegen.CompilerConstants.staticCallNoLookup;
-import static jdk.nashorn.internal.lookup.Lookup.MH;
-import static jdk.nashorn.internal.runtime.linker.AdaptationResult.Outcome.ERROR_NO_ACCESSIBLE_CONSTRUCTOR;
+import static org.objectweb.asm.Opcodes.ACC_FINAL;
+import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
+import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
+import static org.objectweb.asm.Opcodes.ACC_STATIC;
+import static org.objectweb.asm.Opcodes.ACC_SUPER;
+import static org.objectweb.asm.Opcodes.ACC_VARARGS;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.objectweb.asm.Opcodes.D2F;
+import static org.objectweb.asm.Opcodes.H_INVOKESTATIC;
+import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
+import static org.objectweb.asm.Opcodes.I2B;
+import static org.objectweb.asm.Opcodes.I2S;
+import static org.objectweb.asm.Opcodes.RETURN;
+import static nashorn.internal.codegen.CompilerConstants.interfaceCallNoLookup;
+import static nashorn.internal.codegen.CompilerConstants.staticCallNoLookup;
+import static nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.runtime.linker.AdaptationResult.Outcome.ERROR_NO_ACCESSIBLE_CONSTRUCTOR;
 
 import java.lang.invoke.CallSite;
 import java.lang.invoke.MethodHandle;
@@ -62,19 +62,18 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import jdk.internal.org.objectweb.asm.ClassWriter;
-import jdk.internal.org.objectweb.asm.Handle;
-import jdk.internal.org.objectweb.asm.Label;
-import jdk.internal.org.objectweb.asm.Opcodes;
-import jdk.internal.org.objectweb.asm.Type;
-import jdk.internal.org.objectweb.asm.commons.InstructionAdapter;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import jdk.nashorn.api.scripting.ScriptUtils;
-import jdk.nashorn.internal.codegen.CompilerConstants.Call;
-import jdk.nashorn.internal.runtime.ScriptFunction;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.linker.AdaptationResult.Outcome;
-import jdk.internal.reflect.CallerSensitive;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Handle;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.InstructionAdapter;
+import nashorn.api.scripting.ScriptObjectMirror;
+import nashorn.api.scripting.ScriptUtils;
+import nashorn.internal.codegen.CompilerConstants.Call;
+import nashorn.internal.runtime.ScriptFunction;
+import nashorn.internal.runtime.ScriptObject;
+import nashorn.internal.runtime.linker.AdaptationResult.Outcome;
 
 /**
  * Generates bytecode for a Java adapter class. Used by the {@link JavaAdapterFactory}.
@@ -203,7 +202,7 @@ final class JavaAdapterBytecodeGenerator {
     private static final String GET_METHOD_PROPERTY_METHOD_DESCRIPTOR = Type.getMethodDescriptor(OBJECT_TYPE, SCRIPT_OBJECT_TYPE);
     private static final String VOID_METHOD_DESCRIPTOR = Type.getMethodDescriptor(Type.VOID_TYPE);
 
-    private static final String ADAPTER_PACKAGE_INTERNAL = "jdk/nashorn/javaadapters/";
+    private static final String ADAPTER_PACKAGE_INTERNAL = "nashorn/javaadapters/";
     private static final int MAX_GENERATED_TYPE_NAME_LENGTH = 255;
 
     // Method name prefix for invoking super-methods
@@ -388,7 +387,7 @@ final class JavaAdapterBytecodeGenerator {
         boolean canBeAutoConverted = false;
         for (final Constructor<?> ctor: superClass.getDeclaredConstructors()) {
             final int modifier = ctor.getModifiers();
-            if((modifier & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0 && !isCallerSensitive(ctor)) {
+            if((modifier & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0) {
                 canBeAutoConverted = generateConstructors(ctor) | canBeAutoConverted;
                 gotCtor = true;
             }
@@ -1150,7 +1149,7 @@ final class JavaAdapterBytecodeGenerator {
                     }
 
                     final MethodInfo mi = new MethodInfo(typeMethod);
-                    if (Modifier.isFinal(m) || isCallerSensitive(typeMethod)) {
+                    if (Modifier.isFinal(m)) {
                         finalMethods.add(mi);
                     } else if (!finalMethods.contains(mi) && methodInfos.add(mi) && Modifier.isAbstract(m)) {
                         abstractMethodNames.add(mi.getName());
@@ -1225,10 +1224,6 @@ final class JavaAdapterBytecodeGenerator {
     private static Class<?> assignableSuperClass(final Class<?> c1, final Class<?> c2) {
         final Class<?> superClass = c1.getSuperclass();
         return superClass.isAssignableFrom(c2) ? superClass : assignableSuperClass(superClass, c2);
-    }
-
-    private static boolean isCallerSensitive(final AccessibleObject e) {
-        return e.isAnnotationPresent(CallerSensitive.class);
     }
 
     private static Call lookupServiceMethod(final String name, final Class<?> rtype, final Class<?>... ptypes) {
