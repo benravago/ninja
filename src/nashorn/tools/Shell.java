@@ -30,8 +30,6 @@ import nashorn.internal.codegen.Compiler;
 import nashorn.internal.codegen.Compiler.CompilationPhases;
 import nashorn.internal.ir.Expression;
 import nashorn.internal.ir.FunctionNode;
-import nashorn.internal.ir.debug.ASTWriter;
-import nashorn.internal.ir.debug.PrintVisitor;
 import nashorn.internal.objects.Global;
 import nashorn.internal.objects.NativeSymbol;
 import nashorn.internal.parser.Parser;
@@ -378,14 +376,6 @@ public class Shell implements PartialParser {
                        functionNode.getSource(),
                        env._strict | functionNode.isStrict()).
                        compile(functionNode, CompilationPhases.COMPILE_ALL_NO_INSTALL);
-
-                if (env._print_ast) {
-                    context.getErr().println(new ASTWriter(functionNode));
-                }
-
-                if (env._print_parse) {
-                    context.getErr().println(new PrintVisitor(functionNode));
-                }
 
                 if (errors.getNumberOfErrors() != 0) {
                     return COMPILATION_ERROR;

@@ -52,7 +52,6 @@ import nashorn.api.scripting.ScriptObjectMirror;
 import nashorn.internal.codegen.ApplySpecialization;
 import nashorn.internal.codegen.CompilerConstants;
 import nashorn.internal.codegen.CompilerConstants.Call;
-import nashorn.internal.ir.debug.JSONWriter;
 import nashorn.internal.objects.AbstractIterator;
 import nashorn.internal.objects.Global;
 import nashorn.internal.objects.NativeObject;
@@ -608,19 +607,6 @@ public final class ScriptRuntime {
         }
 
         return x == y;
-    }
-
-    /**
-     * Returns AST as JSON compatible string. This is used to
-     * implement "parse" function in resources/parse.js script.
-     *
-     * @param code code to be parsed
-     * @param name name of the code source (used for location)
-     * @param includeLoc tells whether to include location information for nodes or not
-     * @return JSON string representation of AST of the supplied code
-     */
-    public static String parse(final String code, final String name, final boolean includeLoc) {
-        return JSONWriter.parse(Context.getContextTrusted(), code, name, includeLoc);
     }
 
     /**

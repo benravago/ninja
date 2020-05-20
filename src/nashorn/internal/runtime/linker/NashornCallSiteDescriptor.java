@@ -53,7 +53,6 @@ import dynalink.Operation;
 import dynalink.SecureLookupSupplier;
 import dynalink.StandardNamespace;
 import dynalink.StandardOperation;
-import nashorn.internal.ir.debug.NashornTextifier;
 import nashorn.internal.runtime.AccessControlContextFactory;
 import nashorn.internal.runtime.ScriptRuntime;
 

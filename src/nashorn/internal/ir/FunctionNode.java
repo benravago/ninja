@@ -267,14 +267,6 @@ public final class FunctionNode extends LexicalContextExpression implements Flag
      * Note that even IS_STRICT is one such flag but that requires special handling.
      */
 
-    /** parser, print parse tree */
-    public static final int DEBUG_PRINT_PARSE       = 1 << 0;
-    /** parser, print lower parse tree */
-    public static final int DEBUG_PRINT_LOWER_PARSE = 1 << 1;
-    /** parser, print AST */
-    public static final int DEBUG_PRINT_AST         = 1 << 2;
-    /** parser, print lower AST */
-    public static final int DEBUG_PRINT_LOWER_AST   = 1 << 3;
     /** parser, print symbols */
     public static final int DEBUG_PRINT_SYMBOLS     = 1 << 4;
 
@@ -292,8 +284,7 @@ public final class FunctionNode extends LexicalContextExpression implements Flag
     public static final int DEBUG_TRACE_VALUES      = 1 << 8;
 
     /** extension callsite flags mask */
-    public static final int DEBUG_CALLSITE_FLAGS = DEBUG_PRINT_PARSE |
-            DEBUG_PRINT_LOWER_PARSE | DEBUG_PRINT_AST | DEBUG_PRINT_LOWER_AST |
+    public static final int DEBUG_CALLSITE_FLAGS =
             DEBUG_PRINT_SYMBOLS | DEBUG_PROFILE | DEBUG_TRACE_ENTEREXIT |
             DEBUG_TRACE_MISSES | DEBUG_TRACE_VALUES;
 
@@ -535,14 +526,6 @@ public final class FunctionNode extends LexicalContextExpression implements Flag
                 return DEBUG_TRACE_VALUES;
             case "nashorn callsite profile":
                 return DEBUG_PROFILE;
-            case "nashorn print parse":
-                return DEBUG_PRINT_PARSE;
-            case "nashorn print lower parse":
-                return DEBUG_PRINT_LOWER_PARSE;
-            case "nashorn print ast":
-                return DEBUG_PRINT_AST;
-            case "nashorn print lower ast":
-                return DEBUG_PRINT_LOWER_AST;
             case "nashorn print symbols":
                 return DEBUG_PRINT_SYMBOLS;
             default:

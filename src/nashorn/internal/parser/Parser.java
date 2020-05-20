@@ -135,8 +135,6 @@ import nashorn.internal.ir.UnaryNode;
 import nashorn.internal.ir.VarNode;
 import nashorn.internal.ir.WhileNode;
 import nashorn.internal.ir.WithNode;
-import nashorn.internal.ir.debug.ASTWriter;
-import nashorn.internal.ir.debug.PrintVisitor;
 import nashorn.internal.ir.visitor.NodeVisitor;
 import nashorn.internal.runtime.Context;
 import nashorn.internal.runtime.ErrorManager;
@@ -447,7 +445,6 @@ public class Parser extends AbstractParser implements Loggable {
                     FunctionNode.Kind.NORMAL,
                     functionLine,
                     functionBody);
-            printAST(functionNode);
             return functionNode;
         } catch (final Exception e) {
             handleParseException(e);
@@ -583,8 +580,6 @@ public class Parser extends AbstractParser implements Loggable {
                 function.getEndParserState(),
                 function.getModule(),
                 function.getDebugFlags());
-
-        printAST(functionNode);
 
         return functionNode;
     }
@@ -4334,16 +4329,6 @@ public class Parser extends AbstractParser implements Loggable {
             final Lexer newLexer = new Lexer(source, position, lexer.limit - position, stream, scripting, es6, true);
             newLexer.restoreState(new Lexer.State(position, Integer.MAX_VALUE, line, -1, linePosition, SEMICOLON));
             return newLexer;
-        }
-    }
-
-    private void printAST(final FunctionNode functionNode) {
-        if (functionNode.getDebugFlag(FunctionNode.DEBUG_PRINT_AST)) {
-            env.getErr().println(new ASTWriter(functionNode));
-        }
-
-        if (functionNode.getDebugFlag(FunctionNode.DEBUG_PRINT_PARSE)) {
-            env.getErr().println(new PrintVisitor(functionNode, true, false));
         }
     }
 

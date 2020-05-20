@@ -52,21 +52,14 @@ import static nashorn.internal.codegen.CompilerConstants.methodDescriptor;
 import static nashorn.internal.codegen.CompilerConstants.typeDescriptor;
 import static nashorn.internal.codegen.CompilerConstants.virtualCallNoLookup;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintWriter;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.util.TraceClassVisitor;
 import nashorn.internal.codegen.types.Type;
 import nashorn.internal.ir.FunctionNode;
-import nashorn.internal.ir.debug.NashornClassReader;
-import nashorn.internal.ir.debug.NashornTextifier;
 import nashorn.internal.runtime.Context;
 import nashorn.internal.runtime.PropertyMap;
 import nashorn.internal.runtime.RewriteException;
@@ -431,31 +424,6 @@ public class ClassEmitter {
         classStarted = false;
         classEnded   = true;
         assert methodsStarted.isEmpty() : "methodsStarted not empty " + methodsStarted;
-    }
-
-    /**
-     * Disassemble an array of byte code.
-     *
-     * @param bytecode  byte array representing bytecode
-     *
-     * @return disassembly as human readable string
-     */
-    static String disassemble(final byte[] bytecode) {
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (final PrintWriter pw = new PrintWriter(baos)) {
-            final NashornClassReader cr = new NashornClassReader(bytecode);
-            final Context ctx = AccessController.doPrivileged(new PrivilegedAction<Context>() {
-                @Override
-                public Context run() {
-                    return Context.getContext();
-                }
-            });
-            final TraceClassVisitor tcv = new TraceClassVisitor(null, new NashornTextifier(ctx.getEnv(), cr), pw);
-            cr.accept(tcv, 0);
-        }
-
-        final String str = new String(baos.toByteArray());
-        return str;
     }
 
     /**

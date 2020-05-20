@@ -27,7 +27,6 @@ package nashorn.internal.codegen;
 
 import static nashorn.internal.runtime.logging.DebugLogger.quote;
 
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -39,8 +38,6 @@ import nashorn.internal.ir.FunctionNode;
 import nashorn.internal.ir.LiteralNode;
 import nashorn.internal.ir.Node;
 import nashorn.internal.ir.Symbol;
-import nashorn.internal.ir.debug.ASTWriter;
-import nashorn.internal.ir.debug.PrintVisitor;
 import nashorn.internal.ir.visitor.NodeVisitor;
 import nashorn.internal.ir.visitor.SimpleNodeVisitor;
 import nashorn.internal.runtime.CodeInstaller;
@@ -275,20 +272,6 @@ abstract class CompilationPhase {
         FunctionNode transform(final Compiler compiler, final CompilationPhases phases, final FunctionNode fn) {
             final FunctionNode newFunctionNode = transformFunction(fn, new LocalVariableTypesCalculator(compiler,
                     compiler.getReturnType()));
-            final ScriptEnvironment senv = compiler.getScriptEnvironment();
-            final PrintWriter       err  = senv.getErr();
-
-            //TODO separate phase for the debug printouts for abstraction and clarity
-            if (senv._print_lower_ast || fn.getDebugFlag(FunctionNode.DEBUG_PRINT_LOWER_AST)) {
-                err.println("Lower AST for: " + quote(newFunctionNode.getName()));
-                err.println(new ASTWriter(newFunctionNode));
-            }
-
-            if (senv._print_lower_parse || fn.getDebugFlag(FunctionNode.DEBUG_PRINT_LOWER_PARSE)) {
-                err.println("Lower AST for: " + quote(newFunctionNode.getName()));
-                err.println(new PrintVisitor(newFunctionNode));
-            }
-
             return newFunctionNode;
         }
 
@@ -453,13 +436,6 @@ abstract class CompilationPhase {
                 compiler.addClass(className, bytecode); //classes are only added to the bytecode map if compile unit is used
 
                 CompileUnit.increaseEmitCount();
-
-                // should we verify the generated code?
-                if (senv._verify_code) {
-                    compiler.getCodeInstaller().verify(bytecode);
-                }
-
-                DumpBytecode.dumpBytecode(senv, compiler.getLogger(), bytecode, className);
             }
 
             return newFunctionNode;

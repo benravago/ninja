@@ -38,7 +38,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import dynalink.beans.StaticClass;
-import nashorn.internal.codegen.DumpBytecode;
 import nashorn.internal.runtime.Context;
 import nashorn.internal.runtime.JSType;
 import nashorn.internal.runtime.ScriptFunction;
@@ -143,7 +142,6 @@ final class JavaAdapterClassLoader {
                             return Context.getContext();
                         }
                     }, GET_CONTEXT_ACC_CTXT);
-                    DumpBytecode.dumpBytecode(ctx.getEnv(), ctx.getLogger(nashorn.internal.codegen.Compiler.class), classBytes, name);
                     return defineClass(name, classBytes, 0, classBytes.length, protectionDomain);
                 }
                 throw new ClassNotFoundException(name);

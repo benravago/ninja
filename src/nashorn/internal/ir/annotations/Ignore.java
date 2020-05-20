@@ -27,7 +27,6 @@ package nashorn.internal.ir.annotations;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import nashorn.internal.ir.debug.ASTWriter;
 
 /**
  * This signifies a node that should be ignored in traversal, for example

@@ -491,12 +491,6 @@ public final class ObjectClassGenerator implements Loggable {
         final byte[] code = classEmitter.toByteArray();
         final ScriptEnvironment env = context.getEnv();
 
-        DumpBytecode.dumpBytecode(env, log, code, className);
-
-        if (env._verify_code) {
-            context.verify(code);
-        }
-
         return code;
     }
 
