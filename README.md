@@ -14,7 +14,7 @@ At this time, the changes are:
 8. replace `Unsafe.defineAnonymousClass()` with `Lookup.defineHiddenClass()`
 9. remove debugging code in nashorn/internal/ir/debug, DumpBytecode.java, etc.
 
-The main objective of these changes is to reduce and simplify the code base.  Eventually, I hope to work out some kind of plugin system to support extensions (like javafx).  I would also like to look into the possibility of using [lsp4j](https://github.com/eclipse/lsp4j) for the debugging. 
+The main objective of these changes is to reduce and simplify the code base.  Eventually, I hope to work out some kind of plugin system to support extensions (like javafx).  I would also like to look into the possibility of using [lsp4j](https://github.com/eclipse/lsp4j) for coding/debugging assist. 
 
 `Lookup.defineHiddenClass()` is a JDK15 feature. The code compiles properly but needs some more work to get access permissions sorted out so the anonymous-classes feature is disabled for now.
 
