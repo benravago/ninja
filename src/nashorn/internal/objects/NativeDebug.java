@@ -311,7 +311,7 @@ public final class NativeDebug extends ScriptObject {
      */
     @Function(attributes = Attribute.NOT_ENUMERABLE, where = Where.CONSTRUCTOR)
     public static void setEventQueueCapacity(final Object self, final Object newCapacity) {
-        ((ScriptObject)self).set(EVENT_QUEUE_CAPACITY, newCapacity, NashornCallSiteDescriptor.CALLSITE_STRICT);
+        ((ScriptObject)self).set(EVENT_QUEUE_CAPACITY, newCapacity, 0);
     }
 
     /**
@@ -400,7 +400,7 @@ public final class NativeDebug extends ScriptObject {
         if (sobj.has(EVENT_QUEUE)) {
             q = (LinkedList<RuntimeEvent<?>>)((ScriptObject)self).get(EVENT_QUEUE);
         } else {
-            ((ScriptObject)self).set(EVENT_QUEUE, q = new LinkedList<>(), NashornCallSiteDescriptor.CALLSITE_STRICT);
+            ((ScriptObject)self).set(EVENT_QUEUE, q = new LinkedList<>(), 0);
         }
         return q;
     }

@@ -161,27 +161,6 @@ public final class Bootstrap {
             obj instanceof StaticClass;
     }
 
-    /**
-     * Returns true if the given object is a strict callable
-     * @param callable the callable object to be checked for strictness
-     * @return true if the obj is a strict callable, false if it is a non-strict callable.
-     * @throws ECMAException with {@code TypeError} if the object is not a callable.
-     */
-    public static boolean isStrictCallable(final Object callable) {
-        if (callable instanceof ScriptFunction) {
-            return ((ScriptFunction)callable).isStrict();
-        } else if (isJSObjectFunction(callable)) {
-            return ((JSObject)callable).isStrictFunction();
-        } else if (callable instanceof BoundCallable) {
-            return isStrictCallable(((BoundCallable)callable).getCallable());
-        } else if (BeansLinker.isDynamicMethod(callable) ||
-                callable instanceof StaticClass ||
-                isFunctionalInterfaceObject(callable)) {
-            return false;
-        }
-        throw notFunction(callable);
-    }
-
     private static ECMAException notFunction(final Object obj) {
         return typeError("not.a.function", ScriptRuntime.safeToString(obj));
     }

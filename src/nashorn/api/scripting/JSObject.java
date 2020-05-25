@@ -27,7 +27,6 @@ package nashorn.api.scripting;
 
 import java.util.Collection;
 import java.util.Set;
-import nashorn.internal.runtime.JSType;
 
 /**
  * This interface can be implemented by an arbitrary Java class. Nashorn will
@@ -170,13 +169,6 @@ public interface JSObject {
      * @return if this mirror wraps a ECMAScript function instance
      */
     public boolean isFunction();
-
-    /**
-     * Is this a 'use strict' function object?
-     *
-     * @return true if this mirror represents a ECMAScript 'use strict' function
-     */
-    public boolean isStrictFunction();
 
     /**
      * Is this an array object?

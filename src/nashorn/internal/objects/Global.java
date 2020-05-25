@@ -1158,7 +1158,7 @@ public final class Global extends Scope {
     public Global(final Context context) {
         super(checkAndGetMap(context));
         this.context = context;
-        this.lexicalScope = context.getEnv()._es6 ? new LexicalScope(this) : null;
+        this.lexicalScope = new LexicalScope(this);
     }
 
     /**
@@ -1217,14 +1217,6 @@ public final class Global extends Scope {
      */
     public boolean isOfContext(final Context ctxt) {
         return this.context == ctxt;
-    }
-
-    /**
-     * Does this global belong to a strict Context?
-     * @return true if this global belongs to a strict Context
-     */
-    public boolean isStrictContext() {
-        return context.getEnv()._strict;
     }
 
     /**
@@ -1580,7 +1572,7 @@ public final class Global extends Scope {
 
     /**
      * Hook to search missing variables in ScriptContext if available
-     * @param self used to detect if scope call or not (this function is 'strict')
+     * @param self used to detect if scope call or not
      * @param name name of the variable missing
      * @return value of the missing variable or undefined (or TypeError for scope search)
      */
@@ -1636,20 +1628,19 @@ public final class Global extends Scope {
      * @param str      Evaluated code
      * @param callThis "this" to be passed to the evaluated code
      * @param location location of the eval call
-     * @param strict   is eval called from a strict mode code?
      *
      * @return the return value of the eval
      *
      * This is directly invoked from generated when eval(code) is called in user code
      */
-    public static Object directEval(final Object self, final Object str, final Object callThis, final Object location, final boolean strict) {
+    public static Object directEval(final Object self, final Object str, final Object callThis, final Object location, final boolean unused) {
         if (!isString(str)) {
             return str;
         }
         final Global global = Global.instanceFrom(self);
         final ScriptObject scope = self instanceof ScriptObject && ((ScriptObject)self).isScope() ? (ScriptObject)self : global;
 
-        return global.getContext().eval(scope, str.toString(), callThis, location, strict, true);
+        return global.getContext().eval(scope, str.toString(), callThis, location, true);
     }
 
     /**
@@ -2394,7 +2385,6 @@ public final class Global extends Scope {
      * @return the ES6 lexical global scope.
      */
     public final ScriptObject getLexicalScope() {
-        assert context.getEnv()._es6;
         return lexicalScope;
     }
 
@@ -2405,23 +2395,21 @@ public final class Global extends Scope {
         PropertyMap lexicalMap = null;
         boolean hasLexicalDefinitions = false;
 
-        if (context.getEnv()._es6) {
-            lexScope = (LexicalScope) getLexicalScope();
-            lexicalMap = lexScope.getMap();
+        lexScope = (LexicalScope) getLexicalScope();
+        lexicalMap = lexScope.getMap();
 
-            for (final nashorn.internal.runtime.Property property : properties) {
-                if (property.isLexicalBinding()) {
-                    hasLexicalDefinitions = true;
-                }
-                // ES6 15.1.8 steps 6. and 7.
-                final nashorn.internal.runtime.Property globalProperty = ownMap.findProperty(property.getKey());
-                if (globalProperty != null && !globalProperty.isConfigurable() && property.isLexicalBinding()) {
-                    throw ECMAErrors.syntaxError("redeclare.variable", property.getKey().toString());
-                }
-                final nashorn.internal.runtime.Property lexicalProperty = lexicalMap.findProperty(property.getKey());
-                if (lexicalProperty != null && !property.isConfigurable()) {
-                    throw ECMAErrors.syntaxError("redeclare.variable", property.getKey().toString());
-                }
+        for (final nashorn.internal.runtime.Property property : properties) {
+            if (property.isLexicalBinding()) {
+                hasLexicalDefinitions = true;
+            }
+            // ES6 15.1.8 steps 6. and 7.
+            final nashorn.internal.runtime.Property globalProperty = ownMap.findProperty(property.getKey());
+            if (globalProperty != null && !globalProperty.isConfigurable() && property.isLexicalBinding()) {
+                throw ECMAErrors.syntaxError("redeclare.variable", property.getKey().toString());
+            }
+            final nashorn.internal.runtime.Property lexicalProperty = lexicalMap.findProperty(property.getKey());
+            if (lexicalProperty != null && !property.isConfigurable()) {
+                throw ECMAErrors.syntaxError("redeclare.variable", property.getKey().toString());
             }
         }
 
@@ -2467,7 +2455,7 @@ public final class Global extends Scope {
         // We therefore check if the invocation does already have a switchpoint and the property is non-inherited,
         // assuming this only applies to global constants. If other non-inherited properties will
         // start using switchpoints some time in the future we'll have to revisit this.
-        if (isScope && context.getEnv()._es6 && (invocation.getSwitchPoints() == null || !hasOwnProperty(name))) {
+        if (isScope && (invocation.getSwitchPoints() == null || !hasOwnProperty(name))) {
             return invocation.addSwitchPoint(getLexicalScopeSwitchPoint());
         }
 
@@ -2498,7 +2486,7 @@ public final class Global extends Scope {
 
         final GuardedInvocation invocation = super.findSetMethod(desc, request);
 
-        if (isScope && context.getEnv()._es6) {
+        if (isScope) {
             return invocation.addSwitchPoint(getLexicalScopeSwitchPoint());
         }
 
@@ -2603,24 +2591,11 @@ public final class Global extends Scope {
         final ScriptObject arrayPrototype = getArrayPrototype();
         arrayPrototype.setIsArray();
 
-        if (env._es6) {
-            this.symbol   = LAZY_SENTINEL;
-            this.map      = LAZY_SENTINEL;
-            this.weakMap  = LAZY_SENTINEL;
-            this.set      = LAZY_SENTINEL;
-            this.weakSet  = LAZY_SENTINEL;
-        } else {
-            // We need to manually delete nasgen-generated properties we don't want
-            this.delete("Symbol", false);
-            this.delete("Map", false);
-            this.delete("WeakMap", false);
-            this.delete("Set", false);
-            this.delete("WeakSet", false);
-            builtinObject.delete("getOwnPropertySymbols", false);
-            arrayPrototype.delete("entries", false);
-            arrayPrototype.delete("keys", false);
-            arrayPrototype.delete("values", false);
-        }
+        this.symbol   = LAZY_SENTINEL;
+		this.map      = LAZY_SENTINEL;
+		this.weakMap  = LAZY_SENTINEL;
+		this.set      = LAZY_SENTINEL;
+		this.weakSet  = LAZY_SENTINEL;
 
         // Error stuff
         initErrorObjects();
@@ -2694,7 +2669,7 @@ public final class Global extends Scope {
             // default file name
             addOwnProperty(ScriptEngine.FILENAME, Attribute.NOT_ENUMERABLE, null);
             // __noSuchProperty__ hook for ScriptContext search of missing variables
-            final ScriptFunction noSuchProp = ScriptFunction.createStrictBuiltin(NO_SUCH_PROPERTY_NAME, NO_SUCH_PROPERTY);
+            final ScriptFunction noSuchProp = ScriptFunction.createBuiltin(NO_SUCH_PROPERTY_NAME, NO_SUCH_PROPERTY);
             addOwnProperty(NO_SUCH_PROPERTY_NAME, Attribute.NOT_ENUMERABLE, noSuchProp);
         }
     }
@@ -2779,11 +2754,11 @@ public final class Global extends Scope {
         if (System.getSecurityManager() == null) {
             // do not fill $ENV if we have a security manager around
             // Retrieve current state of ENV variables.
-            env.putAll(System.getenv(), scriptEnv._strict);
+            env.putAll(System.getenv(), true);
 
             // Set the PWD variable to a value that is guaranteed to be understood
             // by the underlying platform.
-            env.put(ScriptingFunctions.PWD_NAME, System.getProperty("user.dir"), scriptEnv._strict);
+            env.put(ScriptingFunctions.PWD_NAME, System.getProperty("user.dir"), true);
         }
         addOwnProperty(ScriptingFunctions.ENV_NAME, Attribute.NOT_ENUMERABLE, env);
 
@@ -2880,13 +2855,11 @@ public final class Global extends Scope {
 
             return res;
         } catch (final Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException)e;
-            } else {
-                throw new RuntimeException(e);
-            }
+        	return uncheck(e);
         }
     }
+    
+    static <T extends Throwable,V> V uncheck(Exception e) throws T { throw (T)e; }
 
     private ScriptObject initPrototype(final String name, final ScriptObject prototype) {
         try {

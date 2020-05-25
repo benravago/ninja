@@ -104,8 +104,6 @@ public final class NashornCallSiteDescriptor extends CallSiteDescriptor {
     /** Flags that the call site references a scope variable (it's an identifier reference or a var declaration, not a
      * property access expression. */
     public static final int CALLSITE_SCOPE         = 1 << 4;
-    /** Flags that the call site is in code that uses ECMAScript strict mode. */
-    public static final int CALLSITE_STRICT        = 1 << 5;
     /** Flags that a property getter or setter call site references a scope variable that is located at a known distance
      * in the scope chain. Such getters and setters can often be linked more optimally using these assumptions. */
     public static final int CALLSITE_FAST_SCOPE    = 1 << 6;
@@ -209,9 +207,6 @@ public final class NashornCallSiteDescriptor extends CallSiteDescriptor {
         }
         if ((flags & CALLSITE_APPLY_TO_CALL) != 0) {
             sb.append(" apply2call");
-        }
-        if ((flags & CALLSITE_STRICT) != 0) {
-            sb.append(" strict");
         }
     }
 
@@ -456,17 +451,6 @@ public final class NashornCallSiteDescriptor extends CallSiteDescriptor {
     }
 
     /**
-     * Returns true if this descriptor is a Nashorn call site descriptor and has the {@link  #CALLSITE_STRICT} flag set.
-     * @param desc the descriptor. It can be any kind of a call site descriptor, not necessarily a
-     * {@code NashornCallSiteDescriptor}. This allows for graceful interoperability when linking Nashorn with code
-     * generated outside of Nashorn.
-     * @return true if the descriptor is a Nashorn call site descriptor, and the flag is set, false otherwise.
-     */
-    public static boolean isStrict(final CallSiteDescriptor desc) {
-        return isFlag(desc, CALLSITE_STRICT);
-    }
-
-    /**
      * Returns true if this is an apply call that we try to call as
      * a "call"
      * @param desc descriptor
@@ -492,15 +476,6 @@ public final class NashornCallSiteDescriptor extends CallSiteDescriptor {
      */
     public static boolean isDeclaration(final CallSiteDescriptor desc) {
         return isFlag(desc, CALLSITE_DECLARE);
-    }
-
-    /**
-     * Returns true if {@code flags} has the {@link  #CALLSITE_STRICT} bit set.
-     * @param flags the flags
-     * @return true if the flag is set, false otherwise.
-     */
-    public static boolean isStrictFlag(final int flags) {
-        return (flags & CALLSITE_STRICT) != 0;
     }
 
     /**

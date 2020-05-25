@@ -32,7 +32,6 @@ import static nashorn.internal.runtime.PropertyDescriptor.WRITABLE;
 import static nashorn.internal.runtime.arrays.ArrayIndex.isValidArrayIndex;
 import static nashorn.internal.runtime.arrays.ArrayLikeIterator.arrayLikeIterator;
 import static nashorn.internal.runtime.arrays.ArrayLikeIterator.reverseArrayLikeIterator;
-import static nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE_STRICT;
 
 import java.lang.invoke.MethodHandle;
 import java.util.ArrayList;
@@ -939,7 +938,7 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
             final long len = JSType.toUint32(sobj.getLength());
 
             if (len == 0) {
-                sobj.set("length", 0, CALLSITE_STRICT);
+                sobj.set("length", 0, 0);
                 return ScriptRuntime.UNDEFINED;
             }
 
@@ -947,7 +946,7 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
             final Object element = sobj.get(index);
 
             sobj.delete(index, true);
-            sobj.set("length", index, CALLSITE_STRICT);
+            sobj.set("length", index, 0);
 
             return element;
         } catch (final ClassCastException | NullPointerException e) {
@@ -1017,9 +1016,9 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
 
             long len = JSType.toUint32(sobj.getLength());
             for (final Object element : args) {
-                sobj.set(len++, element, CALLSITE_STRICT);
+                sobj.set(len++, element, 0);
             }
-            sobj.set("length", len, CALLSITE_STRICT);
+            sobj.set("length", len, 0);
 
             return JSType.toNarrowestNumber(len);
         } catch (final ClassCastException | NullPointerException e) {
@@ -1046,8 +1045,8 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
             }
 
             long len = JSType.toUint32(sobj.getLength());
-            sobj.set(len++, arg, CALLSITE_STRICT);
-            sobj.set("length", len, CALLSITE_STRICT);
+            sobj.set(len++, arg, 0);
+            sobj.set("length", len, 0);
             return len;
         } catch (final ClassCastException | NullPointerException e) {
             throw typeError("not.an.object", ScriptRuntime.safeToString(self));
@@ -1075,14 +1074,14 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
                 final boolean upperExists = sobj.has(upper);
 
                 if (lowerExists && upperExists) {
-                    sobj.set(lower, upperValue, CALLSITE_STRICT);
-                    sobj.set(upper, lowerValue, CALLSITE_STRICT);
+                    sobj.set(lower, upperValue, 0);
+                    sobj.set(upper, lowerValue, 0);
                 } else if (!lowerExists && upperExists) {
-                    sobj.set(lower, upperValue, CALLSITE_STRICT);
+                    sobj.set(lower, upperValue, 0);
                     sobj.delete(upper, true);
                 } else if (lowerExists && !upperExists) {
                     sobj.delete(lower, true);
-                    sobj.set(upper, lowerValue, CALLSITE_STRICT);
+                    sobj.set(upper, lowerValue, 0);
                 }
             }
             return sobj;
@@ -1121,7 +1120,7 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
                 for (long k = 1; k < len; k++) {
                     final boolean hasCurrent = sobj.has(k);
                     if (hasCurrent) {
-                        sobj.set(k - 1, sobj.get(k), CALLSITE_STRICT);
+                        sobj.set(k - 1, sobj.get(k), 0);
                     } else if (hasPrevious) {
                         sobj.delete(k - 1, true);
                     }
@@ -1133,7 +1132,7 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
             len = 0;
         }
 
-        sobj.set("length", len, CALLSITE_STRICT);
+        sobj.set("length", len, 0);
 
         return first;
     }
@@ -1196,7 +1195,7 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
         final Object cmp = compareFunction(comparefn);
 
         final List<Object> list = Arrays.asList(array);
-        final Object cmpThis = cmp == null || Bootstrap.isStrictCallable(cmp) ? ScriptRuntime.UNDEFINED : Global.instance();
+        final Object cmpThis = cmp == null || Bootstrap.isCallable(cmp) ? ScriptRuntime.UNDEFINED : Global.instance();
 
         try {
             Collections.sort(list, new Comparator<Object>() {
@@ -1358,7 +1357,7 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
                 final long to   = k + items.length;
 
                 if (sobj.has(from)) {
-                    sobj.set(to, sobj.get(from), CALLSITE_STRICT);
+                    sobj.set(to, sobj.get(from), 0);
                 } else {
                     sobj.delete(to, true);
                 }
@@ -1374,7 +1373,7 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
 
                 if (sobj.has(from)) {
                     final Object fromValue = sobj.get(from);
-                    sobj.set(to, fromValue, CALLSITE_STRICT);
+                    sobj.set(to, fromValue, 0);
                 } else {
                     sobj.delete(to, true);
                 }
@@ -1383,11 +1382,11 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
 
         long k = start;
         for (int i = 0; i < items.length; i++, k++) {
-            sobj.set(k, items[i], CALLSITE_STRICT);
+            sobj.set(k, items[i], 0);
         }
 
         final long newLength = len - deleteCount + items.length;
-        sobj.set("length", newLength, CALLSITE_STRICT);
+        sobj.set("length", newLength, 0);
 
         return array;
     }
@@ -1427,19 +1426,19 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
 
                 if (sobj.has(from)) {
                     final Object fromValue = sobj.get(from);
-                    sobj.set(to, fromValue, CALLSITE_STRICT);
+                    sobj.set(to, fromValue, 0);
                 } else {
                     sobj.delete(to, true);
                 }
             }
 
             for (int j = 0; j < items.length; j++) {
-                sobj.set(j, items[j], CALLSITE_STRICT);
+                sobj.set(j, items[j], 0);
             }
         }
 
         final long newLength = len + items.length;
-        sobj.set("length", newLength, CALLSITE_STRICT);
+        sobj.set("length", newLength, 0);
 
         return JSType.toNarrowestNumber(newLength);
     }

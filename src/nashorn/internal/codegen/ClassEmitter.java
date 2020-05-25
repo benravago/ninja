@@ -46,7 +46,6 @@ import static nashorn.internal.codegen.CompilerConstants.GET_STRING;
 import static nashorn.internal.codegen.CompilerConstants.INIT;
 import static nashorn.internal.codegen.CompilerConstants.SET_MAP;
 import static nashorn.internal.codegen.CompilerConstants.SOURCE;
-import static nashorn.internal.codegen.CompilerConstants.STRICT_MODE;
 import static nashorn.internal.codegen.CompilerConstants.className;
 import static nashorn.internal.codegen.CompilerConstants.methodDescriptor;
 import static nashorn.internal.codegen.CompilerConstants.typeDescriptor;
@@ -177,9 +176,8 @@ public class ClassEmitter {
      * @param env           Script environment
      * @param sourceName    Source name
      * @param unitClassName Compile unit class name.
-     * @param strictMode    Should we generate this method in strict mode
      */
-    ClassEmitter(final Context context, final String sourceName, final String unitClassName, final boolean strictMode) {
+    ClassEmitter(final String sourceName, final String unitClassName, final Context context) {
         this(context,
              new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS) {
                 private static final String OBJECT_CLASS  = "java/lang/Object";
@@ -203,7 +201,7 @@ public class ClassEmitter {
         cw.visit(V1_7, ACC_PUBLIC | ACC_SUPER, unitClassName, null, pathName(nashorn.internal.scripts.JS.class.getName()), null);
         cw.visitSource(sourceName, null);
 
-        defineCommonStatics(strictMode);
+        defineCommonStatics();
     }
 
     Context getContext() {
@@ -266,10 +264,8 @@ public class ClassEmitter {
 
     /**
      * Define the static fields common in all scripts.
-     *
-     * @param strictMode Should we generate this method in strict mode
      */
-    private void defineCommonStatics(final boolean strictMode) {
+    private void defineCommonStatics() {
         // source - used to store the source data (text) for this script.  Shared across
         // compile units.  Set externally by the compiler.
         field(EnumSet.of(Flag.PRIVATE, Flag.STATIC), SOURCE.symbolName(), Source.class);
@@ -277,9 +273,6 @@ public class ClassEmitter {
         // constants - used to the constants array for this script.  Shared across
         // compile units.  Set externally by the compiler.
         field(EnumSet.of(Flag.PRIVATE, Flag.STATIC), CONSTANTS.symbolName(), Object[].class);
-
-        // strictMode - was this script compiled in strict mode.  Set externally by the compiler.
-        field(EnumSet.of(Flag.PUBLIC, Flag.STATIC, Flag.FINAL), STRICT_MODE.symbolName(), boolean.class, strictMode);
     }
 
     /**

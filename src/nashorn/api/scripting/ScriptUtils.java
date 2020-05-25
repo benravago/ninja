@@ -31,7 +31,6 @@ import dynalink.linker.LinkerServices;
 import nashorn.internal.runtime.Context;
 import nashorn.internal.runtime.ScriptFunction;
 import nashorn.internal.runtime.ScriptObject;
-import nashorn.internal.runtime.ScriptRuntime;
 import nashorn.internal.runtime.linker.Bootstrap;
 
 /**

@@ -125,7 +125,6 @@ abstract class CompilationPhase {
             newFunctionNode = new Splitter(compiler, newFunctionNode, outermostCompileUnit).split(newFunctionNode, true);
             newFunctionNode = transformFunction(newFunctionNode, new SplitIntoFunctions(compiler));
             assert newFunctionNode.getCompileUnit() == outermostCompileUnit : "fn=" + fn.getName() + ", fn.compileUnit (" + newFunctionNode.getCompileUnit() + ") != " + outermostCompileUnit;
-            assert newFunctionNode.isStrict() == compiler.isStrict() : "functionNode.isStrict() != compiler.isStrict() for " + quote(newFunctionNode.getName());
 
             return newFunctionNode;
         }

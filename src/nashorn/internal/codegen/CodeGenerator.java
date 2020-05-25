@@ -151,7 +151,6 @@ import nashorn.internal.runtime.Undefined;
 import nashorn.internal.runtime.UnwarrantedOptimismException;
 import nashorn.internal.runtime.arrays.ArrayData;
 import nashorn.internal.runtime.linker.LinkerCallSite;
-import nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
 import nashorn.internal.runtime.logging.DebugLogger;
 import nashorn.internal.runtime.logging.Loggable;
 import nashorn.internal.runtime.logging.Logger;
@@ -286,8 +285,7 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
     }
 
     /**
-     * Gets the call site flags, adding the strict flag if the current function
-     * being generated is in strict mode
+     * Gets the call site flags
      *
      * @return the correct flags for a call site in the current function
      */
@@ -1554,7 +1552,7 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
                         // them can ever be optimistic.
                         method.loadCompilerConstant(THIS);
                         method.load(callNode.getEvalArgs().getLocation());
-                        method.load(CodeGenerator.this.lc.getCurrentFunction().isStrict());
+                        method.load(true);
                         // direct call to Global.directEval
                         globalDirectEval();
                         convertOptimisticReturnValue();
@@ -1628,11 +1626,7 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
                     @Override
                     void loadStack() {
                         callee = (FunctionNode)origCallee.accept(CodeGenerator.this);
-                        if (callee.isStrict()) { // "this" is undefined
-                            method.loadUndefined(Type.OBJECT);
-                        } else { // get global from scope (which is the self)
-                            globalInstance();
-                        }
+                        method.loadUndefined(Type.OBJECT);
                         argsCount = loadArgs(args);
                     }
 
@@ -2055,9 +2049,7 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
         if (function.needsCallee()) {
             method.loadCompilerConstant(CALLEE);
         } else {
-            // If function is strict mode, "arguments.callee" is not populated, so we don't necessarily need the
-            // caller.
-            assert function.isStrict();
+            // "arguments.callee" is not populated, so we don't necessarily need the caller.
             method.loadNull();
         }
         method.load(function.getParameters().size());
@@ -3804,24 +3796,10 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
                 if (!lc.popDiscardIfCurrent(unaryNode)) {
                     method.load(true);
                 }
-            } else if (lc.getCurrentFunction().isStrict()) {
-                // All other scope identifier delete attempts fail for strict mode
-                method.load(name);
-                method.invoke(ScriptRuntime.STRICT_FAIL_DELETE);
-            } else if (!symbol.isScope() && (symbol.isParam() || (symbol.isVar() && !symbol.isProgramLevel()))) {
-                // If symbol is a function parameter, or a declared non-global variable, delete is a no-op and returns false.
-                if (!lc.popDiscardIfCurrent(unaryNode)) {
-                    method.load(false);
-                }
             } else {
-                method.loadCompilerConstant(SCOPE);
+                // All other scope identifier delete attempts fail
                 method.load(name);
-                if ((symbol.isGlobal() && !symbol.isFunctionDeclaration()) || symbol.isProgramLevel()) {
-                    method.invoke(ScriptRuntime.SLOW_DELETE);
-                } else {
-                    method.load(false); // never strict here; that was handled with STRICT_FAIL_DELETE above.
-                    method.invoke(ScriptObject.DELETE);
-                }
+                method.invoke(ScriptRuntime.FAIL_DELETE);
             }
         } else if (expression instanceof BaseNode) {
             loadExpressionAsObject(((BaseNode)expression).getBase());

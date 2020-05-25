@@ -162,7 +162,7 @@ public final class RewriteException extends Exception {
                 assert runtimeScope == null;
                 runtimeScope = (ScriptObject)value;
             } else if(name != null) {
-                locals.set(name, value, NashornCallSiteDescriptor.CALLSITE_STRICT);
+                locals.set(name, value, 0);
             }
         }
         locals.setProto(runtimeScope);

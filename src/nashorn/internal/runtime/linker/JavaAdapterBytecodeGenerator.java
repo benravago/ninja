@@ -100,8 +100,7 @@ import nashorn.internal.runtime.linker.AdaptationResult.Outcome;
  * this one takes a ScriptFunction as its last argument preceded by original constructor arguments. This constructor
  * will use the passed function as the implementation for all abstract methods. For consistency, any concrete methods
  * sharing the single abstract method name will also be overridden by the function. When methods on the adapter instance
- * are invoked, the ScriptFunction is invoked with UNDEFINED or Global as its "this" depending whether the function is
- * strict or not.
+ * are invoked, the ScriptFunction is invoked with UNDEFINED as its "this".
  * </li>
  * <li>
  * If the adapter being generated has class-level overrides, constructors taking same arguments as the superclass

@@ -38,7 +38,6 @@ import java.util.List;
 import nashorn.internal.codegen.types.Type;
 import nashorn.internal.ir.Symbol;
 import nashorn.internal.runtime.Context;
-import nashorn.internal.runtime.JSType;
 import nashorn.internal.runtime.PropertyMap;
 import nashorn.internal.runtime.ScriptObject;
 import nashorn.internal.runtime.arrays.ArrayIndex;

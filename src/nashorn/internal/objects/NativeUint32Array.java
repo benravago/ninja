@@ -168,19 +168,19 @@ public final class NativeUint32Array extends ArrayBufferView {
         }
 
         @Override
-        public ArrayData set(final int index, final Object value, final boolean strict) {
-            return set(index, JSType.toInt32(value), strict);
+        public ArrayData set(final int index, final Object value, final boolean unused) {
+            return set(index, JSType.toInt32(value), true);
         }
 
         @Override
-        public ArrayData set(final int index, final int value, final boolean strict) {
+        public ArrayData set(final int index, final int value, final boolean unused) {
             setElem(index, value);
             return this;
         }
 
         @Override
-        public ArrayData set(final int index, final double value, final boolean strict) {
-            return set(index, (int)value, strict);
+        public ArrayData set(final int index, final double value, final boolean unused) {
+            return set(index, (int)value, true);
         }
     }
 

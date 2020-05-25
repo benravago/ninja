@@ -134,7 +134,6 @@ import nashorn.internal.ir.TryNode;
 import nashorn.internal.ir.UnaryNode;
 import nashorn.internal.ir.VarNode;
 import nashorn.internal.ir.WhileNode;
-import nashorn.internal.ir.WithNode;
 import nashorn.internal.ir.visitor.NodeVisitor;
 import nashorn.internal.runtime.Context;
 import nashorn.internal.runtime.ErrorManager;
@@ -190,7 +189,7 @@ public class Parser extends AbstractParser implements Loggable {
      * @param errors  error manager
      */
     public Parser(final ScriptEnvironment env, final Source source, final ErrorManager errors) {
-        this(env, source, errors, env._strict, null);
+        this(env, source, errors, null);
     }
 
     /**
@@ -199,11 +198,10 @@ public class Parser extends AbstractParser implements Loggable {
      * @param env     script environment
      * @param source  source to parse
      * @param errors  error manager
-     * @param strict  strict
      * @param log debug logger if one is needed
      */
-    public Parser(final ScriptEnvironment env, final Source source, final ErrorManager errors, final boolean strict, final DebugLogger log) {
-        this(env, source, errors, strict, 0, log);
+    public Parser(final ScriptEnvironment env, final Source source, final ErrorManager errors, final DebugLogger log) {
+        this(env, source, errors, 0, log);
     }
 
     /**
@@ -212,12 +210,11 @@ public class Parser extends AbstractParser implements Loggable {
      * @param env     script environment
      * @param source  source to parse
      * @param errors  error manager
-     * @param strict  parser created with strict mode enabled.
      * @param lineOffset line offset to start counting lines from
      * @param log debug logger if one is needed
      */
-    public Parser(final ScriptEnvironment env, final Source source, final ErrorManager errors, final boolean strict, final int lineOffset, final DebugLogger log) {
-        super(source, errors, strict, lineOffset);
+    public Parser(final ScriptEnvironment env, final Source source, final ErrorManager errors, final int lineOffset, final DebugLogger log) {
+        super(source, errors, lineOffset);
         this.lc = new ParserContext();
         this.defaultNames = new ArrayDeque<>();
         this.env = env;
@@ -314,7 +311,7 @@ public class Parser extends AbstractParser implements Loggable {
 
         try {
             stream = new TokenStream();
-            lexer  = new Lexer(source, startPos, len, stream, scripting && !env._no_syntax_extensions, env._es6, reparsedFunction != null);
+            lexer  = new Lexer(source, startPos, len, stream, scripting && !env._no_syntax_extensions, reparsedFunction != null);
             lexer.line = lexer.pendingLine = lineOffset + 1;
             line = lineOffset;
 
@@ -350,7 +347,7 @@ public class Parser extends AbstractParser implements Loggable {
     public FunctionNode parseModule(final String moduleName, final int startPos, final int len) {
         try {
             stream = new TokenStream();
-            lexer  = new Lexer(source, startPos, len, stream, scripting && !env._no_syntax_extensions, env._es6, reparsedFunction != null);
+            lexer  = new Lexer(source, startPos, len, stream, scripting && !env._no_syntax_extensions, reparsedFunction != null);
             lexer.line = lexer.pendingLine = lineOffset + 1;
             line = lineOffset;
 
@@ -386,7 +383,7 @@ public class Parser extends AbstractParser implements Loggable {
     public List<IdentNode> parseFormalParameterList() {
         try {
             stream = new TokenStream();
-            lexer  = new Lexer(source, stream, scripting && !env._no_syntax_extensions, env._es6);
+            lexer  = new Lexer(source, stream, scripting && !env._no_syntax_extensions);
 
             scanFirstToken();
 
@@ -408,7 +405,7 @@ public class Parser extends AbstractParser implements Loggable {
     public FunctionNode parseFunctionBody() {
         try {
             stream = new TokenStream();
-            lexer  = new Lexer(source, stream, scripting && !env._no_syntax_extensions, env._es6);
+            lexer  = new Lexer(source, stream, scripting && !env._no_syntax_extensions);
             final int functionLine = line;
 
             scanFirstToken();
@@ -546,9 +543,6 @@ public class Parser extends AbstractParser implements Loggable {
         assert parentFunction != null || kind == FunctionNode.Kind.MODULE || name.equals(PROGRAM.symbolName()) : "name = " + name;
 
         int flags = 0;
-        if (isStrictMode) {
-            flags |= FunctionNode.IS_STRICT;
-        }
         if (parentFunction == null) {
             flags |= FunctionNode.IS_PROGRAM;
         }
@@ -667,13 +661,7 @@ public class Parser extends AbstractParser implements Loggable {
         }
     }
 
-    private boolean useBlockScope() {
-        return env._es6;
-    }
-
-    private boolean isES6() {
-        return env._es6;
-    }
+    private boolean useBlockScope() { return true; } // TODO: remove
 
     private static boolean isArguments(final String name) {
         return ARGUMENTS_NAME.equals(name);
@@ -743,7 +731,7 @@ public class Parser extends AbstractParser implements Loggable {
 
     private boolean isDestructuringLhs(final Expression lhs) {
         if (lhs instanceof ObjectNode || lhs instanceof LiteralNode.ArrayLiteralNode) {
-            return isES6();
+            return true;
         }
         return false;
     }
@@ -888,88 +876,53 @@ public class Parser extends AbstractParser implements Loggable {
         List<Node>    directiveStmts        = null;
         boolean       checkDirective        = true;
         int           functionFlags          = reparseFlags;
-        final boolean oldStrictMode         = isStrictMode;
 
+        // If is a script, then process until the end of the script.
+        while (type != EOF) {
+            // Break if the end of a code block.
+            if (type == RBRACE) {
+                break;
+            }
 
-        try {
-            // If is a script, then process until the end of the script.
-            while (type != EOF) {
-                // Break if the end of a code block.
-                if (type == RBRACE) {
-                    break;
-                }
+            try {
+                // Get the next element.
+                statement(true, functionFlags, false, false);
+                functionFlags = 0;
 
-                try {
-                    // Get the next element.
-                    statement(true, functionFlags, false, false);
-                    functionFlags = 0;
+                // check for directive prologues
+                if (checkDirective) {
+                    // skip any debug statement like line number to get actual first line
+                    final Statement lastStatement = lc.getLastStatement();
 
-                    // check for directive prologues
+                    // get directive prologue, if any
+                    final String directive = getDirective(lastStatement);
+
+                    // If we have seen first non-directive statement,
+                    // no more directive statements!!
+                    checkDirective = directive != null;
+
                     if (checkDirective) {
-                        // skip any debug statement like line number to get actual first line
-                        final Statement lastStatement = lc.getLastStatement();
-
-                        // get directive prologue, if any
-                        final String directive = getDirective(lastStatement);
-
-                        // If we have seen first non-directive statement,
-                        // no more directive statements!!
-                        checkDirective = directive != null;
-
-                        if (checkDirective) {
-                            if (!oldStrictMode) {
-                                if (directiveStmts == null) {
-                                    directiveStmts = new ArrayList<>();
-                                }
-                                directiveStmts.add(lastStatement);
-                            }
-
-                            // handle use strict directive
-                            if ("use strict".equals(directive)) {
-                                isStrictMode = true;
+                        if (Context.DEBUG) {
+                            final int debugFlag = FunctionNode.getDirectiveFlag(directive);
+                            if (debugFlag != 0) {
                                 final ParserContextFunctionNode function = lc.getCurrentFunction();
-                                function.setFlag(FunctionNode.IS_STRICT);
-
-                                // We don't need to check these, if lexical environment is already strict
-                                if (!oldStrictMode && directiveStmts != null) {
-                                    // check that directives preceding this one do not violate strictness
-                                    for (final Node statement : directiveStmts) {
-                                        // the get value will force unescape of preceding
-                                        // escaped string directives
-                                        getValue(statement.getToken());
-                                    }
-
-                                    // verify that function name as well as parameter names
-                                    // satisfy strict mode restrictions.
-                                    verifyIdent(function.getIdent(), "function name");
-                                    for (final IdentNode param : function.getParameters()) {
-                                        verifyIdent(param, "function parameter");
-                                    }
-                                }
-                            } else if (Context.DEBUG) {
-                                final int debugFlag = FunctionNode.getDirectiveFlag(directive);
-                                if (debugFlag != 0) {
-                                    final ParserContextFunctionNode function = lc.getCurrentFunction();
-                                    function.setDebugFlag(debugFlag);
-                                }
+                                function.setDebugFlag(debugFlag);
                             }
                         }
                     }
-                } catch (final Exception e) {
-                    final int errorLine = line;
-                    final long errorToken = token;
-                    //recover parsing
-                    recover(e);
-                    final ErrorNode errorExpr = new ErrorNode(errorToken, finish);
-                    final ExpressionStatement expressionStatement = new ExpressionStatement(errorLine, errorToken, finish, errorExpr);
-                    appendStatement(expressionStatement);
                 }
-
-                // No backtracking from here on.
-                stream.commit(k);
+            } catch (final Exception e) {
+                final int errorLine = line;
+                final long errorToken = token;
+                //recover parsing
+                recover(e);
+                final ErrorNode errorExpr = new ErrorNode(errorToken, finish);
+                final ExpressionStatement expressionStatement = new ExpressionStatement(errorLine, errorToken, finish, errorExpr);
+                appendStatement(expressionStatement);
             }
-        } finally {
-            isStrictMode = oldStrictMode;
+
+            // No backtracking from here on.
+            stream.commit(k);
         }
     }
 
@@ -1085,9 +1038,9 @@ public class Parser extends AbstractParser implements Loggable {
             // is not "portable". Implementation can issue a warning or disallow the same.
             if (singleStatement) {
                 // ES6 B.3.2 Labelled Function Declarations
-                // It is a Syntax Error if any strict mode source code matches this rule:
+                // It is a Syntax Error if any source code matches this rule:
                 // LabelledItem : FunctionDeclaration.
-                if (!labelledStatement || isStrictMode) {
+                if (!labelledStatement) {
                     throw error(AbstractParser.message("expected.stmt", "function declaration"), token);
                 }
             }
@@ -1100,7 +1053,7 @@ public class Parser extends AbstractParser implements Loggable {
                 }
                 variableStatement(type);
                 break;
-            } else if (type == CLASS && isES6()) {
+            } else if (type == CLASS && true) {
                 if (singleStatement) {
                     throw error(AbstractParser.message("expected.stmt", "class declaration"), token);
                 }
@@ -1112,7 +1065,7 @@ public class Parser extends AbstractParser implements Loggable {
                 break;
             }
 
-            if (type == IDENT || isNonStrictModeIdent()) {
+            if (type == IDENT || isFutureIdent()) {
                 if (T(k + 1) == COLON) {
                     labelStatement();
                     return;
@@ -1135,7 +1088,7 @@ public class Parser extends AbstractParser implements Loggable {
             }
 
             if ((reparseFlags & ScriptFunctionData.IS_ES6_METHOD) != 0
-                    && (type == IDENT || type == LBRACKET || isNonStrictModeIdent())) {
+                    && (type == IDENT || type == LBRACKET || isFutureIdent())) {
                 final String ident = (String)getValue();
                 final long propertyToken = token;
                 final int propertyLine = line;
@@ -1240,91 +1193,85 @@ public class Parser extends AbstractParser implements Loggable {
      */
     private ClassNode classTail(final int classLineNumber, final long classToken,
             final IdentNode className, final boolean isStatement) {
-        final boolean oldStrictMode = isStrictMode;
-        isStrictMode = true;
-        try {
-            Expression classHeritage = null;
-            if (type == EXTENDS) {
+        Expression classHeritage = null;
+        if (type == EXTENDS) {
+            next();
+            classHeritage = leftHandSideExpression();
+        }
+
+        expect(LBRACE);
+
+        PropertyNode constructor = null;
+        final ArrayList<PropertyNode> classElements = new ArrayList<>();
+        final Map<ClassElementKey, Integer> keyToIndexMap = new HashMap<>();
+        for (;;) {
+            if (type == SEMICOLON) {
                 next();
-                classHeritage = leftHandSideExpression();
+                continue;
             }
-
-            expect(LBRACE);
-
-            PropertyNode constructor = null;
-            final ArrayList<PropertyNode> classElements = new ArrayList<>();
-            final Map<ClassElementKey, Integer> keyToIndexMap = new HashMap<>();
-            for (;;) {
-                if (type == SEMICOLON) {
-                    next();
-                    continue;
-                }
-                if (type == RBRACE) {
-                    break;
-                }
-                final long classElementToken = token;
-                boolean isStatic = false;
-                if (type == STATIC) {
-                    isStatic = true;
-                    next();
-                }
-                boolean generator = false;
-                if (isES6() && type == MUL) {
-                    generator = true;
-                    next();
-                }
-                final PropertyNode classElement = methodDefinition(isStatic, classHeritage != null, generator);
-                if (classElement.isComputed()) {
-                    classElements.add(classElement);
-                } else if (!classElement.isStatic() && classElement.getKeyName().equals(CONSTRUCTOR_NAME)) {
-                    if (constructor == null) {
-                        constructor = classElement;
-                    } else {
-                        throw error(AbstractParser.message("multiple.constructors"), classElementToken);
-                    }
+            if (type == RBRACE) {
+                break;
+            }
+            final long classElementToken = token;
+            boolean isStatic = false;
+            if (type == STATIC) {
+                isStatic = true;
+                next();
+            }
+            boolean generator = false;
+            if (true && type == MUL) {
+                generator = true;
+                next();
+            }
+            final PropertyNode classElement = methodDefinition(isStatic, classHeritage != null, generator);
+            if (classElement.isComputed()) {
+                classElements.add(classElement);
+            } else if (!classElement.isStatic() && classElement.getKeyName().equals(CONSTRUCTOR_NAME)) {
+                if (constructor == null) {
+                    constructor = classElement;
                 } else {
-                    // Check for duplicate method definitions and combine accessor methods.
-                    // In ES6, a duplicate is never an error regardless of strict mode (in consequence of computed property names).
+                    throw error(AbstractParser.message("multiple.constructors"), classElementToken);
+                }
+            } else {
+                // Check for duplicate method definitions and combine accessor methods.
+                // A duplicate is never an error (in consequence of computed property names).
 
-                    final ClassElementKey key = new ClassElementKey(classElement.isStatic(), classElement.getKeyName());
-                    final Integer existing = keyToIndexMap.get(key);
+                final ClassElementKey key = new ClassElementKey(classElement.isStatic(), classElement.getKeyName());
+                final Integer existing = keyToIndexMap.get(key);
 
-                    if (existing == null) {
+                if (existing == null) {
+                    keyToIndexMap.put(key, classElements.size());
+                    classElements.add(classElement);
+                } else {
+                    final PropertyNode existingProperty = classElements.get(existing);
+
+                    final Expression   value  = classElement.getValue();
+                    final FunctionNode getter = classElement.getGetter();
+                    final FunctionNode setter = classElement.getSetter();
+
+                    if (value != null || existingProperty.getValue() != null) {
                         keyToIndexMap.put(key, classElements.size());
                         classElements.add(classElement);
-                    } else {
-                        final PropertyNode existingProperty = classElements.get(existing);
-
-                        final Expression   value  = classElement.getValue();
-                        final FunctionNode getter = classElement.getGetter();
-                        final FunctionNode setter = classElement.getSetter();
-
-                        if (value != null || existingProperty.getValue() != null) {
-                            keyToIndexMap.put(key, classElements.size());
-                            classElements.add(classElement);
-                        } else if (getter != null) {
-                            assert existingProperty.getGetter() != null || existingProperty.getSetter() != null;
-                            classElements.set(existing, existingProperty.setGetter(getter));
-                        } else if (setter != null) {
-                            assert existingProperty.getGetter() != null || existingProperty.getSetter() != null;
-                            classElements.set(existing, existingProperty.setSetter(setter));
-                        }
+                    } else if (getter != null) {
+                        assert existingProperty.getGetter() != null || existingProperty.getSetter() != null;
+                        classElements.set(existing, existingProperty.setGetter(getter));
+                    } else if (setter != null) {
+                        assert existingProperty.getGetter() != null || existingProperty.getSetter() != null;
+                        classElements.set(existing, existingProperty.setSetter(setter));
                     }
                 }
             }
-
-            final long lastToken = token;
-            expect(RBRACE);
-
-            if (constructor == null) {
-                constructor = createDefaultClassConstructor(classLineNumber, classToken, lastToken, className, classHeritage != null);
-            }
-
-            classElements.trimToSize();
-            return new ClassNode(classLineNumber, classToken, finish, className, classHeritage, constructor, classElements, isStatement);
-        } finally {
-            isStrictMode = oldStrictMode;
         }
+
+        final long lastToken = token;
+        expect(RBRACE);
+
+        if (constructor == null) {
+            constructor = createDefaultClassConstructor(classLineNumber, classToken, lastToken, className, classHeritage != null);
+        }
+
+        classElements.trimToSize();
+        return new ClassNode(classLineNumber, classToken, finish, className, classHeritage, constructor, classElements, isStatement);
     }
 
     private PropertyNode createDefaultClassConstructor(final int classLineNumber, final long classToken, final long lastToken, final IdentNode className, final boolean subclass) {
@@ -1466,29 +1413,27 @@ public class Parser extends AbstractParser implements Loggable {
      * @param contextString String used in error message to give context to the user
      */
     private void verifyIdent(final IdentNode ident, final String contextString) {
-        verifyStrictIdent(ident, contextString);
+        verifyFutureIdent(ident, contextString);
         checkEscapedKeyword(ident);
     }
 
     /**
-     * Make sure that in strict mode, the identifier name used is allowed.
+     * Make sure that the identifier name used is allowed.
      *
      * @param ident         Identifier that is verified
      * @param contextString String used in error message to give context to the user
      */
-    private void verifyStrictIdent(final IdentNode ident, final String contextString) {
-        if (isStrictMode) {
-            switch (ident.getName()) {
+    private void verifyFutureIdent(final IdentNode ident, final String contextString) {
+        switch (ident.getName()) {
             case "eval":
             case "arguments":
                 throw error(AbstractParser.message("strict.name", ident.getName(), contextString), ident.getToken());
             default:
                 break;
-            }
+        }
 
-            if (ident.isFutureStrictName()) {
-                throw error(AbstractParser.message("strict.name", ident.getName(), contextString), ident.getToken());
-            }
+        if (ident.isFutureName()) {
+            throw error(AbstractParser.message("strict.name", ident.getName(), contextString), ident.getToken());
         }
     }
 
@@ -1496,9 +1441,9 @@ public class Parser extends AbstractParser implements Loggable {
      * ES6 11.6.2: A code point in a ReservedWord cannot be expressed by a | UnicodeEscapeSequence.
      */
     private void checkEscapedKeyword(final IdentNode ident) {
-        if (isES6() && ident.containsEscapes()) {
+        if (true && ident.containsEscapes()) {
             final TokenType tokenType = TokenLookup.lookupKeyword(ident.getName().toCharArray(), 0, ident.getName().length());
-            if (tokenType != IDENT && !(tokenType.getKind() == TokenKind.FUTURESTRICT && !isStrictMode)) {
+            if (tokenType != IDENT && !(tokenType.getKind() == TokenKind.FUTURE && !true)) {
                 throw error(AbstractParser.message("keyword.escaped.character"), ident.getToken());
             }
         }
@@ -1687,7 +1632,7 @@ public class Parser extends AbstractParser implements Loggable {
     }
 
     private boolean isBindingIdentifier() {
-        return type == IDENT || isNonStrictModeIdent();
+        return type == IDENT || isFutureIdent();
     }
 
     private IdentNode bindingIdentifier(final String contextString) {
@@ -1707,7 +1652,7 @@ public class Parser extends AbstractParser implements Loggable {
     }
 
     private Expression bindingIdentifierOrPattern(final String contextString) {
-        if (isBindingIdentifier() || !isES6()) {
+        if (isBindingIdentifier() || !true) {
             return bindingIdentifier(contextString);
         } else {
             return bindingPattern();
@@ -1993,7 +1938,7 @@ public class Parser extends AbstractParser implements Loggable {
                 break;
 
             case IDENT:
-                if (env._es6 && "of".equals(getValue())) {
+                if ("of".equals(getValue())) {
                     isForOf = true;
                     // fall through
                 } else {
@@ -2009,10 +1954,8 @@ public class Parser extends AbstractParser implements Loggable {
                         // for (var i, j in obj) is invalid
                         throw error(AbstractParser.message("many.vars.in.for.in.loop", isForOf ? "of" : "in"), varDeclList.secondBinding.getToken());
                     }
-                    if (varDeclList.declarationWithInitializerToken != 0 && (isStrictMode || type != TokenType.IN || varType != VAR || varDeclList.init != null)) {
+                    if (varDeclList.declarationWithInitializerToken != 0 && (type != TokenType.IN || varType != VAR || varDeclList.init != null)) {
                         // ES5 legacy: for (var i = AssignmentExpressionNoIn in Expression)
-                        // Invalid in ES6, but allow it in non-strict mode if no ES6 features used,
-                        // i.e., error if strict, for-of, let/const, or destructuring
                         throw error(AbstractParser.message("for.in.loop.initializer", isForOf ? "of" : "in"), varDeclList.declarationWithInitializerToken);
                     }
                     init = varDeclList.firstBinding;
@@ -2099,7 +2042,7 @@ public class Parser extends AbstractParser implements Loggable {
             case COMMENT:
                 continue;
             case IDENT:
-                if (ofContextualKeyword && isES6() && "of".equals(getValue(getToken(k + i)))) {
+                if (ofContextualKeyword && true && "of".equals(getValue(getToken(k + i)))) {
                     return false;
                 }
                 // fall through
@@ -2107,10 +2050,6 @@ public class Parser extends AbstractParser implements Loggable {
             case LBRACE:
                 return true;
             default:
-                // accept future strict tokens in non-strict mode (including LET)
-                if (!isStrictMode && t.getKind() == TokenKind.FUTURESTRICT) {
-                    return true;
-                }
                 return false;
             }
         }
@@ -2414,17 +2353,7 @@ public class Parser extends AbstractParser implements Loggable {
         // WITH tested in caller.
         next();
 
-        // ECMA 12.10.1 strict mode restrictions
-        if (isStrictMode) {
-            throw error(AbstractParser.message("strict.no.with"), withToken);
-        }
-
-        expect(LPAREN);
-        final Expression expression = expression();
-        expect(RPAREN);
-        final Block body = getStatement();
-
-        appendStatement(new WithNode(withLine, withToken, finish, expression, body));
+        throw error(AbstractParser.message("strict.no.with"), withToken);
     }
 
     /**
@@ -2647,7 +2576,7 @@ public class Parser extends AbstractParser implements Loggable {
                         }
                     });
                 } else {
-                    // ECMA 12.4.1 strict mode restrictions
+                    // ECMA 12.4.1 mode restrictions
                     verifyIdent((IdentNode) exception, "catch argument");
                 }
 
@@ -2766,7 +2695,7 @@ public class Parser extends AbstractParser implements Loggable {
             checkEscapedKeyword(ident);
             return ident;
         case OCTAL_LEGACY:
-            if (isStrictMode) {
+            if (true) {
                throw error(AbstractParser.message("strict.no.octal"), token);
             }
         case STRING:
@@ -2797,7 +2726,7 @@ public class Parser extends AbstractParser implements Loggable {
         case LPAREN:
             next();
 
-            if (isES6()) {
+            if (true) {
                 if (type == RPAREN) {
                     // ()
                     nextOrEOL();
@@ -2828,7 +2757,7 @@ public class Parser extends AbstractParser implements Loggable {
                 next();
                 return getLiteral();
             }
-            if (isNonStrictModeIdent()) {
+            if (isFutureIdent()) {
                 return getIdent();
             }
             break;
@@ -2913,7 +2842,7 @@ public class Parser extends AbstractParser implements Loggable {
                 break;
 
             case ELLIPSIS:
-                if (isES6()) {
+                if (true) {
                     hasSpread = true;
                     spreadToken = token;
                     next();
@@ -3021,13 +2950,9 @@ public class Parser extends AbstractParser implements Loggable {
                     final FunctionNode prevGetter = existingProperty.getGetter();
                     final FunctionNode prevSetter = existingProperty.getSetter();
 
-                    if (!isES6()) {
-                        checkPropertyRedefinition(property, value, getter, setter, prevValue, prevGetter, prevSetter);
-                    } else {
-                        if (property.getKey() instanceof IdentNode && ((IdentNode)property.getKey()).isProtoPropertyName() &&
-                                        existingProperty.getKey() instanceof IdentNode && ((IdentNode)existingProperty.getKey()).isProtoPropertyName()) {
-                            throw error(AbstractParser.message("multiple.proto.key"), property.getToken());
-                        }
+                    if (property.getKey() instanceof IdentNode && ((IdentNode)property.getKey()).isProtoPropertyName() &&
+				        existingProperty.getKey() instanceof IdentNode && ((IdentNode)existingProperty.getKey()).isProtoPropertyName()) {
+                    	throw error(AbstractParser.message("multiple.proto.key"), property.getToken());
                     }
 
                     if (value != null || prevValue != null) {
@@ -3048,8 +2973,8 @@ public class Parser extends AbstractParser implements Loggable {
     }
 
     private void checkPropertyRedefinition(final PropertyNode property, final Expression value, final FunctionNode getter, final FunctionNode setter, final Expression prevValue, final FunctionNode prevGetter, final FunctionNode prevSetter) {
-        // ECMA 11.1.5 strict mode restrictions
-        if (isStrictMode && value != null && prevValue != null) {
+        // ECMA 11.1.5 mode restrictions
+        if (value != null && prevValue != null) {
             throw error(AbstractParser.message("property.redefinition", property.getKeyName()), property.getToken());
         }
 
@@ -3088,7 +3013,7 @@ public class Parser extends AbstractParser implements Loggable {
         case IDENT:
             return getIdent().setIsPropertyName();
         case OCTAL_LEGACY:
-            if (isStrictMode) {
+            if (true) {
                 throw error(AbstractParser.message("strict.no.octal"), token);
             }
         case STRING:
@@ -3125,7 +3050,7 @@ public class Parser extends AbstractParser implements Loggable {
      * @return PropertyName node
      */
     private Expression propertyName() {
-        if (type == LBRACKET && isES6()) {
+        if (type == LBRACKET && true) {
             return computedPropertyName();
         } else {
             return (Expression)literalPropertyName();
@@ -3160,7 +3085,7 @@ public class Parser extends AbstractParser implements Loggable {
         final boolean isIdentifier;
 
         boolean generator = false;
-        if (type == MUL && isES6()) {
+        if (type == MUL && true) {
             generator = true;
             next();
         }
@@ -3170,7 +3095,7 @@ public class Parser extends AbstractParser implements Loggable {
             // Get IDENT.
             final String ident = (String)expectValue(IDENT);
 
-            if (type != COLON && (type != LPAREN || !isES6())) {
+            if (type != COLON && (type != LPAREN || !true)) {
                 final long getSetToken = propertyToken;
 
                 switch (ident) {
@@ -3193,7 +3118,7 @@ public class Parser extends AbstractParser implements Loggable {
             }
             propertyName = identNode;
         } else {
-            isIdentifier = isNonStrictModeIdent();
+            isIdentifier = isFutureIdent();
             propertyName = propertyName();
         }
 
@@ -3203,11 +3128,11 @@ public class Parser extends AbstractParser implements Loggable {
             expectDontAdvance(LPAREN);
         }
 
-        if (type == LPAREN && isES6()) {
+        if (type == LPAREN && true) {
             propertyValue = propertyMethodFunction(propertyName, propertyToken, functionLine, generator, FunctionNode.ES6_IS_METHOD, computed).functionNode;
-        } else if (isIdentifier && (type == COMMARIGHT || type == RBRACE || type == ASSIGN) && isES6()) {
+        } else if (isIdentifier && (type == COMMARIGHT || type == RBRACE || type == ASSIGN) && true) {
             propertyValue = createIdentNode(propertyToken, finish, ((IdentNode) propertyName).getPropertyName());
-            if (type == ASSIGN && isES6()) {
+            if (type == ASSIGN && true) {
                 // TODO if not destructuring, this is a SyntaxError
                 final long assignToken = token;
                 next();
@@ -3485,7 +3410,7 @@ public class Parser extends AbstractParser implements Loggable {
         // NEW is tested in caller.
         next();
 
-        if (type == PERIOD && isES6()) {
+        if (type == PERIOD && true) {
             next();
             if (type == IDENT && "target".equals(getValue())) {
                 if (lc.getCurrentFunction().isProgram()) {
@@ -3574,41 +3499,33 @@ public class Parser extends AbstractParser implements Loggable {
             break;
 
         case CLASS:
-            if (isES6()) {
-                lhs = classExpression(false);
-                break;
-            } else {
-                // fall through
-            }
+            lhs = classExpression(false);
+			break;
 
         case SUPER:
-            if (isES6()) {
-                final ParserContextFunctionNode currentFunction = getCurrentNonArrowFunction();
-                if (currentFunction.isMethod()) {
-                    final long identToken = Token.recast(token, IDENT);
-                    next();
-                    lhs = createIdentNode(identToken, finish, SUPER.getName());
+            final ParserContextFunctionNode currentFunction = getCurrentNonArrowFunction();
+            if (currentFunction.isMethod()) {
+                final long identToken = Token.recast(token, IDENT);
+                next();
+                lhs = createIdentNode(identToken, finish, SUPER.getName());
 
-                    switch (type) {
-                        case LBRACKET:
-                        case PERIOD:
-                            getCurrentNonArrowFunction().setFlag(FunctionNode.ES6_USES_SUPER);
-                            isSuper = true;
+                switch (type) {
+                    case LBRACKET:
+                    case PERIOD:
+                        getCurrentNonArrowFunction().setFlag(FunctionNode.ES6_USES_SUPER);
+                        isSuper = true;
+                        break;
+                    case LPAREN:
+                        if (currentFunction.isSubclassConstructor()) {
+                            lhs = ((IdentNode)lhs).setIsDirectSuper();
                             break;
-                        case LPAREN:
-                            if (currentFunction.isSubclassConstructor()) {
-                                lhs = ((IdentNode)lhs).setIsDirectSuper();
-                                break;
-                            } else {
-                                // fall through to throw error
-                            }
-                        default:
-                            throw error(AbstractParser.message("invalid.super"), identToken);
-                    }
-                    break;
-                } else {
-                    // fall through
+                        } else {
+                            // fall through to throw error
+                        }
+                    default:
+                        throw error(AbstractParser.message("invalid.super"), identToken);
                 }
+                break;
             } else {
                 // fall through
             }
@@ -3714,7 +3631,7 @@ public class Parser extends AbstractParser implements Loggable {
             }
 
             long spreadToken = 0;
-            if (type == ELLIPSIS && isES6()) {
+            if (type == ELLIPSIS && true) {
                 spreadToken = token;
                 next();
             }
@@ -3768,7 +3685,7 @@ public class Parser extends AbstractParser implements Loggable {
         next();
 
         boolean generator = false;
-        if (type == MUL && isES6()) {
+        if (type == MUL && true) {
             generator = true;
             next();
         }
@@ -3832,14 +3749,10 @@ public class Parser extends AbstractParser implements Loggable {
         }
 
         if (isStatement) {
-            if (topLevel || useBlockScope() || (!isStrictMode && env._function_statement == ScriptEnvironment.FunctionStatementBehavior.ACCEPT)) {
+            if (topLevel || useBlockScope()) {
                 functionNode.setFlag(FunctionNode.IS_DECLARED);
-            } else if (isStrictMode) {
+            } else {
                 throw error(JSErrorType.SYNTAX_ERROR, AbstractParser.message("strict.no.func.decl.here"), functionToken);
-            } else if (env._function_statement == ScriptEnvironment.FunctionStatementBehavior.ERROR) {
-                throw error(JSErrorType.SYNTAX_ERROR, AbstractParser.message("no.func.decl.here"), functionToken);
-            } else if (env._function_statement == ScriptEnvironment.FunctionStatementBehavior.WARNING) {
-                warning(JSErrorType.SYNTAX_ERROR, AbstractParser.message("no.func.decl.here.warn"), functionToken);
             }
             if (isArguments(name)) {
                lc.getCurrentFunction().setFlag(FunctionNode.DEFINES_ARGUMENTS);
@@ -3885,7 +3798,7 @@ public class Parser extends AbstractParser implements Loggable {
     private void verifyParameterList(final List<IdentNode> parameters, final ParserContextFunctionNode functionNode) {
         final IdentNode duplicateParameter = functionNode.getDuplicateParameterBinding();
         if (duplicateParameter != null) {
-            if (functionNode.isStrict() || functionNode.getKind() == FunctionNode.Kind.ARROW || !functionNode.isSimpleParameterList()) {
+            if (functionNode.getKind() == FunctionNode.Kind.ARROW || !functionNode.isSimpleParameterList()) {
                 throw error(AbstractParser.message("strict.param.redefinition", duplicateParameter.getName()), duplicateParameter.getToken());
             }
 
@@ -3897,7 +3810,7 @@ public class Parser extends AbstractParser implements Loggable {
                 String parameterName = parameter.getName();
 
                 if (parametersSet.contains(parameterName)) {
-                    // redefinition of parameter name, rename in non-strict mode
+                    // redefinition of parameter name
                     parameterName = functionNode.uniqueName(parameterName);
                     final long parameterToken = parameter.getToken();
                     parameters.set(i, new IdentNode(parameterToken, Token.descPosition(parameterToken), functionNode.uniqueName(parameterName)));
@@ -4011,7 +3924,7 @@ public class Parser extends AbstractParser implements Loggable {
             }
 
             boolean restParameter = false;
-            if (type == ELLIPSIS && isES6()) {
+            if (type == ELLIPSIS && true) {
                 next();
                 restParameter = true;
             }
@@ -4024,7 +3937,7 @@ public class Parser extends AbstractParser implements Loggable {
             final int paramLine = line;
             final String contextString = "function parameter";
             IdentNode ident;
-            if (isBindingIdentifier() || restParameter || !isES6()) {
+            if (isBindingIdentifier() || restParameter || !true) {
                 ident = bindingIdentifier(contextString);
 
                 if (restParameter) {
@@ -4033,7 +3946,7 @@ public class Parser extends AbstractParser implements Loggable {
                     expectDontAdvance(endType);
                     parameters.add(ident);
                     break;
-                } else if (type == ASSIGN && isES6()) {
+                } else if (type == ASSIGN && true) {
                     next();
                     ident = ident.setIsDefaultParameter();
 
@@ -4297,7 +4210,7 @@ public class Parser extends AbstractParser implements Loggable {
         }
 
         stream.reset();
-        lexer = parserState.createLexer(source, lexer, stream, scripting && !env._no_syntax_extensions, env._es6);
+        lexer = parserState.createLexer(source, lexer, stream, scripting && !env._no_syntax_extensions);
         line = parserState.line;
         linePosition = parserState.linePosition;
         // Doesn't really matter, but it's safe to treat it as if there were a semicolon before
@@ -4325,8 +4238,8 @@ public class Parser extends AbstractParser implements Loggable {
             this.linePosition = linePosition;
         }
 
-        Lexer createLexer(final Source source, final Lexer lexer, final TokenStream stream, final boolean scripting, final boolean es6) {
-            final Lexer newLexer = new Lexer(source, position, lexer.limit - position, stream, scripting, es6, true);
+        Lexer createLexer(final Source source, final Lexer lexer, final TokenStream stream, final boolean scripting) {
+            final Lexer newLexer = new Lexer(source, position, lexer.limit - position, stream, scripting, true);
             newLexer.restoreState(new Lexer.State(position, Integer.MAX_VALUE, line, -1, linePosition, SEMICOLON));
             return newLexer;
         }
@@ -4577,7 +4490,7 @@ public class Parser extends AbstractParser implements Loggable {
             next();
 
             boolean rhsRestParameter = false;
-            if (type == ELLIPSIS && isES6()) {
+            if (type == ELLIPSIS && true) {
                 // (a, b, ...rest) is not a valid expression, unless we're parsing the parameter list of an arrow function (we need to throw the right error).
                 // But since the rest parameter is always last, at least we know that the expression has to end here and be followed by RPAREN and ARROW, so peek ahead.
                 if (isRestParameterEndOfArrowFunctionParameterList()) {
@@ -4687,7 +4600,7 @@ public class Parser extends AbstractParser implements Loggable {
         // This method is protected so that subclass can get details
         // at assignment expression start point!
 
-        if (type == YIELD && inGeneratorFunction() && isES6()) {
+        if (type == YIELD && inGeneratorFunction() && true) {
             return yieldExpression(noIn);
         }
 
@@ -4695,7 +4608,7 @@ public class Parser extends AbstractParser implements Loggable {
         final int startLine = line;
         final Expression exprLhs = conditionalExpression(noIn);
 
-        if (type == ARROW && isES6()) {
+        if (type == ARROW && true) {
             if (checkNoLineTerminator()) {
                 final Expression paramListExpr;
                 if (exprLhs instanceof ExpressionList) {
@@ -4947,10 +4860,7 @@ public class Parser extends AbstractParser implements Loggable {
             case COMMENT:
                 continue;
             default:
-                if (t.getKind() == TokenKind.FUTURESTRICT) {
-                    return true;
-                }
-                return false;
+                return (t.getKind() == TokenKind.FUTURE);
             }
         }
         return false;
@@ -5125,48 +5035,42 @@ public class Parser extends AbstractParser implements Loggable {
      *      ModuleItemList
      */
     private FunctionNode module(final String moduleName) {
-        final boolean oldStrictMode = isStrictMode;
-        try {
-            isStrictMode = true; // Module code is always strict mode code. (ES6 10.2.1)
 
-            // Make a pseudo-token for the script holding its start and length.
-            final int functionStart = Math.min(Token.descPosition(Token.withDelimiter(token)), finish);
-            final long functionToken = Token.toDesc(FUNCTION, functionStart, source.getLength() - functionStart);
-            final int  functionLine  = line;
+        // Make a pseudo-token for the script holding its start and length.
+        final int functionStart = Math.min(Token.descPosition(Token.withDelimiter(token)), finish);
+        final long functionToken = Token.toDesc(FUNCTION, functionStart, source.getLength() - functionStart);
+        final int  functionLine  = line;
 
-            final IdentNode ident = new IdentNode(functionToken, Token.descPosition(functionToken), moduleName);
-            final ParserContextFunctionNode script = createParserContextFunctionNode(
-                            ident,
-                            functionToken,
-                            FunctionNode.Kind.MODULE,
-                            functionLine,
-                            Collections.<IdentNode>emptyList());
-            lc.push(script);
+        final IdentNode ident = new IdentNode(functionToken, Token.descPosition(functionToken), moduleName);
+        final ParserContextFunctionNode script = createParserContextFunctionNode(
+                        ident,
+                        functionToken,
+                        FunctionNode.Kind.MODULE,
+                        functionLine,
+                        Collections.<IdentNode>emptyList());
+        lc.push(script);
 
-            final ParserContextModuleNode module = new ParserContextModuleNode(moduleName);
-            lc.push(module);
+        final ParserContextModuleNode module = new ParserContextModuleNode(moduleName);
+        lc.push(module);
 
-            final ParserContextBlockNode body = newBlock();
+        final ParserContextBlockNode body = newBlock();
 
-            functionDeclarations = new ArrayList<>();
-            moduleBody();
-            addFunctionDeclarations(script);
-            functionDeclarations = null;
+        functionDeclarations = new ArrayList<>();
+        moduleBody();
+        addFunctionDeclarations(script);
+        functionDeclarations = null;
 
-            restoreBlock(body);
-            body.setFlag(Block.NEEDS_SCOPE);
-            final Block programBody = new Block(functionToken, finish, body.getFlags() | Block.IS_SYNTHETIC | Block.IS_BODY, body.getStatements());
-            lc.pop(module);
-            lc.pop(script);
-            script.setLastToken(token);
+        restoreBlock(body);
+        body.setFlag(Block.NEEDS_SCOPE);
+        final Block programBody = new Block(functionToken, finish, body.getFlags() | Block.IS_SYNTHETIC | Block.IS_BODY, body.getStatements());
+        lc.pop(module);
+        lc.pop(script);
+        script.setLastToken(token);
 
-            expect(EOF);
+        expect(EOF);
 
-            script.setModule(module.createModule());
-            return createFunctionNode(script, functionToken, ident, Collections.<IdentNode>emptyList(), FunctionNode.Kind.MODULE, functionLine, programBody);
-        } finally {
-            isStrictMode = oldStrictMode;
-        }
+        script.setModule(module.createModule());
+        return createFunctionNode(script, functionToken, ident, Collections.<IdentNode>emptyList(), FunctionNode.Kind.MODULE, functionLine, programBody);
     }
 
     /**

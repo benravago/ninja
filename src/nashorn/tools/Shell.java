@@ -252,10 +252,10 @@ public class Shell implements PartialParser {
      * with whitespace in different and incompatible ways.
      * <p>
      * @implNote Example:<ul>
-     * <li>Shebang line in {@code script.js}: {@code #!/path/to/njs --language=es6}</li>
+     * <li>Shebang line in {@code script.js}: {@code #!/path/to/njs}</li>
      * <li>Command line: {@code ./script.js arg2}</li>
-     * <li>{@code args} array passed to Nashorn: {@code --language=es6,./script.js,arg}</li>
-     * <li>Required canonicalized arguments array: {@code --language=es6,./script.js,--,arg2}</li>
+     * <li>{@code args} array passed to Nashorn: {@code ./script.js,arg}</li>
+     * <li>Required canonicalized arguments array: {@code ./script.js,--,arg2}</li>
      * </ul>
      *
      * @param args the command line arguments as passed into Nashorn.
@@ -365,17 +365,14 @@ public class Shell implements PartialParser {
 
             // For each file on the command line.
             for (final String fileName : files) {
-                final FunctionNode functionNode = new Parser(env, sourceFor(fileName, new File(fileName)), errors, env._strict, 0, context.getLogger(Parser.class)).parse();
+                final FunctionNode functionNode = new Parser(env, sourceFor(fileName, new File(fileName)), errors, 0, context.getLogger(Parser.class)).parse();
 
                 if (errors.getNumberOfErrors() != 0) {
                     return COMPILATION_ERROR;
                 }
 
-                Compiler.forNoInstallerCompilation(
-                       context,
-                       functionNode.getSource(),
-                       env._strict | functionNode.isStrict()).
-                       compile(functionNode, CompilationPhases.COMPILE_ALL_NO_INSTALL);
+                Compiler.forNoInstallerCompilation(context, functionNode.getSource())
+                	    .compile(functionNode, CompilationPhases.COMPILE_ALL_NO_INSTALL);
 
                 if (errors.getNumberOfErrors() != 0) {
                     return COMPILATION_ERROR;

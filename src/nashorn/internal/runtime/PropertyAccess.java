@@ -221,24 +221,21 @@ public interface PropertyAccess {
     /**
      * Delete a property with the given key from the implementor
      * @param key    the key
-     * @param strict are we in strict mode
      * @return true if deletion succeeded, false otherwise
      */
-    public boolean delete(int key, boolean strict);
+    public boolean delete(int key, boolean unused);
 
     /**
      * Delete a property with the given key from the implementor
      * @param key    the key
-     * @param strict are we in strict mode
      * @return true if deletion succeeded, false otherwise
      */
-    public boolean delete(double key, boolean strict);
+    public boolean delete(double key, boolean unused);
 
     /**
      * Delete a property with the given key from the implementor
      * @param key    the key
-     * @param strict are we in strict mode
      * @return true if deletion succeeded, false otherwise
      */
-    public boolean delete(Object key, boolean strict);
+    public boolean delete(Object key, boolean unused);
 }

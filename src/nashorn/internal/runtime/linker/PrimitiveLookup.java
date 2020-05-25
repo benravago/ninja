@@ -132,7 +132,7 @@ public final class PrimitiveLookup {
             }
             break;
         case SET:
-            return getPrimitiveSetter(name, guard, wrapFilter, NashornCallSiteDescriptor.isStrict(desc));
+            return getPrimitiveSetter(name, guard, wrapFilter, true);
         default:
             break;
         }
@@ -153,41 +153,35 @@ public final class PrimitiveLookup {
         return null;
     }
 
-    private static GuardedInvocation getPrimitiveSetter(final String name, final MethodHandle guard,
-                                                        final MethodHandle wrapFilter, final boolean isStrict) {
+    private static GuardedInvocation getPrimitiveSetter(final String name, final MethodHandle guard, final MethodHandle wrapFilter, final boolean unused) {
         MethodHandle filter = MH.asType(wrapFilter, wrapFilter.type().changeReturnType(ScriptObject.class));
         final MethodHandle target;
 
         if (name == null) {
             filter = MH.dropArguments(filter, 1, Object.class, Object.class);
-            target = MH.insertArguments(PRIMITIVE_SETTER, 3, isStrict);
+            target = MH.insertArguments(PRIMITIVE_SETTER, 3, true);
         } else {
             filter = MH.dropArguments(filter, 1, Object.class);
-            target = MH.insertArguments(PRIMITIVE_SETTER, 2, name, isStrict);
+            target = MH.insertArguments(PRIMITIVE_SETTER, 2, name, true);
         }
 
         return new GuardedInvocation(MH.foldArguments(target, filter), guard);
     }
 
-
     @SuppressWarnings("unused")
-    private static void primitiveSetter(final ScriptObject wrappedSelf, final Object self, final Object key,
-                                        final boolean strict, final Object value) {
+    private static void primitiveSetter(final ScriptObject wrappedSelf, final Object self, final Object key, final boolean unused, final Object value) {
         // See ES5.1 8.7.2 PutValue (V, W)
         final String name = JSType.toString(key);
         final FindProperty find = wrappedSelf.findProperty(name, true);
         if (find == null || !find.getProperty().isAccessorProperty() || !find.getProperty().hasNativeSetter()) {
-            if (strict) {
-                if (find == null || !find.getProperty().isAccessorProperty()) {
-                    throw typeError("property.not.writable", name, ScriptRuntime.safeToString(self));
-                } else {
-                    throw typeError("property.has.no.setter", name, ScriptRuntime.safeToString(self));
-                }
+            if (find == null || !find.getProperty().isAccessorProperty()) {
+                throw typeError("property.not.writable", name, ScriptRuntime.safeToString(self));
+            } else {
+                throw typeError("property.has.no.setter", name, ScriptRuntime.safeToString(self));
             }
-            return;
         }
         // property found and is a UserAccessorProperty
-        find.setValue(value, strict);
+        find.setValue(value, true);
     }
 
     private static MethodHandle findOwnMH(final String name, final MethodType type) {

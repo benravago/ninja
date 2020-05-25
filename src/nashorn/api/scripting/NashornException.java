@@ -44,7 +44,6 @@ import nashorn.internal.runtime.ScriptObject;
  *
  * @since 1.8u40
  */
-@SuppressWarnings("serial")
 public abstract class NashornException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 

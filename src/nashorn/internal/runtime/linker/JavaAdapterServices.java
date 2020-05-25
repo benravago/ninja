@@ -76,10 +76,10 @@ public final class JavaAdapterServices {
      * the right object to use as its "this" when called.
      * @param delegate the delegate function
      * @param global the current global of the adapter
-     * @return either the passed global, or UNDEFINED if the function is strict.
+     * @return UNDEFINED
      */
     public static Object getCallThis(final ScriptFunction delegate, final Object global) {
-        return delegate.isStrict() ? ScriptRuntime.UNDEFINED : global;
+        return ScriptRuntime.UNDEFINED; // TODO: remove
     }
 
     /**

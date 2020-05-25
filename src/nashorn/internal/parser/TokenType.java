@@ -28,7 +28,6 @@ package nashorn.internal.parser;
 import static nashorn.internal.parser.TokenKind.BINARY;
 import static nashorn.internal.parser.TokenKind.BRACKET;
 import static nashorn.internal.parser.TokenKind.FUTURE;
-import static nashorn.internal.parser.TokenKind.FUTURESTRICT;
 import static nashorn.internal.parser.TokenKind.IR;
 import static nashorn.internal.parser.TokenKind.KEYWORD;
 import static nashorn.internal.parser.TokenKind.LITERAL;
@@ -136,25 +135,25 @@ public enum TokenType {
 //  GET            (KEYWORD,  "get"), // Contextual.
 //  GOTO           (FUTURE,   "goto"),
     IF             (KEYWORD,   "if"),
-    IMPLEMENTS     (FUTURESTRICT,   "implements"),
+    IMPLEMENTS     (FUTURE,   "implements"),
     IMPORT         (FUTURE,   "import"),
     IN             (BINARY,   "in",         10, true),
     INSTANCEOF     (BINARY,   "instanceof", 10, true),
 //  INT            (FUTURE,   "int"),
-    INTERFACE      (FUTURESTRICT,   "interface"),
-    LET            (FUTURESTRICT,   "let"),
+    INTERFACE      (FUTURE,   "interface"),
+    LET            (FUTURE,   "let"),
 //  LONG           (FUTURE,   "long"),
 //  NATIVE         (FUTURE,   "native"),
     NEW            (UNARY,    "new",        17, false),
     NULL           (LITERAL,  "null"),
-    PACKAGE        (FUTURESTRICT,   "package"),
-    PRIVATE        (FUTURESTRICT,   "private"),
-    PROTECTED      (FUTURESTRICT,   "protected"),
-    PUBLIC         (FUTURESTRICT,   "public"),
+    PACKAGE        (FUTURE,   "package"),
+    PRIVATE        (FUTURE,   "private"),
+    PROTECTED      (FUTURE,   "protected"),
+    PUBLIC         (FUTURE,   "public"),
     RETURN         (KEYWORD,  "return"),
 //  SET            (KEYWORD,  "set"), // Contextual.
 //  SHORT          (FUTURE,   "short"),
-    STATIC         (FUTURESTRICT,   "static"),
+    STATIC         (FUTURE,   "static"),
     SUPER          (FUTURE,   "super"),
     SWITCH         (KEYWORD,  "switch"),
 //  SYNCHRONIZED   (FUTURE,   "synchronized"),
@@ -170,7 +169,7 @@ public enum TokenType {
 //  VOLATILE       (FUTURE,   "volatile"),
     WHILE          (KEYWORD,  "while"),
     WITH           (KEYWORD,  "with"),
-    YIELD          (FUTURESTRICT,  "yield"),
+    YIELD          (FUTURE,  "yield"),
 
     DECIMAL        (LITERAL,  null),
     HEXADECIMAL    (LITERAL,  null),

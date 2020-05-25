@@ -244,14 +244,7 @@ final class JSObjectLinker implements TypeBasedGuardingDynamicLinker {
     // This is used when a JSObject is called as scope call to do undefined -> Global this translation.
     @SuppressWarnings("unused")
     private static Object jsObjectScopeCall(final JSObject jsObj, final Object thiz, final Object[] args) {
-        final Object modifiedThiz;
-        if (thiz == ScriptRuntime.UNDEFINED && !jsObj.isStrictFunction()) {
-            final Global global = Context.getGlobal();
-            modifiedThiz = ScriptObjectMirror.wrap(global, global);
-        } else {
-            modifiedThiz = thiz;
-        }
-        return jsObj.call(modifiedThiz, args);
+        return jsObj.call(thiz, args);
     }
 
     private static final MethodHandleFunctionality MH = MethodHandleFactory.getFunctionality();

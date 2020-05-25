@@ -44,7 +44,5 @@ public enum TokenKind {
     /** IR only token. */
     IR,
     /** Token reserved for future usage. */
-    FUTURE,
-    /** Token reserved for future in strict mode. */
-    FUTURESTRICT
+    FUTURE
 }

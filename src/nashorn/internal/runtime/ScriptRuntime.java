@@ -135,9 +135,9 @@ public final class ScriptRuntime {
     public static final Call INVALIDATE_RESERVED_BUILTIN_NAME = staticCallNoLookup(ScriptRuntime.class, "invalidateReservedBuiltinName", void.class, String.class);
 
     /**
-     * Used to perform failed delete under strict mode
+     * Used to perform failed delete
      */
-    public static final Call STRICT_FAIL_DELETE = staticCallNoLookup(ScriptRuntime.class, "strictFailDelete", boolean.class, String.class);
+    public static final Call FAIL_DELETE = staticCallNoLookup(ScriptRuntime.class, "failDelete", boolean.class, String.class);
 
     /**
      * Used to find the scope for slow delete
@@ -779,7 +779,7 @@ public final class ScriptRuntime {
      * ECMA 11.4.1 - delete operator, implementation for slow scopes
      *
      * This implementation of 'delete' walks the scope chain to find the scope that contains the
-     * property to be deleted, then invokes delete on it. Always used on scopes, never strict.
+     * property to be deleted, then invokes delete on it. Always used on scopes.
      *
      * @param obj       top scope object
      * @param property  property to delete
@@ -801,14 +801,14 @@ public final class ScriptRuntime {
     /**
      * ECMA 11.4.1 - delete operator, special case
      *
-     * This is 'delete' on a scope; it always fails under strict mode.
+     * This is 'delete' on a scope; it always fails.
      * It always throws an exception, but is declared to return a boolean
      * to be compatible with the delete operator type.
      *
      * @param property  property to delete
      * @return nothing, always throws an exception.
      */
-    public static boolean strictFailDelete(final String property) {
+    public static boolean failDelete(final String property) {
         throw syntaxError("strict.cant.delete", property);
     }
 

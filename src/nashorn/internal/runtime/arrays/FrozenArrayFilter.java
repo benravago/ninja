@@ -49,31 +49,22 @@ final class FrozenArrayFilter extends SealedArrayFilter {
     }
 
     @Override
-    public ArrayData set(final int index, final int value, final boolean strict) {
-        if (strict) {
-            throw typeError("cant.set.property", Integer.toString(index), "frozen array");
-        }
-        return this;
+    public ArrayData set(final int index, final int value, final boolean unused) {
+        throw typeError("cant.set.property", Integer.toString(index), "frozen array");
     }
 
     @Override
-    public ArrayData set(final int index, final double value, final boolean strict) {
-        if (strict) {
-            throw typeError("cant.set.property", Integer.toString(index), "frozen array");
-        }
-        return this;
+    public ArrayData set(final int index, final double value, final boolean unused) {
+        throw typeError("cant.set.property", Integer.toString(index), "frozen array");
     }
 
     @Override
-    public ArrayData set(final int index, final Object value, final boolean strict) {
-        if (strict) {
-            throw typeError("cant.set.property", Integer.toString(index), "frozen array");
-        }
-        return this;
+    public ArrayData set(final int index, final Object value, final boolean unused) {
+        throw typeError("cant.set.property", Integer.toString(index), "frozen array");
     }
 
     @Override
-    public ArrayData push(final boolean strict, final Object... items) {
+    public ArrayData push(final boolean unused, final Object... items) {
         return this; //nop
     }
 

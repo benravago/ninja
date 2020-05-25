@@ -96,22 +96,22 @@ abstract class ArrayFilter extends ArrayData {
     }
 
     @Override
-    public ArrayData set(final int index, final Object value, final boolean strict) {
-        underlying = underlying.set(index, value, strict);
+    public ArrayData set(final int index, final Object value, final boolean unused) {
+        underlying = underlying.set(index, value, true);
         setLength(underlying.length());
         return this;
     }
 
     @Override
-    public ArrayData set(final int index, final int value, final boolean strict) {
-        underlying = underlying.set(index, value, strict);
+    public ArrayData set(final int index, final int value, final boolean unused) {
+        underlying = underlying.set(index, value, true);
         setLength(underlying.length());
         return this;
     }
 
     @Override
-    public ArrayData set(final int index, final double value, final boolean strict) {
-        underlying = underlying.set(index, value, strict);
+    public ArrayData set(final int index, final double value, final boolean unused) {
+        underlying = underlying.set(index, value, true);
         setLength(underlying.length());
         return this;
     }

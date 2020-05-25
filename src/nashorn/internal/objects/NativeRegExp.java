@@ -670,7 +670,7 @@ public final class NativeRegExp extends ScriptObject {
             sb.append(string, 0, matcher.start());
 
             if (function != null) {
-                final Object self = Bootstrap.isStrictCallable(function) ? UNDEFINED : Global.instance();
+                final Object self = Bootstrap.isCallable(function) ? UNDEFINED : Global.instance();
                 sb.append(callReplaceValue(getReplaceValueInvoker(), function, self, matcher, string));
             } else {
                 appendReplacement(matcher, string, replacement, sb);
@@ -690,7 +690,7 @@ public final class NativeRegExp extends ScriptObject {
         final StringBuilder sb = new StringBuilder();
 
         final MethodHandle invoker = function == null ? null : getReplaceValueInvoker();
-        final Object self = function == null || Bootstrap.isStrictCallable(function) ? UNDEFINED : Global.instance();
+        final Object self = function == null || Bootstrap.isCallable(function) ? UNDEFINED : Global.instance();
 
         do {
             sb.append(string, thisIndex, matcher.start());

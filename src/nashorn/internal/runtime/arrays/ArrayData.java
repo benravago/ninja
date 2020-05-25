@@ -147,18 +147,18 @@ public abstract class ArrayData {
         }
 
         @Override
-        public ArrayData set(final int index, final Object value, final boolean strict) {
-            return toRealArrayData(index).set(index, value, strict);
+        public ArrayData set(final int index, final Object value, final boolean unused) {
+            return toRealArrayData(index).set(index, value, true);
         }
 
         @Override
-        public ArrayData set(final int index, final int value, final boolean strict) {
-            return toRealArrayData(index).set(index, value, strict);
+        public ArrayData set(final int index, final int value, final boolean unused) {
+            return toRealArrayData(index).set(index, value, true);
         }
 
         @Override
-        public ArrayData set(final int index, final double value, final boolean strict) {
-            return toRealArrayData(index).set(index, value, strict);
+        public ArrayData set(final int index, final double value, final boolean unused) {
+            return toRealArrayData(index).set(index, value, true);
         }
 
         @Override
@@ -187,8 +187,8 @@ public abstract class ArrayData {
         }
 
         @Override
-        public ArrayData push(final boolean strict, final Object item) {
-            return toRealArrayData().push(strict, item);
+        public ArrayData push(final boolean unused, final Object item) {
+            return toRealArrayData().push(true, item);
         }
 
         @Override
@@ -492,30 +492,27 @@ public abstract class ArrayData {
      *
      * @param index the index
      * @param value the value
-     * @param strict are we in strict mode
      * @return new array data (or same)
      */
-    public abstract ArrayData set(final int index, final Object value, final boolean strict);
+    public abstract ArrayData set(final int index, final Object value, final boolean unused);
 
     /**
      * Set an int value at a given index
      *
      * @param index the index
      * @param value the value
-     * @param strict are we in strict mode
      * @return new array data (or same)
      */
-    public abstract ArrayData set(final int index, final int value, final boolean strict);
+    public abstract ArrayData set(final int index, final int value, final boolean unused);
 
     /**
      * Set an double value at a given index
      *
      * @param index the index
      * @param value the value
-     * @param strict are we in strict mode
      * @return new array data (or same)
      */
-    public abstract ArrayData set(final int index, final double value, final boolean strict);
+    public abstract ArrayData set(final int index, final double value, final boolean unused);
 
     /**
      * Set an empty value at a given index. Should only affect Object array.
@@ -608,11 +605,10 @@ public abstract class ArrayData {
      * Returns if element at specific index can be deleted or not.
      *
      * @param index the index of the element
-     * @param strict are we in strict mode
      *
      * @return true if element can be deleted
      */
-    public boolean canDelete(final int index, final boolean strict) {
+    public boolean canDelete(final int index, final boolean unused) {
         return true;
     }
 
@@ -620,11 +616,10 @@ public abstract class ArrayData {
      * Returns if element at specific index can be deleted or not.
      *
      * @param longIndex  the index
-     * @param strict     are we in strict mode
      *
      * @return true if range can be deleted
      */
-    public boolean canDelete(final long longIndex, final boolean strict) {
+    public boolean canDelete(final long longIndex, final boolean unused) {
         return true;
     }
 
@@ -634,11 +629,10 @@ public abstract class ArrayData {
      *
      * @param fromIndex  the start index (inclusive)
      * @param toIndex    the end index (inclusive)
-     * @param strict     are we in strict mode
      * @return an array with the range deleted, or this array if no deletion took place
      */
-    public final ArrayData safeDelete(final long fromIndex, final long toIndex, final boolean strict) {
-        if (fromIndex <= toIndex && canDelete(fromIndex, strict)) {
+    public final ArrayData safeDelete(final long fromIndex, final long toIndex, final boolean unused) {
+        if (fromIndex <= toIndex && canDelete(fromIndex, true)) {
             return delete(fromIndex, toIndex);
         }
         return this;
@@ -688,11 +682,10 @@ public abstract class ArrayData {
     /**
      * Push an array of items to the end of the array
      *
-     * @param strict are we in strict mode
      * @param items  the items
      * @return new array data (or same)
      */
-    public ArrayData push(final boolean strict, final Object... items) {
+    public ArrayData push(final boolean unused, final Object... items) {
         if (items.length == 0) {
             return this;
         }
@@ -703,7 +696,7 @@ public abstract class ArrayData {
         long      pos     = newData.length;
         for (final Object item : items) {
             newData = newData.ensure(pos); //avoid sparse array
-            newData.set((int)pos++, item, strict);
+            newData.set((int)pos++, item, true);
         }
         return newData;
     }
@@ -711,12 +704,11 @@ public abstract class ArrayData {
     /**
      * Push an array of items to the end of the array
      *
-     * @param strict are we in strict mode
      * @param item   the item
      * @return new array data (or same)
      */
-    public ArrayData push(final boolean strict, final Object item) {
-        return push(strict, new Object[] { item });
+    public ArrayData push(final boolean unused, final Object item) {
+        return push(true, new Object[] { item });
     }
 
     /**

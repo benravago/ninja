@@ -86,9 +86,6 @@ public abstract class AbstractParser {
     /** Lexer used to scan source content. */
     protected Lexer lexer;
 
-    /** Is this parser running under strict mode? */
-    protected boolean isStrictMode;
-
     /** What should line numbers be counted from? */
     protected final int lineOffset;
 
@@ -99,10 +96,9 @@ public abstract class AbstractParser {
      *
      * @param source     Source to parse.
      * @param errors     Error reporting manager.
-     * @param strict     True if we are in strict mode
      * @param lineOffset Offset from which lines should be counted
      */
-    protected AbstractParser(final Source source, final ErrorManager errors, final boolean strict, final int lineOffset) {
+    protected AbstractParser(final Source source, final ErrorManager errors, final int lineOffset) {
         if (source.getLength() > Token.LENGTH_MASK) {
             throw new RuntimeException("Source exceeds size limit of " + Token.LENGTH_MASK + " bytes");
         }
@@ -112,7 +108,6 @@ public abstract class AbstractParser {
         this.token        = Token.toDesc(EOL, 0, 1);
         this.type         = EOL;
         this.last         = EOL;
-        this.isStrictMode = strict;
         this.lineOffset   = lineOffset;
     }
 
@@ -189,7 +184,7 @@ public abstract class AbstractParser {
             return;
         }
 
-        final String comment = (String) lexer.getValueOf(token, isStrictMode);
+        final String comment = (String) lexer.getValueOf(token);
         final int len = comment.length();
         // 4 characters for directive comment marker //@\s or //#\s
         if (len > 4 && comment.substring(4).startsWith(SOURCE_URL_PREFIX)) {
@@ -391,7 +386,7 @@ public abstract class AbstractParser {
      */
     protected final Object getValue(final long valueToken) {
         try {
-            return lexer.getValueOf(valueToken, isStrictMode);
+            return lexer.getValueOf(valueToken);
         } catch (final ParserException e) {
             errors.error(e);
         }
@@ -400,13 +395,13 @@ public abstract class AbstractParser {
     }
 
     /**
-     * Certain future reserved words can be used as identifiers in
-     * non-strict mode. Check if the current token is one such.
+     * Certain future reserved words can be used as identifiers.
+     * Check if the current token is one such.
      *
-     * @return true if non strict mode identifier
+     * @return true if future mode identifier
      */
-    protected final boolean isNonStrictModeIdent() {
-        return !isStrictMode && type.getKind() == TokenKind.FUTURESTRICT;
+    protected final boolean isFutureIdent() {
+    	return type.getKind() == TokenKind.FUTURE;
     }
 
     /**
@@ -418,7 +413,7 @@ public abstract class AbstractParser {
         // Capture IDENT token.
         long identToken = token;
 
-        if (isNonStrictModeIdent()) {
+        if (isFutureIdent()) {
             // Fake out identifier.
             identToken = Token.recast(token, IDENT);
             // Get IDENT.
@@ -427,7 +422,7 @@ public abstract class AbstractParser {
             next();
 
             // Create IDENT node.
-            return createIdentNode(identToken, finish, ident).setIsFutureStrictName();
+            return createIdentNode(identToken, finish, ident).setIsFutureName();
         }
 
         // Get IDENT.
@@ -461,7 +456,7 @@ public abstract class AbstractParser {
      */
     protected final boolean isIdentifierName() {
         final TokenKind kind = type.getKind();
-        if (kind == TokenKind.KEYWORD || kind == TokenKind.FUTURE || kind == TokenKind.FUTURESTRICT) {
+        if (kind == TokenKind.KEYWORD || kind == TokenKind.FUTURE) {
             return true;
         }
 

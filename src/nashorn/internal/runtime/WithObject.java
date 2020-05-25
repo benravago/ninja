@@ -72,18 +72,17 @@ public final class WithObject extends Scope {
     /**
      * Delete a property based on a key.
      * @param key Any valid JavaScript value.
-     * @param strict strict mode execution.
      * @return True if deleted.
      */
     @Override
-    public boolean delete(final Object key, final boolean strict) {
+    public boolean delete(final Object key, final boolean unused) {
         final ScriptObject self = expression;
         final String propName = JSType.toString(key);
 
         final FindProperty find = self.findProperty(propName, true);
 
         if (find != null) {
-            return self.delete(propName, strict);
+            return self.delete(propName, true);
         }
 
         return false;
@@ -189,7 +188,7 @@ public final class WithObject extends Scope {
             final Object func = find.getObjectValue();
             if (func instanceof ScriptFunction) {
                 final ScriptFunction sfunc = (ScriptFunction)func;
-                final Object self = isScope && sfunc.isStrict()? UNDEFINED : expression;
+                final Object self = isScope ? UNDEFINED : expression;
                 return ScriptRuntime.apply(sfunc, self, key);
             }
         }

@@ -108,15 +108,14 @@ public final class FindProperty {
      * @see ObjectClassGenerator
      *
      * @param type type of setter, e.g. int.class if we want a function with {@code set(I)V} signature
-     * @param strict are we in strict mode
      * @param request link request
      *
      * @return method handle for the getter
      */
-    public MethodHandle getSetter(final Class<?> type, final boolean strict, final LinkRequest request) {
+    public MethodHandle getSetter(final Class<?> type, final boolean unused, final LinkRequest request) {
         MethodHandle setter = property.getSetter(type, getOwner().getMap());
         if (property instanceof UserAccessorProperty) {
-            setter =  MH.insertArguments(setter, 1, UserAccessorProperty.getINVOKE_UA_SETTER(type), strict ? property.getKey() : null);
+            setter =  MH.insertArguments(setter, 1, UserAccessorProperty.getINVOKE_UA_SETTER(type), property.getKey());
             property.setType(type);
             return insertAccessorsGetter((UserAccessorProperty) property, request, setter);
         }
@@ -234,30 +233,27 @@ public final class FindProperty {
      * Set the property value in self.
      *
      * @param value the new value
-     * @param strict strict flag
      */
-    public void setValue(final int value, final boolean strict) {
-        property.setValue(getSetterReceiver(), getOwner(), value, strict);
+    public void setValue(final int value, final boolean unused) {
+        property.setValue(getSetterReceiver(), getOwner(), value, true);
     }
 
     /**
      * Set the property value in self.
      *
      * @param value the new value
-     * @param strict strict flag
      */
-    public void setValue(final double value, final boolean strict) {
-        property.setValue(getSetterReceiver(), getOwner(), value, strict);
+    public void setValue(final double value, final boolean unused) {
+        property.setValue(getSetterReceiver(), getOwner(), value, true);
     }
 
     /**
      * Set the property value in self.
      *
      * @param value the new value
-     * @param strict strict flag
      */
-    public void setValue(final Object value, final boolean strict) {
-        property.setValue(getSetterReceiver(), getOwner(), value, strict);
+    public void setValue(final Object value, final boolean unused) {
+        property.setValue(getSetterReceiver(), getOwner(), value, true);
     }
 
     /**

@@ -308,6 +308,6 @@ public final class NativeFunction {
 
     private static Parser getParser(final String sourceText) {
         final ScriptEnvironment env = Global.getEnv();
-        return new Parser(env, sourceFor("<function>", sourceText), new Context.ThrowErrorManager(), env._strict, null);
+        return new Parser(env, sourceFor("<function>", sourceText), new Context.ThrowErrorManager(), null);
     }
 }

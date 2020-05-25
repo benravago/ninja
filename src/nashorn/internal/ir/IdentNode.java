@@ -46,7 +46,7 @@ public final class IdentNode extends Expression implements PropertyKey, Function
     private static final int PROPERTY_NAME     = 1 << 0;
     private static final int INITIALIZED_HERE  = 1 << 1;
     private static final int FUNCTION          = 1 << 2;
-    private static final int FUTURESTRICT_NAME = 1 << 3;
+    private static final int FUTURE_NAME       = 1 << 3;
     private static final int IS_DECLARED_HERE  = 1 << 4;
     private static final int IS_DEAD           = 1 << 5;
     private static final int DIRECT_SUPER      = 1 << 6;
@@ -216,22 +216,22 @@ public final class IdentNode extends Expression implements PropertyKey, Function
     }
 
     /**
-     * Check if this IdentNode is a future strict name
-     * @return true if this is a future strict name
+     * Check if this IdentNode is a future name
+     * @return true if this is a future name
      */
-    public boolean isFutureStrictName() {
-        return (flags & FUTURESTRICT_NAME) == FUTURESTRICT_NAME;
+    public boolean isFutureName() {
+        return (flags & FUTURE_NAME) == FUTURE_NAME;
     }
 
     /**
-     * Flag this IdentNode as a future strict name
+     * Flag this IdentNode as a future name
      * @return a node equivalent to this one except for the requested change.
      */
-    public IdentNode setIsFutureStrictName() {
-        if (isFutureStrictName()) {
+    public IdentNode setIsFutureName() {
+        if (isFutureName()) {
             return this;
         }
-        return new IdentNode(this, name, type, flags | FUTURESTRICT_NAME, programPoint, conversion);
+        return new IdentNode(this, name, type, flags | FUTURE_NAME, programPoint, conversion);
     }
 
     /**

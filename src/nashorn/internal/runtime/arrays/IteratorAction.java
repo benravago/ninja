@@ -94,10 +94,9 @@ public abstract class IteratorAction<T> {
      * @return result of apply
      */
     public final T apply() {
-        final boolean strict = Bootstrap.isStrictCallable(callbackfn);
 
-        // for non-strict callback, need to translate undefined thisArg to be global object
-        thisArg = (thisArg == ScriptRuntime.UNDEFINED && !strict)? Context.getGlobal() : thisArg;
+        // might need to translate undefined thisArg to be global object
+        thisArg = (thisArg == ScriptRuntime.UNDEFINED && !Bootstrap.isCallable(callbackfn)) ? Context.getGlobal() : thisArg;
 
         applyLoopBegin(iter);
         final boolean reverse = iter.isReverse();

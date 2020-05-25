@@ -82,9 +82,6 @@ public class Lexer extends Scanner {
     /** True if here and edit strings are supported. */
     private final boolean scripting;
 
-    /** True if parsing in ECMAScript 6 mode. */
-    private final boolean es6;
-
     /** True if a nested scan. (scan to completion, no EOF.) */
     private final boolean nested;
 
@@ -175,7 +172,7 @@ public class Lexer extends Scanner {
      * @param stream    the token stream to lex
      */
     public Lexer(final Source source, final TokenStream stream) {
-        this(source, stream, false, false);
+        this(source, stream, false);
     }
 
     /**
@@ -184,10 +181,9 @@ public class Lexer extends Scanner {
      * @param source    the source
      * @param stream    the token stream to lex
      * @param scripting are we in scripting mode
-     * @param es6       are we in ECMAScript 6 mode
      */
-    public Lexer(final Source source, final TokenStream stream, final boolean scripting, final boolean es6) {
-        this(source, 0, source.getLength(), stream, scripting, es6, false);
+    public Lexer(final Source source, final TokenStream stream, final boolean scripting) {
+        this(source, 0, source.getLength(), stream, scripting, false);
     }
 
     /**
@@ -198,17 +194,15 @@ public class Lexer extends Scanner {
      * @param len       length of source segment to lex
      * @param stream    token stream to lex
      * @param scripting are we in scripting mode
-     * @param es6       are we in ECMAScript 6 mode
      * @param pauseOnFunctionBody if true, lexer will return from {@link #lexify()} when it encounters a
      * function body. This is used with the feature where the parser is skipping nested function bodies to
      * avoid reading ahead unnecessarily when we skip the function bodies.
      */
-    public Lexer(final Source source, final int start, final int len, final TokenStream stream, final boolean scripting, final boolean es6, final boolean pauseOnFunctionBody) {
+    public Lexer(final Source source, final int start, final int len, final TokenStream stream, final boolean scripting, final boolean pauseOnFunctionBody) {
         super(source.getContent(), 1, start, len);
         this.source      = source;
         this.stream      = stream;
         this.scripting   = scripting;
-        this.es6         = es6;
         this.nested      = false;
         this.pendingLine = 1;
         this.last        = EOL;
@@ -222,7 +216,6 @@ public class Lexer extends Scanner {
         source = lexer.source;
         stream = lexer.stream;
         scripting = lexer.scripting;
-        es6 = lexer.es6;
         nested = true;
 
         pendingLine = state.pendingLine;
@@ -831,7 +824,7 @@ public class Lexer extends Scanner {
      * @param length Length of token.
      * @return JavaScript string object.
      */
-    private String valueOfString(final int start, final int length, final boolean strict) throws RuntimeException {
+    private String valueOfString(final int start, final int length, final boolean allow) throws RuntimeException {
         // Save the current position.
         final int savePosition = position;
         // Calculate the end position.
@@ -863,8 +856,8 @@ public class Lexer extends Scanner {
                 case '5':
                 case '6':
                 case '7': {
-                    if (strict) {
-                        // "\0" itself is allowed in strict mode. Only other 'real'
+                    if (allow) {
+                        // "\0" itself may be allowed. Only other 'real'
                         // octal escape sequences are not allowed (eg. "\02", "\31").
                         // See section 7.8.4 String literals production EscapeSequence
                         if (next != '0' || (ch0 >= '0' && ch0 <= '9')) {
@@ -1153,7 +1146,7 @@ public class Lexer extends Scanner {
             }
 
             type = HEXADECIMAL;
-        } else if (digit == 0 && es6 && (ch1 == 'o' || ch1 == 'O') && convertDigit(ch2, 8) != -1) {
+        } else if (digit == 0 && (ch1 == 'o' || ch1 == 'O') && convertDigit(ch2, 8) != -1) {
             // Skip over 0oN.
             skip(3);
             // Skip over remaining digits.
@@ -1162,7 +1155,7 @@ public class Lexer extends Scanner {
             }
 
             type = OCTAL;
-        } else if (digit == 0 && es6 && (ch1 == 'b' || ch1 == 'B') && convertDigit(ch2, 2) != -1) {
+        } else if (digit == 0 && (ch1 == 'b' || ch1 == 'B') && convertDigit(ch2, 2) != -1) {
             // Skip over 0bN.
             skip(3);
             // Skip over remaining digits.
@@ -1718,7 +1711,7 @@ public class Lexer extends Scanner {
             } else if (Character.isDigit(ch0)) {
                 // Scan and add a number.
                 scanNumber();
-            } else if (isTemplateDelimiter(ch0) && es6) {
+            } else if (isTemplateDelimiter(ch0)) {
                 // Scan and add template in ES6 mode.
                 scanTemplate();
             } else if (isTemplateDelimiter(ch0) && scripting) {
@@ -1738,7 +1731,7 @@ public class Lexer extends Scanner {
      * @param token  Token descriptor.
      * @return JavaScript value.
      */
-    Object getValueOf(final long token, final boolean strict) {
+    Object getValueOf(final long token) {
         final int start = Token.descPosition(token);
         final int len   = Token.descLength(token);
 
@@ -1772,7 +1765,7 @@ public class Lexer extends Scanner {
         case STRING:
             return source.getString(start, len); // String
         case ESCSTRING:
-            return valueOfString(start, len, strict); // String
+            return valueOfString(start, len, true); // String
         case IDENT:
             return valueOfIdent(start, len); // String
         case REGEX:

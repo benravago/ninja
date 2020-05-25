@@ -626,7 +626,7 @@ public class DateParser {
         return true;
     }
 
-    private boolean patchResult(final boolean strict) {
+    private boolean patchResult(final boolean ecma) {
         // sanity checks - make sure we have something
         if (!isSet(YEAR) && !isSet(HOUR)) {
             return false;
@@ -637,7 +637,7 @@ public class DateParser {
         // fill in default values for unset fields except timezone
         for (int field = YEAR; field <= TIMEZONE; field++) {
             if (get(field) == null) {
-                if (field == TIMEZONE && !strict) {
+                if (field == TIMEZONE && !ecma) {
                     // We only use UTC as default timezone for dates parsed complying with
                     // the format specified in ES5 15.9.1.15. Otherwise the slot is left empty
                     // and local timezone is used.
@@ -648,7 +648,7 @@ public class DateParser {
             }
         }
 
-        if (!strict) {
+        if (!ecma) {
             // swap year, month, and day if it looks like the right thing to do
             if (isDay(get(YEAR))) {
                 final int d = get(YEAR);

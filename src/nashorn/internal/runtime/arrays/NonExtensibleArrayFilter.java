@@ -52,34 +52,31 @@ final class NonExtensibleArrayFilter extends ArrayFilter {
         return new NonExtensibleArrayFilter(underlying.slice(from, to));
     }
 
-    private ArrayData extensionCheck(final boolean strict, final int index) {
-        if (!strict) {
-            return this;
-        }
+    private ArrayData extensionCheck(final boolean unused, final int index) {
         throw typeError(Global.instance(), "object.non.extensible", String.valueOf(index), ScriptRuntime.safeToString(this));
     }
 
     @Override
-    public ArrayData set(final int index, final Object value, final boolean strict) {
+    public ArrayData set(final int index, final Object value, final boolean unused) {
         if (has(index)) {
-            return underlying.set(index, value, strict);
+            return underlying.set(index, value, true);
         }
-        return extensionCheck(strict, index);
+        return extensionCheck(true, index);
     }
 
     @Override
-    public ArrayData set(final int index, final int value, final boolean strict) {
+    public ArrayData set(final int index, final int value, final boolean unused) {
         if (has(index)) {
-            return underlying.set(index, value, strict);
+            return underlying.set(index, value, true);
         }
-        return extensionCheck(strict, index);
+        return extensionCheck(true, index);
     }
 
     @Override
-    public ArrayData set(final int index, final double value, final boolean strict) {
+    public ArrayData set(final int index, final double value, final boolean unused) {
         if (has(index)) {
-            return underlying.set(index, value, strict);
+            return underlying.set(index, value, true);
         }
-        return extensionCheck(strict, index);
+        return extensionCheck(true, index);
     }
 }

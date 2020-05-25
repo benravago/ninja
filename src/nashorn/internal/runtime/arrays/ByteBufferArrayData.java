@@ -106,7 +106,7 @@ final class ByteBufferArrayData extends ArrayData {
     }
 
     @Override
-    public ArrayData set(final int index, final Object value, final boolean strict) {
+    public ArrayData set(final int index, final Object value, final boolean unused) {
         if (value instanceof Number) {
             buf.put(index, ((Number)value).byteValue());
             return this;
@@ -116,13 +116,13 @@ final class ByteBufferArrayData extends ArrayData {
     }
 
     @Override
-    public ArrayData set(final int index, final int value, final boolean strict) {
+    public ArrayData set(final int index, final int value, final boolean unused) {
         buf.put(index, (byte)value);
         return this;
     }
 
     @Override
-    public ArrayData set(final int index, final double value, final boolean strict) {
+    public ArrayData set(final int index, final double value, final boolean unused) {
         buf.put(index, (byte)value);
         return this;
     }
@@ -148,12 +148,12 @@ final class ByteBufferArrayData extends ArrayData {
     }
 
     @Override
-    public boolean canDelete(final int index, final boolean strict) {
+    public boolean canDelete(final int index, final boolean unused) {
         return false;
     }
 
     @Override
-    public boolean canDelete(final long longIndex, final boolean strict) {
+    public boolean canDelete(final long longIndex, final boolean unused) {
         return false;
     }
 
@@ -168,7 +168,7 @@ final class ByteBufferArrayData extends ArrayData {
     }
 
     @Override
-    public ArrayData push(final boolean strict, final Object... items) {
+    public ArrayData push(final boolean unused, final Object... items) {
         throw unsupported("push");
     }
 

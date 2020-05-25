@@ -168,10 +168,10 @@ class SparseArrayData extends ArrayData {
     }
 
     @Override
-    public ArrayData set(final int index, final Object value, final boolean strict) {
+    public ArrayData set(final int index, final Object value, final boolean unused) {
         if (index >= 0 && index < maxDenseLength) {
             final long oldLength = underlying.length();
-            underlying = underlying.ensure(index).set(index, value, strict).safeDelete(oldLength, index - 1, strict);
+            underlying = underlying.ensure(index).set(index, value, true).safeDelete(oldLength, index - 1, true);
             setLength(Math.max(underlying.length(), length()));
         } else {
             final Long longIndex = indexToKey(index);
@@ -183,10 +183,10 @@ class SparseArrayData extends ArrayData {
     }
 
     @Override
-    public ArrayData set(final int index, final int value, final boolean strict) {
+    public ArrayData set(final int index, final int value, final boolean unused) {
         if (index >= 0 && index < maxDenseLength) {
             final long oldLength = underlying.length();
-            underlying = underlying.ensure(index).set(index, value, strict).safeDelete(oldLength, index - 1, strict);
+            underlying = underlying.ensure(index).set(index, value, true).safeDelete(oldLength, index - 1, true);
             setLength(Math.max(underlying.length(), length()));
         } else {
             final Long longIndex = indexToKey(index);
@@ -197,10 +197,10 @@ class SparseArrayData extends ArrayData {
     }
 
     @Override
-    public ArrayData set(final int index, final double value, final boolean strict) {
+    public ArrayData set(final int index, final double value, final boolean unused) {
         if (index >= 0 && index < maxDenseLength) {
             final long oldLength = underlying.length();
-            underlying = underlying.ensure(index).set(index, value, strict).safeDelete(oldLength, index - 1, strict);
+            underlying = underlying.ensure(index).set(index, value, true).safeDelete(oldLength, index - 1, true);
             setLength(Math.max(underlying.length(), length()));
         } else {
             final Long longIndex = indexToKey(index);

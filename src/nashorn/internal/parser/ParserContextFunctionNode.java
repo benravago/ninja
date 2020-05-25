@@ -117,13 +117,6 @@ class ParserContextFunctionNode extends ParserContextBaseNode {
     }
 
     /**
-     * @return if function in strict mode
-     */
-    public boolean isStrict() {
-        return getFlag(FunctionNode.IS_STRICT) != 0;
-    }
-
-    /**
      * @return true if the function has nested evals
      */
     public boolean hasNestedEval() {

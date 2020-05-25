@@ -180,19 +180,19 @@ public final class NativeUint8ClampedArray extends ArrayBufferView {
         }
 
         @Override
-        public ArrayData set(final int index, final Object value, final boolean strict) {
-            return set(index, JSType.toNumber(value), strict);
+        public ArrayData set(final int index, final Object value, final boolean unused) {
+            return set(index, JSType.toNumber(value), true);
         }
 
         @Override
-        public ArrayData set(final int index, final int value, final boolean strict) {
+        public ArrayData set(final int index, final int value, final boolean unused) {
             setElem(index, value);
             return this;
         }
 
         @Override
-        public ArrayData set(final int index, final double value, final boolean strict) {
-            return set(index, (int) rint(value), strict);
+        public ArrayData set(final int index, final double value, final boolean unused) {
+            return set(index, (int) rint(value), true);
         }
 
         private static double rint(final double rint) {

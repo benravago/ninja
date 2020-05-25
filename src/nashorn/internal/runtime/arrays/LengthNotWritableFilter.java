@@ -140,29 +140,29 @@ final class LengthNotWritableFilter extends ArrayFilter {
     }
 
     @Override
-    public ArrayData set(final int index, final Object value, final boolean strict) {
+    public ArrayData set(final int index, final Object value, final boolean unused) {
         if (checkAdd(index, value)) {
             return this;
         }
-        underlying = underlying.set(index, value, strict);
+        underlying = underlying.set(index, value, true);
         return this;
     }
 
     @Override
-    public ArrayData set(final int index, final int value, final boolean strict) {
+    public ArrayData set(final int index, final int value, final boolean unused) {
         if (checkAdd(index, value)) {
             return this;
         }
-        underlying = underlying.set(index, value, strict);
+        underlying = underlying.set(index, value, true);
         return this;
     }
 
     @Override
-    public ArrayData set(final int index, final double value, final boolean strict) {
+    public ArrayData set(final int index, final double value, final boolean unused) {
         if (checkAdd(index, value)) {
             return this;
         }
-        underlying = underlying.set(index, value, strict);
+        underlying = underlying.set(index, value, true);
         return this;
     }
 
