@@ -14,6 +14,7 @@ At this time, the changes are:
 8. replace `Unsafe.defineAnonymousClass()` with `Lookup.defineHiddenClass()`
 9. remove debugging code in nashorn/internal/ir/debug, DumpBytecode.java, etc.
 10. remove nashorn.api.tree package
+11. always use es6 and strict modes
 
 The main objective of these changes is to reduce and simplify the code base.  Eventually, I hope to work out some kind of plugin system to support extensions (like javafx).  I would also like to look into the possibility of using [lsp4j](https://github.com/eclipse/lsp4j) for coding/debugging assist. 
 
