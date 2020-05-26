@@ -987,7 +987,7 @@ public final class Context {
         setGlobal(newGlobal);
 
         final Object[] wrapped = args == null? ScriptRuntime.EMPTY_ARRAY :  ScriptObjectMirror.wrapArray(args, oldGlobal);
-        newGlobal.put("arguments", newGlobal.wrapAsObject(wrapped), true);
+        newGlobal.put("arguments", newGlobal.wrapAsObject(wrapped));
 
         try {
             // wrap objects from newGlobal's world as mirrors - but if result

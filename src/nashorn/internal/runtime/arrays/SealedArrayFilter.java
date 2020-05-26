@@ -49,12 +49,12 @@ class SealedArrayFilter extends ArrayFilter {
     }
 
     @Override
-    public boolean canDelete(final int index, final boolean unused) {
-        return canDelete(ArrayIndex.toLongIndex(index), true);
+    public boolean canDelete(final int index) {
+        return canDelete(ArrayIndex.toLongIndex(index));
     }
 
     @Override
-    public boolean canDelete(final long longIndex, final boolean unused) {
+    public boolean canDelete(final long longIndex) {
         throw typeError("cant.delete.property", Long.toString(longIndex), "sealed array");
     }
 

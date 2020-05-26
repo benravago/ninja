@@ -466,19 +466,19 @@ public class AccessorProperty extends Property {
     }
 
     @Override
-    public void setValue(final ScriptObject self, final ScriptObject owner, final int value, final boolean unused)  {
+    public void setValue(final ScriptObject self, final ScriptObject owner, final int value)  {
         assert isConfigurable() || isWritable() : getKey() + " is not writable or configurable";
         invokeSetter(self, value);
     }
 
     @Override
-    public void setValue(final ScriptObject self, final ScriptObject owner, final double value, final boolean unused)  {
+    public void setValue(final ScriptObject self, final ScriptObject owner, final double value)  {
         assert isConfigurable() || isWritable() : getKey() + " is not writable or configurable";
         invokeSetter(self, value);
     }
 
     @Override
-    public void setValue(final ScriptObject self, final ScriptObject owner, final Object value, final boolean unused)  {
+    public void setValue(final ScriptObject self, final ScriptObject owner, final Object value)  {
         //this is sometimes used for bootstrapping, hence no assert. ugly.
         invokeSetter(self, value);
     }

@@ -141,13 +141,13 @@ public final class AccessorPropertyDescriptor extends ScriptObject implements Pr
         if (sobj.has(CONFIGURABLE)) {
             this.configurable = JSType.toBoolean(sobj.get(CONFIGURABLE));
         } else {
-            delete(CONFIGURABLE, false);
+            delete(CONFIGURABLE);
         }
 
         if (sobj.has(ENUMERABLE)) {
             this.enumerable = JSType.toBoolean(sobj.get(ENUMERABLE));
         } else {
-            delete(ENUMERABLE, false);
+            delete(ENUMERABLE);
         }
 
         if (sobj.has(GET)) {
@@ -158,7 +158,7 @@ public final class AccessorPropertyDescriptor extends ScriptObject implements Pr
                 throw typeError("not.a.function", ScriptRuntime.safeToString(getter));
             }
         } else {
-            delete(GET, false);
+            delete(GET);
         }
 
         if (sobj.has(SET)) {
@@ -169,7 +169,7 @@ public final class AccessorPropertyDescriptor extends ScriptObject implements Pr
                 throw typeError("not.a.function", ScriptRuntime.safeToString(setter));
             }
         } else {
-            delete(SET, false);
+            delete(SET);
         }
 
         return this;

@@ -324,7 +324,7 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
     public void clear() {
         inGlobal(new Callable<Object>() {
             @Override public Object call() {
-                sobj.clear(true);
+                sobj.clear();
                 return null;
             }
         });
@@ -410,7 +410,7 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
         return inGlobal(new Callable<Object>() {
             @Override public Object call() {
                 final Object modValue = globalChanged? wrapLikeMe(value, oldGlobal) : value;
-                return translateUndefined(wrapLikeMe(sobj.put(key, unwrap(modValue, global), true)));
+                return translateUndefined(wrapLikeMe(sobj.put(key, unwrap(modValue, global))));
             }
         });
     }
@@ -439,7 +439,7 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
         checkKey(key);
         return inGlobal(new Callable<Object>() {
             @Override public Object call() {
-                return translateUndefined(wrapLikeMe(sobj.remove(key, true)));
+                return translateUndefined(wrapLikeMe(sobj.remove(key)));
             }
         });
     }
@@ -454,7 +454,7 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
     public boolean delete(final Object key) {
         return inGlobal(new Callable<Boolean>() {
             @Override public Boolean call() {
-                return sobj.delete(unwrap(key, global), true);
+                return sobj.delete(unwrap(key, global));
             }
         });
     }

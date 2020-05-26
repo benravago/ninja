@@ -223,19 +223,19 @@ public interface PropertyAccess {
      * @param key    the key
      * @return true if deletion succeeded, false otherwise
      */
-    public boolean delete(int key, boolean unused);
+    public boolean delete(int key);
 
     /**
      * Delete a property with the given key from the implementor
      * @param key    the key
      * @return true if deletion succeeded, false otherwise
      */
-    public boolean delete(double key, boolean unused);
+    public boolean delete(double key);
 
     /**
      * Delete a property with the given key from the implementor
      * @param key    the key
      * @return true if deletion succeeded, false otherwise
      */
-    public boolean delete(Object key, boolean unused);
+    public boolean delete(Object key);
 }

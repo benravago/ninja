@@ -4661,7 +4661,7 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
 
     private MethodEmitter globalDirectEval() {
         return method.invokestatic(GLOBAL_OBJECT, "directEval",
-                methodDescriptor(Object.class, Object.class, Object.class, Object.class, Object.class, boolean.class));
+                methodDescriptor(Object.class, Object.class, Object.class, Object.class, Object.class));
     }
 
     private abstract class OptimisticOperation {

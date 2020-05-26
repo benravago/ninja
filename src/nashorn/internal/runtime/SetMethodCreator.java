@@ -149,7 +149,7 @@ final class SetMethodCreator {
             final PropertyMap oldMap = getMap();
             final Property newProperty = property.removeFlags(Property.NEEDS_DECLARATION);
             final PropertyMap newMap = oldMap.replaceProperty(property, newProperty);
-            final MethodHandle fastSetter = find.replaceProperty(newProperty).getSetter(type, true, request);
+            final MethodHandle fastSetter = find.replaceProperty(newProperty).getSetter(type, request);
             final MethodHandle slowSetter = MH.insertArguments(ScriptObject.DECLARE_AND_SET, 1, getName()).asType(fastSetter.type());
 
             // cas map used as guard, if true that means we can do the set fast
@@ -158,7 +158,7 @@ final class SetMethodCreator {
             casMap = MH.asType(casMap, casMap.type().changeParameterType(0, Object.class));
             methodHandle = MH.guardWithTest(casMap, fastSetter, slowSetter);
         } else {
-            methodHandle = find.getSetter(type, true, request);
+            methodHandle = find.getSetter(type, request);
         }
 
         assert methodHandle != null;

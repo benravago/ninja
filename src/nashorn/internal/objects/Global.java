@@ -1511,11 +1511,11 @@ public final class Global extends Scope {
         final AccessorPropertyDescriptor desc = new AccessorPropertyDescriptor(configurable, enumerable, get == null ? UNDEFINED : get, set == null ? UNDEFINED : set, this);
 
         if (get == null) {
-            desc.delete(PropertyDescriptor.GET, false);
+            desc.delete(PropertyDescriptor.GET);
         }
 
         if (set == null) {
-            desc.delete(PropertyDescriptor.SET, false);
+            desc.delete(PropertyDescriptor.SET);
         }
 
         return desc;
@@ -1618,7 +1618,7 @@ public final class Global extends Scope {
      * @return the result of eval
      */
     public static Object eval(final Object self, final Object str) {
-        return directEval(self, str, Global.instanceFrom(self), UNDEFINED, false);
+        return directEval(self, str, Global.instanceFrom(self), UNDEFINED);
     }
 
     /**
@@ -1633,7 +1633,7 @@ public final class Global extends Scope {
      *
      * This is directly invoked from generated when eval(code) is called in user code
      */
-    public static Object directEval(final Object self, final Object str, final Object callThis, final Object location, final boolean unused) {
+    public static Object directEval(final Object self, final Object str, final Object callThis, final Object location) {
         if (!isString(str)) {
             return str;
         }
@@ -2607,14 +2607,14 @@ public final class Global extends Scope {
             initJavaAccess();
         } else {
             // delete nasgen-created global properties related to java access
-            this.delete("Java", false);
-            this.delete("JavaImporter", false);
-            this.delete("Packages", false);
-            this.delete("com", false);
-            this.delete("edu", false);
-            this.delete("java", false);
-            this.delete("javax", false);
-            this.delete("org", false);
+            this.delete("Java");
+            this.delete("JavaImporter");
+            this.delete("Packages");
+            this.delete("com");
+            this.delete("edu");
+            this.delete("java");
+            this.delete("javax");
+            this.delete("org");
         }
 
         if (! env._no_typed_arrays) {
@@ -2754,11 +2754,11 @@ public final class Global extends Scope {
         if (System.getSecurityManager() == null) {
             // do not fill $ENV if we have a security manager around
             // Retrieve current state of ENV variables.
-            env.putAll(System.getenv(), true);
+            env.putAll(System.getenv());
 
             // Set the PWD variable to a value that is guaranteed to be understood
             // by the underlying platform.
-            env.put(ScriptingFunctions.PWD_NAME, System.getProperty("user.dir"), true);
+            env.put(ScriptingFunctions.PWD_NAME, System.getProperty("user.dir"));
         }
         addOwnProperty(ScriptingFunctions.ENV_NAME, Attribute.NOT_ENUMERABLE, env);
 
@@ -2859,7 +2859,8 @@ public final class Global extends Scope {
         }
     }
     
-    static <T extends Throwable,V> V uncheck(Exception e) throws T { throw (T)e; }
+    @SuppressWarnings("unchecked")
+	static <T extends Throwable,V> V uncheck(Exception e) throws T { throw (T)e; }
 
     private ScriptObject initPrototype(final String name, final ScriptObject prototype) {
         try {

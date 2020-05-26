@@ -83,6 +83,6 @@ class ScriptArrayIterator extends ArrayLikeIterator<Object> {
 
     @Override
     public void remove() {
-        array.delete(index, false);
+        array.delete(index);
     }
 }

@@ -51,8 +51,8 @@ import nashorn.internal.runtime.ScriptRuntime;
 public final class PrimitiveLookup {
 
     /** Method handle to link setters on primitive base. See ES5 8.7.2. */
-    private static final MethodHandle PRIMITIVE_SETTER = findOwnMH("primitiveSetter",
-            MH.type(void.class, ScriptObject.class, Object.class, Object.class, boolean.class, Object.class));
+    private static final MethodHandle PRIMITIVE_SETTER = findOwnMH("primitiveSetter", 
+            MH.type(void.class, ScriptObject.class, Object.class, Object.class, Object.class));
 
 
     private PrimitiveLookup() {
@@ -132,7 +132,7 @@ public final class PrimitiveLookup {
             }
             break;
         case SET:
-            return getPrimitiveSetter(name, guard, wrapFilter, true);
+            return getPrimitiveSetter(name, guard, wrapFilter);
         default:
             break;
         }
@@ -153,7 +153,7 @@ public final class PrimitiveLookup {
         return null;
     }
 
-    private static GuardedInvocation getPrimitiveSetter(final String name, final MethodHandle guard, final MethodHandle wrapFilter, final boolean unused) {
+    private static GuardedInvocation getPrimitiveSetter(final String name, final MethodHandle guard, final MethodHandle wrapFilter) {
         MethodHandle filter = MH.asType(wrapFilter, wrapFilter.type().changeReturnType(ScriptObject.class));
         final MethodHandle target;
 
@@ -169,7 +169,7 @@ public final class PrimitiveLookup {
     }
 
     @SuppressWarnings("unused")
-    private static void primitiveSetter(final ScriptObject wrappedSelf, final Object self, final Object key, final boolean unused, final Object value) {
+    private static void primitiveSetter(final ScriptObject wrappedSelf, final Object self, final Object key, final Object value) {
         // See ES5.1 8.7.2 PutValue (V, W)
         final String name = JSType.toString(key);
         final FindProperty find = wrappedSelf.findProperty(name, true);
@@ -181,7 +181,7 @@ public final class PrimitiveLookup {
             }
         }
         // property found and is a UserAccessorProperty
-        find.setValue(value, true);
+        find.setValue(value);
     }
 
     private static MethodHandle findOwnMH(final String name, final MethodType type) {

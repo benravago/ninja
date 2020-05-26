@@ -166,26 +166,26 @@ final class NumberArrayData extends ContinuousArrayData implements NumericElemen
     }
 
     @Override
-    public ArrayData set(final int index, final Object value, final boolean unused) {
+    public ArrayData set(final int index, final Object value) {
         if (value instanceof Double || (value != null && canWiden(value.getClass()))) {
-            return set(index, ((Number)value).doubleValue(), true);
+            return set(index, ((Number)value).doubleValue());
         } else if (value == UNDEFINED) {
-            return new UndefinedArrayFilter(this).set(index, value, true);
+            return new UndefinedArrayFilter(this).set(index, value);
         }
 
         final ArrayData newData = convert(value == null ? Object.class : value.getClass());
-        return newData.set(index, value, true);
+        return newData.set(index, value);
     }
 
     @Override
-    public ArrayData set(final int index, final int value, final boolean unused) {
+    public ArrayData set(final int index, final int value) {
         array[index] = value;
         setLength(Math.max(index + 1, length()));
         return this;
     }
 
     @Override
-    public ArrayData set(final int index, final double value, final boolean unused) {
+    public ArrayData set(final int index, final double value) {
         array[index] = value;
         setLength(Math.max(index + 1, length()));
         return this;

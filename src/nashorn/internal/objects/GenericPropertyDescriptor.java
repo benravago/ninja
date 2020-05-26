@@ -127,13 +127,13 @@ public final class GenericPropertyDescriptor extends ScriptObject implements Pro
         if (sobj.has(CONFIGURABLE)) {
             this.configurable = JSType.toBoolean(sobj.get(CONFIGURABLE));
         } else {
-            delete(CONFIGURABLE, false);
+            delete(CONFIGURABLE);
         }
 
         if (sobj.has(ENUMERABLE)) {
             this.enumerable = JSType.toBoolean(sobj.get(ENUMERABLE));
         } else {
-            delete(ENUMERABLE, false);
+            delete(ENUMERABLE);
         }
 
         return this;

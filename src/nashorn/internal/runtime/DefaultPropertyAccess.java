@@ -146,13 +146,13 @@ public abstract class DefaultPropertyAccess implements PropertyAccess {
     public abstract boolean hasOwnProperty(Object key);
 
     @Override
-    public boolean delete(final int key, final boolean unused) {
-        return delete(JSType.toObject(key), true);
+    public boolean delete(final int key) {
+        return delete(JSType.toObject(key));
     }
 
     @Override
-    public boolean delete(final double key, final boolean unused) {
-        return delete(JSType.toObject(key), true);
+    public boolean delete(final double key) {
+        return delete(JSType.toObject(key));
     }
 
 }

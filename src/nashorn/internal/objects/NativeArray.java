@@ -118,12 +118,12 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
             final long value = array[index];
 
             if (widest == int.class && JSType.isRepresentableAsInt(value)) {
-                arrayData = arrayData.set(index, (int) value, false);
+                arrayData = arrayData.set(index, (int) value);
             } else if (widest != Object.class && JSType.isRepresentableAsDouble(value)) {
-                arrayData = arrayData.set(index, (double) value, false);
+                arrayData = arrayData.set(index, (double) value);
                 widest = double.class;
             } else {
-                arrayData = arrayData.set(index, (Object) value, false);
+                arrayData = arrayData.set(index, (Object) value);
                 widest = Object.class;
             }
         }
@@ -142,7 +142,7 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
             if (value == ScriptRuntime.EMPTY) {
                 arrayData = arrayData.delete(index);
             } else {
-                arrayData = arrayData.set(index, value, false);
+                arrayData = arrayData.set(index, value);
             }
         }
 
@@ -315,7 +315,7 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
         long o = oldLen;
         while (newLen < o) {
             o--;
-            final boolean deleteSucceeded = delete(o, false);
+            final boolean deleteSucceeded = delete(o);
             if (!deleteSucceeded) {
                 newLenDesc.setValue(o + 1);
                 if (!newWritable) {
@@ -422,7 +422,7 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
             // make array big enough to hold..
             setArray(getArray().ensure(longIndex));
         }
-        setArray(getArray().set(index, value, false));
+        setArray(getArray().set(index, value));
     }
 
     /**
@@ -945,7 +945,7 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
             final long   index   = len - 1;
             final Object element = sobj.get(index);
 
-            sobj.delete(index, true);
+            sobj.delete(index);
             sobj.set("length", index, 0);
 
             return element;
@@ -1009,7 +1009,7 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
             final ScriptObject sobj   = (ScriptObject)self;
 
             if (bulkable(sobj) && sobj.getArray().length() + args.length <= JSType.MAX_UINT) {
-                final ArrayData newData = sobj.getArray().push(true, args);
+                final ArrayData newData = sobj.getArray().push(args);
                 sobj.setArray(newData);
                 return JSType.toNarrowestNumber(newData.length());
             }
@@ -1040,7 +1040,7 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
             final ArrayData arrayData = sobj.getArray();
             final long length = arrayData.length();
             if (bulkable(sobj) && length < JSType.MAX_UINT) {
-                sobj.setArray(arrayData.push(true, arg));
+                sobj.setArray(arrayData.push(arg));
                 return length + 1;
             }
 
@@ -1078,9 +1078,9 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
                     sobj.set(upper, lowerValue, 0);
                 } else if (!lowerExists && upperExists) {
                     sobj.set(lower, upperValue, 0);
-                    sobj.delete(upper, true);
+                    sobj.delete(upper);
                 } else if (lowerExists && !upperExists) {
-                    sobj.delete(lower, true);
+                    sobj.delete(lower);
                     sobj.set(upper, lowerValue, 0);
                 }
             }
@@ -1122,12 +1122,12 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
                     if (hasCurrent) {
                         sobj.set(k - 1, sobj.get(k), 0);
                     } else if (hasPrevious) {
-                        sobj.delete(k - 1, true);
+                        sobj.delete(k - 1);
                     }
                     hasPrevious = hasCurrent;
                 }
             }
-            sobj.delete(--len, true);
+            sobj.delete(--len);
         } else {
             len = 0;
         }
@@ -1266,7 +1266,7 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
                 final Object[] sorted = sort(src.toArray(), comparefn);
 
                 for (int i = 0; i < sorted.length; i++) {
-                    array = array.set(i, sorted[i], true);
+                    array = array.set(i, sorted[i]);
                 }
 
                 // delete missing elements - which are at the end of sorted array
@@ -1359,12 +1359,12 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
                 if (sobj.has(from)) {
                     sobj.set(to, sobj.get(from), 0);
                 } else {
-                    sobj.delete(to, true);
+                    sobj.delete(to);
                 }
             }
 
             for (long k = len; k > len - deleteCount + items.length; k--) {
-                sobj.delete(k - 1, true);
+                sobj.delete(k - 1);
             }
         } else if (items.length > deleteCount) {
             for (long k = len - deleteCount; k > start; k--) {
@@ -1375,7 +1375,7 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
                     final Object fromValue = sobj.get(from);
                     sobj.set(to, fromValue, 0);
                 } else {
-                    sobj.delete(to, true);
+                    sobj.delete(to);
                 }
             }
         }
@@ -1417,7 +1417,7 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
             sobj.getArray().shiftRight(items.length);
 
             for (int j = 0; j < items.length; j++) {
-                sobj.setArray(sobj.getArray().set(j, items[j], true));
+                sobj.setArray(sobj.getArray().set(j, items[j]));
             }
         } else {
             for (long k = len; k > 0; k--) {
@@ -1428,7 +1428,7 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
                     final Object fromValue = sobj.get(from);
                     sobj.set(to, fromValue, 0);
                 } else {
-                    sobj.delete(to, true);
+                    sobj.delete(to);
                 }
             }
 

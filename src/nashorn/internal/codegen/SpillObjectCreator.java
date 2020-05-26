@@ -108,11 +108,11 @@ public final class SpillObjectCreator extends ObjectCreator<Expression> {
 
                         //avoid blowing up the array if we can
                         if (constantValue instanceof Integer) {
-                            arrayData = arrayData.set(index, ((Integer)constantValue).intValue(), false);
+                            arrayData = arrayData.set(index, ((Integer)constantValue).intValue());
                         } else if (constantValue instanceof Double) {
-                            arrayData = arrayData.set(index, ((Double)constantValue).doubleValue(), false);
+                            arrayData = arrayData.set(index, ((Double)constantValue).doubleValue());
                         } else {
-                            arrayData = arrayData.set(index, constantValue, false);
+                            arrayData = arrayData.set(index, constantValue);
                         }
 
                         if (longIndex > oldLength) {

@@ -112,7 +112,7 @@ public final class FindProperty {
      *
      * @return method handle for the getter
      */
-    public MethodHandle getSetter(final Class<?> type, final boolean unused, final LinkRequest request) {
+    public MethodHandle getSetter(final Class<?> type, final LinkRequest request) {
         MethodHandle setter = property.getSetter(type, getOwner().getMap());
         if (property instanceof UserAccessorProperty) {
             setter =  MH.insertArguments(setter, 1, UserAccessorProperty.getINVOKE_UA_SETTER(type), property.getKey());
@@ -234,8 +234,8 @@ public final class FindProperty {
      *
      * @param value the new value
      */
-    public void setValue(final int value, final boolean unused) {
-        property.setValue(getSetterReceiver(), getOwner(), value, true);
+    public void setValue(final int value) {
+        property.setValue(getSetterReceiver(), getOwner(), value);
     }
 
     /**
@@ -243,8 +243,8 @@ public final class FindProperty {
      *
      * @param value the new value
      */
-    public void setValue(final double value, final boolean unused) {
-        property.setValue(getSetterReceiver(), getOwner(), value, true);
+    public void setValue(final double value) {
+        property.setValue(getSetterReceiver(), getOwner(), value);
     }
 
     /**
@@ -252,8 +252,8 @@ public final class FindProperty {
      *
      * @param value the new value
      */
-    public void setValue(final Object value, final boolean unused) {
-        property.setValue(getSetterReceiver(), getOwner(), value, true);
+    public void setValue(final Object value) {
+        property.setValue(getSetterReceiver(), getOwner(), value);
     }
 
     /**

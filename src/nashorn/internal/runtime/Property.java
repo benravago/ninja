@@ -474,7 +474,7 @@ public abstract class Property implements Serializable {
      * @param owner the owner object
      * @param value the new property value
      */
-    public abstract void setValue(final ScriptObject self, final ScriptObject owner, final int value, final boolean unused);
+    public abstract void setValue(final ScriptObject self, final ScriptObject owner, final int value);
 
     /**
      * Set the value of this property in {@code owner}. This allows to bypass creation of the
@@ -484,7 +484,7 @@ public abstract class Property implements Serializable {
      * @param owner the owner object
      * @param value the new property value
      */
-    public abstract void setValue(final ScriptObject self, final ScriptObject owner, final double value, final boolean unused);
+    public abstract void setValue(final ScriptObject self, final ScriptObject owner, final double value);
 
     /**
      * Set the value of this property in {@code owner}. This allows to bypass creation of the
@@ -494,7 +494,7 @@ public abstract class Property implements Serializable {
      * @param owner the owner object
      * @param value the new property value
      */
-    public abstract void setValue(final ScriptObject self, final ScriptObject owner, final Object value, final boolean unused);
+    public abstract void setValue(final ScriptObject self, final ScriptObject owner, final Object value);
 
     /**
      * Returns true if this property has a low-level setter handle. This can be used to determine whether a

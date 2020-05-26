@@ -147,18 +147,18 @@ public abstract class ArrayData {
         }
 
         @Override
-        public ArrayData set(final int index, final Object value, final boolean unused) {
-            return toRealArrayData(index).set(index, value, true);
+        public ArrayData set(final int index, final Object value) {
+            return toRealArrayData(index).set(index, value);
         }
 
         @Override
-        public ArrayData set(final int index, final int value, final boolean unused) {
-            return toRealArrayData(index).set(index, value, true);
+        public ArrayData set(final int index, final int value) {
+            return toRealArrayData(index).set(index, value);
         }
 
         @Override
-        public ArrayData set(final int index, final double value, final boolean unused) {
-            return toRealArrayData(index).set(index, value, true);
+        public ArrayData set(final int index, final double value) {
+            return toRealArrayData(index).set(index, value);
         }
 
         @Override
@@ -187,8 +187,8 @@ public abstract class ArrayData {
         }
 
         @Override
-        public ArrayData push(final boolean unused, final Object item) {
-            return toRealArrayData().push(true, item);
+        public ArrayData push(final Object item) {
+            return toRealArrayData().push(item);
         }
 
         @Override
@@ -494,7 +494,7 @@ public abstract class ArrayData {
      * @param value the value
      * @return new array data (or same)
      */
-    public abstract ArrayData set(final int index, final Object value, final boolean unused);
+    public abstract ArrayData set(final int index, final Object value);
 
     /**
      * Set an int value at a given index
@@ -503,7 +503,7 @@ public abstract class ArrayData {
      * @param value the value
      * @return new array data (or same)
      */
-    public abstract ArrayData set(final int index, final int value, final boolean unused);
+    public abstract ArrayData set(final int index, final int value);
 
     /**
      * Set an double value at a given index
@@ -512,7 +512,7 @@ public abstract class ArrayData {
      * @param value the value
      * @return new array data (or same)
      */
-    public abstract ArrayData set(final int index, final double value, final boolean unused);
+    public abstract ArrayData set(final int index, final double value);
 
     /**
      * Set an empty value at a given index. Should only affect Object array.
@@ -608,7 +608,7 @@ public abstract class ArrayData {
      *
      * @return true if element can be deleted
      */
-    public boolean canDelete(final int index, final boolean unused) {
+    public boolean canDelete(final int index) {
         return true;
     }
 
@@ -619,7 +619,7 @@ public abstract class ArrayData {
      *
      * @return true if range can be deleted
      */
-    public boolean canDelete(final long longIndex, final boolean unused) {
+    public boolean canDelete(final long longIndex) {
         return true;
     }
 
@@ -631,8 +631,8 @@ public abstract class ArrayData {
      * @param toIndex    the end index (inclusive)
      * @return an array with the range deleted, or this array if no deletion took place
      */
-    public final ArrayData safeDelete(final long fromIndex, final long toIndex, final boolean unused) {
-        if (fromIndex <= toIndex && canDelete(fromIndex, true)) {
+    public final ArrayData safeDelete(final long fromIndex, final long toIndex) {
+        if (fromIndex <= toIndex && canDelete(fromIndex)) {
             return delete(fromIndex, toIndex);
         }
         return this;
@@ -685,7 +685,7 @@ public abstract class ArrayData {
      * @param items  the items
      * @return new array data (or same)
      */
-    public ArrayData push(final boolean unused, final Object... items) {
+    public ArrayData push(final Object... items) {
         if (items.length == 0) {
             return this;
         }
@@ -696,7 +696,7 @@ public abstract class ArrayData {
         long      pos     = newData.length;
         for (final Object item : items) {
             newData = newData.ensure(pos); //avoid sparse array
-            newData.set((int)pos++, item, true);
+            newData.set((int)pos++, item);
         }
         return newData;
     }
@@ -707,8 +707,8 @@ public abstract class ArrayData {
      * @param item   the item
      * @return new array data (or same)
      */
-    public ArrayData push(final boolean unused, final Object item) {
-        return push(true, new Object[] { item });
+    public ArrayData push(final Object item) {
+        return push(new Object[] { item });
     }
 
     /**

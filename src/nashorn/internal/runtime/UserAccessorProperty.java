@@ -203,17 +203,17 @@ public final class UserAccessorProperty extends SpillProperty {
     }
 
     @Override
-    public void setValue(final ScriptObject self, final ScriptObject owner, final int value, final boolean unused) {
-        setValue(self, owner, (Object) value, true);
+    public void setValue(final ScriptObject self, final ScriptObject owner, final int value) {
+        setValue(self, owner, (Object) value);
     }
 
     @Override
-    public void setValue(final ScriptObject self, final ScriptObject owner, final double value, final boolean unused) {
-        setValue(self, owner, (Object) value, true);
+    public void setValue(final ScriptObject self, final ScriptObject owner, final double value) {
+        setValue(self, owner, (Object) value);
     }
 
     @Override
-    public void setValue(final ScriptObject self, final ScriptObject owner, final Object value, final boolean unused) {
+    public void setValue(final ScriptObject self, final ScriptObject owner, final Object value) {
         try {
             invokeObjectSetter(getAccessors((owner != null) ? owner : self), getObjectSetterInvoker(), getKey().toString(), self, value);
         } catch (final Error | RuntimeException t) {

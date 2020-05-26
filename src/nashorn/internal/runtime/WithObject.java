@@ -75,14 +75,14 @@ public final class WithObject extends Scope {
      * @return True if deleted.
      */
     @Override
-    public boolean delete(final Object key, final boolean unused) {
+    public boolean delete(final Object key) {
         final ScriptObject self = expression;
         final String propName = JSType.toString(key);
 
         final FindProperty find = self.findProperty(propName, true);
 
         if (find != null) {
-            return self.delete(propName, true);
+            return self.delete(propName);
         }
 
         return false;

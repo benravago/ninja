@@ -327,27 +327,27 @@ public final class NativeJSAdapter extends ScriptObject {
     }
 
     @Override
-    public boolean delete(final int key, final boolean unused) {
+    public boolean delete(final int key) {
         if (overrides && super.hasOwnProperty(key)) {
-            return super.delete(key, true);
+            return super.delete(key);
         }
 
         return JSType.toBoolean(callAdaptee(Boolean.TRUE, __delete__, key, true));
     }
 
     @Override
-    public boolean delete(final double key, final boolean unused) {
+    public boolean delete(final double key) {
         if (overrides && super.hasOwnProperty(key)) {
-            return super.delete(key, true);
+            return super.delete(key);
         }
 
         return JSType.toBoolean(callAdaptee(Boolean.TRUE, __delete__, key, true));
     }
 
     @Override
-    public boolean delete(final Object key, final boolean unused) {
+    public boolean delete(final Object key) {
         if (overrides && super.hasOwnProperty(key)) {
-            return super.delete(key, true);
+            return super.delete(key);
         }
 
         return JSType.toBoolean(callAdaptee(Boolean.TRUE, __delete__, key, true));
