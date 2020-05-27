@@ -28,9 +28,7 @@ package nashorn.tools;
 import static nashorn.internal.lookup.Lookup.MH;
 import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import nashorn.internal.runtime.JSType;

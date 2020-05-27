@@ -45,7 +45,6 @@ import nashorn.internal.codegen.types.Type;
 import nashorn.internal.lookup.MethodHandleFactory;
 import nashorn.internal.lookup.MethodHandleFunctionality;
 import nashorn.internal.objects.Global;
-import nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
 
 /**
  * Used to signal to the linker to relink the callee

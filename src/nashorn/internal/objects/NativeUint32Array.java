@@ -32,7 +32,6 @@ import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
-import nashorn.internal.codegen.types.Type;
 import nashorn.internal.objects.annotations.Attribute;
 import nashorn.internal.objects.annotations.Constructor;
 import nashorn.internal.objects.annotations.Function;
@@ -42,7 +41,6 @@ import nashorn.internal.objects.annotations.Where;
 import nashorn.internal.runtime.JSType;
 import nashorn.internal.runtime.PropertyMap;
 import nashorn.internal.runtime.ScriptObject;
-import nashorn.internal.runtime.UnwarrantedOptimismException;
 import nashorn.internal.runtime.arrays.ArrayData;
 import nashorn.internal.runtime.arrays.TypedArrayData;
 

@@ -37,7 +37,6 @@ import nashorn.internal.WeakValueCache;
 import nashorn.internal.objects.annotations.Attribute;
 import nashorn.internal.objects.annotations.Constructor;
 import nashorn.internal.objects.annotations.Function;
-import nashorn.internal.objects.annotations.Getter;
 import nashorn.internal.objects.annotations.Property;
 import nashorn.internal.objects.annotations.ScriptClass;
 import nashorn.internal.objects.annotations.Where;

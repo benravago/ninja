@@ -44,7 +44,6 @@ import nashorn.internal.runtime.ScriptObject;
 import nashorn.internal.runtime.ScriptRuntime;
 import nashorn.internal.runtime.events.RuntimeEvent;
 import nashorn.internal.runtime.linker.LinkerCallSite;
-import nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
 
 /**
  * Nashorn specific debug utils. This is meant for Nashorn developers.

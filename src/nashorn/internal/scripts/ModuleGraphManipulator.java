@@ -25,8 +25,6 @@
 
 package nashorn.internal.scripts;
 
-import nashorn.api.scripting.JSObject;
-
 /**
  * Nashorn's StructureLoader and ScriptLoader instances load
  * this class in the respective dynamic modules created. This

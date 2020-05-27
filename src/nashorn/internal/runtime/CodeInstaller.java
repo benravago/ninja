@@ -27,7 +27,6 @@ package nashorn.internal.runtime;
 
 import java.util.Collection;
 import java.util.Map;
-import nashorn.internal.codegen.ClassEmitter;
 
 /**
  * Interface for installing classes passed to the compiler.

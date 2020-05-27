@@ -45,7 +45,6 @@ import dynalink.linker.GuardingDynamicLinker;
 import dynalink.linker.GuardingTypeConverterFactory;
 import dynalink.linker.LinkRequest;
 import dynalink.linker.LinkerServices;
-import dynalink.linker.support.Guards;
 import dynalink.linker.support.Lookup;
 import nashorn.internal.codegen.types.Type;
 import nashorn.internal.runtime.ECMAException;

@@ -45,7 +45,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import nashorn.internal.objects.NativeArray;
-import static nashorn.internal.runtime.ECMAErrors.rangeError;
 
 /**
  * Global functions supported only in scripting mode.

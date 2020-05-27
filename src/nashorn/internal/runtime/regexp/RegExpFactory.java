@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 import nashorn.internal.runtime.ParserException;
-import nashorn.internal.runtime.options.Options;
 
 /**
  * Factory class for regular expressions. This class creates instances of {@link JdkRegExp}.
