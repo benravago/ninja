@@ -176,9 +176,6 @@ public final class ScriptEnvironment {
     /** List of functions to write to the print code dir, optional */
     public final String _print_code_func;
 
-    /** Print function will no print newline characters */
-    public final boolean _print_no_newline;
-
     /** print symbols and their contents for the script */
     public final boolean _print_symbols;
 
@@ -273,7 +270,6 @@ public final class ScriptEnvironment {
         _parse_only           = options.getBoolean("parse.only");
         _persistent_cache     = options.getBoolean("persistent.code.cache");
         _print_code           = options.getString("print.code") != null;
-        _print_no_newline     = options.getBoolean("print.no.newline");
         _print_symbols        = options.getBoolean("print.symbols");
         _scripting            = options.getBoolean("scripting");
         _version              = options.getBoolean("version");

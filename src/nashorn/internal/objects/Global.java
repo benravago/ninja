@@ -32,7 +32,7 @@ import static nashorn.internal.runtime.JSType.isString;
 import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.UncheckedIOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -163,10 +163,12 @@ public final class Global extends Scope {
     @Property(attributes = Attribute.NOT_ENUMERABLE)
     public Object unescape;
 
-    /** Nashorn extension: global.print */
+    /** Nashorn extension: global.{print,warn} */
     @Property(attributes = Attribute.NOT_ENUMERABLE)
     public Object print;
-
+    @Property(attributes = Attribute.NOT_ENUMERABLE)
+    public Object warn;
+    
     /** Nashorn extension: global.load */
     @Property(attributes = Attribute.NOT_ENUMERABLE)
     public Object load;
@@ -1064,7 +1066,7 @@ public final class Global extends Scope {
 
     private static final MethodHandle EVAL                 = findOwnMH_S("eval",                Object.class, Object.class, Object.class);
     private static final MethodHandle NO_SUCH_PROPERTY     = findOwnMH_S(NO_SUCH_PROPERTY_NAME, Object.class, Object.class, Object.class);
-    private static final MethodHandle PRINT                = findOwnMH_S("print",               Object.class, Object.class, Object[].class);
+    private static final MethodHandle ERRORLN              = findOwnMH_S("errorln",             Object.class, Object.class, Object[].class);
     private static final MethodHandle PRINTLN              = findOwnMH_S("println",             Object.class, Object.class, Object[].class);
     private static final MethodHandle LOAD                 = findOwnMH_S("load",                Object.class, Object.class, Object.class);
     private static final MethodHandle LOAD_WITH_NEW_GLOBAL = findOwnMH_S("loadWithNewGlobal",   Object.class, Object.class, Object[].class);
@@ -1644,14 +1646,14 @@ public final class Global extends Scope {
     }
 
     /**
-     * Global print implementation - Nashorn extension
+     * Global warn implementation - Nashorn extension
      *
      * @param self    scope
      * @param objects arguments to print
      *
-     * @return result of print (undefined)
+     * @return result of warn (undefined)
      */
-    public static Object print(final Object self, final Object... objects) {
+    public static Object errorln(final Object self, final Object... objects) {
         return Global.instanceFrom(self).printImpl(false, objects);
     }
 
@@ -2569,7 +2571,8 @@ public final class Global extends Scope {
         this.decodeURIComponent = ScriptFunction.createBuiltin("decodeURIComponent", GlobalFunctions.DECODE_URICOMPONENT);
         this.escape             = ScriptFunction.createBuiltin("escape",     GlobalFunctions.ESCAPE);
         this.unescape           = ScriptFunction.createBuiltin("unescape",   GlobalFunctions.UNESCAPE);
-        this.print              = ScriptFunction.createBuiltin("print",      env._print_no_newline ? PRINT : PRINTLN);
+        this.print              = ScriptFunction.createBuiltin("print",      PRINTLN);
+        this.warn               = ScriptFunction.createBuiltin("warn",       ERRORLN);
         this.load               = ScriptFunction.createBuiltin("load",       LOAD);
         this.loadWithNewGlobal  = ScriptFunction.createBuiltin("loadWithNewGlobal", LOAD_WITH_NEW_GLOBAL);
         this.exit               = ScriptFunction.createBuiltin("exit",       EXIT);
@@ -2592,10 +2595,10 @@ public final class Global extends Scope {
         arrayPrototype.setIsArray();
 
         this.symbol   = LAZY_SENTINEL;
-		this.map      = LAZY_SENTINEL;
-		this.weakMap  = LAZY_SENTINEL;
-		this.set      = LAZY_SENTINEL;
-		this.weakSet  = LAZY_SENTINEL;
+        this.map      = LAZY_SENTINEL;
+        this.weakMap  = LAZY_SENTINEL;
+        this.set      = LAZY_SENTINEL;
+        this.weakSet  = LAZY_SENTINEL;
 
         // Error stuff
         initErrorObjects();
@@ -2802,10 +2805,12 @@ public final class Global extends Scope {
         this.addOwnProperty("Debug", Attribute.NOT_ENUMERABLE, initConstructor("Debug", ScriptObject.class));
     }
 
-    private Object printImpl(final boolean newLine, final Object... objects) {
+    private Object printImpl(final boolean stdout, final Object... objects) {
         final ScriptContext sc = currentContext();
         @SuppressWarnings("resource")
-        final PrintWriter out = sc != null? new PrintWriter(sc.getWriter()) : getContext().getEnv().getOut();
+        var out = stdout 
+            ? ( sc != null ? sc.getWriter() : getContext().getEnv().getOut() )
+            : ( sc != null ? sc.getErrorWriter() : getContext().getEnv().getErr() );
         final StringBuilder sb = new StringBuilder();
 
         for (final Object obj : objects) {
@@ -2817,13 +2822,12 @@ public final class Global extends Scope {
         }
 
         // Print all at once to ensure thread friendly result.
-        if (newLine) {
-            out.println(sb.toString());
-        } else {
-            out.print(sb.toString());
+        try {
+            out.append(sb).append('\n');
+            out.flush();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
-
-        out.flush();
 
         return UNDEFINED;
     }
@@ -2855,12 +2859,12 @@ public final class Global extends Scope {
 
             return res;
         } catch (final Exception e) {
-        	return uncheck(e);
+            return uncheck(e);
         }
     }
     
     @SuppressWarnings("unchecked")
-	static <T extends Throwable,V> V uncheck(Exception e) throws T { throw (T)e; }
+    static <T extends Throwable,V> V uncheck(Exception e) throws T { throw (T)e; }
 
     private ScriptObject initPrototype(final String name, final ScriptObject prototype) {
         try {
