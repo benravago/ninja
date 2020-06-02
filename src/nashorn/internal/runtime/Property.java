@@ -33,6 +33,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.SwitchPoint;
 import java.util.Objects;
 import nashorn.internal.codegen.ObjectClassGenerator;
+import nashorn.internal.Util;
 
 /**
  * This is the abstract superclass representing a JavaScript Property.
@@ -617,7 +618,7 @@ public abstract class Property implements Serializable {
 
         sb.append(indent(getKey().toString(), 20)).
             append(" id=").
-            append(Debug.id(this)).
+            append(Util.id(this)).
             append(" (0x").
             append(indent(Integer.toHexString(flags), 4)).
             append(") ").

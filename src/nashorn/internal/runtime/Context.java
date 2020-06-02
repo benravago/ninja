@@ -176,11 +176,6 @@ public final class Context {
      */
     private final Map<String, SwitchPoint> builtinSwitchPoints = new HashMap<>();
 
-    /* Force DebuggerSupport to be loaded. */
-    static {
-        DebuggerSupport.FORCELOAD = true;
-    }
-
     static long getNamedInstalledScriptCount() {
         return NAMED_INSTALLED_SCRIPT_COUNT.sum();
     }

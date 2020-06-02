@@ -46,6 +46,7 @@ import nashorn.internal.codegen.ObjectClassGenerator;
 import nashorn.internal.codegen.types.Type;
 import nashorn.internal.lookup.Lookup;
 import nashorn.internal.objects.Global;
+import nashorn.internal.Util;
 
 /**
  * An AccessorProperty is the most generic property type. An AccessorProperty is
@@ -667,7 +668,7 @@ public class AccessorProperty extends Property {
                 new Supplier<String>() {
                     @Override
                     public String get() {
-                        return tag + " '" + getKey() + "' (property="+ Debug.id(this) + ", slot=" + getSlot() + " " + getClass().getSimpleName() + " forType=" + stripName(forType) + ", type=" + stripName(type) + ')';
+                        return tag + " '" + getKey() + "' (property="+ Util.id(this) + ", slot=" + getSlot() + " " + getClass().getSimpleName() + " forType=" + stripName(forType) + ", type=" + stripName(type) + ')';
                     }
                 });
     }
@@ -699,7 +700,7 @@ public class AccessorProperty extends Property {
                 new Supplier<String>() {
                     @Override
                     public String get() {
-                        return "Setting map " + Debug.id(oldMap) + " => " + Debug.id(newMap) + " " + oldMap + " => " + newMap;
+                        return "Setting map " + Util.id(oldMap) + " => " + Util.id(newMap) + " " + oldMap + " => " + newMap;
                     }
                 });
         return mh;

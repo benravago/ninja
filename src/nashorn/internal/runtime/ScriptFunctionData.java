@@ -40,7 +40,6 @@ import java.util.LinkedList;
 import java.util.List;
 import nashorn.internal.runtime.linker.LinkerCallSite;
 
-
 /**
  * A container for data needed to instantiate a specific {@link ScriptFunction} at runtime.
  * Instances of this class are created during codegen and stored in script classes'
@@ -627,8 +626,6 @@ public abstract class ScriptFunctionData implements Serializable {
         final Object       selfObj = convertThisObject(self);
         final Object[]     args    = arguments == null ? ScriptRuntime.EMPTY_ARRAY : arguments;
 
-        DebuggerSupport.notifyInvoke(mh);
-
         if (isVarArg(mh)) {
             if (needsCallee(mh)) {
                 return mh.invokeExact(fn, selfObj, args);
@@ -681,8 +678,6 @@ public abstract class ScriptFunctionData implements Serializable {
     Object construct(final ScriptFunction fn, final Object... arguments) throws Throwable {
         final MethodHandle mh   = getGenericConstructor(fn.getScope());
         final Object[]     args = arguments == null ? ScriptRuntime.EMPTY_ARRAY : arguments;
-
-        DebuggerSupport.notifyInvoke(mh);
 
         if (isVarArg(mh)) {
             if (needsCallee(mh)) {

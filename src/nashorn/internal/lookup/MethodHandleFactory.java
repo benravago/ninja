@@ -39,7 +39,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import nashorn.internal.runtime.Context;
-import nashorn.internal.runtime.Debug;
+import nashorn.internal.Util;
 import nashorn.internal.runtime.ScriptObject;
 import nashorn.internal.runtime.logging.DebugLogger;
 import nashorn.internal.runtime.logging.Loggable;
@@ -216,7 +216,7 @@ public final class MethodHandleFactory {
 
         if (arg instanceof ScriptObject) {
             return arg.toString() +
-                    " (map=" + Debug.id(((ScriptObject)arg).getMap()) +
+                    " (map=" + Util.id(((ScriptObject)arg).getMap()) +
                     ')';
         }
 

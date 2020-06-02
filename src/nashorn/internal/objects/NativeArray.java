@@ -55,7 +55,7 @@ import nashorn.internal.objects.annotations.SpecializedFunction;
 import nashorn.internal.objects.annotations.SpecializedFunction.LinkLogic;
 import nashorn.internal.objects.annotations.Where;
 import nashorn.internal.runtime.Context;
-import nashorn.internal.runtime.Debug;
+import nashorn.internal.Util;
 import nashorn.internal.runtime.JSType;
 import nashorn.internal.runtime.OptimisticBuiltins;
 import nashorn.internal.runtime.PropertyDescriptor;
@@ -1757,7 +1757,7 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
 
     @Override
     public String toString() {
-        return "NativeArray@" + Debug.id(this) + " [" + getArray().getClass().getSimpleName() + ']';
+        return "NativeArray@" + Util.id(this) + " [" + getArray().getClass().getSimpleName() + ']';
     }
 
     @Override

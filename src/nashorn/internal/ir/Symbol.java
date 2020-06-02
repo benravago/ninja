@@ -34,7 +34,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import nashorn.internal.codegen.types.Type;
 import nashorn.internal.runtime.Context;
-import nashorn.internal.runtime.Debug;
+import nashorn.internal.Util;
 import nashorn.internal.runtime.options.Options;
 
 /**
@@ -665,7 +665,7 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
     }
 
     private void trace(final String desc) {
-        Context.err(Debug.id(this) + " SYMBOL: '" + name + "' " + desc);
+        Context.err(Util.id(this) + " SYMBOL: '" + name + "' " + desc);
         if (TRACE_SYMBOLS_STACKTRACE != null && (TRACE_SYMBOLS_STACKTRACE.isEmpty() || TRACE_SYMBOLS_STACKTRACE.contains(name))) {
             new Throwable().printStackTrace(Context.getCurrentErr());
         }

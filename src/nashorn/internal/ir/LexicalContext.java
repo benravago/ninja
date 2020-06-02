@@ -27,7 +27,7 @@ package nashorn.internal.ir;
 import java.io.File;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import nashorn.internal.runtime.Debug;
+import nashorn.internal.Util;
 import nashorn.internal.runtime.Source;
 
 /**
@@ -714,7 +714,7 @@ public class LexicalContext {
             final Object node = stack[i];
             sb.append(node.getClass().getSimpleName());
             sb.append('@');
-            sb.append(Debug.id(node));
+            sb.append(Util.id(node));
             sb.append(':');
             if (node instanceof FunctionNode) {
                 final FunctionNode fn = (FunctionNode)node;

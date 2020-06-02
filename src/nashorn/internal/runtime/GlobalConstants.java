@@ -50,6 +50,7 @@ import nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
 import nashorn.internal.runtime.logging.DebugLogger;
 import nashorn.internal.runtime.logging.Loggable;
 import nashorn.internal.runtime.logging.Logger;
+import nashorn.internal.Util;
 
 /**
  * Each context owns one of these. This is basically table of accessors
@@ -208,7 +209,7 @@ public final class GlobalConstants implements Loggable {
 
         @Override
         public String toString() {
-            return "[" + quote(name) + " <id=" + Debug.id(this) + "> inv#=" + invalidations + '/' + MAX_RETRIES + " sp_inv=" + sp.hasBeenInvalidated() + ']';
+            return "[" + quote(name) + " <id=" + Util.id(this) + "> inv#=" + invalidations + '/' + MAX_RETRIES + " sp_inv=" + sp.hasBeenInvalidated() + ']';
         }
 
         String getName() {

@@ -47,6 +47,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.atomic.LongAdder;
 import nashorn.internal.runtime.options.Options;
 import nashorn.internal.scripts.JO;
+import nashorn.internal.Util;
 
 /**
  * Map of object properties. The PropertyMap is the "template" for JavaScript object
@@ -742,7 +743,7 @@ public class PropertyMap implements Iterable<Object>, Serializable {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
 
-        sb.append(Debug.id(this));
+        sb.append(Util.id(this));
         sb.append(" = {\n");
 
         for (final Property property : getProperties()) {

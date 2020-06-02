@@ -134,7 +134,7 @@ import nashorn.internal.objects.Global;
 import nashorn.internal.parser.Lexer.RegexToken;
 import nashorn.internal.parser.TokenType;
 import nashorn.internal.runtime.Context;
-import nashorn.internal.runtime.Debug;
+import nashorn.internal.Util;
 import nashorn.internal.runtime.ECMAException;
 import nashorn.internal.runtime.JSType;
 import nashorn.internal.runtime.OptimisticReturnFilters;
@@ -218,9 +218,6 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
     /** Is the current code submitted by 'eval' call? */
     private final boolean evalCode;
 
-    /** Call site flags given to the code generator to be used for all generated call sites */
-    private final int callSiteFlags;
-
     /** How many regexp fields have been emitted */
     private int regexFieldCount;
 
@@ -270,7 +267,6 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
         this.compiler                = compiler;
         this.evalCode                = compiler.getSource().isEvalCode();
         this.continuationEntryPoints = continuationEntryPoints;
-        this.callSiteFlags           = compiler.getScriptEnvironment()._callsite_flags;
         this.log                     = initLogger(compiler.getContext());
     }
 
@@ -290,7 +286,7 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
      * @return the correct flags for a call site in the current function
      */
     int getCallSiteFlags() {
-        return lc.getCurrentFunction().getCallSiteFlags() | callSiteFlags;
+        return lc.getCurrentFunction().getCallSiteFlags();
     }
 
     /**
@@ -1966,9 +1962,6 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
                 param.getSymbol().setFieldIndex(nextParam++);
             }
         }
-
-        // Debugging: print symbols? @see --print-symbols flag
-        printSymbols(block, function, (isFunctionBody ? "Function " : "Block in ") + (function.getIdent() == null ? "<anonymous>" : function.getIdent().getName()));
     }
 
     /**
@@ -2105,7 +2098,7 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
         if (!emittedMethods.contains(fnName)) {
             log.info("=== BEGIN ", fnName);
 
-            assert functionNode.getCompileUnit() != null : "no compile unit for " + fnName + " " + Debug.id(functionNode);
+            assert functionNode.getCompileUnit() != null : "no compile unit for " + fnName + " " + Util.id(functionNode);
             unit = lc.pushCompileUnit(functionNode.getCompileUnit());
             assert lc.hasCompileUnits();
 
@@ -4328,25 +4321,6 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
             scopeAccess.generateScopeCall();
         }
     }
-
-    /**
-     * Debug code used to print symbols
-     *
-     * @param block the block we are in
-     * @param function the function we are in
-     * @param ident identifier for block or function where applicable
-     */
-    private void printSymbols(final Block block, final FunctionNode function, final String ident) {
-        if (compiler.getScriptEnvironment()._print_symbols || function.getDebugFlag(FunctionNode.DEBUG_PRINT_SYMBOLS)) {
-            final PrintWriter out = compiler.getScriptEnvironment().getErr();
-            out.println("[BLOCK in '" + ident + "']");
-            if (!block.printSymbols(out)) {
-                out.println("<no symbols>");
-            }
-            out.println();
-        }
-    }
-
 
     /**
      * The difference between a store and a self modifying store is that

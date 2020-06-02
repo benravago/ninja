@@ -137,11 +137,6 @@ public final class Source implements Loggable {
         }
     }
 
-    /* package-private */
-    DebuggerSupport.SourceInfo getSourceInfo() {
-        return new DebuggerSupport.SourceInfo(getName(), data.hashCode(),  data.url(), data.array());
-    }
-
     // Wrapper to manage lazy loading
     private static interface Data {
 

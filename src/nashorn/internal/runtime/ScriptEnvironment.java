@@ -34,8 +34,6 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import nashorn.internal.codegen.Namespace;
-import nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
-import nashorn.internal.runtime.options.KeyValueOption;
 import nashorn.internal.runtime.options.LoggingOption;
 import nashorn.internal.runtime.options.LoggingOption.LoggerInfo;
 import nashorn.internal.runtime.options.Option;
@@ -74,9 +72,6 @@ public final class ScriptEnvironment {
 
     /** Accept "const" keyword and treat it as variable. Interim feature */
     public final boolean _const_as_var;
-
-    /** Accumulated callsite flags that will be used when bootstrapping script callsites */
-    public final int     _callsite_flags;
 
     /** Generate line number table in class files */
     public final boolean _debug_lines;
@@ -167,17 +162,11 @@ public final class ScriptEnvironment {
     /** Enable disk cache for compiled scripts */
     public final boolean _persistent_cache;
 
-    /** Print resulting bytecode for script */
-    public final boolean _print_code;
-
     /** Directory (optional) to print files to */
     public final String _print_code_dir;
 
     /** List of functions to write to the print code dir, optional */
     public final String _print_code_func;
-
-    /** print symbols and their contents for the script */
-    public final boolean _print_symbols;
 
     /** is this environment in scripting mode? */
     public final boolean _scripting;
@@ -266,8 +255,6 @@ public final class ScriptEnvironment {
         _no_typed_arrays      = options.getBoolean("no.typed.arrays");
         _parse_only           = options.getBoolean("parse.only");
         _persistent_cache     = options.getBoolean("persistent.code.cache");
-        _print_code           = options.getString("print.code") != null;
-        _print_symbols        = options.getBoolean("print.symbols");
         _scripting            = options.getBoolean("scripting");
         _version              = options.getBoolean("version");
 
@@ -323,26 +310,6 @@ public final class ScriptEnvironment {
         }
         _print_code_dir = dir;
         _print_code_func = func;
-
-        int callSiteFlags = 0;
-        if (options.getBoolean("profile.callsites")) {
-            callSiteFlags |= NashornCallSiteDescriptor.CALLSITE_PROFILE;
-        }
-
-        if (options.get("trace.callsites") instanceof KeyValueOption) {
-            callSiteFlags |= NashornCallSiteDescriptor.CALLSITE_TRACE;
-            final KeyValueOption kv = (KeyValueOption)options.get("trace.callsites");
-            if (kv.hasValue("miss")) {
-                callSiteFlags |= NashornCallSiteDescriptor.CALLSITE_TRACE_MISSES;
-            }
-            if (kv.hasValue("enterexit") || (callSiteFlags & NashornCallSiteDescriptor.CALLSITE_TRACE_MISSES) == 0) {
-                callSiteFlags |= NashornCallSiteDescriptor.CALLSITE_TRACE_ENTEREXIT;
-            }
-            if (kv.hasValue("objects")) {
-                callSiteFlags |= NashornCallSiteDescriptor.CALLSITE_TRACE_VALUES;
-            }
-        }
-        this._callsite_flags = callSiteFlags;
 
         final Option<?> timezoneOption = options.get("timezone");
         if (timezoneOption != null) {

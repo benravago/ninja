@@ -54,6 +54,7 @@ import nashorn.internal.objects.annotations.SpecializedFunction.LinkLogic;
 import nashorn.internal.runtime.events.RecompilationEvent;
 import nashorn.internal.runtime.linker.Bootstrap;
 import nashorn.internal.runtime.logging.DebugLogger;
+import nashorn.internal.Util;
 
 /**
  * An version of a JavaScript function, native or JavaScript.
@@ -871,7 +872,7 @@ final class CompiledFunction {
             log.unindent();
             log.info("Done.");
 
-            log.info("Recompiled '", fn.getName(), "' (", Debug.id(this), ") ", canBeDeoptimized ? "can still be deoptimized." : " is completely deoptimized.");
+            log.info("Recompiled '", fn.getName(), "' (", Util.id(this), ") ", canBeDeoptimized ? "can still be deoptimized." : " is completely deoptimized.");
             log.finest("Looking up invoker...");
         }
 

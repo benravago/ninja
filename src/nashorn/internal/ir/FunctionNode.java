@@ -25,12 +25,6 @@
 
 package nashorn.internal.ir;
 
-import static nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE_PROFILE;
-import static nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE_TRACE;
-import static nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE_TRACE_ENTEREXIT;
-import static nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE_TRACE_MISSES;
-import static nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE_TRACE_VALUES;
-
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -257,32 +251,6 @@ public final class FunctionNode extends LexicalContextExpression implements Flag
     /** Does this function need the parent scope? It needs it if either it or its descendants use variables from it, or have a deep eval, or it's the program. */
     public static final int NEEDS_PARENT_SCOPE = USES_ANCESTOR_SCOPE | HAS_DEEP_EVAL | IS_PROGRAM;
 
-
-    /**
-     * The following flags are derived from directive comments within this function.
-     */
-
-    /** parser, print symbols */
-    public static final int DEBUG_PRINT_SYMBOLS     = 1 << 4;
-
-    // callsite tracing, profiling within this function
-    /** profile callsites in this function? */
-    public static final int DEBUG_PROFILE           = 1 << 5;
-
-    /** trace callsite enterexit in this function? */
-    public static final int DEBUG_TRACE_ENTEREXIT   = 1 << 6;
-
-    /** trace callsite misses in this function? */
-    public static final int DEBUG_TRACE_MISSES      = 1 << 7;
-
-    /** trace callsite values in this function? */
-    public static final int DEBUG_TRACE_VALUES      = 1 << 8;
-
-    /** extension callsite flags mask */
-    public static final int DEBUG_CALLSITE_FLAGS = 
-            DEBUG_PRINT_SYMBOLS | DEBUG_PROFILE | DEBUG_TRACE_ENTEREXIT |
-            DEBUG_TRACE_MISSES | DEBUG_TRACE_VALUES;
-
     /** What is the return type of this function? */
     public Type returnType = Type.UNKNOWN;
 
@@ -403,38 +371,6 @@ public final class FunctionNode extends LexicalContextExpression implements Flag
     }
 
     /**
-     * Get additional callsite flags to be used specific to this function.
-     *
-     * @return callsite flags
-     */
-    public int getCallSiteFlags() {
-        int callsiteFlags = 0;
-
-        // quick check for extension callsite flags turned on by directives.
-        if ((debugFlags & DEBUG_CALLSITE_FLAGS) == 0) {
-            return callsiteFlags;
-        }
-
-        if (getDebugFlag(DEBUG_PROFILE)) {
-            callsiteFlags |= CALLSITE_PROFILE;
-        }
-
-        if (getDebugFlag(DEBUG_TRACE_MISSES)) {
-            callsiteFlags |= CALLSITE_TRACE | CALLSITE_TRACE_MISSES;
-        }
-
-        if (getDebugFlag(DEBUG_TRACE_VALUES)) {
-            callsiteFlags |= CALLSITE_TRACE | CALLSITE_TRACE_ENTEREXIT | CALLSITE_TRACE_VALUES;
-        }
-
-        if (getDebugFlag(DEBUG_TRACE_ENTEREXIT)) {
-            callsiteFlags |= CALLSITE_TRACE | CALLSITE_TRACE_ENTEREXIT;
-        }
-
-        return callsiteFlags;
-    }
-
-    /**
      * Get the source for this function
      * @return the source
      */
@@ -500,30 +436,6 @@ public final class FunctionNode extends LexicalContextExpression implements Flag
     public static String getSourceName(final Source source) {
         final String explicitURL = source.getExplicitURL();
         return explicitURL != null ? explicitURL : source.getName();
-    }
-
-    /**
-     * Function to parse nashorn per-function extension directive comments.
-     *
-     * @param directive nashorn extension directive string
-     * @return integer flag for the given directive.
-     */
-    public static int getDirectiveFlag(final String directive) {
-        switch (directive) {
-            case "nashorn callsite trace enterexit":
-                return DEBUG_TRACE_ENTEREXIT;
-            case "nashorn callsite trace misses":
-                return DEBUG_TRACE_MISSES;
-            case "nashorn callsite trace objects":
-                return DEBUG_TRACE_VALUES;
-            case "nashorn callsite profile":
-                return DEBUG_PROFILE;
-            case "nashorn print symbols":
-                return DEBUG_PRINT_SYMBOLS;
-            default:
-                // unknown/unsupported directive
-                return 0;
-        }
     }
 
     /**
@@ -1282,4 +1194,7 @@ public final class FunctionNode extends LexicalContextExpression implements Flag
                         thisProperties,
                         rootClass, source, namespace));
     }
+
+    public static int getDirectiveFlag(final String directive) { return 0; } // TODO: remove
+    public int getCallSiteFlags() { return 0; } // TODO: remove
 }

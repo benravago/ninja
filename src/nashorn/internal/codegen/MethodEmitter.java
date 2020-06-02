@@ -100,7 +100,7 @@ import nashorn.internal.ir.TryNode;
 import nashorn.internal.objects.NativeArray;
 import nashorn.internal.runtime.ArgumentSetter;
 import nashorn.internal.runtime.Context;
-import nashorn.internal.runtime.Debug;
+import nashorn.internal.Util;
 import nashorn.internal.runtime.JSType;
 import nashorn.internal.runtime.RewriteException;
 import nashorn.internal.runtime.Scope;
@@ -238,7 +238,7 @@ public class MethodEmitter {
 
     @Override
     public String toString() {
-        return "methodEmitter: " + (functionNode == null ? method : functionNode.getName()).toString() + ' ' + Debug.id(this);
+        return "methodEmitter: " + (functionNode == null ? method : functionNode.getName()).toString() + ' ' + Util.id(this);
     }
 
     /**

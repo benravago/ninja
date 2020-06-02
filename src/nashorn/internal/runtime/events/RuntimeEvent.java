@@ -26,7 +26,6 @@
 package nashorn.internal.runtime.events;
 
 import java.util.logging.Level;
-import nashorn.internal.objects.NativeDebug;
 import nashorn.internal.runtime.options.Options;
 
 /**
