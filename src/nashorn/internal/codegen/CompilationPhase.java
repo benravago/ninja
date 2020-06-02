@@ -406,7 +406,7 @@ abstract class CompilationPhase {
                 newFunctionNode = transformFunction(newFunctionNode, codegen);
                 codegen.generateScopeCalls();
             } catch (final VerifyError e) {
-                if (senv._verify_code || senv._print_code) {
+                if (senv._print_code) {
                     senv.getErr().println(e.getClass().getSimpleName() + ": "  + e.getMessage());
                     if (senv._dump_on_error) {
                         e.printStackTrace(senv.getErr());

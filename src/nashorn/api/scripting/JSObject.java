@@ -188,4 +188,5 @@ public interface JSObject {
     default Object getDefaultValue(final Class<?> hint) throws UnsupportedOperationException {
         return DefaultValueImpl.getDefaultValue(this, hint);
     }
+
 }

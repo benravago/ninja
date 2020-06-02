@@ -324,15 +324,15 @@ public final class Context {
                 if (LOOKUP_IN == null) {
                     LOOKUP_IN = LOOKUP.in(JS.class);
                 }
-                return LOOKUP_IN.defineHiddenClass(bytecode, false).lookupClass();
+                return LOOKUP_IN.defineHiddenClass(bytecode,false).lookupClass();
             } catch (Exception e) {
                 return uncheck(e);
             }
         }
-
+        
         @SuppressWarnings("unchecked")
         private static <T extends Throwable,V> V uncheck(Exception e) throws T { throw (T)e; }
-        
+
         @Override
         public CodeInstaller getOnDemandCompilationInstaller() {
             // This code loader can be indefinitely reused for on-demand recompilations for the same code source.
@@ -796,8 +796,6 @@ public final class Context {
             final Object callThis, final Object location, final boolean evalCall) {
         final String  file       = location == UNDEFINED || location == null ? "<eval>" : location.toString();
         final Source  source     = sourceFor(file, string, evalCall);
-        // is this direct 'eval' builtin call?
-        final boolean directEval = evalCall && (location != UNDEFINED);
         final Global  global = Context.getGlobal();
         ScriptObject scope = initialScope;
 
@@ -809,22 +807,12 @@ public final class Context {
             return null;
         }
 
-        // 'eval' does not instantiate variables and functions
-        // in the caller's environment. A new environment is created!
-
         // Create a new scope object with given scope as its prototype
         scope = newScope(scope);
 
         final ScriptFunction func = getProgramFunction(clazz, scope);
-        Object evalThis;
-        if (directEval) {
-            evalThis = (callThis != UNDEFINED && callThis != null) ? callThis : global;
-        } else {
-            // either indirect evalCall or non-eval (Function, engine.eval, ScriptObjectMirror.eval..)
-            evalThis = callThis;
-        }
 
-        return ScriptRuntime.apply(func, evalThis);
+        return ScriptRuntime.apply(func, callThis);
     }
 
     private static ScriptObject newScope(final ScriptObject callerScope) {

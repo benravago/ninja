@@ -332,7 +332,7 @@ public final class NativeJSAdapter extends ScriptObject {
             return super.delete(key);
         }
 
-        return JSType.toBoolean(callAdaptee(Boolean.TRUE, __delete__, key, true));
+        return JSType.toBoolean(callAdaptee(Boolean.TRUE, __delete__, key));
     }
 
     @Override
@@ -341,7 +341,7 @@ public final class NativeJSAdapter extends ScriptObject {
             return super.delete(key);
         }
 
-        return JSType.toBoolean(callAdaptee(Boolean.TRUE, __delete__, key, true));
+        return JSType.toBoolean(callAdaptee(Boolean.TRUE, __delete__, key));
     }
 
     @Override
@@ -350,7 +350,7 @@ public final class NativeJSAdapter extends ScriptObject {
             return super.delete(key);
         }
 
-        return JSType.toBoolean(callAdaptee(Boolean.TRUE, __delete__, key, true));
+        return JSType.toBoolean(callAdaptee(Boolean.TRUE, __delete__, key));
     }
 
     @Override

@@ -95,7 +95,7 @@ public enum TokenType {
     RBRACKET       (BRACKET, "]",     0, true),
     BIT_XOR        (BINARY,  "^",     7, true),
     ASSIGN_BIT_XOR (BINARY,  "^=",    2, false),
-    LBRACE         (BRACKET,  "{"),
+    LBRACE         (BRACKET, "{"),
     BIT_OR         (BINARY,  "|",     6, true),
     ASSIGN_BIT_OR  (BINARY,  "|=",    2, false),
     OR             (BINARY,  "||",    4, true),
@@ -134,7 +134,7 @@ public enum TokenType {
     FUNCTION       (KEYWORD,  "function"),
 //  GET            (KEYWORD,  "get"), // Contextual.
 //  GOTO           (FUTURE,   "goto"),
-    IF             (KEYWORD,   "if"),
+    IF             (KEYWORD,  "if"),
     IMPLEMENTS     (FUTURE,   "implements"),
     IMPORT         (FUTURE,   "import"),
     IN             (BINARY,   "in",         10, true),
@@ -169,7 +169,7 @@ public enum TokenType {
 //  VOLATILE       (FUTURE,   "volatile"),
     WHILE          (KEYWORD,  "while"),
     WITH           (KEYWORD,  "with"),
-    YIELD          (FUTURE,  "yield"),
+    YIELD          (FUTURE,   "yield"),
 
     DECIMAL        (LITERAL,  null),
     HEXADECIMAL    (LITERAL,  null),

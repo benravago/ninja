@@ -298,14 +298,18 @@ final class ObjectArrayData extends ContinuousArrayData implements AnyElements {
     }
 
     @Override
-    public ArrayData push(final Object item) {
+    public ArrayData push(final Object... items) {
+        if (items.length == 0) {
+            return this;
+        }
+        // TODO: only first is used
         final long      len     = length();
         final ArrayData newData = ensure(len);
         if (newData == this) {
-            array[(int)len] = item;
+            array[(int)len] = items[0];
             return this;
         }
-        return newData.set((int)len, item);
+        return newData.set((int)len, items[0]);
     }
 
     @Override

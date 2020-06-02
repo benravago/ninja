@@ -95,8 +95,8 @@ public abstract class IteratorAction<T> {
      */
     public final T apply() {
 
-        // might need to translate undefined thisArg to be global object
-        thisArg = (thisArg == ScriptRuntime.UNDEFINED && !Bootstrap.isCallable(callbackfn)) ? Context.getGlobal() : thisArg;
+    	// might need to translate undefined thisArg to be global object
+        thisArg = (thisArg == ScriptRuntime.UNDEFINED && !Bootstrap.isCallable(callbackfn))? Context.getGlobal() : thisArg;
 
         applyLoopBegin(iter);
         final boolean reverse = iter.isReverse();

@@ -43,7 +43,10 @@ import nashorn.api.scripting.JSObject;
 import nashorn.api.scripting.ScriptObjectMirror;
 import nashorn.internal.lookup.MethodHandleFactory;
 import nashorn.internal.lookup.MethodHandleFunctionality;
+import nashorn.internal.runtime.Context;
 import nashorn.internal.runtime.JSType;
+import nashorn.internal.runtime.ScriptRuntime;
+import nashorn.internal.objects.Global;
 
 /**
  * A Dynalink linker to handle web browser built-in JS (DOM etc.) objects as well
@@ -241,7 +244,14 @@ final class JSObjectLinker implements TypeBasedGuardingDynamicLinker {
     // This is used when a JSObject is called as scope call to do undefined -> Global this translation.
     @SuppressWarnings("unused")
     private static Object jsObjectScopeCall(final JSObject jsObj, final Object thiz, final Object[] args) {
-        return jsObj.call(thiz, args);
+        final Object modifiedThiz;
+        if (thiz == ScriptRuntime.UNDEFINED && !jsObj.isFunction()) {
+            final Global global = Context.getGlobal();
+            modifiedThiz = ScriptObjectMirror.wrap(global, global);
+        } else {
+            modifiedThiz = thiz;
+        }
+        return jsObj.call(modifiedThiz, args);
     }
 
     private static final MethodHandleFunctionality MH = MethodHandleFactory.getFunctionality();

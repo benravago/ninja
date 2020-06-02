@@ -159,7 +159,6 @@ public class ClassEmitter {
     /**
      * Constructor.
      *
-     * @param env             script environment
      * @param className       name of class to weave
      * @param superClassName  super class name for class
      * @param interfaceNames  names of interfaces implemented by this class, or
@@ -172,8 +171,6 @@ public class ClassEmitter {
 
     /**
      * Constructor from the compiler.
-     *
-     * @param env           Script environment
      * @param sourceName    Source name
      * @param unitClassName Compile unit class name.
      */

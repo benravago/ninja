@@ -303,7 +303,7 @@ final class Lower extends NodeOperatorVisitor<BlockLexicalContext> implements Lo
     @Override
     public boolean enterFunctionNode(final FunctionNode functionNode) {
 
-    	if (functionNode.getKind() == FunctionNode.Kind.MODULE) {
+        if (functionNode.getKind() == FunctionNode.Kind.MODULE) {
             throwNotImplementedYet("es6.module", functionNode);
         }
 
@@ -641,7 +641,7 @@ final class Lower extends NodeOperatorVisitor<BlockLexicalContext> implements Lo
     @Override
     public boolean enterUnaryNode(final UnaryNode unaryNode) {
 
-		if (unaryNode.isTokenType(TokenType.YIELD) ||
+        if (unaryNode.isTokenType(TokenType.YIELD) ||
             unaryNode.isTokenType(TokenType.YIELD_STAR)) {
             throwNotImplementedYet("es6.yield", unaryNode);
         } else if (unaryNode.isTokenType(TokenType.SPREAD_ARGUMENT) ||

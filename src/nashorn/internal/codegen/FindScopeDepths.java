@@ -146,10 +146,6 @@ final class FindScopeDepths extends SimpleNodeVisitor implements Loggable {
         return globalBlock;
     }
 
-    private static boolean isDynamicScopeBoundary(final FunctionNode fn) {
-        return fn.needsDynamicScope();
-    }
-
     private boolean isDynamicScopeBoundary(final Block block) {
         return withBodies.contains(block);
     }
@@ -158,10 +154,6 @@ final class FindScopeDepths extends SimpleNodeVisitor implements Loggable {
     public boolean enterFunctionNode(final FunctionNode functionNode) {
         if (compiler.isOnDemandCompilation()) {
             return true;
-        }
-
-        if (isDynamicScopeBoundary(functionNode)) {
-            increaseDynamicScopeCount(functionNode);
         }
 
         final int fnId = functionNode.getId();
@@ -217,10 +209,6 @@ final class FindScopeDepths extends SimpleNodeVisitor implements Loggable {
             }
         } else {
             compiler.setData(data);
-        }
-
-        if (isDynamicScopeBoundary(functionNode)) {
-            decreaseDynamicScopeCount(functionNode);
         }
 
         return newFunctionNode;

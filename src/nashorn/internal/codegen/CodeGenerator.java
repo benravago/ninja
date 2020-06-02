@@ -454,7 +454,7 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
                 }
                 previousWasBlock = true;
             } else {
-                if (node instanceof WithNode && previousWasBlock || node instanceof FunctionNode && ((FunctionNode)node).needsDynamicScope()) {
+                if (node instanceof WithNode && previousWasBlock) {
                     // If we hit a scope that can have symbols introduced into it at run time before finding the defining
                     // block, the symbol can't be fast scoped. A WithNode only counts if we've immediately seen a block
                     // before - its block. Otherwise, we are currently processing the WithNode's expression, and that's
@@ -1552,7 +1552,7 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
                         // them can ever be optimistic.
                         method.loadCompilerConstant(THIS);
                         method.load(callNode.getEvalArgs().getLocation());
-                        method.load(true);
+                        // method.load(true);
                         // direct call to Global.directEval
                         globalDirectEval();
                         convertOptimisticReturnValue();

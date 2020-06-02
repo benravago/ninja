@@ -442,6 +442,7 @@ public class Parser extends AbstractParser implements Loggable {
                     FunctionNode.Kind.NORMAL,
                     functionLine,
                     functionBody);
+
             return functionNode;
         } catch (final Exception e) {
             handleParseException(e);
@@ -661,8 +662,6 @@ public class Parser extends AbstractParser implements Loggable {
         }
     }
 
-    private boolean useBlockScope() { return true; } // TODO: remove
-
     private static boolean isArguments(final String name) {
         return ARGUMENTS_NAME.equals(name);
     }
@@ -730,10 +729,7 @@ public class Parser extends AbstractParser implements Loggable {
     }
 
     private boolean isDestructuringLhs(final Expression lhs) {
-        if (lhs instanceof ObjectNode || lhs instanceof LiteralNode.ArrayLiteralNode) {
-            return true;
-        }
-        return false;
+        return (lhs instanceof ObjectNode || lhs instanceof LiteralNode.ArrayLiteralNode);
     }
 
     private void verifyDestructuringAssignmentPattern(final Expression pattern, final String contextString) {
@@ -902,6 +898,7 @@ public class Parser extends AbstractParser implements Loggable {
                     checkDirective = directive != null;
 
                     if (checkDirective) {
+
                         if (Context.DEBUG) {
                             final int debugFlag = FunctionNode.getDirectiveFlag(directive);
                             if (debugFlag != 0) {
@@ -1047,13 +1044,13 @@ public class Parser extends AbstractParser implements Loggable {
             functionExpression(true, topLevel || labelledStatement);
             return;
         default:
-            if (useBlockScope() && (type == LET && lookaheadIsLetDeclaration(false) || type == CONST)) {
+            if (type == LET && lookaheadIsLetDeclaration(false) || type == CONST) {
                 if (singleStatement) {
                     throw error(AbstractParser.message("expected.stmt", type.getName() + " declaration"), token);
                 }
                 variableStatement(type);
                 break;
-            } else if (type == CLASS && true) {
+            } else if (type == CLASS) {
                 if (singleStatement) {
                     throw error(AbstractParser.message("expected.stmt", "class declaration"), token);
                 }
@@ -1065,7 +1062,7 @@ public class Parser extends AbstractParser implements Loggable {
                 break;
             }
 
-            if (type == IDENT || isFutureIdent()) {
+            if (type == IDENT) {
                 if (T(k + 1) == COLON) {
                     labelStatement();
                     return;
@@ -1088,7 +1085,7 @@ public class Parser extends AbstractParser implements Loggable {
             }
 
             if ((reparseFlags & ScriptFunctionData.IS_ES6_METHOD) != 0
-                    && (type == IDENT || type == LBRACKET || isFutureIdent())) {
+                    && (type == IDENT || type == LBRACKET)) {
                 final String ident = (String)getValue();
                 final long propertyToken = token;
                 final int propertyLine = line;
@@ -1219,7 +1216,7 @@ public class Parser extends AbstractParser implements Loggable {
                 next();
             }
             boolean generator = false;
-            if (true && type == MUL) {
+            if (type == MUL) {
                 generator = true;
                 next();
             }
@@ -1424,6 +1421,7 @@ public class Parser extends AbstractParser implements Loggable {
      * @param contextString String used in error message to give context to the user
      */
     private void verifyFutureIdent(final IdentNode ident, final String contextString) {
+
         switch (ident.getName()) {
             case "eval":
             case "arguments":
@@ -1435,15 +1433,16 @@ public class Parser extends AbstractParser implements Loggable {
         if (ident.isFutureName()) {
             throw error(AbstractParser.message("strict.name", ident.getName(), contextString), ident.getToken());
         }
+
     }
 
     /**
      * ES6 11.6.2: A code point in a ReservedWord cannot be expressed by a | UnicodeEscapeSequence.
      */
     private void checkEscapedKeyword(final IdentNode ident) {
-        if (true && ident.containsEscapes()) {
+        if (ident.containsEscapes()) {
             final TokenType tokenType = TokenLookup.lookupKeyword(ident.getName().toCharArray(), 0, ident.getName().length());
-            if (tokenType != IDENT && !(tokenType.getKind() == TokenKind.FUTURE && !true)) {
+            if (tokenType != IDENT) {
                 throw error(AbstractParser.message("keyword.escaped.character"), ident.getToken());
             }
         }
@@ -1632,7 +1631,7 @@ public class Parser extends AbstractParser implements Loggable {
     }
 
     private boolean isBindingIdentifier() {
-        return type == IDENT || isFutureIdent();
+        return type == IDENT;
     }
 
     private IdentNode bindingIdentifier(final String contextString) {
@@ -1652,7 +1651,7 @@ public class Parser extends AbstractParser implements Loggable {
     }
 
     private Expression bindingIdentifierOrPattern(final String contextString) {
-        if (isBindingIdentifier() || !true) {
+        if (isBindingIdentifier()) {
             return bindingIdentifier(contextString);
         } else {
             return bindingPattern();
@@ -1854,7 +1853,7 @@ public class Parser extends AbstractParser implements Loggable {
         // part of this 'for' statement (if any).
         final int forStart = Token.descPosition(forToken);
         // When ES6 for-let is enabled we create a container block to capture the LET.
-        final ParserContextBlockNode outer = useBlockScope() ? newBlock() : null;
+        final ParserContextBlockNode outer = newBlock();
 
         // Create FOR node, capturing FOR token.
         final ParserContextLoopNode forNode = new ParserContextLoopNode();
@@ -1890,7 +1889,7 @@ public class Parser extends AbstractParser implements Loggable {
             case SEMICOLON:
                 break;
             default:
-                if (useBlockScope() && (type == LET && lookaheadIsLetDeclaration(true) || type == CONST)) {
+                if (type == LET && lookaheadIsLetDeclaration(true) || type == CONST) {
                     flags |= ForNode.PER_ITERATION_SCOPE;
                     // LET/CONST declaration captured in container block created above.
                     varDeclList = variableDeclarationList(varType = type, false, forStart);
@@ -2042,7 +2041,7 @@ public class Parser extends AbstractParser implements Loggable {
             case COMMENT:
                 continue;
             case IDENT:
-                if (ofContextualKeyword && true && "of".equals(getValue(getToken(k + i)))) {
+                if (ofContextualKeyword && "of".equals(getValue(getToken(k + i)))) {
                     return false;
                 }
                 // fall through
@@ -2353,6 +2352,7 @@ public class Parser extends AbstractParser implements Loggable {
         // WITH tested in caller.
         next();
 
+        // ECMA 12.10.1 mode restrictions
         throw error(AbstractParser.message("strict.no.with"), withToken);
     }
 
@@ -2695,9 +2695,7 @@ public class Parser extends AbstractParser implements Loggable {
             checkEscapedKeyword(ident);
             return ident;
         case OCTAL_LEGACY:
-            if (true) {
-               throw error(AbstractParser.message("strict.no.octal"), token);
-            }
+            throw error(AbstractParser.message("strict.no.octal"), token);
         case STRING:
         case ESCSTRING:
         case DECIMAL:
@@ -2726,20 +2724,18 @@ public class Parser extends AbstractParser implements Loggable {
         case LPAREN:
             next();
 
-            if (true) {
-                if (type == RPAREN) {
-                    // ()
-                    nextOrEOL();
-                    expectDontAdvance(ARROW);
-                    return new ExpressionList(primaryToken, finish, Collections.emptyList());
-                } else if (type == ELLIPSIS) {
-                    // (...rest)
-                    final IdentNode restParam = formalParameterList(false).get(0);
-                    expectDontAdvance(RPAREN);
-                    nextOrEOL();
-                    expectDontAdvance(ARROW);
-                    return new ExpressionList(primaryToken, finish, Collections.singletonList(restParam));
-                }
+            if (type == RPAREN) {
+                // ()
+                nextOrEOL();
+                expectDontAdvance(ARROW);
+                return new ExpressionList(primaryToken, finish, Collections.emptyList());
+            } else if (type == ELLIPSIS) {
+                // (...rest)
+                final IdentNode restParam = formalParameterList(false).get(0);
+                expectDontAdvance(RPAREN);
+                nextOrEOL();
+                expectDontAdvance(ARROW);
+                return new ExpressionList(primaryToken, finish, Collections.singletonList(restParam));
             }
 
             final Expression expression = expression();
@@ -2756,9 +2752,6 @@ public class Parser extends AbstractParser implements Loggable {
             if (lexer.scanLiteral(primaryToken, type, lineInfoReceiver)) {
                 next();
                 return getLiteral();
-            }
-            if (isFutureIdent()) {
-                return getIdent();
             }
             break;
         }
@@ -2842,11 +2835,9 @@ public class Parser extends AbstractParser implements Loggable {
                 break;
 
             case ELLIPSIS:
-                if (true) {
-                    hasSpread = true;
-                    spreadToken = token;
-                    next();
-                }
+                hasSpread = true;
+                spreadToken = token;
+                next();
                 // fall through
 
             default:
@@ -2951,7 +2942,7 @@ public class Parser extends AbstractParser implements Loggable {
                     final FunctionNode prevSetter = existingProperty.getSetter();
 
                     if (property.getKey() instanceof IdentNode && ((IdentNode)property.getKey()).isProtoPropertyName() &&
-				        existingProperty.getKey() instanceof IdentNode && ((IdentNode)existingProperty.getKey()).isProtoPropertyName()) {
+				                existingProperty.getKey() instanceof IdentNode && ((IdentNode)existingProperty.getKey()).isProtoPropertyName()) {
                     	throw error(AbstractParser.message("multiple.proto.key"), property.getToken());
                     }
 
@@ -3013,9 +3004,7 @@ public class Parser extends AbstractParser implements Loggable {
         case IDENT:
             return getIdent().setIsPropertyName();
         case OCTAL_LEGACY:
-            if (true) {
-                throw error(AbstractParser.message("strict.no.octal"), token);
-            }
+            throw error(AbstractParser.message("strict.no.octal"), token);
         case STRING:
         case ESCSTRING:
         case DECIMAL:
@@ -3050,7 +3039,7 @@ public class Parser extends AbstractParser implements Loggable {
      * @return PropertyName node
      */
     private Expression propertyName() {
-        if (type == LBRACKET && true) {
+        if (type == LBRACKET) {
             return computedPropertyName();
         } else {
             return (Expression)literalPropertyName();
@@ -3085,7 +3074,7 @@ public class Parser extends AbstractParser implements Loggable {
         final boolean isIdentifier;
 
         boolean generator = false;
-        if (type == MUL && true) {
+        if (type == MUL) {
             generator = true;
             next();
         }
@@ -3095,7 +3084,7 @@ public class Parser extends AbstractParser implements Loggable {
             // Get IDENT.
             final String ident = (String)expectValue(IDENT);
 
-            if (type != COLON && (type != LPAREN || !true)) {
+            if (type != COLON && type != LPAREN) {
                 final long getSetToken = propertyToken;
 
                 switch (ident) {
@@ -3118,7 +3107,7 @@ public class Parser extends AbstractParser implements Loggable {
             }
             propertyName = identNode;
         } else {
-            isIdentifier = isFutureIdent();
+            isIdentifier = false;
             propertyName = propertyName();
         }
 
@@ -3128,11 +3117,11 @@ public class Parser extends AbstractParser implements Loggable {
             expectDontAdvance(LPAREN);
         }
 
-        if (type == LPAREN && true) {
+        if (type == LPAREN) {
             propertyValue = propertyMethodFunction(propertyName, propertyToken, functionLine, generator, FunctionNode.ES6_IS_METHOD, computed).functionNode;
-        } else if (isIdentifier && (type == COMMARIGHT || type == RBRACE || type == ASSIGN) && true) {
+        } else if (isIdentifier && (type == COMMARIGHT || type == RBRACE || type == ASSIGN)) {
             propertyValue = createIdentNode(propertyToken, finish, ((IdentNode) propertyName).getPropertyName());
-            if (type == ASSIGN && true) {
+            if (type == ASSIGN) {
                 // TODO if not destructuring, this is a SyntaxError
                 final long assignToken = token;
                 next();
@@ -3410,7 +3399,7 @@ public class Parser extends AbstractParser implements Loggable {
         // NEW is tested in caller.
         next();
 
-        if (type == PERIOD && true) {
+        if (type == PERIOD) {
             next();
             if (type == IDENT && "target".equals(getValue())) {
                 if (lc.getCurrentFunction().isProgram()) {
@@ -3504,31 +3493,31 @@ public class Parser extends AbstractParser implements Loggable {
 
         case SUPER:
             final ParserContextFunctionNode currentFunction = getCurrentNonArrowFunction();
-            if (currentFunction.isMethod()) {
-                final long identToken = Token.recast(token, IDENT);
-                next();
-                lhs = createIdentNode(identToken, finish, SUPER.getName());
+			if (currentFunction.isMethod()) {
+			    final long identToken = Token.recast(token, IDENT);
+			    next();
+			    lhs = createIdentNode(identToken, finish, SUPER.getName());
 
-                switch (type) {
-                    case LBRACKET:
-                    case PERIOD:
-                        getCurrentNonArrowFunction().setFlag(FunctionNode.ES6_USES_SUPER);
-                        isSuper = true;
-                        break;
-                    case LPAREN:
-                        if (currentFunction.isSubclassConstructor()) {
-                            lhs = ((IdentNode)lhs).setIsDirectSuper();
-                            break;
-                        } else {
-                            // fall through to throw error
-                        }
-                    default:
-                        throw error(AbstractParser.message("invalid.super"), identToken);
-                }
-                break;
-            } else {
-                // fall through
-            }
+			    switch (type) {
+			        case LBRACKET:
+			        case PERIOD:
+			            getCurrentNonArrowFunction().setFlag(FunctionNode.ES6_USES_SUPER);
+			            isSuper = true;
+			            break;
+			        case LPAREN:
+			            if (currentFunction.isSubclassConstructor()) {
+			                lhs = ((IdentNode)lhs).setIsDirectSuper();
+			                break;
+			            } else {
+			                // fall through to throw error
+			            }
+			        default:
+			            throw error(AbstractParser.message("invalid.super"), identToken);
+			    }
+			    break;
+			} else {
+			    // fall through
+			}
 
         default:
             // Get primary expression.
@@ -3631,7 +3620,7 @@ public class Parser extends AbstractParser implements Loggable {
             }
 
             long spreadToken = 0;
-            if (type == ELLIPSIS && true) {
+            if (type == ELLIPSIS) {
                 spreadToken = token;
                 next();
             }
@@ -3685,7 +3674,7 @@ public class Parser extends AbstractParser implements Loggable {
         next();
 
         boolean generator = false;
-        if (type == MUL && true) {
+        if (type == MUL) {
             generator = true;
             next();
         }
@@ -3749,11 +3738,7 @@ public class Parser extends AbstractParser implements Loggable {
         }
 
         if (isStatement) {
-            if (topLevel || useBlockScope()) {
-                functionNode.setFlag(FunctionNode.IS_DECLARED);
-            } else {
-                throw error(JSErrorType.SYNTAX_ERROR, AbstractParser.message("strict.no.func.decl.here"), functionToken);
-            }
+            functionNode.setFlag(FunctionNode.IS_DECLARED);
             if (isArguments(name)) {
                lc.getCurrentFunction().setFlag(FunctionNode.DEFINES_ARGUMENTS);
             }
@@ -3781,14 +3766,12 @@ public class Parser extends AbstractParser implements Loggable {
             }
 
             // mark ES6 block functions as lexically scoped
-            final int     varFlags = (topLevel || !useBlockScope()) ? 0 : VarNode.IS_LET;
+            final int     varFlags = topLevel ? 0 : VarNode.IS_LET;
             final VarNode varNode  = new VarNode(functionLine, functionToken, finish, name, function, varFlags);
             if (topLevel) {
                 functionDeclarations.add(varNode);
-            } else if (useBlockScope()) {
-                prependStatement(varNode); // Hoist to beginning of current block
             } else {
-                appendStatement(varNode);
+                prependStatement(varNode); // Hoist to beginning of current block
             }
         }
 
@@ -3924,7 +3907,7 @@ public class Parser extends AbstractParser implements Loggable {
             }
 
             boolean restParameter = false;
-            if (type == ELLIPSIS && true) {
+            if (type == ELLIPSIS) {
                 next();
                 restParameter = true;
             }
@@ -3937,7 +3920,7 @@ public class Parser extends AbstractParser implements Loggable {
             final int paramLine = line;
             final String contextString = "function parameter";
             IdentNode ident;
-            if (isBindingIdentifier() || restParameter || !true) {
+            if (isBindingIdentifier() || restParameter) {
                 ident = bindingIdentifier(contextString);
 
                 if (restParameter) {
@@ -3946,7 +3929,7 @@ public class Parser extends AbstractParser implements Loggable {
                     expectDontAdvance(endType);
                     parameters.add(ident);
                     break;
-                } else if (type == ASSIGN && true) {
+                } else if (type == ASSIGN) {
                     next();
                     ident = ident.setIsDefaultParameter();
 
@@ -4490,7 +4473,7 @@ public class Parser extends AbstractParser implements Loggable {
             next();
 
             boolean rhsRestParameter = false;
-            if (type == ELLIPSIS && true) {
+            if (type == ELLIPSIS) {
                 // (a, b, ...rest) is not a valid expression, unless we're parsing the parameter list of an arrow function (we need to throw the right error).
                 // But since the rest parameter is always last, at least we know that the expression has to end here and be followed by RPAREN and ARROW, so peek ahead.
                 if (isRestParameterEndOfArrowFunctionParameterList()) {
@@ -4600,7 +4583,7 @@ public class Parser extends AbstractParser implements Loggable {
         // This method is protected so that subclass can get details
         // at assignment expression start point!
 
-        if (type == YIELD && inGeneratorFunction() && true) {
+        if (type == YIELD && inGeneratorFunction()) {
             return yieldExpression(noIn);
         }
 
@@ -4608,7 +4591,7 @@ public class Parser extends AbstractParser implements Loggable {
         final int startLine = line;
         final Expression exprLhs = conditionalExpression(noIn);
 
-        if (type == ARROW && true) {
+        if (type == ARROW) {
             if (checkNoLineTerminator()) {
                 final Expression paramListExpr;
                 if (exprLhs instanceof ExpressionList) {

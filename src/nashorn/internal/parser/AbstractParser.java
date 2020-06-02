@@ -395,16 +395,6 @@ public abstract class AbstractParser {
     }
 
     /**
-     * Certain future reserved words can be used as identifiers.
-     * Check if the current token is one such.
-     *
-     * @return true if future mode identifier
-     */
-    protected final boolean isFutureIdent() {
-    	return type.getKind() == TokenKind.FUTURE;
-    }
-
-    /**
      * Get ident.
      *
      * @return Ident node.
@@ -412,18 +402,6 @@ public abstract class AbstractParser {
     protected final IdentNode getIdent() {
         // Capture IDENT token.
         long identToken = token;
-
-        if (isFutureIdent()) {
-            // Fake out identifier.
-            identToken = Token.recast(token, IDENT);
-            // Get IDENT.
-            final String ident = (String)getValue(identToken);
-
-            next();
-
-            // Create IDENT node.
-            return createIdentNode(identToken, finish, ident).setIsFutureName();
-        }
 
         // Get IDENT.
         final String ident = (String)expectValue(IDENT);

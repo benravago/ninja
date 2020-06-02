@@ -166,6 +166,7 @@ public class Shell implements PartialParser {
 
         final Global global = context.createGlobal();
         final ScriptEnvironment env = context.getEnv();
+
         final List<String> files = env.getFiles();
         if (files.isEmpty()) {
             return readEvalPrint(context, global);
@@ -370,7 +371,7 @@ public class Shell implements PartialParser {
                 }
 
                 Compiler.forNoInstallerCompilation(context, functionNode.getSource())
-                	    .compile(functionNode, CompilationPhases.COMPILE_ALL_NO_INSTALL);
+                        .compile(functionNode, CompilationPhases.COMPILE_ALL_NO_INSTALL);
 
                 if (errors.getNumberOfErrors() != 0) {
                     return COMPILATION_ERROR;

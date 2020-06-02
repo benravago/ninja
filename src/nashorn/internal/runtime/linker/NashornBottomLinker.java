@@ -83,20 +83,16 @@ final class NashornBottomLinker implements GuardingDynamicLinker, GuardingTypeCo
             MH.dropArguments(EMPTY_PROP_GETTER, 0, Object.class);
     private static final MethodHandle EMPTY_PROP_SETTER =
             MH.asType(EMPTY_ELEM_GETTER, EMPTY_ELEM_GETTER.type().changeReturnType(void.class));
-    private static final MethodHandle EMPTY_ELEM_SETTER =
-            MH.dropArguments(EMPTY_PROP_SETTER, 0, Object.class);
 
     private static final MethodHandle THROW_PROPERTY_SETTER;
     private static final MethodHandle THROW_PROPERTY_REMOVER;
     private static final MethodHandle THROW_OPTIMISTIC_UNDEFINED;
-    private static final MethodHandle MISSING_PROPERTY_REMOVER;
 
     static {
         final Lookup lookup = new Lookup(MethodHandles.lookup());
         THROW_PROPERTY_SETTER = lookup.findOwnStatic("throwPropertySetter", void.class, Object.class, Object.class);
         THROW_PROPERTY_REMOVER = lookup.findOwnStatic("throwPropertyRemover", boolean.class, Object.class, Object.class);
         THROW_OPTIMISTIC_UNDEFINED = lookup.findOwnStatic("throwOptimisticUndefined", Object.class, int.class);
-        MISSING_PROPERTY_REMOVER = lookup.findOwnStatic("missingPropertyRemover", boolean.class, Object.class, Object.class);
     }
 
     private static GuardedInvocation linkBean(final LinkRequest linkRequest) throws Exception {
@@ -139,7 +135,7 @@ final class NashornBottomLinker implements GuardingDynamicLinker, GuardingTypeCo
             return getInvocation(EMPTY_ELEM_GETTER, linkerServices, desc);
         case SET:
             return adaptThrower(bindOperand(THROW_PROPERTY_SETTER, operand), desc);
-		case REMOVE:
+        case REMOVE:
             return adaptThrower(bindOperand(THROW_PROPERTY_REMOVER, operand), desc);
 		default:
             throw new AssertionError("unknown call type " + desc);

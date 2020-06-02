@@ -187,8 +187,8 @@ public abstract class ArrayData {
         }
 
         @Override
-        public ArrayData push(final Object item) {
-            return toRealArrayData().push(item);
+        public ArrayData push(final Object... items) {
+            return toRealArrayData().push(items);
         }
 
         @Override
@@ -699,16 +699,6 @@ public abstract class ArrayData {
             newData.set((int)pos++, item);
         }
         return newData;
-    }
-
-    /**
-     * Push an array of items to the end of the array
-     *
-     * @param item   the item
-     * @return new array data (or same)
-     */
-    public ArrayData push(final Object item) {
-        return push(new Object[] { item });
     }
 
     /**

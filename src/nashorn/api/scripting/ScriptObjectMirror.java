@@ -263,7 +263,7 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
     public void setSlot(final int index, final Object value) {
         inGlobal(new Callable<Void>() {
             @Override public Void call() {
-                sobj.set(index, unwrap(value, global), getCallSiteFlags());
+                sobj.set(index, unwrap(value, global), 0);
                 return null;
             }
         });
@@ -427,7 +427,7 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
                     final Object modValue = globalChanged? wrapLikeMe(value, oldGlobal) : value;
                     final String key = entry.getKey();
                     checkKey(key);
-                    sobj.set(key, unwrap(modValue, global), getCallSiteFlags());
+                    sobj.set(key, unwrap(modValue, global), 0);
                 }
                 return null;
             }
@@ -833,8 +833,6 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
         return (obj == ScriptRuntime.UNDEFINED)? null : obj;
     }
 
-    private int getCallSiteFlags() { return 0; } // TODO: remove
-
     // internals only below this.
     private <V> V inGlobal(final Callable<V> callable) {
         final Global oldGlobal = Context.getGlobal();
@@ -898,4 +896,5 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
         }
         return new ScriptObjectMirror(sobj, global, true);
     }
+
 }

@@ -279,7 +279,7 @@ public final class FunctionNode extends LexicalContextExpression implements Flag
     public static final int DEBUG_TRACE_VALUES      = 1 << 8;
 
     /** extension callsite flags mask */
-    public static final int DEBUG_CALLSITE_FLAGS =
+    public static final int DEBUG_CALLSITE_FLAGS = 
             DEBUG_PRINT_SYMBOLS | DEBUG_PROFILE | DEBUG_TRACE_ENTEREXIT |
             DEBUG_TRACE_MISSES | DEBUG_TRACE_VALUES;
 
@@ -783,8 +783,6 @@ public final class FunctionNode extends LexicalContextExpression implements Flag
     public boolean inDynamicContext() {
         return getFlag(IN_DYNAMIC_CONTEXT);
     }
-
-    public boolean needsDynamicScope() { return false; } // TODO: remove
 
     /**
      * Flag this function as declared in a dynamic context

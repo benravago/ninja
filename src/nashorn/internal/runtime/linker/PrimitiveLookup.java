@@ -51,7 +51,7 @@ import nashorn.internal.runtime.ScriptRuntime;
 public final class PrimitiveLookup {
 
     /** Method handle to link setters on primitive base. See ES5 8.7.2. */
-    private static final MethodHandle PRIMITIVE_SETTER = findOwnMH("primitiveSetter", 
+    private static final MethodHandle PRIMITIVE_SETTER = findOwnMH("primitiveSetter",
             MH.type(void.class, ScriptObject.class, Object.class, Object.class, Object.class));
 
 
@@ -159,14 +159,15 @@ public final class PrimitiveLookup {
 
         if (name == null) {
             filter = MH.dropArguments(filter, 1, Object.class, Object.class);
-            target = MH.insertArguments(PRIMITIVE_SETTER, 3, true);
+            target = PRIMITIVE_SETTER;
         } else {
             filter = MH.dropArguments(filter, 1, Object.class);
-            target = MH.insertArguments(PRIMITIVE_SETTER, 2, name, true);
+            target = MH.insertArguments(PRIMITIVE_SETTER, 2, name);
         }
 
         return new GuardedInvocation(MH.foldArguments(target, filter), guard);
     }
+
 
     @SuppressWarnings("unused")
     private static void primitiveSetter(final ScriptObject wrappedSelf, final Object self, final Object key, final Object value) {

@@ -970,10 +970,9 @@ public abstract class ScriptObject implements PropertyAccess, Cloneable {
     protected final void initUserAccessors(final String key, final ScriptFunction getter, final ScriptFunction setter) {
         final PropertyMap map = getMap();
         final Property property = map.findProperty(key);
-        assert property instanceof UserAccessorProperty;
-        if (property != null) { // TODO: fix this
-        	ensureSpillSize(property.getSlot());
-        	objectSpill[property.getSlot()] = new UserAccessorProperty.Accessors(getter, setter);
+        if (property != null) { // TODO: review
+            ensureSpillSize(property.getSlot());
+            objectSpill[property.getSlot()] = new UserAccessorProperty.Accessors(getter, setter);
         }
     }
 
@@ -1689,7 +1688,6 @@ public abstract class ScriptObject implements PropertyAccess, Cloneable {
     /**
      * Clears the properties from a ScriptObject
      * (java.util.Map-like method to help ScriptObjectMirror implementation)
-     *
      */
     public void clear() {
         final Iterator<String> iter = propertyIterator();
@@ -2258,9 +2256,10 @@ public abstract class ScriptObject implements PropertyAccess, Cloneable {
     private boolean extensionCheck(final String name) {
         if (isExtensible()) {
             return true; //go on and do the set. this is our guard
+        } else {
+            //throw an error for attempting to do the set
+            throw typeError("object.non.extensible", name, ScriptRuntime.safeToString(this));
         }
-        //throw an error for attempting to do the set
-        throw typeError("object.non.extensible", name, ScriptRuntime.safeToString(this));
     }
 
     private static GuardedInvocation findMegaMorphicSetMethod(final CallSiteDescriptor desc, final String name) {
@@ -3072,8 +3071,8 @@ public abstract class ScriptObject implements PropertyAccess, Cloneable {
                     throw typeError("assign.constant", key.toString()); // Overwriting ES6 const
                 }
                 throw typeError(
-					f.getProperty().isAccessorProperty() ? "property.has.no.setter" : "property.not.writable",
-					key.toString(), ScriptRuntime.safeToString(this));
+						f.getProperty().isAccessorProperty() ? "property.has.no.setter" : "property.not.writable",
+						key.toString(), ScriptRuntime.safeToString(this));
             }
 
             if (NashornCallSiteDescriptor.isDeclaration(callSiteFlags) && f.getProperty().needsDeclaration()) {

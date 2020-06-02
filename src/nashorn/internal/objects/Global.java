@@ -168,7 +168,7 @@ public final class Global extends Scope {
     public Object print;
     @Property(attributes = Attribute.NOT_ENUMERABLE)
     public Object warn;
-    
+
     /** Nashorn extension: global.load */
     @Property(attributes = Attribute.NOT_ENUMERABLE)
     public Object load;
@@ -1658,12 +1658,12 @@ public final class Global extends Scope {
     }
 
     /**
-     * Global println implementation - Nashorn extension
+     * Global print implementation - Nashorn extension
      *
      * @param self    scope
      * @param objects arguments to print
      *
-     * @return result of println (undefined)
+     * @return result of print (undefined)
      */
     public static Object println(final Object self, final Object... objects) {
         return Global.instanceFrom(self).printImpl(true, objects);
@@ -2807,10 +2807,10 @@ public final class Global extends Scope {
 
     private Object printImpl(final boolean stdout, final Object... objects) {
         final ScriptContext sc = currentContext();
-        @SuppressWarnings("resource")
         var out = stdout 
             ? ( sc != null ? sc.getWriter() : getContext().getEnv().getOut() )
             : ( sc != null ? sc.getErrorWriter() : getContext().getEnv().getErr() );
+   
         final StringBuilder sb = new StringBuilder();
 
         for (final Object obj : objects) {
@@ -2862,7 +2862,7 @@ public final class Global extends Scope {
             return uncheck(e);
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     static <T extends Throwable,V> V uncheck(Exception e) throws T { throw (T)e; }
 
