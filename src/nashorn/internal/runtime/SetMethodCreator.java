@@ -143,9 +143,8 @@ final class SetMethodCreator {
         if (NashornCallSiteDescriptor.isDeclaration(desc) && property.needsDeclaration()) {
             // This is a LET or CONST being declared. The property is already there but flagged as needing declaration.
             // We create a new PropertyMap with the flag removed. The map is installed with a fast compare-and-set
-            // method if the pre-callsite map is stable (which should be the case for function scopes except for
-            // non-strict functions containing eval() with var). Otherwise we have to use a slow setter that creates
-            // a new PropertyMap on the fly.
+            // method if the pre-callsite map is stable (which should be the case for function scopes).
+            // Otherwise we have to use a slow setter that creates a new PropertyMap on the fly.
             final PropertyMap oldMap = getMap();
             final Property newProperty = property.removeFlags(Property.NEEDS_DECLARATION);
             final PropertyMap newMap = oldMap.replaceProperty(property, newProperty);
@@ -209,9 +208,8 @@ final class SetMethodCreator {
         final MethodHandle casGuard = MH.guardWithTest(casMap, fastSetter, slowSetter);
 
         //outermost level needs an extendable check. if object can be extended, guard is true and
-        //we can run the cas setter. The setter goes to "nop" VOID_RETURN if false or throws an
-        //exception if we are in strict mode and object is not extensible
-        MethodHandle extCheck = MH.insertArguments(ScriptObject.EXTENSION_CHECK, 1, true, name);
+        //we can run the cas setter. The setter goes to "nop" VOID_RETURN if false or throws an exception
+        MethodHandle extCheck = MH.insertArguments(ScriptObject.EXTENSION_CHECK, 1, name);
         extCheck = MH.asType(extCheck, extCheck.type().changeParameterType(0, Object.class));
         extCheck = MH.dropArguments(extCheck, 1, type);
 

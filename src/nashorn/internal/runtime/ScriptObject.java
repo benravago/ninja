@@ -199,7 +199,7 @@ public abstract class ScriptObject implements PropertyAccess, Cloneable {
     public static final Call SET_MAP = virtualCallNoLookup(ScriptObject.class, "setMap", void.class, PropertyMap.class);
 
     static final MethodHandle CAS_MAP           = findOwnMH_V("compareAndSetMap", boolean.class, PropertyMap.class, PropertyMap.class);
-    static final MethodHandle EXTENSION_CHECK   = findOwnMH_V("_extensionCheck_", boolean.class, boolean.class, String.class);
+    static final MethodHandle EXTENSION_CHECK   = findOwnMH_V("extensionCheck", boolean.class, String.class);
     static final MethodHandle ENSURE_SPILL_SIZE = findOwnMH_V("ensureSpillSize", Object.class, int.class);
 
     private static final GuardedInvocation DELETE_GUARDED = new GuardedInvocation(DELETE.methodHandle(), NashornGuards.getScriptObjectGuard());
@@ -2247,9 +2247,6 @@ public abstract class ScriptObject implements PropertyAccess, Cloneable {
     }
 
     @SuppressWarnings("unused")
-    private boolean _extensionCheck_(final boolean unused, final String name) {
-        return extensionCheck(name); // TODO: review
-    }
     private boolean extensionCheck(final String name) {
         if (isExtensible()) {
             return true; //go on and do the set. this is our guard
