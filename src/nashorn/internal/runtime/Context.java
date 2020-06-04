@@ -103,6 +103,7 @@ import nashorn.internal.runtime.logging.Logger;
 import nashorn.internal.runtime.options.LoggingOption.LoggerInfo;
 import nashorn.internal.runtime.options.Options;
 import nashorn.internal.scripts.JS;
+import nashorn.internal.Util;
 
 /**
  * This class manages the global state of execution. Context is immutable.
@@ -301,7 +302,7 @@ public final class Context {
     private final WeakValueCache<CodeSource, Class<?>> anonymousHostClasses = new WeakValueCache<>();
 
     private static final class AnonymousContextCodeInstaller extends ContextCodeInstaller {
-        private static MethodHandles.Lookup LOOKUP_IN;
+    	private static MethodHandles.Lookup LOOKUP_IN;
         private static final String ANONYMOUS_HOST_CLASS_NAME = Compiler.SCRIPTS_PACKAGE.replace('/', '.') + ".AnonymousHost";
         private static final byte[] ANONYMOUS_HOST_CLASS_BYTES = getAnonymousHostClassBytes();
 
@@ -321,12 +322,9 @@ public final class Context {
                 }
                 return LOOKUP_IN.defineHiddenClass(bytecode,false).lookupClass();
             } catch (Exception e) {
-                return uncheck(e);
+                return Util.uncheck(e);
             }
         }
-        
-        @SuppressWarnings("unchecked")
-        private static <T extends Throwable,V> V uncheck(Exception e) throws T { throw (T)e; }
 
         @Override
         public CodeInstaller getOnDemandCompilationInstaller() {
@@ -349,9 +347,6 @@ public final class Context {
             return cw.toByteArray();
         }
     }
-
-    /** Is Context global debug mode enabled ? */
-    public static final boolean DEBUG = Options.getBooleanProperty("nashorn.debug");
 
     private static final ThreadLocal<Global> currentGlobal = new ThreadLocal<>();
 
@@ -958,9 +953,6 @@ public final class Context {
                try {
                    return newGlobal();
                } catch (final RuntimeException e) {
-                   if (Context.DEBUG) {
-                       e.printStackTrace();
-                   }
                    throw e;
                }
            }
@@ -1134,18 +1126,6 @@ public final class Context {
             } else {
                 throw new ClassNotFoundException(fullName);
             }
-        }
-    }
-
-    /**
-     * Hook to print stack trace for a {@link Throwable} that occurred during
-     * execution
-     *
-     * @param t throwable for which to dump stack
-     */
-    public static void printStackTrace(final Throwable t) {
-        if (Context.DEBUG) {
-            t.printStackTrace(Context.getCurrentErr());
         }
     }
 

@@ -168,7 +168,7 @@ public enum TokenType {
     VOID           (UNARY,    "void",       14, false),
 //  VOLATILE       (FUTURE,   "volatile"),
     WHILE          (KEYWORD,  "while"),
-    WITH           (KEYWORD,  "with"),
+    WITH           (FUTURE,   "with"),
     YIELD          (FUTURE,   "yield"),
 
     DECIMAL        (LITERAL,  null),

@@ -896,5 +896,4 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
         }
         return new ScriptObjectMirror(sobj, global, true);
     }
-
 }

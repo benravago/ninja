@@ -31,7 +31,6 @@ import static nashorn.internal.codegen.ObjectClassGenerator.createSetter;
 import static nashorn.internal.codegen.ObjectClassGenerator.getFieldCount;
 import static nashorn.internal.codegen.ObjectClassGenerator.getFieldName;
 import static nashorn.internal.lookup.Lookup.MH;
-import static nashorn.internal.lookup.MethodHandleFactory.stripName;
 import static nashorn.internal.runtime.JSType.getAccessorTypeIndex;
 import static nashorn.internal.runtime.JSType.getNumberOfAccessorTypes;
 import static nashorn.internal.runtime.UnwarrantedOptimismException.INVALID_PROGRAM_POINT;
@@ -40,13 +39,9 @@ import java.io.ObjectInputStream;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.SwitchPoint;
-import java.util.function.Supplier;
-import java.util.logging.Level;
 import nashorn.internal.codegen.ObjectClassGenerator;
 import nashorn.internal.codegen.types.Type;
 import nashorn.internal.lookup.Lookup;
-import nashorn.internal.objects.Global;
-import nashorn.internal.Util;
 
 /**
  * An AccessorProperty is the most generic property type. An AccessorProperty is
@@ -513,16 +508,13 @@ public class AccessorProperty extends Property {
         if (cachedGetter != null) {
             getter = cachedGetter;
         } else {
-            getter = debug(
+            getter =
                 createGetter(
                     getLocalType(),
                     type,
                     primitiveGetter,
                     objectGetter,
-                    INVALID_PROGRAM_POINT),
-                getLocalType(),
-                type,
-                "get");
+                    INVALID_PROGRAM_POINT);
             getterCache[i] = getter;
        }
        assert getter.type().returnType() == type && getter.type().parameterType(0) == Object.class;
@@ -538,16 +530,13 @@ public class AccessorProperty extends Property {
 
         checkUndeclared();
 
-        return debug(
+        return 
             createGetter(
                 getLocalType(),
                 type,
                 primitiveGetter,
                 objectGetter,
-                programPoint),
-            getLocalType(),
-            type,
-            "get");
+                programPoint);
     }
 
     private MethodHandle getOptimisticPrimitiveGetter(final Class<?> type, final int programPoint) {
@@ -589,7 +578,7 @@ public class AccessorProperty extends Property {
     }
 
     private MethodHandle generateSetter(final Class<?> forType, final Class<?> type) {
-        return debug(createSetter(forType, type, primitiveSetter, objectSetter), getLocalType(), type, "set");
+        return createSetter(forType, type, primitiveSetter, objectSetter);
     }
 
     /**
@@ -620,7 +609,7 @@ public class AccessorProperty extends Property {
 
             final MethodHandle widerSetter = newProperty.getSetter(type, newMap);
             final Class<?>     ct = getLocalType();
-            mh = MH.filterArguments(widerSetter, 0, MH.insertArguments(debugReplace(ct, type, currentMap, newMap) , 1, newMap));
+            mh = MH.filterArguments(widerSetter, 0, MH.insertArguments(REPLACE_MAP, 1, newMap));
             if (ct != null && ct.isPrimitive() && !type.isPrimitive()) {
                  mh = ObjectClassGenerator.createGuardBoxedPrimitiveSetter(ct, generateSetter(ct, ct), mh);
             }
@@ -630,7 +619,7 @@ public class AccessorProperty extends Property {
         }
 
         if (isBuiltin()) {
-           mh = MH.filterArguments(mh, 0, debugInvalidate(MH.insertArguments(INVALIDATE_SP, 0, this), getKey().toString()));
+           mh = MH.filterArguments(mh, 0, MH.insertArguments(INVALIDATE_SP, 0, this));
         }
 
         assert mh.type().returnType() == void.class : mh.type();
@@ -649,80 +638,6 @@ public class AccessorProperty extends Property {
 
     private boolean needsInvalidator(final int typeIndex, final int currentTypeIndex) {
         return canChangeType() && typeIndex > currentTypeIndex;
-    }
-
-    private MethodHandle debug(final MethodHandle mh, final Class<?> forType, final Class<?> type, final String tag) {
-        if (!Context.DEBUG || !Global.hasInstance()) {
-            return mh;
-        }
-
-        final Context context = Context.getContextTrusted();
-        assert context != null;
-
-        return context.addLoggingToHandle(
-                ObjectClassGenerator.class,
-                Level.INFO,
-                mh,
-                0,
-                true,
-                new Supplier<String>() {
-                    @Override
-                    public String get() {
-                        return tag + " '" + getKey() + "' (property="+ Util.id(this) + ", slot=" + getSlot() + " " + getClass().getSimpleName() + " forType=" + stripName(forType) + ", type=" + stripName(type) + ')';
-                    }
-                });
-    }
-
-    private MethodHandle debugReplace(final Class<?> oldType, final Class<?> newType, final PropertyMap oldMap, final PropertyMap newMap) {
-        if (!Context.DEBUG || !Global.hasInstance()) {
-            return REPLACE_MAP;
-        }
-
-        final Context context = Context.getContextTrusted();
-        assert context != null;
-
-        MethodHandle mh = context.addLoggingToHandle(
-                ObjectClassGenerator.class,
-                REPLACE_MAP,
-                new Supplier<String>() {
-                    @Override
-                    public String get() {
-                        return "Type change for '" + getKey() + "' " + oldType + "=>" + newType;
-                    }
-                });
-
-        mh = context.addLoggingToHandle(
-                ObjectClassGenerator.class,
-                Level.FINEST,
-                mh,
-                Integer.MAX_VALUE,
-                false,
-                new Supplier<String>() {
-                    @Override
-                    public String get() {
-                        return "Setting map " + Util.id(oldMap) + " => " + Util.id(newMap) + " " + oldMap + " => " + newMap;
-                    }
-                });
-        return mh;
-    }
-
-    private static MethodHandle debugInvalidate(final MethodHandle invalidator, final String key) {
-        if (!Context.DEBUG || !Global.hasInstance()) {
-            return invalidator;
-        }
-
-        final Context context = Context.getContextTrusted();
-        assert context != null;
-
-        return context.addLoggingToHandle(
-                ObjectClassGenerator.class,
-                invalidator,
-                new Supplier<String>() {
-                    @Override
-                    public String get() {
-                        return "Field change callback for " + key + " triggered ";
-                    }
-                });
     }
 
     private static MethodHandle findOwnMH_S(final String name, final Class<?> rtype, final Class<?>... types) {

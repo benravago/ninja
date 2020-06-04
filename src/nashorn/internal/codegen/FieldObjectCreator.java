@@ -83,7 +83,7 @@ public abstract class FieldObjectCreator<T> extends ObjectCreator<T> {
      */
     FieldObjectCreator(final CodeGenerator codegen, final List<MapTuple<T>> tuples, final boolean isScope, final boolean hasArguments) {
         super(codegen, tuples, isScope, hasArguments);
-        this.callSiteFlags = codegen.getCallSiteFlags();
+        this.callSiteFlags = 0;
         this.evalCode = codegen.isEvalCode();
         countFields();
         findClass();

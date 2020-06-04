@@ -791,11 +791,11 @@ public final class ScriptRuntime {
         while (sobj != null && sobj.isScope()) {
             final FindProperty find = sobj.findProperty(property, false);
             if (find != null) {
-                return sobj.delete(property);
+                return sobj.delete(property); // false
             }
             sobj = sobj.getProto();
         }
-        return obj.delete(property);
+        return obj.delete(property); // false
     }
 
     /**

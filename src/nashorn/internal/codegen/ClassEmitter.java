@@ -171,6 +171,7 @@ public class ClassEmitter {
 
     /**
      * Constructor from the compiler.
+     *
      * @param sourceName    Source name
      * @param unitClassName Compile unit class name.
      */

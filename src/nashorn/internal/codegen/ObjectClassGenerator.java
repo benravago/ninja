@@ -61,7 +61,6 @@ import nashorn.internal.runtime.Context;
 import nashorn.internal.runtime.FunctionScope;
 import nashorn.internal.runtime.JSType;
 import nashorn.internal.runtime.PropertyMap;
-import nashorn.internal.runtime.ScriptEnvironment;
 import nashorn.internal.runtime.ScriptObject;
 import nashorn.internal.runtime.Undefined;
 import nashorn.internal.runtime.UnwarrantedOptimismException;
@@ -489,8 +488,6 @@ public final class ObjectClassGenerator implements Loggable {
         classEmitter.end();
 
         final byte[] code = classEmitter.toByteArray();
-        final ScriptEnvironment env = context.getEnv();
-
         return code;
     }
 

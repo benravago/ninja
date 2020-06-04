@@ -38,7 +38,6 @@ import nashorn.internal.ir.IdentNode;
 import nashorn.internal.ir.LexicalContext;
 import nashorn.internal.ir.Node;
 import nashorn.internal.ir.Symbol;
-import nashorn.internal.ir.WithNode;
 import nashorn.internal.ir.visitor.SimpleNodeVisitor;
 import nashorn.internal.runtime.Context;
 import nashorn.internal.runtime.RecompilableScriptFunctionData;
@@ -232,12 +231,6 @@ final class FindScopeDepths extends SimpleNodeVisitor implements Loggable {
         if (log.isEnabled()) {
             log.finest(quote(lc.getCurrentFunction().getName()), " --dynamicScopeCount = ", dynamicScopeCount, " at: ", node, node.getClass());
         }
-    }
-
-    @Override
-    public boolean enterWithNode(final WithNode node) {
-        withBodies.add(node.getBody());
-        return true;
     }
 
     @Override

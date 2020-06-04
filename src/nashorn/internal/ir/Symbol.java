@@ -29,13 +29,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.StringTokenizer;
 import nashorn.internal.codegen.types.Type;
-import nashorn.internal.runtime.Context;
-import nashorn.internal.Util;
-import nashorn.internal.runtime.options.Options;
 
 /**
  * Symbol is a symbolic address for a value ("variable" if you wish). Identifiers in JavaScript source, as well as
@@ -105,34 +99,6 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
     /** Number of times this symbol is used in code */
     private int useCount;
 
-    /** Debugging option - dump info and stack trace when symbols with given names are manipulated */
-    private static final Set<String> TRACE_SYMBOLS;
-    private static final Set<String> TRACE_SYMBOLS_STACKTRACE;
-
-    static {
-        final String stacktrace = Options.getStringProperty("nashorn.compiler.symbol.stacktrace", null);
-        final String trace;
-        if (stacktrace != null) {
-            trace = stacktrace; //stacktrace always implies trace as well
-            TRACE_SYMBOLS_STACKTRACE = new HashSet<>();
-            for (final StringTokenizer st = new StringTokenizer(stacktrace, ","); st.hasMoreTokens(); ) {
-                TRACE_SYMBOLS_STACKTRACE.add(st.nextToken());
-            }
-        } else {
-            trace = Options.getStringProperty("nashorn.compiler.symbol.trace", null);
-            TRACE_SYMBOLS_STACKTRACE = null;
-        }
-
-        if (trace != null) {
-            TRACE_SYMBOLS = new HashSet<>();
-            for (final StringTokenizer st = new StringTokenizer(trace, ","); st.hasMoreTokens(); ) {
-                TRACE_SYMBOLS.add(st.nextToken());
-            }
-        } else {
-            TRACE_SYMBOLS = null;
-        }
-    }
-
     /**
      * Constructor
      *
@@ -142,9 +108,6 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
     public Symbol(final String name, final int flags) {
         this.name       = name;
         this.flags      = flags;
-        if(shouldTrace()) {
-            trace("CREATE SYMBOL " + name);
-        }
     }
 
     @Override
@@ -349,9 +312,6 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
      */
     public Symbol setIsScope() {
         if (!isScope()) {
-            if(shouldTrace()) {
-                trace("SET IS SCOPE");
-            }
             flags |= IS_SCOPE;
             if(!isParam()) {
                 flags &= ~HAS_SLOT;
@@ -365,9 +325,6 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
      */
     public void setIsFunctionDeclaration() {
         if (!isFunctionDeclaration()) {
-            if(shouldTrace()) {
-                trace("SET IS FUNCTION DECLARATION");
-            }
             flags |= IS_FUNCTION_DECLARATION;
         }
     }
@@ -633,9 +590,6 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
     public Symbol setFirstSlot(final int firstSlot) {
         assert firstSlot >= 0 && firstSlot <= 65535;
         if (firstSlot != this.firstSlot) {
-            if(shouldTrace()) {
-                trace("SET SLOT " + firstSlot);
-            }
             this.firstSlot = firstSlot;
         }
         return this;
@@ -660,20 +614,10 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
         return symbol;
     }
 
-    private boolean shouldTrace() {
-        return TRACE_SYMBOLS != null && (TRACE_SYMBOLS.isEmpty() || TRACE_SYMBOLS.contains(name));
-    }
-
-    private void trace(final String desc) {
-        Context.err(Util.id(this) + " SYMBOL: '" + name + "' " + desc);
-        if (TRACE_SYMBOLS_STACKTRACE != null && (TRACE_SYMBOLS_STACKTRACE.isEmpty() || TRACE_SYMBOLS_STACKTRACE.contains(name))) {
-            new Throwable().printStackTrace(Context.getCurrentErr());
-        }
-    }
-
     private void readObject(final ObjectInputStream in) throws ClassNotFoundException, IOException {
         in.defaultReadObject();
         firstSlot = -1;
         fieldIndex = -1;
     }
+
 }

@@ -187,11 +187,6 @@ public abstract class ArrayData {
         }
 
         @Override
-        public ArrayData push(final Object... items) {
-            return toRealArrayData().push(items);
-        }
-
-        @Override
         public ArrayData slice(final long from, final long to) {
             return this; //empty
         }
@@ -462,7 +457,6 @@ public abstract class ArrayData {
      * Shift the array right
      *
      * @param by offset to shift
-
      * @return New arraydata (or same)
      */
     public abstract ArrayData shiftRight(final int by);
@@ -605,7 +599,6 @@ public abstract class ArrayData {
      * Returns if element at specific index can be deleted or not.
      *
      * @param index the index of the element
-     *
      * @return true if element can be deleted
      */
     public boolean canDelete(final int index) {
@@ -616,7 +609,6 @@ public abstract class ArrayData {
      * Returns if element at specific index can be deleted or not.
      *
      * @param longIndex  the index
-     *
      * @return true if range can be deleted
      */
     public boolean canDelete(final long longIndex) {
@@ -643,7 +635,6 @@ public abstract class ArrayData {
      *
      * @param global the global object
      * @param index  the index
-     *
      * @return property descriptor for element
      */
     public PropertyDescriptor getDescriptor(final Global global, final int index) {
@@ -664,7 +655,6 @@ public abstract class ArrayData {
      *
      * @param fromIndex  from index (inclusive)
      * @param toIndex    to index (inclusive)
-     *
      * @return new ArrayData after deletion
      */
     public abstract ArrayData delete(final long fromIndex, final long toIndex);

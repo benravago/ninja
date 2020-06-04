@@ -86,7 +86,6 @@ import nashorn.internal.ir.TryNode;
 import nashorn.internal.ir.UnaryNode;
 import nashorn.internal.ir.VarNode;
 import nashorn.internal.ir.WhileNode;
-import nashorn.internal.ir.WithNode;
 import nashorn.internal.ir.visitor.NodeVisitor;
 import nashorn.internal.ir.visitor.SimpleNodeVisitor;
 import nashorn.internal.parser.TokenType;
@@ -1131,15 +1130,6 @@ final class LocalVariableTypesCalculator extends SimpleNodeVisitor {
         }
         return false;
     }
-
-    @Override
-    public boolean enterWithNode(final WithNode withNode) {
-        if (reachable) {
-            visitExpression(withNode.getExpression());
-            withNode.getBody().accept(this);
-        }
-        return false;
-    };
 
     private Map<Symbol, LvarType> getBreakTargetTypes(final LexicalContextNode target) {
         // Remove symbols defined in the the blocks that are being broken out of.

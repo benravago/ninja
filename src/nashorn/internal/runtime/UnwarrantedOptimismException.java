@@ -89,7 +89,7 @@ public final class UnwarrantedOptimismException extends RuntimeException {
      * {@code Type#NUMBER}.
      */
     public UnwarrantedOptimismException(final Object returnValue, final int programPoint, final Type returnType) {
-        super("", null, false, Context.DEBUG);
+        super("", null, false, false);
         assert returnType != Type.OBJECT || returnValue == null || !Type.typeFor(returnValue.getClass()).isNumeric();
         assert returnType != Type.INT;
         this.returnValue  = returnValue;

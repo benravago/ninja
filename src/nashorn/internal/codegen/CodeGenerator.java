@@ -54,7 +54,6 @@ import static nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE
 import static nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE_PROGRAM_POINT_SHIFT;
 import static nashorn.internal.runtime.linker.NashornCallSiteDescriptor.CALLSITE_SCOPE;
 
-import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -127,7 +126,6 @@ import nashorn.internal.ir.TryNode;
 import nashorn.internal.ir.UnaryNode;
 import nashorn.internal.ir.VarNode;
 import nashorn.internal.ir.WhileNode;
-import nashorn.internal.ir.WithNode;
 import nashorn.internal.ir.visitor.NodeOperatorVisitor;
 import nashorn.internal.ir.visitor.SimpleNodeVisitor;
 import nashorn.internal.objects.Global;
@@ -281,22 +279,13 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
     }
 
     /**
-     * Gets the call site flags
-     *
-     * @return the correct flags for a call site in the current function
-     */
-    int getCallSiteFlags() {
-        return lc.getCurrentFunction().getCallSiteFlags();
-    }
-
-    /**
      * Gets the flags for a scope call site.
      * @param symbol a scope symbol
      * @return the correct flags for the scope call site
      */
     private int getScopeCallSiteFlags(final Symbol symbol) {
         assert symbol.isScope();
-        final int flags = getCallSiteFlags() | CALLSITE_SCOPE;
+        final int flags = CALLSITE_SCOPE;
         if (isEvalCode() && symbol.isGlobal()) {
             return flags; // Don't set fast-scope flag on non-declared globals in eval code - see JDK-8077955.
         }
@@ -450,13 +439,6 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
                 }
                 previousWasBlock = true;
             } else {
-                if (node instanceof WithNode && previousWasBlock) {
-                    // If we hit a scope that can have symbols introduced into it at run time before finding the defining
-                    // block, the symbol can't be fast scoped. A WithNode only counts if we've immediately seen a block
-                    // before - its block. Otherwise, we are currently processing the WithNode's expression, and that's
-                    // obviously not subjected to introducing new symbols.
-                    return false;
-                }
                 previousWasBlock = false;
             }
         }
@@ -875,8 +857,7 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
                     }
                     @Override
                     void consumeStack() {
-                        final int flags = getCallSiteFlags();
-                        dynamicGet(accessNode.getProperty(), flags, accessNode.isFunction(), accessNode.isIndex());
+                        dynamicGet(accessNode.getProperty(), 0, accessNode.isFunction(), accessNode.isIndex());
                     }
                 }.emit(baseAlreadyOnStack ? 1 : 0);
                 return false;
@@ -894,8 +875,7 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
                     }
                     @Override
                     void consumeStack() {
-                        final int flags = getCallSiteFlags();
-                        dynamicGetIndex(flags, indexNode.isFunction());
+                        dynamicGetIndex(0, indexNode.isFunction());
                     }
                 }.emit(baseAlreadyOnStack ? 2 : 0);
                 return false;
@@ -1590,7 +1570,7 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
 
                 //call nodes have program points.
 
-                final int flags = getCallSiteFlags() | (callNode.isApplyToCall() ? CALLSITE_APPLY_TO_CALL : 0);
+                final int flags = (callNode.isApplyToCall() ? CALLSITE_APPLY_TO_CALL : 0);
 
                 new OptimisticOperation(callNode, resultBounds) {
                     int argCount;
@@ -1622,13 +1602,13 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
                     @Override
                     void loadStack() {
                         callee = (FunctionNode)origCallee.accept(CodeGenerator.this);
-                        method.loadUndefined(Type.OBJECT);
+                        method.loadUndefined(Type.OBJECT); // "this" is undefined
                         argsCount = loadArgs(args);
                     }
 
                     @Override
                     void consumeStack() {
-                        dynamicCall(2 + argsCount, getCallSiteFlags(), null);
+                        dynamicCall(2 + argsCount, 0, null);
                     }
                 }.emit();
                 return false;
@@ -1651,13 +1631,13 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
                         // NOTE: not using a nested OptimisticOperation on this dynamicGetIndex, as we expect to get
                         // back a callable object. Nobody in their right mind would optimistically type this call site.
                         assert !node.isOptimistic();
-                        method.dynamicGetIndex(node.getType(), getCallSiteFlags(), true);
+                        method.dynamicGetIndex(node.getType(), 0, true);
                         method.swap();
                         argsCount = loadArgs(args);
                     }
                     @Override
                     void consumeStack() {
-                        dynamicCall(2 + argsCount, getCallSiteFlags(), node.toString(false));
+                        dynamicCall(2 + argsCount, 0, node.toString(false));
                     }
                 }.emit();
                 return false;
@@ -1676,7 +1656,7 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
                         }
                         @Override
                         void consumeStack() {
-                            final int flags = getCallSiteFlags() | CALLSITE_SCOPE;
+                            final int flags = CALLSITE_SCOPE;
                             dynamicCall(2 + argsCount, flags, node.toString(false));
                         }
                 }.emit();
@@ -2158,7 +2138,6 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
             newFunctionObject(newFunctionNode, true);
             return newFunctionNode;
         } catch (final Throwable t) {
-            Context.printStackTrace(t);
             final VerifyError e = new VerifyError("Code generation bug in \"" + functionNode.getName() + "\": likely stack misaligned: " + t + " " + functionNode.getSource().getName());
             e.initCause(t);
             throw e;
@@ -3517,79 +3496,6 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
         method.breakLabel(whileNode.getBreakLabel(), liveLocalsOnContinueOrBreak);
     }
 
-
-    @Override
-    public boolean enterWithNode(final WithNode withNode) {
-        if(!method.isReachable()) {
-            return false;
-        }
-        enterStatement(withNode);
-        final Expression expression = withNode.getExpression();
-        final Block      body       = withNode.getBody();
-
-        // It is possible to have a "pathological" case where the with block does not reference *any* identifiers. It's
-        // pointless, but legal. In that case, if nothing else in the method forced the assignment of a slot to the
-        // scope object, its' possible that it won't have a slot assigned. In this case we'll only evaluate expression
-        // for its side effect and visit the body, and not bother opening and closing a WithObject.
-        final boolean hasScope = method.hasScope();
-
-        if (hasScope) {
-            method.loadCompilerConstant(SCOPE);
-        }
-
-        loadExpressionAsObject(expression);
-
-        final Label tryLabel;
-        if (hasScope) {
-            // Construct a WithObject if we have a scope
-            method.invoke(ScriptRuntime.OPEN_WITH);
-            method.storeCompilerConstant(SCOPE);
-            tryLabel = new Label("with_try");
-            method.label(tryLabel);
-        } else {
-            // We just loaded the expression for its side effect and to check
-            // for null or undefined value.
-            globalCheckObjectCoercible();
-            tryLabel = null;
-        }
-
-        // Always process body
-        body.accept(this);
-
-        if (hasScope) {
-            // Ensure we always close the WithObject
-            final Label endLabel   = new Label("with_end");
-            final Label catchLabel = new Label("with_catch");
-            final Label exitLabel  = new Label("with_exit");
-
-            method.label(endLabel);
-            // Somewhat conservatively presume that if the body is not empty, it can throw an exception. In any case,
-            // we must prevent trying to emit a try-catch for empty range, as it causes a verification error.
-            final boolean bodyCanThrow = endLabel.isAfter(tryLabel);
-            if(bodyCanThrow) {
-                method._try(tryLabel, endLabel, catchLabel);
-            }
-
-            final boolean reachable = method.isReachable();
-            if(reachable) {
-                popScope();
-                if(bodyCanThrow) {
-                    method._goto(exitLabel);
-                }
-            }
-
-            if(bodyCanThrow) {
-                method._catch(catchLabel);
-                popScopeException();
-                method.athrow();
-                if(reachable) {
-                    method.label(exitLabel);
-                }
-            }
-        }
-        return false;
-    }
-
     private void loadADD(final UnaryNode unaryNode, final TypeBounds resultBounds) {
         loadExpression(unaryNode.getExpression(), resultBounds.booleanToInt().notWiderThan(Type.NUMBER));
         if(method.peekType() == Type.BOOLEAN) {
@@ -3726,7 +3632,7 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
         // Load function reference.
         loadExpressionAsObject(func); // must detect type error
 
-        method.dynamicNew(1 + loadArgs(args), getCallSiteFlags(), func.toString(false));
+        method.dynamicNew(1 + loadArgs(args), 0, func.toString(false));
     }
 
     private void loadNOT(final UnaryNode unaryNode) {
@@ -3798,10 +3704,10 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
             loadExpressionAsObject(((BaseNode)expression).getBase());
             if (expression instanceof AccessNode) {
                 final AccessNode accessNode = (AccessNode) expression;
-                method.dynamicRemove(accessNode.getProperty(), getCallSiteFlags(), accessNode.isIndex());
+                method.dynamicRemove(accessNode.getProperty(), 0, accessNode.isIndex());
             } else if (expression instanceof IndexNode) {
                 loadExpressionAsObject(((IndexNode) expression).getIndex());
-                method.dynamicRemoveIndex(getCallSiteFlags());
+                method.dynamicRemoveIndex(0);
             } else {
                 throw new AssertionError(expression.getClass().getName());
             }
@@ -4322,6 +4228,7 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
         }
     }
 
+
     /**
      * The difference between a store and a self modifying store is that
      * the latter may load part of the target on the stack, e.g. the base
@@ -4531,13 +4438,13 @@ final class CodeGenerator extends NodeOperatorVisitor<CodeGeneratorLexicalContex
 
                 @Override
                 public boolean enterAccessNode(final AccessNode node) {
-                    method.dynamicSet(node.getProperty(), getCallSiteFlags(), node.isIndex());
+                    method.dynamicSet(node.getProperty(), 0, node.isIndex());
                     return false;
                 }
 
                 @Override
                 public boolean enterIndexNode(final IndexNode node) {
-                    method.dynamicSetIndex(getCallSiteFlags());
+                    method.dynamicSetIndex(0);
                     return false;
                 }
             });

@@ -499,4 +499,5 @@ public final class NashornCallSiteDescriptor extends CallSiteDescriptor {
     protected CallSiteDescriptor changeOperationInternal(final Operation newOperation) {
         return get(getLookupPrivileged(), newOperation, getMethodType(), flags);
     }
+
 }

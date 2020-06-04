@@ -40,7 +40,6 @@ import nashorn.internal.ir.LexicalContext;
 import nashorn.internal.ir.LexicalContextNode;
 import nashorn.internal.ir.Node;
 import nashorn.internal.ir.Symbol;
-import nashorn.internal.ir.WithNode;
 
 /**
  * A lexical context that also tracks if we have any dynamic scopes in the context. Such scopes can have new
@@ -77,15 +76,9 @@ final class CodeGeneratorLexicalContext extends LexicalContext {
     /** size of next free slot vector */
     private int nextFreeSlotsSize;
 
-    private boolean isWithBoundary(final Object node) {
-        return node instanceof Block && !isEmpty() && peek() instanceof WithNode;
-    }
-
     @Override
     public <T extends LexicalContextNode> T push(final T node) {
-        if (isWithBoundary(node)) {
-            dynamicScopeCount++;
-        } else if (node instanceof FunctionNode) {
+        if (node instanceof FunctionNode) {
             if (((FunctionNode)node).inDynamicContext()) {
                 dynamicScopeCount++;
             }
@@ -107,10 +100,7 @@ final class CodeGeneratorLexicalContext extends LexicalContext {
     @Override
     public <T extends Node> T pop(final T node) {
         final T popped = super.pop(node);
-        if (isWithBoundary(node)) {
-            dynamicScopeCount--;
-            assert dynamicScopeCount >= 0;
-        } else if (node instanceof FunctionNode) {
+        if (node instanceof FunctionNode) {
             if (((FunctionNode)node).inDynamicContext()) {
                 dynamicScopeCount--;
                 assert dynamicScopeCount >= 0;

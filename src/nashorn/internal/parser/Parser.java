@@ -442,7 +442,6 @@ public class Parser extends AbstractParser implements Loggable {
                     FunctionNode.Kind.NORMAL,
                     functionLine,
                     functionBody);
-
             return functionNode;
         } catch (final Exception e) {
             handleParseException(e);
@@ -872,7 +871,7 @@ public class Parser extends AbstractParser implements Loggable {
         List<Node>    directiveStmts        = null;
         boolean       checkDirective        = true;
         int           functionFlags          = reparseFlags;
-
+        
         // If is a script, then process until the end of the script.
         while (type != EOF) {
             // Break if the end of a code block.
@@ -886,28 +885,6 @@ public class Parser extends AbstractParser implements Loggable {
                 functionFlags = 0;
 
                 // check for directive prologues
-                if (checkDirective) {
-                    // skip any debug statement like line number to get actual first line
-                    final Statement lastStatement = lc.getLastStatement();
-
-                    // get directive prologue, if any
-                    final String directive = getDirective(lastStatement);
-
-                    // If we have seen first non-directive statement,
-                    // no more directive statements!!
-                    checkDirective = directive != null;
-
-                    if (checkDirective) {
-
-                        if (Context.DEBUG) {
-                            final int debugFlag = FunctionNode.getDirectiveFlag(directive);
-                            if (debugFlag != 0) {
-                                final ParserContextFunctionNode function = lc.getCurrentFunction();
-                                function.setDebugFlag(debugFlag);
-                            }
-                        }
-                    }
-                }
             } catch (final Exception e) {
                 final int errorLine = line;
                 final long errorToken = token;
@@ -1009,9 +986,6 @@ public class Parser extends AbstractParser implements Loggable {
             break;
         case RETURN:
             returnStatement();
-            break;
-        case WITH:
-            withStatement();
             break;
         case SWITCH:
             switchStatement();
@@ -1190,6 +1164,7 @@ public class Parser extends AbstractParser implements Loggable {
      */
     private ClassNode classTail(final int classLineNumber, final long classToken,
             final IdentNode className, final boolean isStatement) {
+
         Expression classHeritage = null;
         if (type == EXTENDS) {
             next();
@@ -1269,6 +1244,7 @@ public class Parser extends AbstractParser implements Loggable {
 
         classElements.trimToSize();
         return new ClassNode(classLineNumber, classToken, finish, className, classHeritage, constructor, classElements, isStatement);
+
     }
 
     private PropertyNode createDefaultClassConstructor(final int classLineNumber, final long classToken, final long lastToken, final IdentNode className, final boolean subclass) {
@@ -1953,7 +1929,7 @@ public class Parser extends AbstractParser implements Loggable {
                         // for (var i, j in obj) is invalid
                         throw error(AbstractParser.message("many.vars.in.for.in.loop", isForOf ? "of" : "in"), varDeclList.secondBinding.getToken());
                     }
-                    if (varDeclList.declarationWithInitializerToken != 0 && (type != TokenType.IN || varType != VAR || varDeclList.init != null)) {
+                    if (varDeclList.declarationWithInitializerToken != 0) {
                         // ES5 legacy: for (var i = AssignmentExpressionNoIn in Expression)
                         throw error(AbstractParser.message("for.in.loop.initializer", isForOf ? "of" : "in"), varDeclList.declarationWithInitializerToken);
                     }
@@ -2338,25 +2314,6 @@ public class Parser extends AbstractParser implements Loggable {
     }
 
     /**
-     * WithStatement :
-     *      with ( Expression ) Statement
-     *
-     * See 12.10
-     *
-     * Parse WITH statement.
-     */
-    private void withStatement() {
-        // Capture WITH token.
-        final int  withLine  = line;
-        final long withToken = token;
-        // WITH tested in caller.
-        next();
-
-        // ECMA 12.10.1 mode restrictions
-        throw error(AbstractParser.message("strict.no.with"), withToken);
-    }
-
-    /**
      * SwitchStatement :
      *      switch ( Expression ) CaseBlock
      *
@@ -2576,7 +2533,7 @@ public class Parser extends AbstractParser implements Loggable {
                         }
                     });
                 } else {
-                    // ECMA 12.4.1 mode restrictions
+                    // ECMA 12.4.1 strict mode restrictions
                     verifyIdent((IdentNode) exception, "catch argument");
                 }
 
@@ -2942,8 +2899,8 @@ public class Parser extends AbstractParser implements Loggable {
                     final FunctionNode prevSetter = existingProperty.getSetter();
 
                     if (property.getKey() instanceof IdentNode && ((IdentNode)property.getKey()).isProtoPropertyName() &&
-				                existingProperty.getKey() instanceof IdentNode && ((IdentNode)existingProperty.getKey()).isProtoPropertyName()) {
-                    	throw error(AbstractParser.message("multiple.proto.key"), property.getToken());
+                                    existingProperty.getKey() instanceof IdentNode && ((IdentNode)existingProperty.getKey()).isProtoPropertyName()) {
+                        throw error(AbstractParser.message("multiple.proto.key"), property.getToken());
                     }
 
                     if (value != null || prevValue != null) {
@@ -3489,35 +3446,35 @@ public class Parser extends AbstractParser implements Loggable {
 
         case CLASS:
             lhs = classExpression(false);
-			break;
+            break;
 
         case SUPER:
             final ParserContextFunctionNode currentFunction = getCurrentNonArrowFunction();
-			if (currentFunction.isMethod()) {
-			    final long identToken = Token.recast(token, IDENT);
-			    next();
-			    lhs = createIdentNode(identToken, finish, SUPER.getName());
+            if (currentFunction.isMethod()) {
+                final long identToken = Token.recast(token, IDENT);
+                next();
+                lhs = createIdentNode(identToken, finish, SUPER.getName());
 
-			    switch (type) {
-			        case LBRACKET:
-			        case PERIOD:
-			            getCurrentNonArrowFunction().setFlag(FunctionNode.ES6_USES_SUPER);
-			            isSuper = true;
-			            break;
-			        case LPAREN:
-			            if (currentFunction.isSubclassConstructor()) {
-			                lhs = ((IdentNode)lhs).setIsDirectSuper();
-			                break;
-			            } else {
-			                // fall through to throw error
-			            }
-			        default:
-			            throw error(AbstractParser.message("invalid.super"), identToken);
-			    }
-			    break;
-			} else {
-			    // fall through
-			}
+                switch (type) {
+                    case LBRACKET:
+                    case PERIOD:
+                        getCurrentNonArrowFunction().setFlag(FunctionNode.ES6_USES_SUPER);
+                        isSuper = true;
+                        break;
+                    case LPAREN:
+                        if (currentFunction.isSubclassConstructor()) {
+                            lhs = ((IdentNode)lhs).setIsDirectSuper();
+                            break;
+                        } else {
+                            // fall through to throw error
+                        }
+                    default:
+                        throw error(AbstractParser.message("invalid.super"), identToken);
+                }
+                break;
+            } else {
+                // fall through
+            }
 
         default:
             // Get primary expression.

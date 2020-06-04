@@ -1195,6 +1195,4 @@ public final class FunctionNode extends LexicalContextExpression implements Flag
                         rootClass, source, namespace));
     }
 
-    public static int getDirectiveFlag(final String directive) { return 0; } // TODO: remove
-    public int getCallSiteFlags() { return 0; } // TODO: remove
 }

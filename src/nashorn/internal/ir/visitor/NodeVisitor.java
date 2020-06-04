@@ -66,7 +66,6 @@ import nashorn.internal.ir.TryNode;
 import nashorn.internal.ir.UnaryNode;
 import nashorn.internal.ir.VarNode;
 import nashorn.internal.ir.WhileNode;
-import nashorn.internal.ir.WithNode;
 
 /**
  * Visitor used to navigate the IR.
@@ -897,26 +896,6 @@ public abstract class NodeVisitor<T extends LexicalContext> {
      */
     public Node leaveWhileNode(final WhileNode whileNode) {
         return leaveDefault(whileNode);
-    }
-
-    /**
-     * Callback for entering a WithNode
-     *
-     * @param  withNode  the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterWithNode(final WithNode withNode) {
-        return enterDefault(withNode);
-    }
-
-    /**
-     * Callback for leaving a WithNode
-     *
-     * @param  withNode  the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveWithNode(final WithNode withNode) {
-        return leaveDefault(withNode);
     }
 
     /**

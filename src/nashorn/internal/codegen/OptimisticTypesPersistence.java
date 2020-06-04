@@ -562,7 +562,7 @@ public final class OptimisticTypesPersistence {
         return Math.max(0, Integer.parseInt(str));
     }
 
-    private static final String JRT_NASHORN_DIR = "/modules/scripting.nashorn";
+    private static final String JRT_NASHORN_DIR = "/modules/nashorn.scripting";
 
     // version directory name if nashorn is loaded from jrt:/ URL
     private static String getJrtVersionDirName() throws Exception {

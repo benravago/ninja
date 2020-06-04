@@ -139,6 +139,7 @@ final class JavaAdapterClassLoader {
                             return Context.getContext();
                         }
                     }, GET_CONTEXT_ACC_CTXT);
+
                     return defineClass(name, classBytes, 0, classBytes.length, protectionDomain);
                 }
                 throw new ClassNotFoundException(name);

@@ -52,6 +52,7 @@ import dynalink.linker.GuardedInvocation;
 import dynalink.linker.LinkRequest;
 import nashorn.api.scripting.ClassFilter;
 import nashorn.api.scripting.ScriptObjectMirror;
+import nashorn.internal.Util;
 import nashorn.internal.lookup.Lookup;
 import nashorn.internal.objects.annotations.Attribute;
 import nashorn.internal.objects.annotations.Getter;
@@ -1513,11 +1514,11 @@ public final class Global extends Scope {
         final AccessorPropertyDescriptor desc = new AccessorPropertyDescriptor(configurable, enumerable, get == null ? UNDEFINED : get, set == null ? UNDEFINED : set, this);
 
         if (get == null) {
-            desc.delete(PropertyDescriptor.GET);
+            desc.delete(PropertyDescriptor.GET); // false
         }
 
         if (set == null) {
-            desc.delete(PropertyDescriptor.SET);
+            desc.delete(PropertyDescriptor.SET); // false
         }
 
         return desc;
@@ -2594,6 +2595,7 @@ public final class Global extends Scope {
         final ScriptObject arrayPrototype = getArrayPrototype();
         arrayPrototype.setIsArray();
 
+
         this.symbol   = LAZY_SENTINEL;
         this.map      = LAZY_SENTINEL;
         this.weakMap  = LAZY_SENTINEL;
@@ -2610,14 +2612,14 @@ public final class Global extends Scope {
             initJavaAccess();
         } else {
             // delete nasgen-created global properties related to java access
-            this.delete("Java");
-            this.delete("JavaImporter");
-            this.delete("Packages");
-            this.delete("com");
-            this.delete("edu");
-            this.delete("java");
-            this.delete("javax");
-            this.delete("org");
+            this.delete("Java"); // false
+            this.delete("JavaImporter"); // false
+            this.delete("Packages"); // false
+            this.delete("com"); // false
+            this.delete("edu"); // false
+            this.delete("java"); // false
+            this.delete("javax"); // false
+            this.delete("org"); // false
         }
 
         if (! env._no_typed_arrays) {
@@ -2636,27 +2638,6 @@ public final class Global extends Scope {
 
         if (env._scripting) {
             initScripting(env);
-        }
-
-        if (Context.DEBUG) {
-            boolean debugOkay;
-            final SecurityManager sm = System.getSecurityManager();
-            if (sm != null) {
-                try {
-                    sm.checkPermission(new RuntimePermission(Context.NASHORN_DEBUG_MODE));
-                    debugOkay = true;
-                } catch (final SecurityException ignored) {
-                    // if no permission, don't initialize Debug object
-                    debugOkay = false;
-                }
-
-            } else {
-                debugOkay = true;
-            }
-
-            if (debugOkay) {
-                initDebug();
-            }
         }
 
         copyBuiltins();
@@ -2808,9 +2789,9 @@ public final class Global extends Scope {
     private Object printImpl(final boolean stdout, final Object... objects) {
         final ScriptContext sc = currentContext();
         var out = stdout 
-            ? ( sc != null ? sc.getWriter() : getContext().getEnv().getOut() )
-            : ( sc != null ? sc.getErrorWriter() : getContext().getEnv().getErr() );
-   
+                ? ( sc != null ? sc.getWriter() : getContext().getEnv().getOut() )
+                : ( sc != null ? sc.getErrorWriter() : getContext().getEnv().getErr() );
+       
         final StringBuilder sb = new StringBuilder();
 
         for (final Object obj : objects) {
@@ -2859,12 +2840,9 @@ public final class Global extends Scope {
 
             return res;
         } catch (final Exception e) {
-            return uncheck(e);
+            return Util.uncheck(e);
         }
     }
-
-    @SuppressWarnings("unchecked")
-    static <T extends Throwable,V> V uncheck(Exception e) throws T { throw (T)e; }
 
     private ScriptObject initPrototype(final String name, final ScriptObject prototype) {
         try {
@@ -2878,11 +2856,7 @@ public final class Global extends Scope {
             res.setInitialProto(prototype);
             return res;
         } catch (final Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException)e;
-            } else {
-                throw new RuntimeException(e);
-            }
+            return Util.uncheck(e);
         }
     }
 

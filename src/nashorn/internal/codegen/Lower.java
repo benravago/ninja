@@ -76,7 +76,6 @@ import nashorn.internal.ir.TryNode;
 import nashorn.internal.ir.UnaryNode;
 import nashorn.internal.ir.VarNode;
 import nashorn.internal.ir.WhileNode;
-import nashorn.internal.ir.WithNode;
 import nashorn.internal.ir.visitor.NodeOperatorVisitor;
 import nashorn.internal.ir.visitor.SimpleNodeVisitor;
 import nashorn.internal.parser.Token;
@@ -640,7 +639,6 @@ final class Lower extends NodeOperatorVisitor<BlockLexicalContext> implements Lo
 
     @Override
     public boolean enterUnaryNode(final UnaryNode unaryNode) {
-
         if (unaryNode.isTokenType(TokenType.YIELD) ||
             unaryNode.isTokenType(TokenType.YIELD_STAR)) {
             throwNotImplementedYet("es6.yield", unaryNode);
@@ -684,11 +682,6 @@ final class Lower extends NodeOperatorVisitor<BlockLexicalContext> implements Lo
         }
 
          return addStatement(checkEscape(whileNode));
-    }
-
-    @Override
-    public Node leaveWithNode(final WithNode withNode) {
-        return addStatement(withNode);
     }
 
     @Override

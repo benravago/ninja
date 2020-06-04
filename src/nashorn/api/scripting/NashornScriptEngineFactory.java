@@ -149,9 +149,6 @@ public final class NashornScriptEngineFactory implements ScriptEngineFactory {
         try {
             return new NashornScriptEngine(this, DEFAULT_OPTIONS, getAppClassLoader(), null);
         } catch (final RuntimeException e) {
-            if (Context.DEBUG) {
-                e.printStackTrace();
-            }
             throw e;
         }
     }
@@ -233,9 +230,6 @@ public final class NashornScriptEngineFactory implements ScriptEngineFactory {
         try {
             return new NashornScriptEngine(this, args, appLoader, classFilter);
         } catch (final RuntimeException e) {
-            if (Context.DEBUG) {
-                e.printStackTrace();
-            }
             throw e;
         }
     }

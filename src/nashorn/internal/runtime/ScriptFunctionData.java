@@ -40,6 +40,7 @@ import java.util.LinkedList;
 import java.util.List;
 import nashorn.internal.runtime.linker.LinkerCallSite;
 
+
 /**
  * A container for data needed to instantiate a specific {@link ScriptFunction} at runtime.
  * Instances of this class are created during codegen and stored in script classes'

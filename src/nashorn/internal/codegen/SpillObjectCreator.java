@@ -106,11 +106,11 @@ public final class SpillObjectCreator extends ObjectCreator<Expression> {
 
                         //avoid blowing up the array if we can
                         if (constantValue instanceof Integer) {
-                            arrayData = arrayData.set(index, ((Integer)constantValue).intValue());
+                            arrayData = arrayData.set(index, ((Integer)constantValue).intValue()); // false
                         } else if (constantValue instanceof Double) {
-                            arrayData = arrayData.set(index, ((Double)constantValue).doubleValue());
+                            arrayData = arrayData.set(index, ((Double)constantValue).doubleValue()); // false
                         } else {
-                            arrayData = arrayData.set(index, constantValue);
+                            arrayData = arrayData.set(index, constantValue); // false
                         }
 
                         if (longIndex > oldLength) {
@@ -148,7 +148,6 @@ public final class SpillObjectCreator extends ObjectCreator<Expression> {
 
     @Override
     public void populateRange(final MethodEmitter method, final Type objectType, final int objectSlot, final int start, final int end) {
-        final int  callSiteFlags = codegen.getCallSiteFlags();
         method.load(objectType, objectSlot);
 
         // set postfix values
@@ -167,12 +166,12 @@ public final class SpillObjectCreator extends ObjectCreator<Expression> {
                 method.dup();
                 loadIndex(method, ArrayIndex.toLongIndex(index));
                 loadTuple(method, tuple, false);
-                method.dynamicSetIndex(callSiteFlags);
+                method.dynamicSetIndex(0);
             } else {
                 assert property.getKey() instanceof String; // symbol keys not yet supported in object literals
                 method.dup();
                 loadTuple(method, tuple, false);
-                method.dynamicSet((String) property.getKey(), codegen.getCallSiteFlags(), false);
+                method.dynamicSet((String) property.getKey(), 0, false);
             }
         }
     }

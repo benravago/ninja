@@ -57,7 +57,6 @@ import nashorn.internal.ir.TryNode;
 import nashorn.internal.ir.UnaryNode;
 import nashorn.internal.ir.VarNode;
 import nashorn.internal.ir.WhileNode;
-import nashorn.internal.ir.WithNode;
 import nashorn.internal.ir.visitor.NodeOperatorVisitor;
 
 
@@ -308,12 +307,6 @@ final class WeighNodes extends NodeOperatorVisitor<LexicalContext> {
     public Node leaveWhileNode(final WhileNode whileNode) {
         weight += LOOP_WEIGHT;
         return whileNode;
-    }
-
-    @Override
-    public Node leaveWithNode(final WithNode withNode) {
-        weight += WITH_WEIGHT;
-        return withNode;
     }
 
     @Override

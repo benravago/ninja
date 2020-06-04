@@ -78,7 +78,6 @@ import nashorn.internal.ir.Symbol;
 import nashorn.internal.ir.TryNode;
 import nashorn.internal.ir.UnaryNode;
 import nashorn.internal.ir.VarNode;
-import nashorn.internal.ir.WithNode;
 import nashorn.internal.ir.visitor.SimpleNodeVisitor;
 import nashorn.internal.parser.TokenType;
 import nashorn.internal.runtime.Context;
@@ -925,14 +924,6 @@ final class AssignSymbols extends SimpleNodeVisitor implements Loggable {
                 // We reached the function boundary or a splitting boundary without seeing a definition for the symbol.
                 // It needs to be in scope.
                 return true;
-            } else if (node instanceof WithNode) {
-                if (previousWasBlock) {
-                    // We reached a WithNode; the symbol must be scoped. Note that if the WithNode was not immediately
-                    // preceded by a block, this means we're currently processing its expression, not its body,
-                    // therefore it doesn't count.
-                    return true;
-                }
-                previousWasBlock = false;
             } else if (node instanceof Block) {
                 if (((Block)node).getExistingSymbol(symbol.getName()) == symbol) {
                     // We reached the block that defines the symbol without reaching either the function boundary, or a

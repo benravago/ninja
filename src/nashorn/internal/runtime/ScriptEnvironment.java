@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import nashorn.internal.codegen.Namespace;
@@ -162,12 +161,6 @@ public final class ScriptEnvironment {
     /** Enable disk cache for compiled scripts */
     public final boolean _persistent_cache;
 
-    /** Directory (optional) to print files to */
-    public final String _print_code_dir;
-
-    /** List of functions to write to the print code dir, optional */
-    public final String _print_code_func;
-
     /** is this environment in scripting mode? */
     public final boolean _scripting;
 
@@ -290,26 +283,6 @@ public final class ScriptEnvironment {
 
         this._anonymous_classes_threshold = Options.getIntProperty(
                 "nashorn.anonymous.classes.threshold", DEFAULT_ANON_CLASS_THRESHOLD);
-
-        String dir = null;
-        String func = null;
-        final String pc = options.getString("print.code");
-        if (pc != null) {
-            final StringTokenizer st = new StringTokenizer(pc, ",");
-            while (st.hasMoreTokens()) {
-                final StringTokenizer st2 = new StringTokenizer(st.nextToken(), ":");
-                while (st2.hasMoreTokens()) {
-                    final String cmd = st2.nextToken();
-                    if ("dir".equals(cmd)) {
-                        dir = st2.nextToken();
-                    } else if ("function".equals(cmd)) {
-                        func = st2.nextToken();
-                    }
-                }
-            }
-        }
-        _print_code_dir = dir;
-        _print_code_func = func;
 
         final Option<?> timezoneOption = options.get("timezone");
         if (timezoneOption != null) {

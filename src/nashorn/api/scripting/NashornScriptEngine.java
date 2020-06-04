@@ -127,9 +127,6 @@ public final class NashornScriptEngine extends AbstractScriptEngine implements C
                 try {
                     return new Context(options, errMgr, appLoader, classFilter);
                 } catch (final RuntimeException e) {
-                    if (Context.DEBUG) {
-                        e.printStackTrace();
-                    }
                     throw e;
                 }
             }
@@ -348,9 +345,6 @@ public final class NashornScriptEngine extends AbstractScriptEngine implements C
                 try {
                     return nashornContext.newGlobal();
                 } catch (final RuntimeException e) {
-                    if (Context.DEBUG) {
-                        e.printStackTrace();
-                    }
                     throw e;
                 }
             }

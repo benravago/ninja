@@ -46,7 +46,7 @@ public final class IdentNode extends Expression implements PropertyKey, Function
     private static final int PROPERTY_NAME     = 1 << 0;
     private static final int INITIALIZED_HERE  = 1 << 1;
     private static final int FUNCTION          = 1 << 2;
-    private static final int FUTURE_NAME       = 1 << 3;
+    private static final int FUTURE_NAME = 1 << 3;
     private static final int IS_DECLARED_HERE  = 1 << 4;
     private static final int IS_DEAD           = 1 << 5;
     private static final int DIRECT_SUPER      = 1 << 6;

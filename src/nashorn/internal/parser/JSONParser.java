@@ -243,7 +243,7 @@ public class JSONParser {
                 newArrayData = newArrayData.delete(oldLength, longIndex - 1);
             }
         }
-        return newArrayData.set(index, value);
+        return newArrayData.set(index, value); // false
     }
 
     private PropertyMap addObjectProperty(final PropertyMap propertyMap, final List<Object> values,
@@ -338,7 +338,7 @@ public class JSONParser {
                     throw expectedError(pos, ", or ]", toString(c));
                 }
                 final long index = arrayData.length();
-                arrayData = arrayData.ensure(index).set((int) index, parseLiteral());
+                arrayData = arrayData.ensure(index).set((int) index, parseLiteral()); // true
                 state = STATE_ELEMENT_PARSED;
                 break;
             }

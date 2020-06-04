@@ -138,25 +138,25 @@ public final class DataPropertyDescriptor extends ScriptObject implements Proper
         if (sobj.has(CONFIGURABLE)) {
             this.configurable = JSType.toBoolean(sobj.get(CONFIGURABLE));
         } else {
-            delete(CONFIGURABLE);
+            delete(CONFIGURABLE); // false
         }
 
         if (sobj.has(ENUMERABLE)) {
             this.enumerable = JSType.toBoolean(sobj.get(ENUMERABLE));
         } else {
-            delete(ENUMERABLE);
+            delete(ENUMERABLE); // false
         }
 
         if (sobj.has(WRITABLE)) {
             this.writable = JSType.toBoolean(sobj.get(WRITABLE));
         } else {
-            delete(WRITABLE);
+            delete(WRITABLE); // false
         }
 
         if (sobj.has(VALUE)) {
             this.value = sobj.get(VALUE);
         } else {
-            delete(VALUE);
+            delete(VALUE); // false
         }
 
         return this;

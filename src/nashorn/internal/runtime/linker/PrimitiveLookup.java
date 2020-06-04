@@ -26,7 +26,6 @@
 package nashorn.internal.runtime.linker;
 
 import static nashorn.internal.lookup.Lookup.MH;
-import static nashorn.internal.runtime.ECMAErrors.typeError;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -41,7 +40,6 @@ import nashorn.internal.runtime.FindProperty;
 import nashorn.internal.runtime.GlobalConstants;
 import nashorn.internal.runtime.JSType;
 import nashorn.internal.runtime.ScriptObject;
-import nashorn.internal.runtime.ScriptRuntime;
 
 /**
  * Implements lookup of methods to link for dynamic operations on JavaScript primitive values (booleans, strings, and
@@ -168,21 +166,17 @@ public final class PrimitiveLookup {
         return new GuardedInvocation(MH.foldArguments(target, filter), guard);
     }
 
-
     @SuppressWarnings("unused")
     private static void primitiveSetter(final ScriptObject wrappedSelf, final Object self, final Object key, final Object value) {
         // See ES5.1 8.7.2 PutValue (V, W)
         final String name = JSType.toString(key);
         final FindProperty find = wrappedSelf.findProperty(name, true);
-        if (find == null || !find.getProperty().isAccessorProperty() || !find.getProperty().hasNativeSetter()) {
-            if (find == null || !find.getProperty().isAccessorProperty()) {
-                throw typeError("property.not.writable", name, ScriptRuntime.safeToString(self));
-            } else {
-                throw typeError("property.has.no.setter", name, ScriptRuntime.safeToString(self));
-            }
+        if (find != null && (find.getProperty().isAccessorProperty() || find.getProperty().hasNativeSetter())) {
+            // property found and is a UserAccessorProperty
+        	find.setValue(value);
         }
-        // property found and is a UserAccessorProperty
-        find.setValue(value);
+        // throw typeError("property.has.no.setter", name, ScriptRuntime.safeToString(self));
+        // throw typeError("property.not.writable", name, ScriptRuntime.safeToString(self));   
     }
 
     private static MethodHandle findOwnMH(final String name, final MethodType type) {

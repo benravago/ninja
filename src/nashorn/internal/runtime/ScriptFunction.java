@@ -44,7 +44,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.atomic.LongAdder;
 import dynalink.CallSiteDescriptor;
 import dynalink.SecureLookupSupplier;
 import dynalink.linker.GuardedInvocation;
@@ -111,7 +110,7 @@ public class ScriptFunction extends ScriptObject {
 
     private static final MethodHandle IS_APPLY_FUNCTION = findOwnMH_S("isApplyFunction", boolean.class, boolean.class, Object.class, Object.class);
 
-    private static final MethodHandle IS_PLAIN_FUNCTION = findOwnMH_S("isPlainFunction", boolean.class, Object.class, Object.class, ScriptFunctionData.class);
+    private static final MethodHandle IS_NONSTRICT_FUNCTION = findOwnMH_S("isNonStrictFunction", boolean.class, Object.class, Object.class, ScriptFunctionData.class);
 
     private static final MethodHandle ADD_ZEROTH_ELEMENT = findOwnMH_S("addZerothElement", Object[].class, Object[].class, Object.class);
 
@@ -120,7 +119,7 @@ public class ScriptFunction extends ScriptObject {
     // various property maps used for different kinds of functions
     // property map for anonymous function that serves as Function.prototype
     private static final PropertyMap anonmap$;
-    // property map for functions
+    // property map for strict mode functions
     private static final PropertyMap functionmap$;
     // property map for bound functions
     private static final PropertyMap boundfunctionmap$;
@@ -133,7 +132,7 @@ public class ScriptFunction extends ScriptObject {
     private static final AccessControlContext GET_LOOKUP_PERMISSION_CONTEXT =
             AccessControlContextFactory.createAccessControlContext(SecureLookupSupplier.GET_LOOKUP_PERMISSION_NAME);
 
-    private static PropertyMap createFunctionMap(final PropertyMap map) {
+    private static PropertyMap createStrictModeMap(final PropertyMap map) {
         final int flags = Property.NOT_ENUMERABLE | Property.NOT_CONFIGURABLE;
         PropertyMap newMap = map;
         // Need to add properties directly to map since slots are assigned speculatively by newUserAccessors.
@@ -142,10 +141,10 @@ public class ScriptFunction extends ScriptObject {
         return newMap;
     }
 
-    private static PropertyMap createBoundFunctionMap(final PropertyMap functionMap) {
-        // Bound function map is same as function map, but additionally lacks the "prototype" property, see
+    private static PropertyMap createBoundFunctionMap(final PropertyMap strictModeMap) {
+        // Bound function map is same as strict function map, but additionally lacks the "prototype" property, see
         // ECMAScript 5.1 section 15.3.4.5
-        return functionMap.deleteProperty(functionMap.findProperty("prototype"));
+        return strictModeMap.deleteProperty(strictModeMap.findProperty("prototype"));
     }
 
     static {
@@ -155,7 +154,7 @@ public class ScriptFunction extends ScriptObject {
         properties.add(AccessorProperty.create("length", Property.NOT_ENUMERABLE | Property.NOT_CONFIGURABLE | Property.NOT_WRITABLE, G$LENGTH, null));
         properties.add(AccessorProperty.create("name", Property.NOT_ENUMERABLE | Property.NOT_CONFIGURABLE | Property.NOT_WRITABLE, G$NAME, null));
         map$ = PropertyMap.newMap(properties);
-        functionmap$ = createFunctionMap(map$);
+        functionmap$ = createStrictModeMap(map$);
         boundfunctionmap$ = createBoundFunctionMap(functionmap$);
     }
 
@@ -191,10 +190,6 @@ public class ScriptFunction extends ScriptObject {
             final Global global) {
 
         super(map);
-
-        if (Context.DEBUG) {
-            constructorCount.increment();
-        }
 
         this.data = data;
         this.scope = scope;
@@ -455,7 +450,7 @@ public class ScriptFunction extends ScriptObject {
     }
 
     /**
-     * Returns true if this is a non-built-in function that requires
+     * Returns true if this is a non-strict, non-built-in function that requires
      * non-primitive this argument according to ECMA 10.4.3.
      *
      * @return true if this argument must be an object
@@ -478,9 +473,6 @@ public class ScriptFunction extends ScriptObject {
      * thrown from it
      */
     final Object invoke(final Object self, final Object... arguments) throws Throwable {
-        if (Context.DEBUG) {
-            invokes.increment();
-        }
         return data.invoke(this, self, arguments);
     }
 
@@ -505,10 +497,6 @@ public class ScriptFunction extends ScriptObject {
      */
     @SuppressWarnings("unused")
     private Object allocate() {
-        if (Context.DEBUG) {
-            allocations.increment();
-        }
-
         assert !isBoundFunction(); // allocate never invoked on bound functions
 
         final ScriptObject prototype = getAllocatorPrototype();
@@ -734,40 +722,6 @@ public class ScriptFunction extends ScriptObject {
         return null;
     }
 
-    // These counters are updated only in debug mode.
-    private static LongAdder constructorCount;
-    private static LongAdder invokes;
-    private static LongAdder allocations;
-
-    static {
-        if (Context.DEBUG) {
-            constructorCount = new LongAdder();
-            invokes = new LongAdder();
-            allocations = new LongAdder();
-        }
-    }
-
-    /**
-     * @return the constructorCount
-     */
-    public static long getConstructorCount() {
-        return constructorCount.longValue();
-    }
-
-    /**
-     * @return the invokes
-     */
-    public static long getInvokes() {
-        return invokes.longValue();
-    }
-
-    /**
-     * @return the allocations
-     */
-    public static long getAllocations() {
-        return allocations.longValue();
-    }
-
     @Override
     protected GuardedInvocation findNewMethod(final CallSiteDescriptor desc, final LinkRequest request) {
         final MethodType type = desc.getMethodType();
@@ -947,14 +901,14 @@ public class ScriptFunction extends ScriptObject {
             boundHandle = MH.dropArguments(callHandle, 0, type.parameterType(0));
         }
 
-        // For functions, check whether this-object is primitive type.
+        // For non-strict functions, check whether this-object is primitive type.
         // If so add a to-object-wrapper argument filter.
         // Else install a guard that will trigger a relink when the argument becomes primitive.
         if (!scopeCall && needsWrappedThis()) {
             if (ScriptFunctionData.isPrimitiveThis(request.getArguments()[1])) {
                 boundHandle = MH.filterArguments(boundHandle, 1, WRAPFILTER);
             } else {
-                guard = getPlainFunctionGuard(this);
+                guard = getNonStrictFunctionGuard(this);
             }
         }
 
@@ -1099,7 +1053,7 @@ public class ScriptFunction extends ScriptObject {
             if (passesArgs) {
                 // Make sure that the passed argArray is converted to Object[] the same way NativeFunction.apply() would do it.
                 inv = MH.filterArguments(inv, 2, NativeFunction.TO_APPLY_ARGS);
-                // Some guards (functions with non-primitive this) have a this-object parameter, so we
+                // Some guards (non-strict functions with non-primitive this) have a this-object parameter, so we
                 // need to apply this transformations to them as well.
                 if (guard.type().parameterCount() > 2) {
                     guard = MH.filterArguments(guard, 2, NativeFunction.TO_APPLY_ARGS);
@@ -1296,9 +1250,9 @@ public class ScriptFunction extends ScriptObject {
      *
      * @return method handle for guard
      */
-    private static MethodHandle getPlainFunctionGuard(final ScriptFunction function) {
+    private static MethodHandle getNonStrictFunctionGuard(final ScriptFunction function) {
         assert function.data != null;
-        return MH.insertArguments(IS_PLAIN_FUNCTION, 2, function.data);
+        return MH.insertArguments(IS_NONSTRICT_FUNCTION, 2, function.data);
     }
 
     @SuppressWarnings("unused")
@@ -1307,7 +1261,7 @@ public class ScriptFunction extends ScriptObject {
     }
 
     @SuppressWarnings("unused")
-    private static boolean isPlainFunction(final Object self, final Object arg, final ScriptFunctionData data) {
+    private static boolean isNonStrictFunction(final Object self, final Object arg, final ScriptFunctionData data) {
         return self instanceof ScriptFunction && ((ScriptFunction) self).data == data && arg instanceof ScriptObject;
     }
 

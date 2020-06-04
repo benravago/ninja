@@ -68,7 +68,7 @@ public final class NativeEvalError extends ScriptObject {
         if (msg != UNDEFINED) {
             this.instMessage = JSType.toString(msg);
         } else {
-            this.delete(NativeError.MESSAGE);
+            this.delete(NativeError.MESSAGE); // false
         }
         NativeError.initException(this);
     }

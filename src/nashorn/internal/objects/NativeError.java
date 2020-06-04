@@ -96,7 +96,7 @@ public final class NativeError extends ScriptObject {
         if (msg != UNDEFINED) {
             this.instMessage = JSType.toString(msg);
         } else {
-            this.delete(NativeError.MESSAGE);
+            this.delete(NativeError.MESSAGE); // false
         }
         initException(this);
     }
@@ -146,7 +146,7 @@ public final class NativeError extends ScriptObject {
     public static Object captureStackTrace(final Object self, final Object errorObj) {
         final ScriptObject sobj = Global.checkObject(errorObj);
         initException(sobj);
-        sobj.delete(STACK);
+        sobj.delete(STACK); // false
         if (! sobj.has("stack")) {
             final ScriptFunction getStack = ScriptFunction.createBuiltin("getStack", GET_STACK);
             final ScriptFunction setStack = ScriptFunction.createBuiltin("setStack", SET_STACK);
@@ -229,7 +229,7 @@ public final class NativeError extends ScriptObject {
     public static Object setLineNumber(final Object self, final Object value) {
         final ScriptObject sobj = Global.checkObject(self);
         if (sobj.hasOwnProperty(LINENUMBER)) {
-            sobj.put(LINENUMBER, value);
+            sobj.put(LINENUMBER, value); // false
         } else {
             sobj.addOwnProperty(LINENUMBER, Attribute.NOT_ENUMERABLE, value);
         }
@@ -259,7 +259,7 @@ public final class NativeError extends ScriptObject {
     public static Object setColumnNumber(final Object self, final Object value) {
         final ScriptObject sobj = Global.checkObject(self);
         if (sobj.hasOwnProperty(COLUMNNUMBER)) {
-            sobj.put(COLUMNNUMBER, value);
+            sobj.put(COLUMNNUMBER, value); // false
         } else {
             sobj.addOwnProperty(COLUMNNUMBER, Attribute.NOT_ENUMERABLE, value);
         }
@@ -289,7 +289,7 @@ public final class NativeError extends ScriptObject {
     public static Object setFileName(final Object self, final Object value) {
         final ScriptObject sobj = Global.checkObject(self);
         if (sobj.hasOwnProperty(FILENAME)) {
-            sobj.put(FILENAME, value);
+            sobj.put(FILENAME, value); // false
         } else {
             sobj.addOwnProperty(FILENAME, Attribute.NOT_ENUMERABLE, value);
         }
@@ -315,7 +315,7 @@ public final class NativeError extends ScriptObject {
         if (exception instanceof Throwable) {
             final Object value = getScriptStackString(sobj, (Throwable)exception);
             if (sobj.hasOwnProperty(STACK)) {
-                sobj.put(STACK, value);
+                sobj.put(STACK, value); // false
             } else {
                 sobj.addOwnProperty(STACK, Attribute.NOT_ENUMERABLE, value);
             }
@@ -338,7 +338,7 @@ public final class NativeError extends ScriptObject {
     public static Object setStack(final Object self, final Object value) {
         final ScriptObject sobj = Global.checkObject(self);
         if (sobj.hasOwnProperty(STACK)) {
-            sobj.put(STACK, value);
+            sobj.put(STACK, value); // false
         } else {
             sobj.addOwnProperty(STACK, Attribute.NOT_ENUMERABLE, value);
         }

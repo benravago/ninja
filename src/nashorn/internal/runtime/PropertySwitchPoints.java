@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.concurrent.atomic.LongAdder;
 
 /**
  * Helper class for tracking and invalidation of switchpoints for inherited properties.
@@ -41,17 +40,6 @@ public class PropertySwitchPoints {
     private final Map<Object, WeakSwitchPointSet> switchPointMap = new HashMap<>();
 
     private final static SwitchPoint[] EMPTY_SWITCHPOINT_ARRAY = new SwitchPoint[0];
-
-    // These counters are updated in debug mode
-    private static LongAdder switchPointsAdded;
-    private static LongAdder switchPointsInvalidated;
-
-    static {
-        if (Context.DEBUG) {
-            switchPointsAdded = new LongAdder();
-            switchPointsInvalidated = new LongAdder();
-        }
-    }
 
     /**
      * Copy constructor
@@ -67,22 +55,6 @@ public class PropertySwitchPoints {
                 }
             }
         }
-    }
-
-    /**
-     * Return aggregate switchpoints added to all ProtoSwitchPoints
-     * @return the number of switchpoints added
-     */
-    public static long getSwitchPointsAdded() {
-        return switchPointsAdded.longValue();
-    }
-
-    /**
-     * Return aggregate switchPointMap invalidated in all ProtoSwitchPoints
-     * @return the number of switchpoints invalidated
-     */
-    public static long getSwitchPointsInvalidated() {
-        return switchPointsInvalidated.longValue();
     }
 
     /**
@@ -133,10 +105,6 @@ public class PropertySwitchPoints {
     }
 
     private synchronized void add(final String key, final SwitchPoint switchPoint) {
-        if (Context.DEBUG) {
-            switchPointsAdded.increment();
-        }
-
         WeakSwitchPointSet set = this.switchPointMap.get(key);
         if (set == null) {
             set = new WeakSwitchPointSet();
@@ -164,9 +132,6 @@ public class PropertySwitchPoints {
     synchronized void invalidateProperty(final Property prop) {
         final WeakSwitchPointSet set = switchPointMap.get(prop.getKey());
         if (set != null) {
-            if (Context.DEBUG) {
-                switchPointsInvalidated.add(set.size());
-            }
             final SwitchPoint[] switchPoints = set.elements().toArray(EMPTY_SWITCHPOINT_ARRAY);
             SwitchPoint.invalidateAll(switchPoints);
             this.switchPointMap.remove(prop.getKey());
@@ -184,9 +149,6 @@ public class PropertySwitchPoints {
         for (final Map.Entry<Object, WeakSwitchPointSet> entry : switchPointMap.entrySet()) {
             if (map.findProperty(entry.getKey()) != null) {
                 continue;
-            }
-            if (Context.DEBUG) {
-                switchPointsInvalidated.add(entry.getValue().size());
             }
             final SwitchPoint[] switchPoints = entry.getValue().elements().toArray(EMPTY_SWITCHPOINT_ARRAY);
             SwitchPoint.invalidateAll(switchPoints);

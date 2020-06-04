@@ -45,6 +45,7 @@ import nashorn.internal.codegen.types.Type;
 import nashorn.internal.lookup.MethodHandleFactory;
 import nashorn.internal.lookup.MethodHandleFunctionality;
 import nashorn.internal.objects.Global;
+import nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
 
 /**
  * Used to signal to the linker to relink the callee
@@ -90,7 +91,7 @@ public final class RewriteException extends Exception {
             final Object[] byteCodeSlots,
             final String[] byteCodeSymbolNames,
             final int[] previousContinuationEntryPoints) {
-        super("", e, false, Context.DEBUG);
+        super("", e, false, false);
         this.byteCodeSlots = byteCodeSlots;
         this.runtimeScope = mergeSlotsWithScope(byteCodeSlots, byteCodeSymbolNames);
         this.previousContinuationEntryPoints = previousContinuationEntryPoints;

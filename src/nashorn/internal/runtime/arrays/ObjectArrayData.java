@@ -298,21 +298,6 @@ final class ObjectArrayData extends ContinuousArrayData implements AnyElements {
     }
 
     @Override
-    public ArrayData push(final Object... items) {
-        if (items.length == 0) {
-            return this;
-        }
-        // TODO: only first is used
-        final long      len     = length();
-        final ArrayData newData = ensure(len);
-        if (newData == this) {
-            array[(int)len] = items[0];
-            return this;
-        }
-        return newData.set((int)len, items[0]);
-    }
-
-    @Override
     public ArrayData fastSplice(final int start, final int removed, final int added) throws UnsupportedOperationException {
         final long oldLength = length();
         final long newLength = oldLength - removed + added;

@@ -101,8 +101,8 @@ class SparseArrayData extends ArrayData {
                 if (newIndex < maxDenseLength) {
                     final long oldLength = underlying.length();
                     underlying = underlying.ensure(newIndex)
-                            .set((int) newIndex, entry.getValue())
-                            .safeDelete(oldLength, newIndex - 1);
+                            .set((int) newIndex, entry.getValue()) // false
+                            .safeDelete(oldLength, newIndex - 1); // false
                 } else {
                     newSparseMap.put(newIndex, entry.getValue());
                 }
@@ -352,7 +352,7 @@ class SparseArrayData extends ArrayData {
         sliced = sliced.ensure(newLength - 1);
         for (long i = start; i < to; i = nextIndex(i)) {
             if (has((int)i)) {
-                sliced = sliced.set((int)(i - start), getObject((int)i));
+                sliced = sliced.set((int)(i - start), getObject((int)i)); // false
             }
         }
         assert sliced.length() == newLength;
