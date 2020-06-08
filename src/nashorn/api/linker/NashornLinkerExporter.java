@@ -32,8 +32,8 @@
 package nashorn.api.linker;
 
 import java.util.List;
-import dynalink.linker.GuardingDynamicLinker;
-import dynalink.linker.GuardingDynamicLinkerExporter;
+import jdk.dynalink.linker.GuardingDynamicLinker;
+import jdk.dynalink.linker.GuardingDynamicLinkerExporter;
 import nashorn.internal.runtime.linker.Bootstrap;
 
 /**

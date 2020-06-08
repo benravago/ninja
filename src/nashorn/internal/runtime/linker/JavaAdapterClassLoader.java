@@ -34,7 +34,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import dynalink.beans.StaticClass;
+import jdk.dynalink.beans.StaticClass;
 import nashorn.internal.runtime.Context;
 import nashorn.internal.runtime.JSType;
 import nashorn.internal.runtime.ScriptFunction;

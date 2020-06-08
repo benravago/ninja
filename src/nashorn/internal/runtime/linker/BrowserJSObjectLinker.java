@@ -34,11 +34,11 @@ import static nashorn.internal.runtime.linker.BrowserJSObjectLinker.JSObjectHand
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import dynalink.CallSiteDescriptor;
-import dynalink.linker.GuardedInvocation;
-import dynalink.linker.LinkRequest;
-import dynalink.linker.LinkerServices;
-import dynalink.linker.TypeBasedGuardingDynamicLinker;
+import jdk.dynalink.CallSiteDescriptor;
+import jdk.dynalink.linker.GuardedInvocation;
+import jdk.dynalink.linker.LinkRequest;
+import jdk.dynalink.linker.LinkerServices;
+import jdk.dynalink.linker.TypeBasedGuardingDynamicLinker;
 import nashorn.internal.lookup.MethodHandleFactory;
 import nashorn.internal.lookup.MethodHandleFunctionality;
 import nashorn.internal.runtime.JSType;

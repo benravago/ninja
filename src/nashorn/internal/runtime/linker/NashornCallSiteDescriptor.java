@@ -25,12 +25,12 @@
 
 package nashorn.internal.runtime.linker;
 
-import static dynalink.StandardNamespace.ELEMENT;
-import static dynalink.StandardNamespace.METHOD;
-import static dynalink.StandardNamespace.PROPERTY;
-import static dynalink.StandardOperation.GET;
-import static dynalink.StandardOperation.REMOVE;
-import static dynalink.StandardOperation.SET;
+import static jdk.dynalink.StandardNamespace.ELEMENT;
+import static jdk.dynalink.StandardNamespace.METHOD;
+import static jdk.dynalink.StandardNamespace.PROPERTY;
+import static jdk.dynalink.StandardOperation.GET;
+import static jdk.dynalink.StandardOperation.REMOVE;
+import static jdk.dynalink.StandardOperation.SET;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
@@ -46,13 +46,13 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Stream;
-import dynalink.CallSiteDescriptor;
-import dynalink.NamedOperation;
-import dynalink.NamespaceOperation;
-import dynalink.Operation;
-import dynalink.SecureLookupSupplier;
-import dynalink.StandardNamespace;
-import dynalink.StandardOperation;
+import jdk.dynalink.CallSiteDescriptor;
+import jdk.dynalink.NamedOperation;
+import jdk.dynalink.NamespaceOperation;
+import jdk.dynalink.Operation;
+import jdk.dynalink.SecureLookupSupplier;
+import jdk.dynalink.StandardNamespace;
+import jdk.dynalink.StandardOperation;
 import nashorn.internal.runtime.AccessControlContextFactory;
 import nashorn.internal.runtime.ScriptRuntime;
 

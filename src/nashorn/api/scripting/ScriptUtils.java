@@ -26,8 +26,8 @@
 package nashorn.api.scripting;
 
 import java.lang.invoke.MethodHandle;
-import dynalink.beans.StaticClass;
-import dynalink.linker.LinkerServices;
+import jdk.dynalink.beans.StaticClass;
+import jdk.dynalink.linker.LinkerServices;
 import nashorn.internal.runtime.Context;
 import nashorn.internal.runtime.ScriptFunction;
 import nashorn.internal.runtime.ScriptObject;

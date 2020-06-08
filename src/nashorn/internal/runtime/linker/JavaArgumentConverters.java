@@ -34,7 +34,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.Map;
-import dynalink.linker.support.TypeUtilities;
+import jdk.dynalink.linker.support.TypeUtilities;
 import nashorn.internal.runtime.ConsString;
 import nashorn.internal.runtime.JSType;
 import nashorn.internal.runtime.ScriptObject;

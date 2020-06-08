@@ -82,7 +82,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.script.ScriptEngine;
-import dynalink.DynamicLinker;
+import jdk.dynalink.DynamicLinker;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import nashorn.api.scripting.ClassFilter;
@@ -134,11 +134,6 @@ public final class Context {
      * Permission to use Java reflection/jsr292 from script code.
      */
     public static final String NASHORN_JAVA_REFLECTION = "nashorn.JavaReflection";
-
-    /**
-     * Permission to enable nashorn debug mode.
-     */
-    public static final String NASHORN_DEBUG_MODE = "nashorn.debugMode";
 
     // nashorn load psuedo URL prefixes
     private static final String LOAD_CLASSPATH = "classpath:";

@@ -25,7 +25,7 @@
 
 package nashorn.internal.objects;
 
-import dynalink.beans.StaticClass;
+import jdk.dynalink.beans.StaticClass;
 import nashorn.internal.objects.annotations.Constructor;
 import nashorn.internal.objects.annotations.ScriptClass;
 import nashorn.internal.runtime.Context;

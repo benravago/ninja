@@ -47,9 +47,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
-import dynalink.CallSiteDescriptor;
-import dynalink.linker.GuardedInvocation;
-import dynalink.linker.LinkRequest;
+import jdk.dynalink.CallSiteDescriptor;
+import jdk.dynalink.linker.GuardedInvocation;
+import jdk.dynalink.linker.LinkRequest;
 import nashorn.api.scripting.ClassFilter;
 import nashorn.api.scripting.ScriptObjectMirror;
 import nashorn.internal.Util;
@@ -2615,11 +2615,8 @@ public final class Global extends Scope {
             this.delete("Java"); // false
             this.delete("JavaImporter"); // false
             this.delete("Packages"); // false
-            this.delete("com"); // false
-            this.delete("edu"); // false
             this.delete("java"); // false
             this.delete("javax"); // false
-            this.delete("org"); // false
         }
 
         if (! env._no_typed_arrays) {
@@ -2704,11 +2701,8 @@ public final class Global extends Scope {
     private void initJavaAccess() {
         final ScriptObject objectProto = getObjectPrototype();
         this.builtinPackages = new NativeJavaPackage("", objectProto);
-        this.builtinCom = new NativeJavaPackage("com", objectProto);
-        this.builtinEdu = new NativeJavaPackage("edu", objectProto);
         this.builtinJava = new NativeJavaPackage("java", objectProto);
         this.builtinJavax = new NativeJavaPackage("javax", objectProto);
-        this.builtinOrg = new NativeJavaPackage("org", objectProto);
     }
 
     private void initScripting(final ScriptEnvironment scriptEnv) {
@@ -2780,10 +2774,6 @@ public final class Global extends Scope {
         this.string            = this.builtinString;
         this.syntaxError       = this.builtinSyntaxError;
         this.typeError         = this.builtinTypeError;
-    }
-
-    private void initDebug() {
-        this.addOwnProperty("Debug", Attribute.NOT_ENUMERABLE, initConstructor("Debug", ScriptObject.class));
     }
 
     private Object printImpl(final boolean stdout, final Object... objects) {

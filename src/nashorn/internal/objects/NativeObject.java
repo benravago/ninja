@@ -25,10 +25,10 @@
 
 package nashorn.internal.objects;
 
-import static dynalink.StandardNamespace.METHOD;
-import static dynalink.StandardNamespace.PROPERTY;
-import static dynalink.StandardOperation.GET;
-import static dynalink.StandardOperation.SET;
+import static jdk.dynalink.StandardNamespace.METHOD;
+import static jdk.dynalink.StandardNamespace.PROPERTY;
+import static jdk.dynalink.StandardOperation.GET;
+import static jdk.dynalink.StandardOperation.SET;
 import static nashorn.internal.lookup.Lookup.MH;
 import static nashorn.internal.runtime.ECMAErrors.typeError;
 import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
@@ -43,14 +43,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import dynalink.CallSiteDescriptor;
-import dynalink.Operation;
-import dynalink.beans.BeansLinker;
-import dynalink.beans.StaticClass;
-import dynalink.linker.GuardedInvocation;
-import dynalink.linker.GuardingDynamicLinker;
-import dynalink.linker.LinkRequest;
-import dynalink.linker.support.SimpleLinkRequest;
+import jdk.dynalink.CallSiteDescriptor;
+import jdk.dynalink.Operation;
+import jdk.dynalink.beans.BeansLinker;
+import jdk.dynalink.beans.StaticClass;
+import jdk.dynalink.linker.GuardedInvocation;
+import jdk.dynalink.linker.GuardingDynamicLinker;
+import jdk.dynalink.linker.LinkRequest;
+import jdk.dynalink.linker.support.SimpleLinkRequest;
 import nashorn.api.scripting.ScriptObjectMirror;
 import nashorn.internal.lookup.Lookup;
 import nashorn.internal.objects.annotations.Attribute;

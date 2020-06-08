@@ -27,17 +27,17 @@ package nashorn.internal.runtime.linker;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Modifier;
-import dynalink.CallSiteDescriptor;
-import dynalink.NamedOperation;
-import dynalink.StandardOperation;
-import dynalink.beans.BeansLinker;
-import dynalink.beans.StaticClass;
-import dynalink.linker.GuardedInvocation;
-import dynalink.linker.GuardingDynamicLinker;
-import dynalink.linker.LinkRequest;
-import dynalink.linker.LinkerServices;
-import dynalink.linker.TypeBasedGuardingDynamicLinker;
-import dynalink.linker.support.Guards;
+import jdk.dynalink.CallSiteDescriptor;
+import jdk.dynalink.NamedOperation;
+import jdk.dynalink.StandardOperation;
+import jdk.dynalink.beans.BeansLinker;
+import jdk.dynalink.beans.StaticClass;
+import jdk.dynalink.linker.GuardedInvocation;
+import jdk.dynalink.linker.GuardingDynamicLinker;
+import jdk.dynalink.linker.LinkRequest;
+import jdk.dynalink.linker.LinkerServices;
+import jdk.dynalink.linker.TypeBasedGuardingDynamicLinker;
+import jdk.dynalink.linker.support.Guards;
 import nashorn.internal.runtime.Context;
 import nashorn.internal.runtime.ECMAErrors;
 

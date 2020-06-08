@@ -28,9 +28,9 @@ package nashorn.internal.runtime.arrays;
 import static nashorn.internal.lookup.Lookup.MH;
 import java.lang.invoke.MethodHandle;
 import java.nio.Buffer;
-import dynalink.CallSiteDescriptor;
-import dynalink.linker.GuardedInvocation;
-import dynalink.linker.LinkRequest;
+import jdk.dynalink.CallSiteDescriptor;
+import jdk.dynalink.linker.GuardedInvocation;
+import jdk.dynalink.linker.LinkRequest;
 import nashorn.internal.lookup.Lookup;
 
 /**

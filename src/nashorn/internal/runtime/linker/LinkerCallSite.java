@@ -27,7 +27,7 @@ package nashorn.internal.runtime.linker;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import dynalink.support.ChainedCallSite;
+import jdk.dynalink.support.ChainedCallSite;
 
 /**
  * Relinkable form of call site.

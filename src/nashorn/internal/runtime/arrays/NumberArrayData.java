@@ -32,7 +32,7 @@ import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
-import dynalink.linker.support.TypeUtilities;
+import jdk.dynalink.linker.support.TypeUtilities;
 import nashorn.internal.runtime.JSType;
 
 /**
