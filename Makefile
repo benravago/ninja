@@ -8,7 +8,8 @@ bin: ../codegen/bin
 	pushd src; find . -type f -not -name '*.java' -exec cp -v --parents {} ../bin ';' ; popd
 
 ../codegen/bin:
-	echo "run codegen make"
+	$(eval URL := "$(shell dirname $$(git config --get remote.origin.url))")
+	pushd .. ; git clone $(URL)/codegen ; cd codegen ; make ; popd
 
 clean:
 	rm -fr bin
