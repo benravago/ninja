@@ -278,7 +278,7 @@ public final class ScriptEnvironment {
         } else if (anonClasses.equals("false")) {
             _anonymousClasses = AnonymousClasses.OFF;
         } else {
-            throw new RuntimeException("Unsupported value for anonymous classes: " + anonClasses);
+            throw new IllegalArgumentException("Unsupported value for anonymous classes: " + anonClasses);
         }
 
         this._anonymous_classes_threshold = Options.getIntProperty(

@@ -51,6 +51,8 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
+
+import nashorn.internal.Util;
 import nashorn.internal.objects.Global;
 import nashorn.internal.runtime.Context;
 import nashorn.internal.runtime.ErrorManager;
@@ -108,7 +110,7 @@ public final class NashornScriptEngine extends AbstractScriptEngine implements C
         try {
             return new MessageFormat(MESSAGES_BUNDLE.getString(msgId)).format(args);
         } catch (final java.util.MissingResourceException e) {
-            throw new RuntimeException("no message resource found for message id: "+ msgId);
+            throw new IllegalArgumentException("no message resource found for message id: "+ msgId);
         }
     }
 
@@ -124,11 +126,7 @@ public final class NashornScriptEngine extends AbstractScriptEngine implements C
         this.nashornContext = AccessController.doPrivileged(new PrivilegedAction<Context>() {
             @Override
             public Context run() {
-                try {
-                    return new Context(options, errMgr, appLoader, classFilter);
-                } catch (final RuntimeException e) {
-                    throw e;
-                }
+                return new Context(options, errMgr, appLoader, classFilter);
             }
         }, CREATE_CONTEXT_ACC_CTXT);
 
@@ -279,10 +277,8 @@ public final class NashornScriptEngine extends AbstractScriptEngine implements C
                     Context.setGlobal(oldGlobal);
                 }
             }
-        } catch(final RuntimeException|Error e) {
-            throw e;
-        } catch(final Throwable t) {
-            throw new RuntimeException(t);
+        } catch(Throwable t) {
+            return Util.uncheck(t);
         }
     }
 
@@ -342,11 +338,7 @@ public final class NashornScriptEngine extends AbstractScriptEngine implements C
         final Global newGlobal = AccessController.doPrivileged(new PrivilegedAction<Global>() {
             @Override
             public Global run() {
-                try {
-                    return nashornContext.newGlobal();
-                } catch (final RuntimeException e) {
-                    throw e;
-                }
+                return nashornContext.newGlobal();
             }
         }, CREATE_GLOBAL_ACC_CTXT);
 

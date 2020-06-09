@@ -30,6 +30,8 @@ import java.io.Serializable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.ref.WeakReference;
+
+import nashorn.internal.Util;
 import nashorn.internal.codegen.Compiler;
 import nashorn.internal.codegen.CompilerConstants;
 import nashorn.internal.codegen.ObjectClassGenerator;
@@ -125,10 +127,8 @@ final public class AllocationStrategy implements Serializable {
                         CompilerConstants.ALLOCATE.symbolName(), MH.type(ScriptObject.class, PropertyMap.class));
             }
             return (ScriptObject)allocator.invokeExact(map);
-        } catch (final RuntimeException | Error e) {
-            throw e;
-        } catch (final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            return Util.uncheck(t);
         }
     }
 

@@ -50,6 +50,7 @@ import jdk.dynalink.linker.support.DefaultInternalObjectFilter;
 import jdk.dynalink.linker.support.Lookup;
 import jdk.dynalink.linker.support.SimpleLinkRequest;
 import nashorn.api.scripting.ScriptUtils;
+import nashorn.internal.Util;
 import nashorn.internal.runtime.ConsString;
 import nashorn.internal.runtime.Context;
 import nashorn.internal.runtime.ScriptObject;
@@ -129,10 +130,8 @@ public class NashornBeansLinker implements GuardingDynamicLinker {
                 final Object method;
                 try {
                     method = getMethodInv.getInvocation().invokeExact(self);
-                } catch (final Exception|Error e) {
-                    throw e;
-                } catch (final Throwable t) {
-                    throw new RuntimeException(t);
+                } catch (Throwable t) {
+                    return Util.uncheck(t);
                 }
 
                 final Object[] args = linkRequest.getArguments();

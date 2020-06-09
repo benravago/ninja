@@ -42,6 +42,8 @@ import java.security.PrivilegedAction;
 import java.security.Permissions;
 import java.security.SecureClassLoader;
 
+import nashorn.internal.Util;
+
 /**
  * Superclass for Nashorn class loader classes.
  */
@@ -95,15 +97,15 @@ abstract class NashornLoader extends SecureClassLoader {
         // force class initialization so that <clinit> runs!
         try {
             Class.forName(MODULE_MANIPULATOR_NAME, true, this);
-        } catch (final Exception ex) {
-            throw new RuntimeException(ex);
+        } catch (Exception ex) {
+            Util.uncheck(ex);
         }
         final PrivilegedAction<Void> pa = () -> {
             try {
                 addModuleExport = clazz.getDeclaredMethod("addExport", Module.class);
                 addModuleExport.setAccessible(true);
-            } catch (final NoSuchMethodException | SecurityException ex) {
-                throw new RuntimeException(ex);
+            } catch (NoSuchMethodException | SecurityException ex) {
+                Util.uncheck(ex);
             }
             return null;
         };
@@ -113,10 +115,8 @@ abstract class NashornLoader extends SecureClassLoader {
     final void addModuleExport(final Module to) {
         try {
             addModuleExport.invoke(null, to);
-        } catch (final IllegalAccessException |
-                IllegalArgumentException |
-                InvocationTargetException ex) {
-            throw new RuntimeException(ex);
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            Util.uncheck(ex);
         }
     }
 

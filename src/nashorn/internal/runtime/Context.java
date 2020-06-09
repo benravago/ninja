@@ -217,8 +217,8 @@ public final class Context {
                         return null;
                     }
                 });
-            } catch (final PrivilegedActionException e) {
-                throw new RuntimeException(e);
+            } catch (PrivilegedActionException e) {
+                Util.uncheck(e);
             }
         }
 
@@ -945,11 +945,7 @@ public final class Context {
         final Global newGlobal = AccessController.doPrivileged(new PrivilegedAction<Global>() {
            @Override
            public Global run() {
-               try {
-                   return newGlobal();
-               } catch (final RuntimeException e) {
-                   throw e;
-               }
+               return newGlobal();
            }
         }, CREATE_GLOBAL_ACC_CTXT);
         // initialize newly created Global instance
@@ -1670,7 +1666,7 @@ public final class Context {
         final ModuleFinder mf = ModuleFinder.of(paths);
         final Set<ModuleReference> mrefs = mf.findAll();
         if (mrefs.isEmpty()) {
-            throw new RuntimeException("No modules in script --module-path: " + modulePath);
+            throw new IllegalArgumentException("No modules in script --module-path: " + modulePath);
         }
 
         final Set<String> rootMods;

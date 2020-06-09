@@ -1380,10 +1380,8 @@ public final class Global extends Scope {
 
                 throw typeError(this, "cannot.get.default.number");
             }
-        } catch (final RuntimeException | Error e) {
-            throw e;
-        } catch (final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            Util.uncheck(t);
         }
 
         return UNDEFINED;
@@ -1539,8 +1537,8 @@ public final class Global extends Scope {
             final T newObj = creator.call();
             final T existingObj = map.putIfAbsent(key, newObj);
             return existingObj != null ? existingObj : newObj;
-        } catch (final Exception exp) {
-            throw new RuntimeException(exp);
+        } catch (Exception exp) {
+            return Util.uncheck(exp);
         } finally {
             if (differentGlobal) {
                 Context.setGlobal(oldGlobal);
@@ -2750,8 +2748,8 @@ public final class Global extends Scope {
         for (final Field f : scriptEnv.getClass().getFields()) {
             try {
                 options.set(f.getName(), f.get(scriptEnv), 0);
-            } catch (final IllegalArgumentException | IllegalAccessException exp) {
-                throw new RuntimeException(exp);
+            } catch (IllegalArgumentException | IllegalAccessException exp) {
+                Util.uncheck(exp);
             }
         }
     }

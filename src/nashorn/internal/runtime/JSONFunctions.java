@@ -27,6 +27,8 @@ package nashorn.internal.runtime;
 
 import java.lang.invoke.MethodHandle;
 import java.util.concurrent.Callable;
+
+import nashorn.internal.Util;
 import nashorn.internal.objects.Global;
 import nashorn.internal.parser.JSONParser;
 import nashorn.internal.runtime.arrays.ArrayIndex;
@@ -132,10 +134,8 @@ public final class JSONFunctions {
         try {
              // Object.class, ScriptFunction.class, ScriptObject.class, String.class, Object.class);
              return getREVIVER_INVOKER().invokeExact(reviver, (Object)holder, JSType.toString(name), val);
-        } catch(Error|RuntimeException t) {
-            throw t;
-        } catch(final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            return Util.uncheck(t);
         }
     }
 

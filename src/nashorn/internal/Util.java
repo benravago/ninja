@@ -16,6 +16,6 @@ public interface Util {
      * Make an Exception look like a RuntimeException for the compiler
      */
     @SuppressWarnings("unchecked")
-	static <T extends Throwable,V> V uncheck(Exception e) throws T { throw (T)e; }
+	static <T extends Throwable,V> V uncheck(Throwable e) throws T { throw (T)e; }
     
 }

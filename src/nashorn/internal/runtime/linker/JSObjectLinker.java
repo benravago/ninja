@@ -41,6 +41,7 @@ import jdk.dynalink.linker.LinkerServices;
 import jdk.dynalink.linker.TypeBasedGuardingDynamicLinker;
 import nashorn.api.scripting.JSObject;
 import nashorn.api.scripting.ScriptObjectMirror;
+import nashorn.internal.Util;
 import nashorn.internal.lookup.MethodHandleFactory;
 import nashorn.internal.lookup.MethodHandleFunctionality;
 import nashorn.internal.runtime.Context;
@@ -234,10 +235,8 @@ final class JSObjectLinker implements TypeBasedGuardingDynamicLinker {
         System.arraycopy(args, 1, arguments, 0, arguments.length);
         try {
             return mh.invokeExact(obj, thiz, new Object[] { receiver, arguments });
-        } catch (final RuntimeException | Error e) {
-            throw e;
-        } catch (final Throwable e) {
-            throw new RuntimeException(e);
+        } catch (Throwable e) {
+            return Util.uncheck(e);
         }
     }
 

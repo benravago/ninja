@@ -68,6 +68,7 @@ import jdk.dynalink.NamedOperation;
 import jdk.dynalink.linker.GuardedInvocation;
 import jdk.dynalink.linker.LinkRequest;
 import nashorn.internal.codegen.CompilerConstants.Call;
+import nashorn.internal.Util;
 import nashorn.internal.codegen.ObjectClassGenerator;
 import nashorn.internal.codegen.types.Type;
 import nashorn.internal.lookup.Lookup;
@@ -1074,10 +1075,8 @@ public abstract class ScriptObject implements PropertyAccess, Cloneable {
         if (getter != null) {
             try {
                 return (int)getter.invokeExact((Object)find.getGetterReceiver());
-            } catch (final Error|RuntimeException e) {
-                throw e;
-            } catch (final Throwable e) {
-                throw new RuntimeException(e);
+            } catch (Throwable e) {
+                Util.uncheck(e);
             }
         }
 
@@ -1089,10 +1088,8 @@ public abstract class ScriptObject implements PropertyAccess, Cloneable {
         if (getter != null) {
             try {
                 return (double)getter.invokeExact((Object)find.getGetterReceiver());
-            } catch (final Error|RuntimeException e) {
-                throw e;
-            } catch (final Throwable e) {
-                throw new RuntimeException(e);
+            } catch (Throwable e) {
+                Util.uncheck(e);
             }
         }
 
@@ -3393,8 +3390,8 @@ public abstract class ScriptObject implements PropertyAccess, Cloneable {
     public final ScriptObject copy() {
         try {
             return clone();
-        } catch (final CloneNotSupportedException e) {
-            throw new RuntimeException(e);
+        } catch (CloneNotSupportedException e) {
+            return Util.uncheck(e);
         }
     }
 
@@ -3475,10 +3472,8 @@ public abstract class ScriptObject implements PropertyAccess, Cloneable {
         if (self instanceof ScriptObject && ((ScriptObject)self).getMap() == map) {
             try {
                 return getter.invokeExact(self) == func;
-            } catch (final RuntimeException | Error e) {
-                throw e;
-            } catch (final Throwable t) {
-                throw new RuntimeException(t);
+            } catch (Throwable t) {
+                Util.uncheck(t);
             }
         }
 
@@ -3510,10 +3505,8 @@ public abstract class ScriptObject implements PropertyAccess, Cloneable {
             }
             try {
                 return getter.invokeExact((Object)proto) == func;
-            } catch (final RuntimeException | Error e) {
-                throw e;
-            } catch (final Throwable t) {
-                throw new RuntimeException(t);
+            } catch (Throwable t) {
+                Util.uncheck(t);
             }
         }
 

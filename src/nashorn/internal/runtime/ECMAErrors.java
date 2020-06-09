@@ -386,7 +386,7 @@ public final class ECMAErrors {
         try {
             return new MessageFormat(MESSAGES_BUNDLE.getString(msgId)).format(args);
         } catch (final java.util.MissingResourceException e) {
-            throw new RuntimeException("no message resource found for message id: "+ msgId);
+            throw new IllegalArgumentException("no message resource found for message id: "+ msgId);
         }
     }
 

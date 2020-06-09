@@ -34,6 +34,8 @@ import static nashorn.internal.runtime.ECMAErrors.typeError;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
+
+import nashorn.internal.Util;
 import nashorn.internal.objects.annotations.Attribute;
 import nashorn.internal.objects.annotations.Constructor;
 import nashorn.internal.objects.annotations.Function;
@@ -877,10 +879,8 @@ public final class NativeDate extends ScriptObject {
                 return toIsoString.getInvoker().invokeExact(func, sobj, key);
             }
             throw typeError("not.a.function", ScriptRuntime.safeToString(func));
-        } catch (final RuntimeException | Error e) {
-            throw e;
-        } catch (final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            return Util.uncheck(t);
         }
     }
 

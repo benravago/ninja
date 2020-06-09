@@ -39,6 +39,8 @@ import java.io.ObjectInputStream;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.SwitchPoint;
+
+import nashorn.internal.Util;
 import nashorn.internal.codegen.ObjectClassGenerator;
 import nashorn.internal.codegen.types.Type;
 import nashorn.internal.lookup.Lookup;
@@ -387,10 +389,8 @@ public class AccessorProperty extends Property {
     public int getIntValue(final ScriptObject self, final ScriptObject owner) {
         try {
             return (int)getGetter(int.class).invokeExact((Object)self);
-        } catch (final Error | RuntimeException e) {
-            throw e;
-        } catch (final Throwable e) {
-            throw new RuntimeException(e);
+        } catch (Throwable e) {
+        	return Util.uncheck(e);
         }
      }
 
@@ -398,10 +398,8 @@ public class AccessorProperty extends Property {
      public double getDoubleValue(final ScriptObject self, final ScriptObject owner) {
         try {
             return (double)getGetter(double.class).invokeExact((Object)self);
-        } catch (final Error | RuntimeException e) {
-            throw e;
-        } catch (final Throwable e) {
-            throw new RuntimeException(e);
+        } catch (Throwable e) {
+        	return Util.uncheck(e);
         }
     }
 
@@ -409,10 +407,8 @@ public class AccessorProperty extends Property {
      public Object getObjectValue(final ScriptObject self, final ScriptObject owner) {
         try {
             return getGetter(Object.class).invokeExact((Object)self);
-        } catch (final Error | RuntimeException e) {
-            throw e;
-        } catch (final Throwable e) {
-            throw new RuntimeException(e);
+        } catch (Throwable e) {
+        	return Util.uncheck(e);
         }
     }
 
@@ -424,10 +420,8 @@ public class AccessorProperty extends Property {
     protected final void invokeSetter(final ScriptObject self, final int value) {
         try {
             getSetter(int.class, self.getMap()).invokeExact((Object)self, value);
-        } catch (final Error | RuntimeException e) {
-            throw e;
-        } catch (final Throwable e) {
-            throw new RuntimeException(e);
+        } catch (Throwable e) {
+        	Util.uncheck(e);
         }
     }
 
@@ -439,10 +433,8 @@ public class AccessorProperty extends Property {
     protected final void invokeSetter(final ScriptObject self, final double value) {
         try {
             getSetter(double.class, self.getMap()).invokeExact((Object)self, value);
-        } catch (final Error | RuntimeException e) {
-            throw e;
-        } catch (final Throwable e) {
-            throw new RuntimeException(e);
+        } catch (Throwable e) {
+        	Util.uncheck(e);
         }
     }
 
@@ -454,10 +446,8 @@ public class AccessorProperty extends Property {
     protected final void invokeSetter(final ScriptObject self, final Object value) {
         try {
             getSetter(Object.class, self.getMap()).invokeExact((Object)self, value);
-        } catch (final Error | RuntimeException e) {
-            throw e;
-        } catch (final Throwable e) {
-            throw new RuntimeException(e);
+        } catch (Throwable e) {
+            Util.uncheck(e);
         }
     }
 

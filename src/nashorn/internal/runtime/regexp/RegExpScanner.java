@@ -621,7 +621,7 @@ final class RegExpScanner extends Scanner {
      */
     private boolean identityEscape() {
         if (atEOF()) {
-            throw new RuntimeException("\\ at end of pattern"); // will be converted to PatternSyntaxException
+            throw new IllegalArgumentException("\\ at end of pattern"); // will be converted to PatternSyntaxException
         }
         // ES 5.1 A.7 requires "not IdentifierPart" here but all major engines accept any character here.
         if (ch0 == 'c') {

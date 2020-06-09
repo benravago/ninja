@@ -53,6 +53,8 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
+import nashorn.internal.Util;
 import nashorn.internal.codegen.ClassEmitter.Flag;
 import nashorn.internal.codegen.types.Type;
 import nashorn.internal.runtime.AccessorProperty;
@@ -509,10 +511,8 @@ public final class ObjectClassGenerator implements Loggable {
         try {
             final Object value = mh.invokeExact(receiver);
             throw new UnwarrantedOptimismException(value, programPoint);
-        } catch (final Error | RuntimeException e) {
-            throw e;
-        } catch (final Throwable e) {
-            throw new RuntimeException(e);
+        } catch (Throwable e) {
+            return Util.uncheck(e);
         }
     }
 

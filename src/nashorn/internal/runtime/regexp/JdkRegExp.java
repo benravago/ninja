@@ -82,8 +82,6 @@ public class JdkRegExp extends RegExp {
             }
         } catch (final PatternSyntaxException e2) {
             throwParserException("syntax", e2.getMessage());
-        } catch (StackOverflowError e3) {
-            throw new RuntimeException(e3);
         }
     }
 

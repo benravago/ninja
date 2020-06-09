@@ -36,6 +36,7 @@ import java.util.RandomAccess;
 import java.util.concurrent.Callable;
 import nashorn.api.scripting.JSObject;
 import nashorn.api.scripting.ScriptObjectMirror;
+import nashorn.internal.Util;
 import nashorn.internal.objects.Global;
 import nashorn.internal.runtime.linker.Bootstrap;
 
@@ -155,10 +156,8 @@ public class ListAdapter extends AbstractList<Object> implements RandomAccess, D
     public final void addFirst(final Object e) {
         try {
             getDynamicInvoker(UNSHIFT, ADD_INVOKER_CREATOR).invokeExact(getFunction("unshift"), obj, e);
-        } catch(RuntimeException | Error ex) {
-            throw ex;
-        } catch(final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            Util.uncheck(t);
         }
     }
 
@@ -166,10 +165,8 @@ public class ListAdapter extends AbstractList<Object> implements RandomAccess, D
     public final void addLast(final Object e) {
         try {
             getDynamicInvoker(PUSH, ADD_INVOKER_CREATOR).invokeExact(getFunction("push"), obj, e);
-        } catch(RuntimeException | Error ex) {
-            throw ex;
-        } catch(final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            Util.uncheck(t);
         }
     }
 
@@ -190,10 +187,8 @@ public class ListAdapter extends AbstractList<Object> implements RandomAccess, D
                     throw invalidIndex(index);
                 }
             }
-        } catch(final RuntimeException | Error ex) {
-            throw ex;
-        } catch(final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            Util.uncheck(t);
         }
     }
     private Object getFunction(final String name) {
@@ -276,20 +271,16 @@ public class ListAdapter extends AbstractList<Object> implements RandomAccess, D
     private Object invokeShift() {
         try {
             return getDynamicInvoker(SHIFT, REMOVE_INVOKER_CREATOR).invokeExact(getFunction("shift"), obj);
-        } catch(RuntimeException | Error ex) {
-            throw ex;
-        } catch(final Throwable t) {
-            throw new RuntimeException(t);
+        } catch(Throwable t) {
+            return Util.uncheck(t);
         }
     }
 
     private Object invokePop() {
         try {
             return getDynamicInvoker(POP, REMOVE_INVOKER_CREATOR).invokeExact(getFunction("pop"), obj);
-        } catch(RuntimeException | Error ex) {
-            throw ex;
-        } catch(final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            return Util.uncheck(t);
         }
     }
 
@@ -301,10 +292,8 @@ public class ListAdapter extends AbstractList<Object> implements RandomAccess, D
     private void invokeSpliceRemove(final int fromIndex, final int count) {
         try {
             getDynamicInvoker(SPLICE_REMOVE, SPLICE_REMOVE_INVOKER_CREATOR).invokeExact(getFunction("splice"), obj, fromIndex, count);
-        } catch(RuntimeException | Error ex) {
-            throw ex;
-        } catch(final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            Util.uncheck(t);
         }
     }
 

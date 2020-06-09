@@ -43,6 +43,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import javax.script.Bindings;
+
+import nashorn.internal.Util;
 import nashorn.internal.objects.Global;
 import nashorn.internal.runtime.ConsString;
 import nashorn.internal.runtime.Context;
@@ -113,13 +115,11 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
                 return wrapLikeMe(ScriptRuntime.apply((ScriptFunction)sobj, unwrap(self, global), unwrapArray(modArgs, global)));
             }
 
-            throw new RuntimeException("not a function: " + toString());
+            throw new IllegalArgumentException("not a function: " + toString());
         } catch (final NashornException ne) {
             throw ne.initEcmaError(global);
-        } catch (final RuntimeException | Error e) {
-            throw e;
-        } catch (final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            return Util.uncheck(t);
         } finally {
             if (globalChanged) {
                 Context.setGlobal(oldGlobal);
@@ -145,10 +145,8 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
             throw new RuntimeException("not a constructor: " + toString());
         } catch (final NashornException ne) {
             throw ne.initEcmaError(global);
-        } catch (final RuntimeException | Error e) {
-            throw e;
-        } catch (final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            return Util.uncheck(t);
         } finally {
             if (globalChanged) {
                 Context.setGlobal(oldGlobal);
@@ -200,10 +198,8 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
             throw new NoSuchMethodException("No such function " + functionName);
         } catch (final NashornException ne) {
             throw ne.initEcmaError(global);
-        } catch (final RuntimeException | Error e) {
-            throw e;
-        } catch (final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            return Util.uncheck(t);
         } finally {
             if (globalChanged) {
                 Context.setGlobal(oldGlobal);

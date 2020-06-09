@@ -146,11 +146,7 @@ public final class NashornScriptEngineFactory implements ScriptEngineFactory {
 
     @Override
     public ScriptEngine getScriptEngine() {
-        try {
-            return new NashornScriptEngine(this, DEFAULT_OPTIONS, getAppClassLoader(), null);
-        } catch (final RuntimeException e) {
-            throw e;
-        }
+        return new NashornScriptEngine(this, DEFAULT_OPTIONS, getAppClassLoader(), null);
     }
 
     /**

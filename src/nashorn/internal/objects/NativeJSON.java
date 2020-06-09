@@ -39,6 +39,7 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import nashorn.api.scripting.JSObject;
 import nashorn.api.scripting.ScriptObjectMirror;
+import nashorn.internal.Util;
 import nashorn.internal.objects.annotations.Attribute;
 import nashorn.internal.objects.annotations.Function;
 import nashorn.internal.objects.annotations.ScriptClass;
@@ -247,10 +248,8 @@ public final class NativeJSON extends ScriptObject {
             if (state.replacerFunction != null) {
                 value = getREPLACER_INVOKER().invokeExact(state.replacerFunction, holder, key, value);
             }
-        } catch(Error|RuntimeException t) {
-            throw t;
-        } catch(final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            Util.uncheck(t);
         }
         final boolean isObj = (value instanceof ScriptObject);
         if (isObj) {

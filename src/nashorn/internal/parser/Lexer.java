@@ -763,7 +763,7 @@ public class Lexer extends Scanner {
      * @param length Length of token.
      * @return Ident string or null if an error.
      */
-    private String valueOfIdent(final int start, final int length) throws RuntimeException {
+    private String valueOfIdent(final int start, final int length) {
         // Save the current position.
         final int savePosition = position;
         // End of scan.
@@ -824,7 +824,7 @@ public class Lexer extends Scanner {
      * @param length Length of token.
      * @return JavaScript string object.
      */
-    private String valueOfString(final int start, final int length, final boolean allow) throws RuntimeException {
+    private String valueOfString(final int start, final int length, final boolean allow) {
         // Save the current position.
         final int savePosition = position;
         // Calculate the end position.

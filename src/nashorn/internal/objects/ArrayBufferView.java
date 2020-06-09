@@ -86,11 +86,11 @@ public abstract class ArrayBufferView extends ScriptObject {
 
     private static void checkConstructorArgs(final int byteLength, final int bytesPerElement, final int byteOffset, final int elementLength) {
         if (byteOffset < 0 || elementLength < 0) {
-            throw new RuntimeException("byteOffset or length must not be negative, byteOffset=" + byteOffset + ", elementLength=" + elementLength + ", bytesPerElement=" + bytesPerElement);
+            throw new IllegalArgumentException("byteOffset or length must not be negative, byteOffset=" + byteOffset + ", elementLength=" + elementLength + ", bytesPerElement=" + bytesPerElement);
         } else if (byteOffset + elementLength * bytesPerElement > byteLength) {
-            throw new RuntimeException("byteOffset + byteLength out of range, byteOffset=" + byteOffset + ", elementLength=" + elementLength + ", bytesPerElement=" + bytesPerElement);
+            throw new IllegalArgumentException("byteOffset + byteLength out of range, byteOffset=" + byteOffset + ", elementLength=" + elementLength + ", bytesPerElement=" + bytesPerElement);
         } else if (byteOffset % bytesPerElement != 0) {
-            throw new RuntimeException("byteOffset must be a multiple of the element size, byteOffset=" + byteOffset + " bytesPerElement=" + bytesPerElement);
+            throw new IllegalArgumentException("byteOffset must be a multiple of the element size, byteOffset=" + byteOffset + " bytesPerElement=" + bytesPerElement);
         }
     }
 
@@ -262,7 +262,7 @@ public abstract class ArrayBufferView extends ScriptObject {
                 length = JSType.toInt32(args[2]);
             } else {
                 if ((buffer.getByteLength() - byteOffset) % factory.bytesPerElement != 0) {
-                    throw new RuntimeException("buffer.byteLength - byteOffset must be a multiple of the element size");
+                    throw new IllegalArgumentException("buffer.byteLength - byteOffset must be a multiple of the element size");
                 }
                 length = (buffer.getByteLength() - byteOffset) / factory.bytesPerElement;
             }
@@ -307,14 +307,14 @@ public abstract class ArrayBufferView extends ScriptObject {
             // void set(type[] array, optional unsigned long offset)
             length = (int) (((NativeArray) array).getArray().length() & 0x7fff_ffff);
         } else {
-            throw new RuntimeException("argument is not of array type");
+            throw new IllegalArgumentException("argument is not of array type");
         }
 
         final ScriptObject source = (ScriptObject)array;
         final int offset = JSType.toInt32(offset0); // default=0
 
         if (dest.elementLength() < length + offset || offset < 0) {
-            throw new RuntimeException("offset or array length out of bounds");
+            throw new IllegalArgumentException("offset or array length out of bounds");
         }
 
         copyElements(dest, length, source, offset);

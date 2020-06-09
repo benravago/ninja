@@ -37,6 +37,7 @@ import java.util.List;
 import jdk.dynalink.CallSiteDescriptor;
 import jdk.dynalink.linker.GuardedInvocation;
 import jdk.dynalink.linker.LinkRequest;
+import nashorn.internal.Util;
 import nashorn.internal.codegen.CompilerConstants;
 import nashorn.internal.codegen.types.Type;
 import nashorn.internal.objects.Global;
@@ -800,10 +801,8 @@ public abstract class ArrayData {
     static Object invoke(final MethodHandle mh, final Object arg) {
         try {
             return mh.invoke(arg);
-        } catch (final RuntimeException | Error e) {
-            throw e;
-        } catch (final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            return Util.uncheck(t);
         }
     }
 

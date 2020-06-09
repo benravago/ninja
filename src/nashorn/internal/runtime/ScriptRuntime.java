@@ -49,6 +49,7 @@ import jdk.dynalink.beans.BeansLinker;
 import jdk.dynalink.beans.StaticClass;
 import nashorn.api.scripting.JSObject;
 import nashorn.api.scripting.ScriptObjectMirror;
+import nashorn.internal.Util;
 import nashorn.internal.codegen.ApplySpecialization;
 import nashorn.internal.codegen.CompilerConstants;
 import nashorn.internal.codegen.CompilerConstants.Call;
@@ -452,10 +453,8 @@ public final class ScriptRuntime {
                     if (Bootstrap.isCallable(next)) {
                         return nextInvoker.getInvoker().invokeExact(next, iterator, (Object) null);
                     }
-                } catch (final RuntimeException|Error r) {
-                    throw r;
                 } catch (final Throwable t) {
-                    throw new RuntimeException(t);
+                	return Util.uncheck(t);
                 }
                 return null;
             }
@@ -468,10 +467,8 @@ public final class ScriptRuntime {
                 try {
                     final Object done = doneInvoker.invokeExact(nextResult);
                     return !JSType.toBoolean(done);
-                } catch (final RuntimeException|Error r) {
-                    throw r;
                 } catch (final Throwable t) {
-                    throw new RuntimeException(t);
+                	return Util.uncheck(t);
                 }
             }
 
@@ -484,10 +481,8 @@ public final class ScriptRuntime {
                     final Object result = nextResult;
                     nextResult = nextResult();
                     return valueInvoker.invokeExact(result);
-                } catch (final RuntimeException|Error r) {
-                    throw r;
-                } catch (final Throwable t) {
-                    throw new RuntimeException(t);
+                } catch (Throwable t) {
+                    return Util.uncheck(t);
                 }
             }
 
@@ -524,10 +519,8 @@ public final class ScriptRuntime {
     public static Object apply(final ScriptFunction target, final Object self, final Object... args) {
         try {
             return target.invoke(self, args);
-        } catch (final RuntimeException | Error e) {
-            throw e;
-        } catch (final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            return Util.uncheck(t);
         }
     }
 
@@ -559,10 +552,8 @@ public final class ScriptRuntime {
     public static Object construct(final ScriptFunction target, final Object... args) {
         try {
             return target.construct(args);
-        } catch (final RuntimeException | Error e) {
-            throw e;
-        } catch (final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+        	return Util.uncheck(t);
         }
     }
 

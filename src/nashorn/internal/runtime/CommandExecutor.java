@@ -45,6 +45,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import nashorn.internal.Util;
+
 import static nashorn.internal.runtime.CommandExecutor.RedirectType.*;
 import static nashorn.internal.runtime.ECMAErrors.rangeError;
 
@@ -281,9 +283,9 @@ class CommandExecutor {
                     // Write available date to OutputStream.
                     output.write(b, 0, read);
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Assume the worst.
-                throw new RuntimeException("Broken pipe", e);
+                Util.uncheck(e); // ("Broken pipe", e);
             } finally {
                 // Make sure the streams are closed.
                 try {

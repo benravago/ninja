@@ -49,6 +49,7 @@ import jdk.dynalink.SecureLookupSupplier;
 import jdk.dynalink.linker.GuardedInvocation;
 import jdk.dynalink.linker.LinkRequest;
 import jdk.dynalink.linker.support.Guards;
+import nashorn.internal.Util;
 import nashorn.internal.codegen.ApplySpecialization;
 import nashorn.internal.codegen.Compiler;
 import nashorn.internal.codegen.CompilerConstants.Call;
@@ -1037,10 +1038,8 @@ public class ScriptFunction extends ScriptObject {
         GuardedInvocation appliedInvocation;
         try {
             appliedInvocation = Bootstrap.getLinkerServices().getGuardedInvocation(appliedRequest);
-        } catch (final RuntimeException | Error e) {
-            throw e;
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            return Util.uncheck(e);
         }
         assert appliedRequest != null; // Bootstrap.isCallable() returned true for args[1], so it must produce a linkage.
 

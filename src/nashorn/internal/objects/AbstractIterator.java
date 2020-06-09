@@ -27,6 +27,8 @@ package nashorn.internal.objects;
 
 import java.lang.invoke.MethodHandle;
 import java.util.function.Consumer;
+
+import nashorn.internal.Util;
 import nashorn.internal.objects.annotations.Attribute;
 import nashorn.internal.objects.annotations.Function;
 import nashorn.internal.objects.annotations.ScriptClass;
@@ -169,8 +171,8 @@ public abstract class AbstractIterator extends ScriptObject {
                     }
                     return value;
 
-                } catch (final Throwable t) {
-                    throw new RuntimeException(t);
+                } catch (Throwable t) {
+                    Util.uncheck(t);
                 }
             }
             throw typeError("not.a.function", ScriptRuntime.safeToString(getter));
@@ -215,10 +217,8 @@ public abstract class AbstractIterator extends ScriptObject {
 
             } while (true);
 
-        } catch (final RuntimeException r) {
-            throw r;
-        } catch (final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            Util.uncheck(t);
         }
 
     }

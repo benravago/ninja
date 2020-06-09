@@ -36,6 +36,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import nashorn.internal.Util;
 import nashorn.internal.codegen.CompileUnit;
 import nashorn.internal.runtime.logging.DebugLogger;
 import nashorn.internal.runtime.logging.Loggable;
@@ -173,8 +175,8 @@ public final class Timing implements Loggable {
                 while ((line = br.readLine()) != null) {
                     strs.add(line);
                 }
-            } catch (final IOException e) {
-                throw new RuntimeException(e);
+            } catch (IOException e) {
+                Util.uncheck(e);
             }
             return strs.toArray(new String[0]);
         }

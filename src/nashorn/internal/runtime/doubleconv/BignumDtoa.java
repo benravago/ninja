@@ -169,7 +169,7 @@ class BignumDtoa {
                         buffer);
                 break;
             default:
-                throw new RuntimeException();
+                throw new IllegalArgumentException("mode "+mode);
         }
     }
 

@@ -100,7 +100,7 @@ public abstract class AbstractParser {
      */
     protected AbstractParser(final Source source, final ErrorManager errors, final int lineOffset) {
         if (source.getLength() > Token.LENGTH_MASK) {
-            throw new RuntimeException("Source exceeds size limit of " + Token.LENGTH_MASK + " bytes");
+            throw new IllegalArgumentException("Source exceeds size limit of " + Token.LENGTH_MASK + " bytes");
         }
         this.source       = source;
         this.errors       = errors;

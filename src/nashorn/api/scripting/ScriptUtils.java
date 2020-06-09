@@ -28,6 +28,7 @@ package nashorn.api.scripting;
 import java.lang.invoke.MethodHandle;
 import jdk.dynalink.beans.StaticClass;
 import jdk.dynalink.linker.LinkerServices;
+import nashorn.internal.Util;
 import nashorn.internal.runtime.Context;
 import nashorn.internal.runtime.ScriptFunction;
 import nashorn.internal.runtime.ScriptObject;
@@ -165,10 +166,8 @@ public final class ScriptUtils {
 
         try {
             return converter.invoke(objToConvert);
-        } catch (final RuntimeException | Error e) {
-            throw e;
-        } catch (final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            return Util.uncheck(t);
         }
     }
 }

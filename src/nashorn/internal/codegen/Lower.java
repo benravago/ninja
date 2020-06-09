@@ -855,6 +855,6 @@ final class Lower extends NodeOperatorVisitor<BlockLexicalContext> implements Lo
         final int column = source.getColumn(node.getStart());
         final String message = ECMAErrors.getMessage("unimplemented." + msgId);
         final String formatted = ErrorManager.format(message, source, line, column, token);
-        throw new RuntimeException(formatted);
+        throw new UnsupportedOperationException(formatted);
     }
 }

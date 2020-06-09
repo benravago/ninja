@@ -531,10 +531,8 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
                 if (Bootstrap.isCallable(join)) {
                     return joinInvoker.getInvoker().invokeExact(join, sobj);
                 }
-            } catch (final RuntimeException | Error e) {
-                throw e;
-            } catch (final Throwable t) {
-                throw new RuntimeException(t);
+            } catch (Throwable t) {
+                Util.uncheck(t);
             }
         }
 
@@ -584,10 +582,8 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
                             throw typeError("not.a.function", "toLocaleString");
                         }
                     }
-                } catch (final Error|RuntimeException t) {
-                    throw t;
-                } catch (final Throwable t) {
-                    throw new RuntimeException(t);
+                } catch (Throwable t) {
+                    Util.uncheck(t);
                 }
             }
 
@@ -1213,10 +1209,8 @@ public final class NativeArray extends ScriptObject implements OptimisticBuiltin
                     if (cmp != null) {
                         try {
                             return (int)Math.signum((double)call_cmp.invokeExact(cmp, cmpThis, x, y));
-                        } catch (final RuntimeException | Error e) {
-                            throw e;
-                        } catch (final Throwable t) {
-                            throw new RuntimeException(t);
+                        } catch (Throwable t) {
+                            Util.uncheck(t);
                         }
                     }
 

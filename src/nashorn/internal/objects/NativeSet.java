@@ -26,6 +26,8 @@
 package nashorn.internal.objects;
 
 import java.lang.invoke.MethodHandle;
+
+import nashorn.internal.Util;
 import nashorn.internal.objects.annotations.Attribute;
 import nashorn.internal.objects.annotations.Constructor;
 import nashorn.internal.objects.annotations.Function;
@@ -206,10 +208,8 @@ public class NativeSet extends ScriptObject {
 
             try {
                 final Object result = invoker.invokeExact(callbackFn, thisArg, node.getKey(), node.getKey(), self);
-            } catch (final RuntimeException | Error e) {
-                throw e;
-            } catch (final Throwable t) {
-                throw new RuntimeException(t);
+            } catch (Throwable t) {
+                Util.uncheck(t);
             }
         }
     }

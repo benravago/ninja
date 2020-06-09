@@ -110,7 +110,7 @@ class Bignum {
 
     private void ensureCapacity(final int size) {
         if (size > kBigitCapacity) {
-            throw new RuntimeException();
+            throw new IndexOutOfBoundsException(size);
         }
     }
 
@@ -432,7 +432,7 @@ class Bignum {
         // Assert that the additional number of bits in a DoubleChunk are enough to
         // sum up used_digits of Bigit*Bigit.
         if ((1L << (2 * (kChunkSize - kBigitSize))) <= used_digits_) {
-            throw new RuntimeException("unimplemented");
+            throw new IndexOutOfBoundsException("unimplemented");
         }
         long accumulator = 0;
         // First shift the digits so we don't overwrite them.

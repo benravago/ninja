@@ -52,6 +52,7 @@ import jdk.dynalink.linker.GuardingDynamicLinker;
 import jdk.dynalink.linker.LinkRequest;
 import jdk.dynalink.linker.support.SimpleLinkRequest;
 import nashorn.api.scripting.ScriptObjectMirror;
+import nashorn.internal.Util;
 import nashorn.internal.lookup.Lookup;
 import nashorn.internal.objects.annotations.Attribute;
 import nashorn.internal.objects.annotations.Constructor;
@@ -535,10 +536,8 @@ public final class NativeObject {
                 if (Bootstrap.isCallable(toString)) {
                     return toStringInvoker.getInvoker().invokeExact(toString, sobj);
                 }
-            } catch (final RuntimeException | Error e) {
-                throw e;
-            } catch (final Throwable t) {
-                throw new RuntimeException(t);
+            } catch (Throwable t) {
+                Util.uncheck(t);
             }
 
             throw typeError("not.a.function", "toString");
@@ -841,10 +840,8 @@ public final class NativeObject {
             // constant for any given method name and object's class.)
             return MethodHandles.dropArguments(MethodHandles.constant(Object.class,
                     Bootstrap.bindCallable(methodGetter.invoke(source), source, null)), 0, Object.class);
-        } catch(RuntimeException|Error e) {
-            throw e;
-        } catch(final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            return Util.uncheck(t);
         }
     }
 
@@ -854,10 +851,8 @@ public final class NativeObject {
         try {
             inv = NashornBeansLinker.getGuardedInvocation(linker, createLinkRequest(operation.named(name), methodType, source), Bootstrap.getLinkerServices());
             assert passesGuard(source, inv.getGuard());
-        } catch(RuntimeException|Error e) {
-            throw e;
-        } catch(final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (final Throwable t) {
+            return Util.uncheck(t);
         }
         assert inv.getSwitchPoints() == null; // Linkers in Dynalink's beans package don't use switchpoints.
         // We discard the guard, as all method handles will be bound to a specific object.

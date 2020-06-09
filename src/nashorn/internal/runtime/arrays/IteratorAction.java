@@ -25,6 +25,7 @@
 
 package nashorn.internal.runtime.arrays;
 
+import nashorn.internal.Util;
 import nashorn.internal.runtime.Context;
 import nashorn.internal.runtime.ScriptRuntime;
 import nashorn.internal.runtime.linker.Bootstrap;
@@ -109,10 +110,8 @@ public abstract class IteratorAction<T> {
                 if (!forEach(val, index)) {
                     return result;
                 }
-            } catch (final RuntimeException | Error e) {
-                throw e;
-            } catch (final Throwable t) {
-                throw new RuntimeException(t);
+            } catch (Throwable t) {
+                Util.uncheck(t);
             }
         }
 

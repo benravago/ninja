@@ -34,6 +34,8 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.concurrent.Callable;
+
+import nashorn.internal.Util;
 import nashorn.internal.lookup.Lookup;
 import nashorn.internal.runtime.linker.Bootstrap;
 import nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
@@ -145,10 +147,8 @@ public final class UserAccessorProperty extends SpillProperty {
         try {
             //invoke the getter and find out
             super.getSetter(Object.class, map).invokeExact((Object)sobj, (Object)gs);
-        } catch (final Error | RuntimeException t) {
-            throw t;
-        } catch (final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+        	Util.uncheck(t);
         }
     }
 
@@ -159,10 +159,8 @@ public final class UserAccessorProperty extends SpillProperty {
             //get the getter setter from the correct spill slot
             final Object gs = super.getGetter(Object.class).invokeExact((Object)sobj);
             return (Accessors)gs;
-        } catch (final Error | RuntimeException t) {
-            throw t;
-        } catch (final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+        	return Util.uncheck(t);
         }
     }
 
@@ -195,10 +193,8 @@ public final class UserAccessorProperty extends SpillProperty {
     public Object getObjectValue(final ScriptObject self, final ScriptObject owner) {
         try {
             return invokeObjectGetter(getAccessors((owner != null) ? owner : self), getObjectGetterInvoker(), self);
-        } catch (final Error | RuntimeException t) {
-            throw t;
-        } catch (final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            return Util.uncheck(t);
         }
     }
 
@@ -216,10 +212,8 @@ public final class UserAccessorProperty extends SpillProperty {
     public void setValue(final ScriptObject self, final ScriptObject owner, final Object value) {
         try {
             invokeObjectSetter(getAccessors((owner != null) ? owner : self), getObjectSetterInvoker(), getKey().toString(), self, value);
-        } catch (final Error | RuntimeException t) {
-            throw t;
-        } catch (final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+        	Util.uncheck(t);
         }
     }
 

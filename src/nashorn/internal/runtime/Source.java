@@ -53,6 +53,7 @@ import java.util.Base64;
 import java.util.Objects;
 import java.util.WeakHashMap;
 import nashorn.api.scripting.URLReader;
+import nashorn.internal.Util;
 import nashorn.internal.parser.Token;
 import nashorn.internal.runtime.logging.DebugLogger;
 import nashorn.internal.runtime.logging.Loggable;
@@ -102,27 +103,19 @@ public final class Source implements Loggable {
     }
 
     private static synchronized Source sourceFor(final String name, final String base, final URLData data) throws IOException {
-        try {
-            final Source newSource = new Source(name, base, data);
-            final Source existingSource = CACHE.get(newSource);
-            if (existingSource != null) {
-                // Force any access errors
-                data.checkPermissionAndClose();
-                return existingSource;
-            }
-
-            // All sources in cache must be fully loaded
-            data.load();
-            CACHE.put(newSource, newSource);
-
-            return newSource;
-        } catch (final RuntimeException e) {
-            final Throwable cause = e.getCause();
-            if (cause instanceof IOException) {
-                throw (IOException) cause;
-            }
-            throw e;
+        final Source newSource = new Source(name, base, data);
+        final Source existingSource = CACHE.get(newSource);
+        if (existingSource != null) {
+            // Force any access errors
+            data.checkPermissionAndClose();
+            return existingSource;
         }
+
+        // All sources in cache must be fully loaded
+        data.load();
+        CACHE.put(newSource, newSource);
+
+        return newSource;
     }
 
     private static class Cache extends WeakHashMap<Source, WeakReference<Source>> {
@@ -266,8 +259,8 @@ public final class Source implements Loggable {
                     } else if (otherData.isDeferred()) {
                         otherData.loadMeta();
                     }
-                } catch (final IOException e) {
-                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    Util.uncheck(e);
                 }
 
                 // Compare meta data
@@ -866,8 +859,8 @@ public final class Source implements Loggable {
                     md.update(getURL().toString().getBytes(StandardCharsets.UTF_8));
                 }
                 digest = ldigest = BASE64.encode(md.digest(bytes));
-            } catch (final NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
+            } catch (NoSuchAlgorithmException e) {
+                Util.uncheck(e);
             }
         }
         return ldigest;

@@ -39,6 +39,7 @@ import java.util.List;
 import jdk.dynalink.CallSiteDescriptor;
 import jdk.dynalink.linker.GuardedInvocation;
 import jdk.dynalink.linker.LinkRequest;
+import nashorn.internal.Util;
 import nashorn.internal.lookup.Lookup;
 import nashorn.internal.objects.annotations.Constructor;
 import nashorn.internal.objects.annotations.ScriptClass;
@@ -587,10 +588,8 @@ public final class NativeJSAdapter extends ScriptObject {
         if (res && getter != null) {
             try {
                 return getter.invokeExact(where) == func;
-            } catch (final RuntimeException | Error e) {
-                throw e;
-            } catch (final Throwable t) {
-                throw new RuntimeException(t);
+            } catch (Throwable t) {
+                Util.uncheck(t);
             }
         }
 

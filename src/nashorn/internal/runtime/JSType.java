@@ -38,6 +38,7 @@ import java.util.List;
 import jdk.dynalink.SecureLookupSupplier;
 import jdk.dynalink.beans.StaticClass;
 import nashorn.api.scripting.JSObject;
+import nashorn.internal.Util;
 import nashorn.internal.codegen.CompilerConstants.Call;
 import nashorn.internal.codegen.types.Type;
 import nashorn.internal.objects.Global;
@@ -1380,10 +1381,8 @@ public enum JSType {
             for (int i = 0; i < src.length; i++) {
                 Array.set(dst, i, invoke(converter, src[i]));
             }
-        } catch (final RuntimeException | Error e) {
-            throw e;
-        } catch (final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            Util.uncheck(t);
         }
         return dst;
     }
@@ -1766,10 +1765,8 @@ public enum JSType {
     private static Object invoke(final MethodHandle mh, final Object arg) {
         try {
             return mh.invoke(arg);
-        } catch (final RuntimeException | Error e) {
-            throw e;
-        } catch (final Throwable t) {
-            throw new RuntimeException(t);
+        } catch (Throwable t) {
+            return Util.uncheck(t);
         }
     }
 
