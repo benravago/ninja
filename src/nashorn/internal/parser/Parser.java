@@ -44,14 +44,11 @@ import static nashorn.internal.parser.TokenType.ELSE;
 import static nashorn.internal.parser.TokenType.EOF;
 import static nashorn.internal.parser.TokenType.EOL;
 import static nashorn.internal.parser.TokenType.EQ_STRICT;
-import static nashorn.internal.parser.TokenType.ESCSTRING;
-import static nashorn.internal.parser.TokenType.EXPORT;
 import static nashorn.internal.parser.TokenType.EXTENDS;
 import static nashorn.internal.parser.TokenType.FINALLY;
 import static nashorn.internal.parser.TokenType.FUNCTION;
 import static nashorn.internal.parser.TokenType.IDENT;
 import static nashorn.internal.parser.TokenType.IF;
-import static nashorn.internal.parser.TokenType.IMPORT;
 import static nashorn.internal.parser.TokenType.INCPOSTFIX;
 import static nashorn.internal.parser.TokenType.LBRACE;
 import static nashorn.internal.parser.TokenType.LBRACKET;
@@ -65,7 +62,6 @@ import static nashorn.internal.parser.TokenType.RPAREN;
 import static nashorn.internal.parser.TokenType.SEMICOLON;
 import static nashorn.internal.parser.TokenType.SPREAD_ARRAY;
 import static nashorn.internal.parser.TokenType.STATIC;
-import static nashorn.internal.parser.TokenType.STRING;
 import static nashorn.internal.parser.TokenType.SUPER;
 import static nashorn.internal.parser.TokenType.TEMPLATE;
 import static nashorn.internal.parser.TokenType.TEMPLATE_HEAD;
@@ -118,7 +114,6 @@ import nashorn.internal.ir.JoinPredecessorExpression;
 import nashorn.internal.ir.LabelNode;
 import nashorn.internal.ir.LexicalContext;
 import nashorn.internal.ir.LiteralNode;
-import nashorn.internal.ir.Module;
 import nashorn.internal.ir.Node;
 import nashorn.internal.ir.ObjectNode;
 import nashorn.internal.ir.PropertyKey;
@@ -331,44 +326,6 @@ public class Parser extends AbstractParser implements Loggable {
                 log.info(end);
             }
         }
-    }
-
-    /**
-     * Parse and return the resulting module.
-     * Errors will be thrown and the error manager will contain information
-     * if parsing should fail
-     *
-     * @param moduleName name for the module, given to the parsed FunctionNode
-     * @param startPos start position in source
-     * @param len length of parse
-     *
-     * @return function node resulting from successful parse
-     */
-    public FunctionNode parseModule(final String moduleName, final int startPos, final int len) {
-        try {
-            stream = new TokenStream();
-            lexer  = new Lexer(source, startPos, len, stream, scripting && !env._no_syntax_extensions, reparsedFunction != null);
-            lexer.line = lexer.pendingLine = lineOffset + 1;
-            line = lineOffset;
-
-            scanFirstToken();
-            // Begin parse.
-            return module(moduleName);
-        } catch (final Exception e) {
-            handleParseException(e);
-
-            return null;
-        }
-    }
-
-    /**
-     * Entry point for parsing a module.
-     *
-     * @param moduleName the module name
-     * @return the parsed module
-     */
-    public FunctionNode parseModule(final String moduleName) {
-        return parseModule(moduleName, 0, source.getLength());
     }
 
     /**
@@ -835,30 +792,6 @@ public class Parser extends AbstractParser implements Loggable {
     }
 
     /**
-     * Directive value or null if statement is not a directive.
-     *
-     * @param stmt Statement to be checked
-     * @return Directive value if the given statement is a directive
-     */
-    private String getDirective(final Node stmt) {
-        if (stmt instanceof ExpressionStatement) {
-            final Node expr = ((ExpressionStatement)stmt).getExpression();
-            if (expr instanceof LiteralNode) {
-                final LiteralNode<?> lit = (LiteralNode<?>)expr;
-                final long litToken = lit.getToken();
-                final TokenType tt = Token.descType(litToken);
-                // A directive is either a string or an escape string
-                if (tt == TokenType.STRING || tt == TokenType.ESCSTRING) {
-                    // Make sure that we don't unescape anything. Return as seen in source!
-                    return source.getString(lit.getStart(), Token.descLength(litToken));
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * SourceElements :
      *      SourceElement
      *      SourceElements SourceElement
@@ -868,8 +801,6 @@ public class Parser extends AbstractParser implements Loggable {
      * Parse the elements of the script or function.
      */
     private void sourceElements(final int reparseFlags) {
-        List<Node>    directiveStmts        = null;
-        boolean       checkDirective        = true;
         int           functionFlags          = reparseFlags;
         
         // If is a script, then process until the end of the script.
@@ -1856,11 +1787,10 @@ public class Parser extends AbstractParser implements Loggable {
 
             expect(LPAREN);
 
-            TokenType varType = null;
             switch (type) {
             case VAR:
                 // Var declaration captured in for outer block.
-                varDeclList = variableDeclarationList(varType = type, false, forStart);
+                varDeclList = variableDeclarationList(type, false, forStart);
                 break;
             case SEMICOLON:
                 break;
@@ -1868,12 +1798,12 @@ public class Parser extends AbstractParser implements Loggable {
                 if (type == LET && lookaheadIsLetDeclaration(true) || type == CONST) {
                     flags |= ForNode.PER_ITERATION_SCOPE;
                     // LET/CONST declaration captured in container block created above.
-                    varDeclList = variableDeclarationList(varType = type, false, forStart);
+                    varDeclList = variableDeclarationList(type, false, forStart);
                     break;
                 }
                 if (env._const_as_var && type == CONST) {
                     // Var declaration captured in for outer block.
-                    varDeclList = variableDeclarationList(varType = TokenType.VAR, false, forStart);
+                    varDeclList = variableDeclarationList(TokenType.VAR, false, forStart);
                     break;
                 }
 
@@ -2920,33 +2850,6 @@ public class Parser extends AbstractParser implements Loggable {
         return new ObjectNode(objectToken, finish, elements);
     }
 
-    private void checkPropertyRedefinition(final PropertyNode property, final Expression value, final FunctionNode getter, final FunctionNode setter, final Expression prevValue, final FunctionNode prevGetter, final FunctionNode prevSetter) {
-        // ECMA 11.1.5 mode restrictions
-        if (value != null && prevValue != null) {
-            throw error(AbstractParser.message("property.redefinition", property.getKeyName()), property.getToken());
-        }
-
-        final boolean isPrevAccessor = prevGetter != null || prevSetter != null;
-        final boolean isAccessor     = getter != null     || setter != null;
-
-        // data property redefined as accessor property
-        if (prevValue != null && isAccessor) {
-            throw error(AbstractParser.message("property.redefinition", property.getKeyName()), property.getToken());
-        }
-
-        // accessor property redefined as data
-        if (isPrevAccessor && value != null) {
-            throw error(AbstractParser.message("property.redefinition", property.getKeyName()), property.getToken());
-        }
-
-        if (isAccessor && isPrevAccessor) {
-            if (getter != null && prevGetter != null ||
-                    setter != null && prevSetter != null) {
-                throw error(AbstractParser.message("property.redefinition", property.getKeyName()), property.getToken());
-            }
-        }
-    }
-
     /**
      * LiteralPropertyName :
      *      IdentifierName
@@ -2955,7 +2858,6 @@ public class Parser extends AbstractParser implements Loggable {
      *
      * @return PropertyName node
      */
-    @SuppressWarnings("fallthrough")
     private PropertyKey literalPropertyName() {
         switch (type) {
         case IDENT:
@@ -4238,7 +4140,6 @@ public class Parser extends AbstractParser implements Loggable {
      * @return Expression node.
      */
     private Expression unaryExpression() {
-        final int  unaryLine  = line;
         final long unaryToken = token;
 
         switch (type) {
@@ -4599,8 +4500,9 @@ public class Parser extends AbstractParser implements Loggable {
         case ASSIGN_SHR:
         case ASSIGN_SUB:
             return true;
+        default:
+        	return false;
         }
-        return false;
     }
 
     /**
@@ -4964,379 +4866,6 @@ public class Parser extends AbstractParser implements Loggable {
         cookedStrings.add(LiteralNode.newInstance(stringToken, finish, cookedString));
     }
 
-
-    /**
-     * Parse a module.
-     *
-     * Module :
-     *      ModuleBody?
-     *
-     * ModuleBody :
-     *      ModuleItemList
-     */
-    private FunctionNode module(final String moduleName) {
-
-        // Make a pseudo-token for the script holding its start and length.
-        final int functionStart = Math.min(Token.descPosition(Token.withDelimiter(token)), finish);
-        final long functionToken = Token.toDesc(FUNCTION, functionStart, source.getLength() - functionStart);
-        final int  functionLine  = line;
-
-        final IdentNode ident = new IdentNode(functionToken, Token.descPosition(functionToken), moduleName);
-        final ParserContextFunctionNode script = createParserContextFunctionNode(
-                        ident,
-                        functionToken,
-                        FunctionNode.Kind.MODULE,
-                        functionLine,
-                        Collections.<IdentNode>emptyList());
-        lc.push(script);
-
-        final ParserContextModuleNode module = new ParserContextModuleNode(moduleName);
-        lc.push(module);
-
-        final ParserContextBlockNode body = newBlock();
-
-        functionDeclarations = new ArrayList<>();
-        moduleBody();
-        addFunctionDeclarations(script);
-        functionDeclarations = null;
-
-        restoreBlock(body);
-        body.setFlag(Block.NEEDS_SCOPE);
-        final Block programBody = new Block(functionToken, finish, body.getFlags() | Block.IS_SYNTHETIC | Block.IS_BODY, body.getStatements());
-        lc.pop(module);
-        lc.pop(script);
-        script.setLastToken(token);
-
-        expect(EOF);
-
-        script.setModule(module.createModule());
-        return createFunctionNode(script, functionToken, ident, Collections.<IdentNode>emptyList(), FunctionNode.Kind.MODULE, functionLine, programBody);
-    }
-
-    /**
-     * Parse module body.
-     *
-     * ModuleBody :
-     *      ModuleItemList
-     *
-     * ModuleItemList :
-     *      ModuleItem
-     *      ModuleItemList ModuleItem
-     *
-     * ModuleItem :
-     *      ImportDeclaration
-     *      ExportDeclaration
-     *      StatementListItem
-     */
-    private void moduleBody() {
-        loop:
-        while (type != EOF) {
-            switch (type) {
-            case EOF:
-                break loop;
-            case IMPORT:
-                importDeclaration();
-                break;
-            case EXPORT:
-                exportDeclaration();
-                break;
-            default:
-                // StatementListItem
-                statement(true, 0, false, false);
-                break;
-            }
-        }
-    }
-
-
-    /**
-     * Parse import declaration.
-     *
-     * ImportDeclaration :
-     *     import ImportClause FromClause ;
-     *     import ModuleSpecifier ;
-     * ImportClause :
-     *     ImportedDefaultBinding
-     *     NameSpaceImport
-     *     NamedImports
-     *     ImportedDefaultBinding , NameSpaceImport
-     *     ImportedDefaultBinding , NamedImports
-     * ImportedDefaultBinding :
-     *     ImportedBinding
-     * ModuleSpecifier :
-     *     StringLiteral
-     * ImportedBinding :
-     *     BindingIdentifier
-     */
-    private void importDeclaration() {
-        final int startPosition = start;
-        expect(IMPORT);
-        final ParserContextModuleNode module = lc.getCurrentModule();
-        if (type == STRING || type == ESCSTRING) {
-            // import ModuleSpecifier ;
-            final IdentNode moduleSpecifier = createIdentNode(token, finish, (String) getValue());
-            next();
-            module.addModuleRequest(moduleSpecifier);
-        } else {
-            // import ImportClause FromClause ;
-            List<Module.ImportEntry> importEntries;
-            if (type == MUL) {
-                importEntries = Collections.singletonList(nameSpaceImport(startPosition));
-            } else if (type == LBRACE) {
-                importEntries = namedImports(startPosition);
-            } else if (isBindingIdentifier()) {
-                // ImportedDefaultBinding
-                final IdentNode importedDefaultBinding = bindingIdentifier("ImportedBinding");
-                final Module.ImportEntry defaultImport = Module.ImportEntry.importSpecifier(importedDefaultBinding, startPosition, finish);
-
-                if (type == COMMARIGHT) {
-                    next();
-                    importEntries = new ArrayList<>();
-                    if (type == MUL) {
-                        importEntries.add(nameSpaceImport(startPosition));
-                    } else if (type == LBRACE) {
-                        importEntries.addAll(namedImports(startPosition));
-                    } else {
-                        throw error(AbstractParser.message("expected.named.import"));
-                    }
-                } else {
-                    importEntries = Collections.singletonList(defaultImport);
-                }
-            } else {
-                throw error(AbstractParser.message("expected.import"));
-            }
-
-            final IdentNode moduleSpecifier = fromClause();
-            module.addModuleRequest(moduleSpecifier);
-            for (int i = 0; i < importEntries.size(); i++) {
-                module.addImportEntry(importEntries.get(i).withFrom(moduleSpecifier, finish));
-            }
-        }
-        expect(SEMICOLON);
-    }
-
-    /**
-     * NameSpaceImport :
-     *     * as ImportedBinding
-     *
-     * @param startPosition the start of the import declaration
-     * @return imported binding identifier
-     */
-    private Module.ImportEntry nameSpaceImport(final int startPosition) {
-        assert type == MUL;
-        final IdentNode starName = createIdentNode(Token.recast(token, IDENT), finish, Module.STAR_NAME);
-        next();
-        final long asToken = token;
-        final String as = (String) expectValue(IDENT);
-        if (!"as".equals(as)) {
-            throw error(AbstractParser.message("expected.as"), asToken);
-        }
-        final IdentNode localNameSpace = bindingIdentifier("ImportedBinding");
-        return Module.ImportEntry.importSpecifier(starName, localNameSpace, startPosition, finish);
-    }
-
-    /**
-     * NamedImports :
-     *     { }
-     *     { ImportsList }
-     *     { ImportsList , }
-     * ImportsList :
-     *     ImportSpecifier
-     *     ImportsList , ImportSpecifier
-     * ImportSpecifier :
-     *     ImportedBinding
-     *     IdentifierName as ImportedBinding
-     * ImportedBinding :
-     *     BindingIdentifier
-     */
-    private List<Module.ImportEntry> namedImports(final int startPosition) {
-        assert type == LBRACE;
-        next();
-        final List<Module.ImportEntry> importEntries = new ArrayList<>();
-        while (type != RBRACE) {
-            final boolean bindingIdentifier = isBindingIdentifier();
-            final long nameToken = token;
-            final IdentNode importName = getIdentifierName();
-            if (type == IDENT && "as".equals(getValue())) {
-                next();
-                final IdentNode localName = bindingIdentifier("ImportedBinding");
-                importEntries.add(Module.ImportEntry.importSpecifier(importName, localName, startPosition, finish));
-            } else if (!bindingIdentifier) {
-                throw error(AbstractParser.message("expected.binding.identifier"), nameToken);
-            } else {
-                importEntries.add(Module.ImportEntry.importSpecifier(importName, startPosition, finish));
-            }
-            if (type == COMMARIGHT) {
-                next();
-            } else {
-                break;
-            }
-        }
-        expect(RBRACE);
-        return importEntries;
-    }
-
-    /**
-     * FromClause :
-     *     from ModuleSpecifier
-     */
-    private IdentNode fromClause() {
-        final long fromToken = token;
-        final String name = (String) expectValue(IDENT);
-        if (!"from".equals(name)) {
-            throw error(AbstractParser.message("expected.from"), fromToken);
-        }
-        if (type == STRING || type == ESCSTRING) {
-            final IdentNode moduleSpecifier = createIdentNode(Token.recast(token, IDENT), finish, (String) getValue());
-            next();
-            return moduleSpecifier;
-        } else {
-            throw error(expectMessage(STRING));
-        }
-    }
-
-    /**
-     * Parse export declaration.
-     *
-     * ExportDeclaration :
-     *     export * FromClause ;
-     *     export ExportClause FromClause ;
-     *     export ExportClause ;
-     *     export VariableStatement
-     *     export Declaration
-     *     export default HoistableDeclaration[Default]
-     *     export default ClassDeclaration[Default]
-     *     export default [lookahead !in {function, class}] AssignmentExpression[In] ;
-     */
-    private void exportDeclaration() {
-        expect(EXPORT);
-        final int startPosition = start;
-        final ParserContextModuleNode module = lc.getCurrentModule();
-        switch (type) {
-            case MUL: {
-                final IdentNode starName = createIdentNode(Token.recast(token, IDENT), finish, Module.STAR_NAME);
-                next();
-                final IdentNode moduleRequest = fromClause();
-                expect(SEMICOLON);
-                module.addModuleRequest(moduleRequest);
-                module.addStarExportEntry(Module.ExportEntry.exportStarFrom(starName, moduleRequest, startPosition, finish));
-                break;
-            }
-            case LBRACE: {
-                final List<Module.ExportEntry> exportEntries = exportClause(startPosition);
-                if (type == IDENT && "from".equals(getValue())) {
-                    final IdentNode moduleRequest = fromClause();
-                    module.addModuleRequest(moduleRequest);
-                    for (final Module.ExportEntry exportEntry : exportEntries) {
-                        module.addIndirectExportEntry(exportEntry.withFrom(moduleRequest, finish));
-                    }
-                } else {
-                    for (final Module.ExportEntry exportEntry : exportEntries) {
-                        module.addLocalExportEntry(exportEntry);
-                    }
-                }
-                expect(SEMICOLON);
-                break;
-            }
-            case DEFAULT:
-                final IdentNode defaultName = createIdentNode(Token.recast(token, IDENT), finish, Module.DEFAULT_NAME);
-                next();
-                final Expression assignmentExpression;
-                IdentNode ident;
-                final int lineNumber = line;
-                final long rhsToken = token;
-                final boolean declaration;
-                switch (type) {
-                    case FUNCTION:
-                        assignmentExpression = functionExpression(false, true);
-                        ident = ((FunctionNode) assignmentExpression).getIdent();
-                        declaration = true;
-                        break;
-                    case CLASS:
-                        assignmentExpression = classDeclaration(true);
-                        ident = ((ClassNode) assignmentExpression).getIdent();
-                        declaration = true;
-                        break;
-                    default:
-                        assignmentExpression = assignmentExpression(false);
-                        ident = null;
-                        declaration = false;
-                        break;
-                }
-                if (ident != null) {
-                    module.addLocalExportEntry(Module.ExportEntry.exportDefault(defaultName, ident, startPosition, finish));
-                } else {
-                    ident = createIdentNode(Token.recast(rhsToken, IDENT), finish, Module.DEFAULT_EXPORT_BINDING_NAME);
-                    lc.appendStatementToCurrentNode(new VarNode(lineNumber, Token.recast(rhsToken, LET), finish, ident, assignmentExpression));
-                    if (!declaration) {
-                        expect(SEMICOLON);
-                    }
-                    module.addLocalExportEntry(Module.ExportEntry.exportDefault(defaultName, ident, startPosition, finish));
-                }
-                break;
-            case VAR:
-            case LET:
-            case CONST:
-                final List<Statement> statements = lc.getCurrentBlock().getStatements();
-                final int previousEnd = statements.size();
-                variableStatement(type);
-                for (final Statement statement : statements.subList(previousEnd, statements.size())) {
-                    if (statement instanceof VarNode) {
-                        module.addLocalExportEntry(Module.ExportEntry.exportSpecifier(((VarNode) statement).getName(), startPosition, finish));
-                    }
-                }
-                break;
-            case CLASS: {
-                final ClassNode classDeclaration = classDeclaration(false);
-                module.addLocalExportEntry(Module.ExportEntry.exportSpecifier(classDeclaration.getIdent(), startPosition, finish));
-                break;
-            }
-            case FUNCTION: {
-                final FunctionNode functionDeclaration = (FunctionNode) functionExpression(true, true);
-                module.addLocalExportEntry(Module.ExportEntry.exportSpecifier(functionDeclaration.getIdent(), startPosition, finish));
-                break;
-            }
-            default:
-                throw error(AbstractParser.message("invalid.export"), token);
-        }
-    }
-
-    /**
-     * ExportClause :
-     *     { }
-     *     { ExportsList }
-     *     { ExportsList , }
-     * ExportsList :
-     *     ExportSpecifier
-     *     ExportsList , ExportSpecifier
-     * ExportSpecifier :
-     *     IdentifierName
-     *     IdentifierName as IdentifierName
-     *
-     * @return a list of ExportSpecifiers
-     */
-    private List<Module.ExportEntry> exportClause(final int startPosition) {
-        assert type == LBRACE;
-        next();
-        final List<Module.ExportEntry> exports = new ArrayList<>();
-        while (type != RBRACE) {
-            final IdentNode localName = getIdentifierName();
-            if (type == IDENT && "as".equals(getValue())) {
-                next();
-                final IdentNode exportName = getIdentifierName();
-                exports.add(Module.ExportEntry.exportSpecifier(exportName, localName, startPosition, finish));
-            } else {
-                exports.add(Module.ExportEntry.exportSpecifier(localName, startPosition, finish));
-            }
-            if (type == COMMARIGHT) {
-                next();
-            } else {
-                break;
-            }
-        }
-        expect(RBRACE);
-        return exports;
-    }
 
     @Override
     public String toString() {

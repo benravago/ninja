@@ -32,7 +32,6 @@ import nashorn.internal.codegen.Namespace;
 import nashorn.internal.ir.Expression;
 import nashorn.internal.ir.FunctionNode;
 import nashorn.internal.ir.IdentNode;
-import nashorn.internal.ir.Module;
 
 /**
  * ParserContextNode that represents a function that is currently being parsed
