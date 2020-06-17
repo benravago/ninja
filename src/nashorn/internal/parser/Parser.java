@@ -497,7 +497,7 @@ public class Parser extends AbstractParser implements Loggable {
         sb.append(ident.getName());
 
         final String name = namespace.uniqueName(sb.toString());
-        assert parentFunction != null || kind == FunctionNode.Kind.MODULE || name.equals(PROGRAM.symbolName()) : "name = " + name;
+        assert parentFunction != null || name.equals(PROGRAM.symbolName()) : "name = " + name;
 
         int flags = 0;
         if (parentFunction == null) {
@@ -529,7 +529,6 @@ public class Parser extends AbstractParser implements Loggable {
                 function.getFlags(),
                 body,
                 function.getEndParserState(),
-                function.getModule(),
                 function.getDebugFlags());
 
         return functionNode;
@@ -2153,7 +2152,7 @@ public class Parser extends AbstractParser implements Loggable {
      */
     private void returnStatement() {
         // check for return outside function
-        if (lc.getCurrentFunction().getKind() == FunctionNode.Kind.SCRIPT || lc.getCurrentFunction().getKind() == FunctionNode.Kind.MODULE) {
+        if (lc.getCurrentFunction().getKind() == FunctionNode.Kind.SCRIPT) {
             throw error(AbstractParser.message("invalid.return"));
         }
 

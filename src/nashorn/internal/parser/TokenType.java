@@ -39,7 +39,6 @@ import java.util.Locale;
 /**
  * Description of all the JavaScript tokens.
  */
-@SuppressWarnings("javadoc")
 public enum TokenType {
     ERROR                (SPECIAL,  null),
     EOF                  (SPECIAL,  null),

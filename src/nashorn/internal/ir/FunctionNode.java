@@ -67,9 +67,7 @@ public final class FunctionNode extends LexicalContextExpression implements Flag
         /** an arrow function */
         ARROW,
         /** a generator function */
-        GENERATOR,
-        /** a module function */
-        MODULE
+        GENERATOR
     }
 
     /** Source of entity. */
@@ -124,9 +122,6 @@ public final class FunctionNode extends LexicalContextExpression implements Flag
 
     /** Root class for function */
     private final Class<?> rootClass;
-
-    /** The ES6 module */
-    private final Module module;
 
     /** The debug flags */
     private final int debugFlags;
@@ -291,7 +286,6 @@ public final class FunctionNode extends LexicalContextExpression implements Flag
         final int flags,
         final Block body,
         final Object endParserState,
-        final Module module,
         final int debugFlags) {
         super(token, finish);
 
@@ -311,7 +305,6 @@ public final class FunctionNode extends LexicalContextExpression implements Flag
         this.thisProperties   = 0;
         this.rootClass        = null;
         this.endParserState   = endParserState;
-        this.module           = module;
         this.debugFlags       = debugFlags;
     }
 
@@ -349,7 +342,6 @@ public final class FunctionNode extends LexicalContextExpression implements Flag
         this.ident           = functionNode.ident;
         this.kind            = functionNode.kind;
         this.firstToken      = functionNode.firstToken;
-        this.module          = functionNode.module;
         this.debugFlags      = functionNode.debugFlags;
     }
 
@@ -1082,24 +1074,6 @@ public final class FunctionNode extends LexicalContextExpression implements Flag
      */
     public boolean usesNewTarget() {
         return getFlag(ES6_USES_NEW_TARGET);
-    }
-
-    /**
-     * Checks if this is an ES6 module.
-     *
-     * @return true if this is an ES6 module
-     */
-    public boolean isModule() {
-        return kind == Kind.MODULE;
-    }
-
-    /**
-     * Returns the functions's ES6 module.
-     *
-     * @return the module, or null if this function is not part of one
-     */
-    public Module getModule() {
-        return module;
     }
 
     /**
