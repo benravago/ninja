@@ -49,6 +49,7 @@ import static nashorn.internal.parser.TokenType.FINALLY;
 import static nashorn.internal.parser.TokenType.FUNCTION;
 import static nashorn.internal.parser.TokenType.IDENT;
 import static nashorn.internal.parser.TokenType.IF;
+import static nashorn.internal.parser.TokenType.IMPORT;
 import static nashorn.internal.parser.TokenType.INCPOSTFIX;
 import static nashorn.internal.parser.TokenType.LBRACE;
 import static nashorn.internal.parser.TokenType.LBRACKET;
@@ -843,11 +844,11 @@ public class Parser extends AbstractParser implements Loggable {
      *      ContinueStatement
      *      BreakStatement
      *      ReturnStatement
-     *      WithStatement
      *      LabelledStatement
      *      ThrowStatement
      *      TryStatement
      *      DebuggerStatement
+     *      ImportStatement      
      *
      * BreakableStatement :
      *      IterationStatement
@@ -972,8 +973,8 @@ public class Parser extends AbstractParser implements Loggable {
                     return;
                 }
 
+                final String ident = (String) getValue();
                 if ((reparseFlags & ScriptFunctionData.IS_PROPERTY_ACCESSOR) != 0) {
-                    final String ident = (String) getValue();
                     final long propertyToken = token;
                     final int propertyLine = line;
                     if (GET_NAME.equals(ident)) {
@@ -986,8 +987,19 @@ public class Parser extends AbstractParser implements Loggable {
                         return;
                     }
                 }
+                
+                if (Beans.isImported(ident) && inMainScript()) {
+               		var bean = beanExpression(ident);
+               		Beans.addBean(bean);
+               		return;
+                }
             }
 
+            if (type == IMPORT && inMainScript()) {
+                importStatement();
+                return;
+            }
+            
             if ((reparseFlags & ScriptFunctionData.IS_ES6_METHOD) != 0
                     && (type == IDENT || type == LBRACKET)) {
                 final String ident = (String)getValue();
@@ -2242,6 +2254,131 @@ public class Parser extends AbstractParser implements Loggable {
         return new UnaryNode(Token.recast(token, VOID), LiteralNode.newInstance(token, finish, 0));
     }
 
+
+    private boolean inMainScript() {
+        var fn = lc.getCurrentFunction();
+        return fn != null && fn.getKind() == FunctionNode.Kind.SCRIPT;
+    }
+    
+    /**
+     * ImportStatement :
+     *      import Identifier ; // [no LineTerminator here]
+     */
+    private void importStatement() {
+        // Capture IMPORT line.
+        final int  importLine  = line;
+        // IMPORT tested in caller.
+        next();
+        
+        var importName = new StringBuilder();
+        last = PERIOD; // prep for loop
+        do {
+            if (type == IDENT && last == PERIOD) {
+                importName.append(getValue());
+            } else if (type == PERIOD && last == IDENT) {
+                importName.append('.');
+            } else if (type == MUL && last == PERIOD) {
+                importName.append('*');
+                nextOrEOL();
+                break;
+            } else {
+                break;
+            }
+            nextOrEOL();
+        } while (finish == start);
+
+        if (type != EOL && type != SEMICOLON) {
+            throw error(AbstractParser.message("expected", ";", type.toString()));
+        }   
+                
+        endOfLine();
+
+        Beans.addImport(importName.toString(), importLine);
+    }
+    
+    /**
+     * BeanExpression :
+     *      Bean ( ElementList )? ObjectLiteral
+     *
+     * Parse BEAN expression.
+     */
+    private ObjectNode beanExpression(String ident) {
+        // Capture BEAN token.
+        final long beanToken = token;
+        final int  beanMark  = finish;
+        // BEAN tested in caller.
+        next();
+
+        int argsMark = 0;
+        long argsToken = 0;
+        LiteralNode<Expression[]> arguments = null;       
+        if (type == LPAREN) {
+            argsToken = token;
+            arguments = beanArguments();
+            argsMark = finish;
+        }
+        
+        // Prepare to accumulate elements.
+        final List<PropertyNode> elements = new ArrayList<>();
+        ObjectNode beanObject = type == LBRACE
+            ? objectLiteral(elements)
+            : new ObjectNode(beanToken, finish, elements);
+
+        endOfLine();
+
+        Beans.setId(elements,beanObject);
+        Beans.setProperty(elements,beanToken,beanMark,"$bean",ident);
+        if (arguments != null) {
+            Beans.setProperty(elements,argsToken,argsMark,"$arguments",arguments);
+        }
+
+        return beanObject;
+    }
+    
+    private LiteralNode<Expression[]> beanArguments() {
+        // Capture LPAREN token.
+        final long argsToken = token;
+        // LPAREN tested in caller.
+        next();
+
+        // Prepare to accumulate elements.
+        final List<Expression> elements = new ArrayList<>();
+        
+        var commaSeen = true;
+        loop:
+        while (true) {
+            switch (type) {
+                case RPAREN:
+                    next();
+                    break loop;
+                    
+                case COMMARIGHT:
+                    if (commaSeen) {
+                        throw error(AbstractParser.message("expected.literal", ","));
+                    }
+                    next();
+                    commaSeen = true;
+                    break;
+                    
+                default:
+                    if (!commaSeen) {
+                        throw error(AbstractParser.message("expected.comma", type.getNameOrType()));
+                    }                   
+                    commaSeen = false;
+                    // Add expression element.
+                    Expression expression = assignmentExpression(false);
+                    if (expression != null) {
+                        elements.add(expression);
+                    } else {
+                        expect(RPAREN);
+                    }
+                    break;
+            }
+        }
+    
+        return LiteralNode.newInstance(argsToken, finish, elements, false, false);
+    }
+
     /**
      * SwitchStatement :
      *      switch ( Expression ) CaseBlock
@@ -2765,6 +2902,9 @@ public class Parser extends AbstractParser implements Loggable {
      * @return Expression node.
      */
     private ObjectNode objectLiteral() {
+        return objectLiteral(new ArrayList<PropertyNode>());
+    }
+    private ObjectNode objectLiteral(final List<PropertyNode> elements) {
         // Capture LBRACE token.
         final long objectToken = token;
         // LBRACE tested in caller.
@@ -2772,7 +2912,6 @@ public class Parser extends AbstractParser implements Loggable {
 
         // Object context.
         // Prepare to accumulate elements.
-        final List<PropertyNode> elements = new ArrayList<>();
         final Map<String, Integer> map = new HashMap<>();
 
         // Create a block for the object literal.
@@ -2991,13 +3130,26 @@ public class Parser extends AbstractParser implements Loggable {
 
             defaultNames.push(propertyName);
             try {
-                propertyValue = assignmentExpression(false);
+                var ident = beanType();
+                propertyValue = ident != null
+                    ? beanExpression(ident)
+                    : assignmentExpression(false);
             } finally {
                 defaultNames.pop();
             }
         }
 
         return new PropertyNode(propertyToken, finish, propertyName, propertyValue, null, null, false, computed);
+    }
+    
+    private String beanType() {
+        if (type == IDENT) {
+            var ident = (String)getValue();
+            if (Beans.isImported(ident)) {
+                return ident;
+            }
+        } 
+        return null;
     }
 
     private PropertyFunction propertyGetterFunction(final long getSetToken, final int functionLine) {
@@ -4500,7 +4652,7 @@ public class Parser extends AbstractParser implements Loggable {
         case ASSIGN_SUB:
             return true;
         default:
-        	return false;
+            return false;
         }
     }
 
