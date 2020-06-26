@@ -19,6 +19,10 @@ class Beans {
     //     Parser#variableDeclarationList:1442
     //     Parser#appendStatement:5045
     
+    // TODO: 
+    // look at how Parser implements 'class' and nashorn.internal.ir.ClassNode
+    // maybe reuse this for Bean declaration
+    
     static boolean addImport(String importName, Object context) {
         var beanName = importName.substring(importName.lastIndexOf('.') + 1);
         System.out.println(">> addImport "+beanName+' '+importName+' '+context); 

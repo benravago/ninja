@@ -65,9 +65,7 @@ public final class FunctionNode extends LexicalContextExpression implements Flag
         /** a setter, @see {@link UserAccessorProperty} */
         SETTER,
         /** an arrow function */
-        ARROW,
-        /** a generator function */
-        GENERATOR
+        ARROW
     }
 
     /** Source of entity. */
@@ -206,11 +204,6 @@ public final class FunctionNode extends LexicalContextExpression implements Flag
      * Does this function contain a super call? (cf. ES6 14.3.5 Static Semantics: HasDirectSuper)
      */
     public static final int ES6_HAS_DIRECT_SUPER        = 1 << 19;
-
-    /**
-     * Does this function use the super binding?
-     */
-    public static final int ES6_USES_SUPER              = 1 << 20;
 
     /**
      * Is this function a (class or object) method?
@@ -1029,15 +1022,6 @@ public final class FunctionNode extends LexicalContextExpression implements Flag
      */
     public boolean isMethod() {
         return getFlag(ES6_IS_METHOD);
-    }
-
-    /**
-     * Checks if this function uses the ES6 super binding.
-     *
-     * @return true if the ES6 super flag is set
-     */
-    public boolean usesSuper() {
-        return getFlag(ES6_USES_SUPER);
     }
 
     /**

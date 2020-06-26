@@ -1036,7 +1036,7 @@ public abstract class LiteralNode<T> extends Expression implements PropertyKey {
      * @param token token
      * @param finish finish
      * @param value literal value list
-     * @param hasSpread true if the array has a spread element
+     * @param hasSpread true if the array has a spread element // TODO: remove
      * @param hasTrailingComma true if the array literal has a comma after the last element
      *
      * @return the new literal node

@@ -45,7 +45,6 @@ import nashorn.internal.ir.BreakNode;
 import nashorn.internal.ir.CallNode;
 import nashorn.internal.ir.CaseNode;
 import nashorn.internal.ir.CatchNode;
-import nashorn.internal.ir.ClassNode;
 import nashorn.internal.ir.ContinueNode;
 import nashorn.internal.ir.DebuggerNode;
 import nashorn.internal.ir.EmptyNode;
@@ -61,11 +60,9 @@ import nashorn.internal.ir.JumpToInlinedFinally;
 import nashorn.internal.ir.LabelNode;
 import nashorn.internal.ir.LexicalContext;
 import nashorn.internal.ir.LiteralNode;
-import nashorn.internal.ir.LiteralNode.ArrayLiteralNode;
 import nashorn.internal.ir.LiteralNode.PrimitiveLiteralNode;
 import nashorn.internal.ir.LoopNode;
 import nashorn.internal.ir.Node;
-import nashorn.internal.ir.ObjectNode;
 import nashorn.internal.ir.ReturnNode;
 import nashorn.internal.ir.RuntimeNode;
 import nashorn.internal.ir.Statement;
@@ -176,10 +173,6 @@ final class Lower extends NodeOperatorVisitor<BlockLexicalContext> implements Lo
 
     @Override
     public boolean enterCatchNode(final CatchNode catchNode) {
-        Expression exception = catchNode.getException();
-        if ((exception != null) && !(exception instanceof IdentNode)) {
-            throwNotImplementedYet("es6.destructuring", exception);
-        }
         return true;
     }
 
@@ -265,10 +258,6 @@ final class Lower extends NodeOperatorVisitor<BlockLexicalContext> implements Lo
             }
         }
 
-        if (expressionStatement.destructuringDeclarationType() != null) {
-            throwNotImplementedYet("es6.destructuring", expressionStatement);
-        }
-
         return addStatement(node);
     }
 
@@ -279,9 +268,6 @@ final class Lower extends NodeOperatorVisitor<BlockLexicalContext> implements Lo
 
     @Override
     public boolean enterForNode(final ForNode forNode) {
-        if (forNode.getInit() instanceof ObjectNode || forNode.getInit() instanceof ArrayLiteralNode) {
-            throwNotImplementedYet("es6.destructuring", forNode);
-        }
         return super.enterForNode(forNode);
     }
 
@@ -302,24 +288,9 @@ final class Lower extends NodeOperatorVisitor<BlockLexicalContext> implements Lo
     @Override
     public boolean enterFunctionNode(final FunctionNode functionNode) {
 
-        if (functionNode.getKind() == FunctionNode.Kind.GENERATOR) {
-            throwNotImplementedYet("es6.generator", functionNode);
-        }
-        if (functionNode.usesSuper()) {
-            throwNotImplementedYet("es6.super", functionNode);
-        }
-
         final int numParams = functionNode.getNumOfParams();
         if (numParams > 0) {
             final IdentNode lastParam = functionNode.getParameter(numParams - 1);
-            if (lastParam.isRestParameter()) {
-                throwNotImplementedYet("es6.rest.param", lastParam);
-            }
-        }
-        for (final IdentNode param : functionNode.getParameters()) {
-            if (param.isDestructuredParameter()) {
-                throwNotImplementedYet("es6.destructuring", functionNode);
-            }
         }
 
         return super.enterFunctionNode(functionNode);
@@ -634,27 +605,6 @@ final class Lower extends NodeOperatorVisitor<BlockLexicalContext> implements Lo
     }
 
     @Override
-    public boolean enterUnaryNode(final UnaryNode unaryNode) {
-        if (unaryNode.isTokenType(TokenType.YIELD) ||
-            unaryNode.isTokenType(TokenType.YIELD_STAR)) {
-            throwNotImplementedYet("es6.yield", unaryNode);
-        } else if (unaryNode.isTokenType(TokenType.SPREAD_ARGUMENT) ||
-                   unaryNode.isTokenType(TokenType.SPREAD_ARRAY)) {
-            throwNotImplementedYet("es6.spread", unaryNode);
-        }
-
-        return super.enterUnaryNode(unaryNode);
-    }
-
-    @Override
-    public boolean enterASSIGN(BinaryNode binaryNode) {
-        if (binaryNode.lhs() instanceof ObjectNode || binaryNode.lhs() instanceof ArrayLiteralNode) {
-            throwNotImplementedYet("es6.destructuring", binaryNode);
-        }
-        return super.enterASSIGN(binaryNode);
-    }
-
-    @Override
     public Node leaveVarNode(final VarNode varNode) {
         addStatement(varNode);
         if (varNode.getFlag(VarNode.IS_LAST_FUNCTION_DECLARATION)
@@ -678,12 +628,6 @@ final class Lower extends NodeOperatorVisitor<BlockLexicalContext> implements Lo
         }
 
          return addStatement(checkEscape(whileNode));
-    }
-
-    @Override
-    public boolean enterClassNode(final ClassNode classNode) {
-        throwNotImplementedYet("es6.class", classNode);
-        return super.enterClassNode(classNode);
     }
 
     /**

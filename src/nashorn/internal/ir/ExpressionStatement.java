@@ -27,7 +27,6 @@ package nashorn.internal.ir;
 
 import nashorn.internal.ir.annotations.Immutable;
 import nashorn.internal.ir.visitor.NodeVisitor;
-import nashorn.internal.parser.TokenType;
 
 /**
  * IR representation for executing bare expressions. Basically, an expression
@@ -40,23 +39,6 @@ public final class ExpressionStatement extends Statement {
 
     /** Expression to execute. */
     private final Expression expression;
-    private final TokenType destructuringDecl;
-
-    /**
-     * Constructor
-     *
-     * @param lineNumber line number
-     * @param token      token
-     * @param finish     finish
-     * @param expression the expression to execute
-     * @param destructuringDecl does this statement represent a destructuring declaration?
-     */
-    public ExpressionStatement(final int lineNumber, final long token, final int finish,
-            final Expression expression, final TokenType destructuringDecl) {
-        super(lineNumber, token, finish);
-        this.expression = expression;
-        this.destructuringDecl = destructuringDecl;
-    }
 
     /**
      * Constructor
@@ -67,13 +49,13 @@ public final class ExpressionStatement extends Statement {
      * @param expression the expression to execute
      */
     public ExpressionStatement(final int lineNumber, final long token, final int finish, final Expression expression) {
-        this(lineNumber, token, finish, expression, null);
+        super(lineNumber, token, finish);
+        this.expression = expression;
     }
 
     private ExpressionStatement(final ExpressionStatement expressionStatement, final Expression expression) {
         super(expressionStatement);
         this.expression = expression;
-        this.destructuringDecl = null;
     }
 
     @Override
@@ -96,15 +78,6 @@ public final class ExpressionStatement extends Statement {
      */
     public Expression getExpression() {
         return expression;
-    }
-
-    /**
-     * Return declaration type if this expression statement is a destructuring declaration
-     *
-     * @return declaration type (LET, VAR, CONST) if destructuring declaration, null otherwise.
-     */
-    public TokenType destructuringDeclarationType() {
-        return destructuringDecl;
     }
 
     /**
