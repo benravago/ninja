@@ -78,8 +78,6 @@ import nashorn.internal.ir.visitor.SimpleNodeVisitor;
 import nashorn.internal.parser.Token;
 import nashorn.internal.parser.TokenType;
 import nashorn.internal.runtime.Context;
-import nashorn.internal.runtime.ECMAErrors;
-import nashorn.internal.runtime.ErrorManager;
 import nashorn.internal.runtime.JSType;
 import nashorn.internal.runtime.Source;
 import nashorn.internal.runtime.logging.DebugLogger;
@@ -99,7 +97,6 @@ import nashorn.internal.runtime.logging.Logger;
 final class Lower extends NodeOperatorVisitor<BlockLexicalContext> implements Loggable {
 
     private final DebugLogger log;
-    private final Source source;
 
     // Conservative pattern to test if element names consist of characters valid for identifiers.
     // This matches any non-zero length alphanumeric string including _ and $ and not starting with a digit.
@@ -147,7 +144,6 @@ final class Lower extends NodeOperatorVisitor<BlockLexicalContext> implements Lo
         });
 
         this.log = initLogger(compiler.getContext());
-        this.source = compiler.getSource();
     }
 
     @Override
@@ -789,12 +785,4 @@ final class Lower extends NodeOperatorVisitor<BlockLexicalContext> implements Lo
         return false;
     }
 
-    private void throwNotImplementedYet(final String msgId, final Node node) {
-        final long token = node.getToken();
-        final int line = source.getLine(node.getStart());
-        final int column = source.getColumn(node.getStart());
-        final String message = ECMAErrors.getMessage("unimplemented." + msgId);
-        final String formatted = ErrorManager.format(message, source, line, column, token);
-        throw new UnsupportedOperationException(formatted);
-    }
 }

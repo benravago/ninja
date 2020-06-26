@@ -894,14 +894,6 @@ public final class Global extends Scope {
     @Property(name = "Packages", attributes = Attribute.NOT_ENUMERABLE)
     public volatile Object packages;
 
-    /** Nashorn extension: Java access - global.com */
-    @Property(attributes = Attribute.NOT_ENUMERABLE)
-    public volatile Object com;
-
-    /** Nashorn extension: Java access - global.edu */
-    @Property(attributes = Attribute.NOT_ENUMERABLE)
-    public volatile Object edu;
-
     /** Nashorn extension: Java access - global.java */
     @Property(attributes = Attribute.NOT_ENUMERABLE)
     public volatile Object java;
@@ -909,10 +901,6 @@ public final class Global extends Scope {
     /** Nashorn extension: Java access - global.javax */
     @Property(attributes = Attribute.NOT_ENUMERABLE)
     public volatile Object javax;
-
-    /** Nashorn extension: Java access - global.org */
-    @Property(attributes = Attribute.NOT_ENUMERABLE)
-    public volatile Object org;
 
     /**
      * Getter for the Nashorn extension: Java access - global.JavaImporter.
@@ -1025,11 +1013,8 @@ public final class Global extends Scope {
     private ScriptFunction builtinTypeError;
     private ScriptFunction builtinURIError;
     private ScriptObject   builtinPackages;
-    private ScriptObject   builtinCom;
-    private ScriptObject   builtinEdu;
     private ScriptObject   builtinJava;
     private ScriptObject   builtinJavax;
-    private ScriptObject   builtinOrg;
     private ScriptFunction builtinJavaImporter;
     private ScriptObject   builtinJavaApi;
     private ScriptFunction builtinArrayBuffer;
@@ -2759,11 +2744,8 @@ public final class Global extends Scope {
         this._boolean          = this.builtinBoolean;
         this.error             = this.builtinError;
         this.function          = this.builtinFunction;
-        this.com               = this.builtinCom;
-        this.edu               = this.builtinEdu;
         this.java              = this.builtinJava;
         this.javax             = this.builtinJavax;
-        this.org               = this.builtinOrg;
         this.math              = this.builtinMath;
         this.number            = this.builtinNumber;
         this.object            = this.builtinObject;
