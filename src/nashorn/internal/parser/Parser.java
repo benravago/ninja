@@ -57,7 +57,6 @@ import static nashorn.internal.parser.TokenType.RBRACE;
 import static nashorn.internal.parser.TokenType.RBRACKET;
 import static nashorn.internal.parser.TokenType.RPAREN;
 import static nashorn.internal.parser.TokenType.SEMICOLON;
-import static nashorn.internal.parser.TokenType.SUPER;
 import static nashorn.internal.parser.TokenType.TEMPLATE;
 import static nashorn.internal.parser.TokenType.TEMPLATE_HEAD;
 import static nashorn.internal.parser.TokenType.TEMPLATE_MIDDLE;
@@ -89,6 +88,7 @@ import nashorn.internal.ir.BreakNode;
 import nashorn.internal.ir.CallNode;
 import nashorn.internal.ir.CaseNode;
 import nashorn.internal.ir.CatchNode;
+
 import nashorn.internal.ir.ContinueNode;
 import nashorn.internal.ir.DebuggerNode;
 import nashorn.internal.ir.EmptyNode;
@@ -591,9 +591,6 @@ public class Parser extends AbstractParser implements Loggable {
 
         if (EVAL.symbolName().equals(name)) {
             markEval(lc);
-        } else if (SUPER.getName().equals(name)) {
-            assert ident.isDirectSuper();
-            markSuperCall(lc);
         }
     }
 
@@ -2916,29 +2913,6 @@ public class Parser extends AbstractParser implements Loggable {
             lhs = functionExpression(false, false);
             break;
 
-        case SUPER:
-            final ParserContextFunctionNode currentFunction = getCurrentNonArrowFunction();
-            if (currentFunction.isMethod()) {
-                final long identToken = Token.recast(token, IDENT);
-                next();
-                lhs = createIdentNode(identToken, finish, SUPER.getName());
-
-                switch (type) {
-                    case LPAREN:
-                        if (currentFunction.isSubclassConstructor()) {
-                            lhs = ((IdentNode)lhs).setIsDirectSuper();
-                            break;
-                        } else {
-                            // fall through to throw error
-                        }
-                    default:
-                        throw error(AbstractParser.message("invalid.super"), identToken);
-                }
-                break;
-            } else {
-                // fall through
-            }
-
         default:
             // Get primary expression.
             lhs = primaryExpression();
@@ -4267,18 +4241,6 @@ public class Parser extends AbstractParser implements Loggable {
 
     private void appendStatement(final Statement statement) {
         lc.appendStatementToCurrentNode(statement);
-    }
-
-    private static void markSuperCall(final ParserContext lc) {
-        final Iterator<ParserContextFunctionNode> iter = lc.getFunctions();
-        while (iter.hasNext()) {
-            final ParserContextFunctionNode fn = iter.next();
-            if (fn.getKind() != FunctionNode.Kind.ARROW) {
-                assert fn.isSubclassConstructor();
-                fn.setFlag(FunctionNode.ES6_HAS_DIRECT_SUPER);
-                break;
-            }
-        }
     }
 
     private ParserContextFunctionNode getCurrentNonArrowFunction() {

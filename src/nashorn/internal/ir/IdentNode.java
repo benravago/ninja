@@ -46,10 +46,9 @@ public final class IdentNode extends Expression implements PropertyKey, Function
     private static final int PROPERTY_NAME     = 1 << 0;
     private static final int INITIALIZED_HERE  = 1 << 1;
     private static final int FUNCTION          = 1 << 2;
-    private static final int FUTURE_NAME = 1 << 3;
+    private static final int FUTURE_NAME       = 1 << 3;
     private static final int IS_DECLARED_HERE  = 1 << 4;
     private static final int IS_DEAD           = 1 << 5;
-    private static final int DIRECT_SUPER      = 1 << 6;
     private static final int PROTO_PROPERTY    = 1 << 8;
     private static final int DEFAULT_PARAMETER = 1 << 9;
 
@@ -384,24 +383,6 @@ public final class IdentNode extends Expression implements PropertyKey, Function
     @Override
     public LocalVariableConversion getLocalVariableConversion() {
         return conversion;
-    }
-
-    /**
-     * Checks if this is a direct super identifier
-     *
-     * @return true if the direct super flag is set
-     */
-    public boolean isDirectSuper() {
-        return (flags & DIRECT_SUPER) != 0;
-    }
-
-    /**
-     * Return a new identifier with the direct super flag set.
-     *
-     * @return the new identifier
-     */
-    public IdentNode setIsDirectSuper() {
-        return new IdentNode(this, name, type, flags | DIRECT_SUPER, programPoint, conversion);
     }
 
     /**
