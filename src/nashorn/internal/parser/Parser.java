@@ -988,16 +988,23 @@ public class Parser extends AbstractParser implements Loggable {
                     }
                 }
                 
-                if (Beans.isImported(ident) && inMainScript()) {
-               		var bean = beanExpression(ident);
-               		Beans.addBean(bean);
-               		return;
+                if (Beans.isImported(ident)) {
+                    var main = mainScript();
+                    if (main != null) {
+                        var bean = beanExpression(ident);
+                        Beans.addBean(bean,main);
+                        return;
+                    }
                 }
             }
 
-            if (type == IMPORT && inMainScript()) {
-                importStatement();
-                return;
+            if (type == IMPORT) {
+                var main = mainScript();
+                if (main != null) {
+                    var name = importStatement();
+                    Beans.addImport(name,main);
+                    return;
+                }
             }
             
             if ((reparseFlags & ScriptFunctionData.IS_ES6_METHOD) != 0
@@ -2255,18 +2262,16 @@ public class Parser extends AbstractParser implements Loggable {
     }
 
 
-    private boolean inMainScript() {
+    private ParserContextFunctionNode mainScript() {
         var fn = lc.getCurrentFunction();
-        return fn != null && fn.getKind() == FunctionNode.Kind.SCRIPT;
+        return fn != null && fn.getKind() == FunctionNode.Kind.SCRIPT ? fn : null;
     }
     
     /**
      * ImportStatement :
      *      import Identifier ; // [no LineTerminator here]
      */
-    private void importStatement() {
-        // Capture IMPORT line.
-        final int  importLine  = line;
+    private String importStatement() {
         // IMPORT tested in caller.
         next();
         
@@ -2293,7 +2298,7 @@ public class Parser extends AbstractParser implements Loggable {
                 
         endOfLine();
 
-        Beans.addImport(importName.toString(), importLine);
+        return importName.toString();
     }
     
     /**
@@ -2303,36 +2308,20 @@ public class Parser extends AbstractParser implements Loggable {
      * Parse BEAN expression.
      */
     private ObjectNode beanExpression(String ident) {
-        // Capture BEAN token.
-        final long beanToken = token;
-        final int  beanMark  = finish;
         // BEAN tested in caller.
         next();
 
-        int argsMark = 0;
-        long argsToken = 0;
-        LiteralNode<Expression[]> arguments = null;       
-        if (type == LPAREN) {
-            argsToken = token;
-            arguments = beanArguments();
-            argsMark = finish;
-        }
+        var arguments = type == LPAREN
+            ? beanArguments() : null;
         
         // Prepare to accumulate elements.
-        final List<PropertyNode> elements = new ArrayList<>();
-        ObjectNode beanObject = type == LBRACE
-            ? objectLiteral(elements)
-            : new ObjectNode(beanToken, finish, elements);
+        var elements = new ArrayList<PropertyNode>();
+        var beanObject = type == LBRACE
+            ? objectLiteral(elements) : new ObjectNode(token, finish, elements);
 
         endOfLine();
 
-        Beans.setId(elements,beanObject);
-        Beans.setProperty(elements,beanToken,beanMark,"$bean",ident);
-        if (arguments != null) {
-            Beans.setProperty(elements,argsToken,argsMark,"$arguments",arguments);
-        }
-
-        return beanObject;
+        return Beans.setInfo(beanObject,elements,ident,arguments);
     }
     
     private LiteralNode<Expression[]> beanArguments() {
