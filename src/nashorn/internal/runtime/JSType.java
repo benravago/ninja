@@ -45,7 +45,6 @@ import nashorn.internal.objects.Global;
 import nashorn.internal.objects.NativeSymbol;
 import nashorn.internal.parser.Lexer;
 import nashorn.internal.runtime.arrays.ArrayLikeIterator;
-import nashorn.internal.runtime.doubleconv.DoubleConversion;
 import nashorn.internal.runtime.linker.Bootstrap;
 
 /**
@@ -690,7 +689,7 @@ public enum JSType {
             return "NaN";
         }
 
-        return DoubleConversion.toShortestString(num);
+        return Double.toString(num); // DoubleConversion.toShortestString(num);
     }
 
     /**

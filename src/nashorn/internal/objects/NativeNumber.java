@@ -33,7 +33,6 @@ import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.util.Locale;
 import jdk.dynalink.linker.GuardedInvocation;
 import jdk.dynalink.linker.LinkRequest;
 import nashorn.internal.objects.annotations.Attribute;
@@ -41,13 +40,11 @@ import nashorn.internal.objects.annotations.Constructor;
 import nashorn.internal.objects.annotations.Function;
 import nashorn.internal.objects.annotations.Property;
 import nashorn.internal.objects.annotations.ScriptClass;
-import nashorn.internal.objects.annotations.SpecializedFunction;
 import nashorn.internal.objects.annotations.Where;
 import nashorn.internal.runtime.JSType;
 import nashorn.internal.runtime.PropertyMap;
 import nashorn.internal.runtime.ScriptObject;
 import nashorn.internal.runtime.ScriptRuntime;
-import nashorn.internal.runtime.doubleconv.DoubleConversion;
 import nashorn.internal.runtime.linker.NashornGuards;
 import nashorn.internal.runtime.linker.PrimitiveLookup;
 
@@ -149,122 +146,6 @@ public final class NativeNumber extends ScriptObject {
     }
 
     /**
-     * ECMA 15.7.4.5 Number.prototype.toFixed (fractionDigits)
-     *
-     * @param self           self reference
-     * @param fractionDigits how many digits should be after the decimal point, 0 if undefined
-     *
-     * @return number in decimal fixed point notation
-     */
-    @Function(attributes = Attribute.NOT_ENUMERABLE)
-    public static String toFixed(final Object self, final Object fractionDigits) {
-        return toFixed(self, JSType.toInteger(fractionDigits));
-    }
-
-    /**
-     * ECMA 15.7.4.5 Number.prototype.toFixed (fractionDigits) specialized for int fractionDigits
-     *
-     * @param self           self reference
-     * @param fractionDigits how many digits should be after the decimal point, 0 if undefined
-     *
-     * @return number in decimal fixed point notation
-     */
-    @SpecializedFunction
-    public static String toFixed(final Object self, final int fractionDigits) {
-        if (fractionDigits < 0 || fractionDigits > 20) {
-            throw rangeError("invalid.fraction.digits", "toFixed");
-        }
-
-        final double x = getNumberValue(self);
-        if (Double.isNaN(x)) {
-            return "NaN";
-        }
-
-        if (Math.abs(x) >= 1e21) {
-            return JSType.toString(x);
-        }
-
-        return DoubleConversion.toFixed(x, fractionDigits);
-    }
-
-    /**
-     * ECMA 15.7.4.6 Number.prototype.toExponential (fractionDigits)
-     *
-     * @param self           self reference
-     * @param fractionDigits how many digital should be after the significand's decimal point. If undefined, use as many as necessary to uniquely specify number.
-     *
-     * @return number in decimal exponential notation
-     */
-    @Function(attributes = Attribute.NOT_ENUMERABLE)
-    public static String toExponential(final Object self, final Object fractionDigits) {
-        final double  x         = getNumberValue(self);
-        final boolean trimZeros = fractionDigits == UNDEFINED;
-        final int     f         = trimZeros ? 16 : JSType.toInteger(fractionDigits);
-
-        if (Double.isNaN(x)) {
-            return "NaN";
-        } else if (Double.isInfinite(x)) {
-            return x > 0? "Infinity" : "-Infinity";
-        }
-
-        if (fractionDigits != UNDEFINED && (f < 0 || f > 20)) {
-            throw rangeError("invalid.fraction.digits", "toExponential");
-        }
-
-        final String res = String.format(Locale.US, "%1." + f + "e", x);
-        return fixExponent(res, trimZeros);
-    }
-
-    /**
-     * ECMA 15.7.4.7 Number.prototype.toPrecision (precision)
-     *
-     * @param self      self reference
-     * @param precision use {@code precision - 1} digits after the significand's decimal point or call {@link JSType#toString} if undefined
-     *
-     * @return number in decimal exponentiation notation or decimal fixed notation depending on {@code precision}
-     */
-    @Function(attributes = Attribute.NOT_ENUMERABLE)
-    public static String toPrecision(final Object self, final Object precision) {
-        final double x = getNumberValue(self);
-        if (precision == UNDEFINED) {
-            return JSType.toString(x);
-        }
-        return (toPrecision(x, JSType.toInteger(precision)));
-    }
-
-    /**
-     * ECMA 15.7.4.7 Number.prototype.toPrecision (precision) specialized f
-     *
-     * @param self      self reference
-     * @param precision use {@code precision - 1} digits after the significand's decimal point.
-     *
-     * @return number in decimal exponentiation notation or decimal fixed notation depending on {@code precision}
-     */
-    @SpecializedFunction
-    public static String toPrecision(final Object self, final int precision) {
-        return toPrecision(getNumberValue(self), precision);
-    }
-
-    private static String toPrecision(final double x, final int p) {
-        if (Double.isNaN(x)) {
-            return "NaN";
-        } else if (Double.isInfinite(x)) {
-            return x > 0? "Infinity" : "-Infinity";
-        }
-
-        if (p < 1 || p > 21) {
-            throw rangeError("invalid.precision");
-        }
-
-        // workaround for http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6469160
-        if (x == 0.0 && p <= 1) {
-            return "0";
-        }
-
-        return DoubleConversion.toPrecision(x, p);
-    }
-
-    /**
      * ECMA 15.7.4.2 Number.prototype.toString ( [ radix ] )
      *
      * @param self  self reference
@@ -339,42 +220,6 @@ public final class NativeNumber extends ScriptObject {
         } else {
             throw typeError("not.a.number", ScriptRuntime.safeToString(self));
         }
-    }
-
-    // Exponent of Java "e" or "E" formatter is always 2 digits and zero
-    // padded if needed (e+01, e+00, e+12 etc.) JS expects exponent to contain
-    // exact number of digits e+1, e+0, e+12 etc. Fix the exponent here.
-    //
-    // Additionally, if trimZeros is true, this cuts trailing zeros in the
-    // fraction part for calls to toExponential() with undefined fractionDigits
-    // argument.
-    private static String fixExponent(final String str, final boolean trimZeros) {
-        final int index = str.indexOf('e');
-        if (index < 1) {
-            // no exponent, do nothing..
-            return str;
-        }
-
-        // check if character after e+ or e- is 0
-        final int expPadding = str.charAt(index + 2) == '0' ? 3 : 2;
-        // check if there are any trailing zeroes we should remove
-
-        int fractionOffset = index;
-        if (trimZeros) {
-            assert fractionOffset > 0;
-            char c = str.charAt(fractionOffset - 1);
-            while (fractionOffset > 1 && (c == '0' || c == '.')) {
-                c = str.charAt(--fractionOffset - 1);
-            }
-
-        }
-        // if anything needs to be done compose a new string
-        if (fractionOffset < index || expPadding == 3) {
-            return str.substring(0, fractionOffset)
-                    + str.substring(index, index + 2)
-                    + str.substring(index + expPadding);
-        }
-        return str;
     }
 
     private static MethodHandle findOwnMH(final String name, final MethodType type) {
