@@ -1832,7 +1832,7 @@ public class Parser extends AbstractParser implements Loggable {
             }
         }
     
-        return LiteralNode.newInstance(argsToken, finish, elements, false, false);
+        return LiteralNode.newInstance(argsToken, finish, elements, false);
     }
 
     /**
@@ -2274,7 +2274,7 @@ public class Parser extends AbstractParser implements Loggable {
         final List<Expression> elements = new ArrayList<>();
         // Track elisions.
         boolean elision = true;
-        // boolean hasSpread = false;
+
         loop:
         while (true) {
             switch (type) {
@@ -2312,8 +2312,8 @@ public class Parser extends AbstractParser implements Loggable {
                 break;
             }
         }
-                                                                     // TODO: remove 'false'
-        return LiteralNode.newInstance(arrayToken, finish, elements, false, elision);
+
+        return LiteralNode.newInstance(arrayToken, finish, elements, elision);
     }
 
     /**

@@ -80,14 +80,6 @@ public class ReturnNode extends Statement {
         return expression != null;
     }
 
-    /**
-     * Return true if is a YIELD node.
-     * @return TRUE if is YIELD node.
-     */
-    public boolean isYield() {
-        return isTokenType(YIELD);
-    }
-
     @Override
     public Node accept(final NodeVisitor<? extends LexicalContext> visitor) {
         if (visitor.enterReturnNode(this)) {
@@ -103,7 +95,7 @@ public class ReturnNode extends Statement {
 
     @Override
     public void toString(final StringBuilder sb, final boolean printType) {
-        sb.append(isYield() ? "yield" : "return");
+        sb.append("return");
         if (expression != null) {
             sb.append(' ');
             expression.toString(sb, printType);

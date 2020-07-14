@@ -81,7 +81,6 @@ public final class Bootstrap {
             new BoundCallableLinker(),
             new JavaSuperAdapterLinker(beansLinker),
             new JSObjectLinker(nashornBeansLinker),
-            new BrowserJSObjectLinker(nashornBeansLinker),
             new ReflectionCheckLinker()
         };
         fallbackLinkers = new GuardingDynamicLinker[] {
@@ -452,11 +451,6 @@ public final class Bootstrap {
 
     private static MethodHandle createMissingMemberHandler(
             final LinkRequest linkRequest, final LinkerServices linkerServices) throws Exception {
-        if (BrowserJSObjectLinker.canLinkTypeStatic(linkRequest.getReceiver().getClass())) {
-            // Don't create missing member handlers for the browser JS objects as they
-            // have their own logic.
-            return null;
-        }
         return NashornBottomLinker.linkMissingBeanMember(linkRequest, linkerServices);
     }
 }
