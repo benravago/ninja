@@ -82,35 +82,25 @@ public final class DebugLogger {
 
     private static Logger instantiateLogger(String name, Level level) {
         var logger = java.util.logging.Logger.getLogger(name);
-        AccessController.doPrivileged(new PrivilegedAction<Void>() {
-            @Override
-            public Void run() {
-                for (var h : logger.getHandlers()) {
-                    logger.removeHandler(h);
-                }
-
-                logger.setLevel(level);
-                logger.setUseParentHandlers(false);
-                var c = new ConsoleHandler();
-
-                c.setFormatter(new Formatter() {
-                    @Override
-                    public String format(LogRecord record) {
-                        var sb = new StringBuilder();
-
-                        sb.append('[')
-                          .append(record.getLoggerName())
-                          .append("] ")
-                          .append(record.getMessage())
-                          .append('\n');
-
-                        return sb.toString();
-                    }
-                });
-                logger.addHandler(c);
-                c.setLevel(level);
-                return null;
+        AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+            for (var h : logger.getHandlers()) {
+                logger.removeHandler(h);
             }
+
+            logger.setLevel(level);
+            logger.setUseParentHandlers(false);
+
+            var c = new ConsoleHandler();
+            c.setFormatter(new Formatter() {
+                @Override
+                public String format(LogRecord record) {
+                    return "[" + record.getLoggerName() + "] " + record.getMessage() +'\n';
+                }
+            });
+
+            logger.addHandler(c);
+            c.setLevel(level);
+            return null;
         }, createLoggerControlAccCtxt());
 
         return logger;

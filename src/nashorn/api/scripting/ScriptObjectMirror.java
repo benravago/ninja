@@ -90,12 +90,7 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
 
     @Override
     public String toString() {
-        return inGlobal(new Callable<String>() {
-            @Override
-            public String call() {
-                return ScriptRuntime.safeToString(sobj);
-            }
-        });
+        return inGlobal(() -> ScriptRuntime.safeToString(sobj));
     }
 
     // JSObject methods
@@ -157,18 +152,10 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
 
     @Override
     public Object eval(String s) {
-        return inGlobal(new Callable<Object>() {
-            @Override
-            public Object call() {
-                final Context context = AccessController.doPrivileged(
-                        new PrivilegedAction<Context>() {
-                            @Override
-                            public Context run() {
-                                return Context.getContext();
-                            }
-                        }, GET_CONTEXT_ACC_CTXT);
-                return wrapLikeMe(context.eval(global, s, sobj, null));
-            }
+        return inGlobal(() -> {
+            var context = AccessController.doPrivileged((PrivilegedAction<Context>) () ->
+                Context.getContext(), GET_CONTEXT_ACC_CTXT);
+            return wrapLikeMe(context.eval(global, s, sobj, null));
         });
     }
 
@@ -208,39 +195,23 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
     @Override
     public Object getMember(String name) {
         Objects.requireNonNull(name);
-        return inGlobal(new Callable<Object>() {
-            @Override public Object call() {
-                return wrapLikeMe(sobj.get(name));
-            }
-        });
+        return inGlobal(() -> wrapLikeMe(sobj.get(name)));
     }
 
     @Override
     public Object getSlot(int index) {
-        return inGlobal(new Callable<Object>() {
-            @Override public Object call() {
-                return wrapLikeMe(sobj.get(index));
-            }
-        });
+        return inGlobal(() -> wrapLikeMe(sobj.get(index)));
     }
 
     @Override
     public boolean hasMember(String name) {
         Objects.requireNonNull(name);
-        return inGlobal(new Callable<Boolean>() {
-            @Override public Boolean call() {
-                return sobj.has(name);
-            }
-        });
+        return inGlobal(() -> sobj.has(name));
     }
 
     @Override
     public boolean hasSlot(int slot) {
-        return inGlobal(new Callable<Boolean>() {
-            @Override public Boolean call() {
-                return sobj.has(slot);
-            }
-        });
+        return inGlobal(() -> sobj.has(slot));
     }
 
     @Override
@@ -255,11 +226,9 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
 
     @Override
     public void setSlot(int index, Object value) {
-        inGlobal(new Callable<Void>() {
-            @Override public Void call() {
-                sobj.set(index, unwrap(value, global), 0);
-                return null;
-            }
+        inGlobal(() -> {
+            sobj.set(index, unwrap(value, global), 0);
+            return null;
         });
     }
 
@@ -268,11 +237,9 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
      * Set indexed properties be exposed from a given nio ByteBuffer.
      */
     public void setIndexedPropertiesToExternalArrayData(ByteBuffer buf) {
-        inGlobal(new Callable<Void>() {
-            @Override public Void call() {
-                sobj.setArray(ArrayData.allocate(buf));
-                return null;
-            }
+        inGlobal(() -> {
+            sobj.setArray(ArrayData.allocate(buf));
+            return null;
         });
     }
 
@@ -288,11 +255,7 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
             return false;
         }
 
-        return inGlobal(new Callable<Boolean>() {
-            @Override public Boolean call() {
-                return sobj.isInstance(mirror.sobj);
-            }
-        });
+        return inGlobal(() -> sobj.isInstance(mirror.sobj));
     }
 
     @Override
@@ -314,83 +277,61 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
 
     @Override
     public void clear() {
-        inGlobal(new Callable<Object>() {
-            @Override public Object call() {
-                sobj.clear();
-                return null;
-            }
+        inGlobal(() -> {
+            sobj.clear();
+            return null;
         });
     }
 
     @Override
     public boolean containsKey(Object key) {
         checkKey(key);
-        return inGlobal(new Callable<Boolean>() {
-            @Override public Boolean call() {
-                return sobj.containsKey(key);
-            }
-        });
+        return inGlobal(() -> sobj.containsKey(key));
     }
 
     @Override
     public boolean containsValue(Object value) {
-        return inGlobal(new Callable<Boolean>() {
-            @Override public Boolean call() {
-                return sobj.containsValue(unwrap(value, global));
-            }
-        });
+        return inGlobal(() -> sobj.containsValue(unwrap(value, global)));
     }
 
     @Override
     public Set<Map.Entry<String, Object>> entrySet() {
-        return inGlobal(new Callable<Set<Map.Entry<String, Object>>>() {
-            @Override public Set<Map.Entry<String, Object>> call() {
-                var iter = sobj.propertyIterator();
-                var entries = new LinkedHashSet<Map.Entry<String, Object>>();
+        return inGlobal(() -> {
+            var iter = sobj.propertyIterator();
+            var entries = new LinkedHashSet<Map.Entry<String, Object>>();
 
-                while (iter.hasNext()) {
-                    var key = iter.next();
-                    var value = translateUndefined(wrapLikeMe(sobj.get(key)));
-                    entries.add(new AbstractMap.SimpleImmutableEntry<>(key, value));
-                }
-
-                return Collections.unmodifiableSet(entries);
+            while (iter.hasNext()) {
+                var key = iter.next();
+                var value = translateUndefined(wrapLikeMe(sobj.get(key)));
+                entries.add(new AbstractMap.SimpleImmutableEntry<>(key, value));
             }
+
+            return Collections.unmodifiableSet(entries);
         });
     }
 
     @Override
     public Object get(Object key) {
         checkKey(key);
-        return inGlobal(new Callable<Object>() {
-            @Override public Object call() {
-                return translateUndefined(wrapLikeMe(sobj.get(key)));
-            }
-        });
+        return inGlobal(() -> translateUndefined(wrapLikeMe(sobj.get(key))));
     }
 
     @Override
     public boolean isEmpty() {
-        return inGlobal(new Callable<Boolean>() {
-            @Override public Boolean call() {
-                return sobj.isEmpty();
-            }
-        });
+        return inGlobal(() -> sobj.isEmpty());
     }
 
     @Override
     public Set<String> keySet() {
-        return inGlobal(new Callable<Set<String>>() {
-            @Override public Set<String> call() {
-                var iter = sobj.propertyIterator();
-                var keySet = new LinkedHashSet<String>();
+        return inGlobal(() -> {
+            var iter = sobj.propertyIterator();
+            var keySet = new LinkedHashSet<String>();
 
-                while (iter.hasNext()) {
-                    keySet.add(iter.next());
-                }
-
-                return Collections.unmodifiableSet(keySet);
+            while (iter.hasNext()) {
+                keySet.add(iter.next());
             }
+
+            return Collections.unmodifiableSet(keySet);
         });
     }
 
@@ -399,11 +340,9 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
         checkKey(key);
         var oldGlobal = Context.getGlobal();
         var globalChanged = (oldGlobal != global);
-        return inGlobal(new Callable<Object>() {
-            @Override public Object call() {
-                var modValue = globalChanged? wrapLikeMe(value, oldGlobal) : value;
-                return translateUndefined(wrapLikeMe(sobj.put(key, unwrap(modValue, global))));
-            }
+        return inGlobal(() -> {
+            var modValue = globalChanged? wrapLikeMe(value, oldGlobal) : value;
+            return translateUndefined(wrapLikeMe(sobj.put(key, unwrap(modValue, global))));
         });
     }
 
@@ -412,28 +351,22 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
         Objects.requireNonNull(map);
         var oldGlobal = Context.getGlobal();
         var globalChanged = (oldGlobal != global);
-        inGlobal(new Callable<Object>() {
-            @Override public Object call() {
-                for (var entry : map.entrySet()) {
-                    var value = entry.getValue();
-                    var modValue = globalChanged? wrapLikeMe(value, oldGlobal) : value;
-                    var key = entry.getKey();
-                    checkKey(key);
-                    sobj.set(key, unwrap(modValue, global), 0);
-                }
-                return null;
+        inGlobal(() -> {
+            for (var entry : map.entrySet()) {
+                var value = entry.getValue();
+                var modValue = globalChanged? wrapLikeMe(value, oldGlobal) : value;
+                var key = entry.getKey();
+                checkKey(key);
+                sobj.set(key, unwrap(modValue, global), 0);
             }
+            return null;
         });
     }
 
     @Override
     public Object remove(Object key) {
         checkKey(key);
-        return inGlobal(new Callable<Object>() {
-            @Override public Object call() {
-                return translateUndefined(wrapLikeMe(sobj.remove(key)));
-            }
-        });
+        return inGlobal(() -> translateUndefined(wrapLikeMe(sobj.remove(key))));
     }
 
     /**
@@ -441,35 +374,25 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
      * Returns true if the delete was successful, false otherwise.
      */
     public boolean delete(Object key) {
-        return inGlobal(new Callable<Boolean>() {
-            @Override public Boolean call() {
-                return sobj.delete(unwrap(key, global));
-            }
-        });
+        return inGlobal(() -> sobj.delete(unwrap(key, global)));
     }
 
     @Override
     public int size() {
-        return inGlobal(new Callable<Integer>() {
-            @Override public Integer call() {
-                return sobj.size();
-            }
-        });
+        return inGlobal(() -> sobj.size());
     }
 
     @Override
     public Collection<Object> values() {
-        return inGlobal(new Callable<Collection<Object>>() {
-            @Override public Collection<Object> call() {
-                var values = new ArrayList<Object>(size());
-                var iter = sobj.valueIterator();
+        return inGlobal(() -> {
+            var values = new ArrayList<Object>(size());
+            var iter = sobj.valueIterator();
 
-                while (iter.hasNext()) {
-                    values.add(translateUndefined(wrapLikeMe(iter.next())));
-                }
-
-                return Collections.unmodifiableList(values);
+            while (iter.hasNext()) {
+                values.add(translateUndefined(wrapLikeMe(iter.next())));
             }
+
+            return Collections.unmodifiableList(values);
         });
     }
 
@@ -479,22 +402,16 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
      * Return the __proto__ of this object.
      */
     public Object getProto() {
-        return inGlobal(new Callable<Object>() {
-            @Override public Object call() {
-                return wrapLikeMe(sobj.getProto());
-            }
-        });
+        return inGlobal(() -> wrapLikeMe(sobj.getProto()));
     }
 
     /**
      * Set the __proto__ of this object.
      */
     public void setProto(Object proto) {
-        inGlobal(new Callable<Void>() {
-            @Override public Void call() {
-                sobj.setPrototypeOf(unwrap(proto, global));
-                return null;
-            }
+        inGlobal(() -> {
+            sobj.setPrototypeOf(unwrap(proto, global));
+            return null;
         });
     }
 
@@ -503,11 +420,7 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
      * Returns the Property Descriptor of the named own property of this object, or undefined if absent.
      */
     public Object getOwnPropertyDescriptor(String key) {
-        return inGlobal(new Callable<Object>() {
-            @Override public Object call() {
-                return wrapLikeMe(sobj.getOwnPropertyDescriptor(key));
-            }
-        });
+        return inGlobal(() -> wrapLikeMe(sobj.getOwnPropertyDescriptor(key)));
     }
 
     /**
@@ -515,22 +428,16 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
      * 'all' is True if to include non-enumerable keys.
      */
     public String[] getOwnKeys(boolean all) {
-        return inGlobal(new Callable<String[]>() {
-            @Override public String[] call() {
-                return sobj.getOwnKeys(all);
-            }
-        });
+        return inGlobal(() -> sobj.getOwnKeys(all));
     }
 
     /**
      * Flag this script object as non extensible
      */
     public ScriptObjectMirror preventExtensions() {
-        return inGlobal(new Callable<ScriptObjectMirror>() {
-            @Override public ScriptObjectMirror call() {
-                sobj.preventExtensions();
-                return ScriptObjectMirror.this;
-            }
+        return inGlobal(() -> {
+            sobj.preventExtensions();
+            return ScriptObjectMirror.this;
         });
     }
 
@@ -538,22 +445,16 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
      * Check if this script object is extensible
      */
     public boolean isExtensible() {
-        return inGlobal(new Callable<Boolean>() {
-            @Override public Boolean call() {
-                return sobj.isExtensible();
-            }
-        });
+        return inGlobal(() -> sobj.isExtensible());
     }
 
     /**
      * ECMAScript 15.2.3.8 - seal implementation
      */
     public ScriptObjectMirror seal() {
-        return inGlobal(new Callable<ScriptObjectMirror>() {
-            @Override public ScriptObjectMirror call() {
-                sobj.seal();
-                return ScriptObjectMirror.this;
-            }
+        return inGlobal(() -> {
+            sobj.seal();
+            return ScriptObjectMirror.this;
         });
     }
 
@@ -561,22 +462,16 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
      * Check whether this script object is sealed
      */
     public boolean isSealed() {
-        return inGlobal(new Callable<Boolean>() {
-            @Override public Boolean call() {
-                return sobj.isSealed();
-            }
-        });
+        return inGlobal(() -> sobj.isSealed());
     }
 
     /**
      * ECMA 15.2.39 - freeze implementation. Freeze this script object
      */
     public ScriptObjectMirror freeze() {
-        return inGlobal(new Callable<ScriptObjectMirror>() {
-            @Override public ScriptObjectMirror call() {
-                sobj.freeze();
-                return ScriptObjectMirror.this;
-            }
+        return inGlobal(() -> {
+            sobj.freeze();
+            return ScriptObjectMirror.this;
         });
     }
 
@@ -584,11 +479,7 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
      * Check whether this script object is frozen
      */
     public boolean isFrozen() {
-        return inGlobal(new Callable<Boolean>() {
-            @Override public Boolean call() {
-                return sobj.isFrozen();
-            }
-        });
+        return inGlobal(() -> sobj.isFrozen());
     }
 
     /**
@@ -604,12 +495,7 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
      * '<T> type' is the destination type to convert to.
      */
     public <T> T to(Class<T> type) {
-        return inGlobal(new Callable<T>() {
-            @Override
-            public T call() {
-                return type.cast(ScriptUtils.convert(sobj, type));
-            }
-        });
+        return inGlobal(() -> type.cast(ScriptUtils.convert(sobj, type)));
     }
 
     /**
@@ -803,15 +689,13 @@ public final class ScriptObjectMirror extends AbstractJSObject implements Bindin
 
     @Override
     public Object getDefaultValue(Class<?> hint) {
-        return inGlobal(new Callable<Object>() {
-            @Override public Object call() {
-                try {
-                    return sobj.getDefaultValue(hint);
-                } catch (ECMAException e) {
-                    // We're catching ECMAException (likely TypeError), and translating it to UnsupportedOperationException.
-                    // This in turn will be translated into TypeError of the caller's Global by JSType#toPrimitive(JSObject,Class) therefore ensuring that it's recognized as "instanceof TypeError" in the caller.
-                    throw new UnsupportedOperationException(e.getMessage(), e);
-                }
+        return inGlobal(() -> {
+            try {
+                return sobj.getDefaultValue(hint);
+            } catch (ECMAException e) {
+                // We're catching ECMAException (likely TypeError), and translating it to UnsupportedOperationException.
+                // This in turn will be translated into TypeError of the caller's Global by JSType#toPrimitive(JSObject,Class) therefore ensuring that it's recognized as "instanceof TypeError" in the caller.
+                throw new UnsupportedOperationException(e.getMessage(), e);
             }
         });
     }

@@ -121,12 +121,8 @@ final class ClassAndLoader {
             return new ClassAndLoader(types[0], false);
         }
 
-        return AccessController.doPrivileged(new PrivilegedAction<ClassAndLoader>() {
-            @Override
-            public ClassAndLoader run() {
-                return getDefiningClassAndLoaderPrivileged(types);
-            }
-        }, GET_LOADER_ACC_CTXT);
+        return AccessController.doPrivileged((PrivilegedAction<ClassAndLoader>) () ->
+            getDefiningClassAndLoaderPrivileged(types), GET_LOADER_ACC_CTXT);
     }
 
     static ClassAndLoader getDefiningClassAndLoaderPrivileged(Class<?>[] types) {

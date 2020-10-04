@@ -31,10 +31,7 @@ import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
 import java.security.SecureClassLoader;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import jdk.dynalink.beans.StaticClass;
@@ -81,14 +78,11 @@ final class JavaAdapterClassLoader {
      */
     StaticClass generateClass(ClassLoader parentLoader, ProtectionDomain protectionDomain) {
         assert protectionDomain != null;
-        return AccessController.doPrivileged(new PrivilegedAction<StaticClass>() {
-            @Override
-            public StaticClass run() {
-                try {
-                    return StaticClass.forClass(Class.forName(className, true, createClassLoader(parentLoader, protectionDomain)));
-                } catch (ClassNotFoundException e) {
-                    throw new AssertionError(e); // cannot happen
-                }
+        return AccessController.doPrivileged((PrivilegedAction<StaticClass>) () -> {
+            try {
+                return StaticClass.forClass(Class.forName(className, true, createClassLoader(parentLoader, protectionDomain)));
+            } catch (ClassNotFoundException e) {
+                throw new AssertionError(e); // cannot happen
             }
         }, CREATE_LOADER_ACC_CTXT);
     }
@@ -138,12 +132,8 @@ final class JavaAdapterClassLoader {
                 if (name.equals(className)) {
                     assert classBytes != null : "what? already cleared .class bytes!!";
 
-                    var ctx = AccessController.doPrivileged(new PrivilegedAction<Context>() {
-                        @Override
-                        public Context run() {
-                            return Context.getContext();
-                        }
-                    }, GET_CONTEXT_ACC_CTXT);
+                    var ctx = AccessController.doPrivileged((PrivilegedAction<Context>) () ->
+                        Context.getContext(), GET_CONTEXT_ACC_CTXT);
 
                     return defineClass(name, classBytes, 0, classBytes.length, protectionDomain);
                 }

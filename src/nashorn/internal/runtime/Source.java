@@ -903,7 +903,7 @@ public final class Source implements Loggable {
     static byte[] readBytes(InputStream is) throws IOException {
         var arr = new byte[BUF_SIZE];
         try {
-            try (ByteArrayOutputStream buf = new ByteArrayOutputStream()) {
+            try (var buf = new ByteArrayOutputStream()) {
                 int numBytes;
                 while ((numBytes = is.read(arr, 0, arr.length)) > 0) {
                     buf.write(arr, 0, numBytes);

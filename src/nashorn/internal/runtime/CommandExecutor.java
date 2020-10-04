@@ -61,7 +61,7 @@ class CommandExecutor {
 
     // User's home directory
     private static final String HOME_DIRECTORY =
-        AccessController.doPrivileged((PrivilegedAction<String>)() -> {
+        AccessController.doPrivileged((PrivilegedAction<String>) () -> {
             return System.getProperty("user.home");
         });
 

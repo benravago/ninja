@@ -40,10 +40,8 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import jdk.dynalink.CallSiteDescriptor;
 import jdk.dynalink.SecureLookupSupplier;
 import jdk.dynalink.linker.GuardedInvocation;
@@ -59,7 +57,6 @@ import nashorn.internal.objects.NativeFunction;
 import nashorn.internal.objects.annotations.SpecializedFunction.LinkLogic;
 import nashorn.internal.runtime.linker.Bootstrap;
 import nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
-import nashorn.internal.runtime.logging.DebugLogger;
 
 /**
  * Runtime representation of a JavaScript function.
@@ -451,9 +448,9 @@ public class ScriptFunction extends ScriptObject {
      * @return allocator prototype
      */
     private ScriptObject getAllocatorPrototype() {
-        var prototype = getPrototype();
-        if (prototype instanceof ScriptObject) {
-            return (ScriptObject) prototype;
+        var p = getPrototype();
+        if (p instanceof ScriptObject) {
+            return (ScriptObject) p;
         }
         return Global.objectPrototype();
     }
@@ -815,7 +812,8 @@ public class ScriptFunction extends ScriptObject {
 
     private static Lookup getLookupPrivileged(CallSiteDescriptor desc) {
         // NOTE: we'd rather not make NashornCallSiteDescriptor.getLookupPrivileged public.
-        return AccessController.doPrivileged((PrivilegedAction<Lookup>)()-> desc.getLookup(), GET_LOOKUP_PERMISSION_CONTEXT);
+        return AccessController.doPrivileged((PrivilegedAction<Lookup>) ()->
+            desc.getLookup(), GET_LOOKUP_PERMISSION_CONTEXT);
     }
 
     private GuardedInvocation createApplyOrCallCall(boolean isApply, CallSiteDescriptor desc, LinkRequest request, Object[] args) {

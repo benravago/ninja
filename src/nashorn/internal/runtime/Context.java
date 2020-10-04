@@ -44,12 +44,10 @@ import java.lang.invoke.MethodType;
 import java.lang.invoke.SwitchPoint;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
-import java.lang.module.Configuration;
 import java.lang.module.ModuleDescriptor;
 import java.lang.module.ModuleFinder;
 import java.lang.module.ModuleReader;
 import java.lang.module.ModuleReference;
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -100,7 +98,6 @@ import nashorn.internal.runtime.linker.Bootstrap;
 import nashorn.internal.runtime.logging.DebugLogger;
 import nashorn.internal.runtime.logging.Loggable;
 import nashorn.internal.runtime.logging.Logger;
-import nashorn.internal.runtime.options.LoggingOption.LoggerInfo;
 import nashorn.internal.runtime.options.Options;
 import nashorn.internal.scripts.JS;
 import nashorn.internal.Util;
@@ -191,21 +188,18 @@ public final class Context {
         @Override
         public void initialize(Collection<Class<?>> classes, Source source, Object[] constants) {
             try {
-                AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
-                    @Override
-                    public Void run() throws Exception {
-                        for (var clazz : classes) {
-                            //use reflection to write source and constants table to installed classes
-                            var sourceField = clazz.getDeclaredField(SOURCE.symbolName());
-                            sourceField.setAccessible(true);
-                            sourceField.set(null, source);
+                AccessController.doPrivileged((PrivilegedExceptionAction<Void>) () -> {
+                    for (var clazz : classes) {
+                        //use reflection to write source and constants table to installed classes
+                        var sourceField = clazz.getDeclaredField(SOURCE.symbolName());
+                        sourceField.setAccessible(true);
+                        sourceField.set(null, source);
 
-                            var constantsField = clazz.getDeclaredField(CONSTANTS.symbolName());
-                            constantsField.setAccessible(true);
-                            constantsField.set(null, constants);
-                        }
-                        return null;
+                        var constantsField = clazz.getDeclaredField(CONSTANTS.symbolName());
+                        constantsField.setAccessible(true);
+                        constantsField.set(null, constants);
                     }
+                    return null;
                 });
             } catch (PrivilegedActionException e) {
                 Util.uncheck(e);
@@ -474,8 +468,8 @@ public final class Context {
 
     static {
         var myLoader = Context.class.getClassLoader();
-        theStructLoader = AccessController.doPrivileged((PrivilegedAction<StructureLoader>)
-            () -> new StructureLoader(myLoader), CREATE_LOADER_ACC_CTXT);
+        theStructLoader = AccessController.doPrivileged((PrivilegedAction<StructureLoader>) () ->
+            new StructureLoader(myLoader), CREATE_LOADER_ACC_CTXT);
     }
 
     /**
@@ -559,8 +553,8 @@ public final class Context {
             if (sm != null) {
                 sm.checkCreateClassLoader();
             }
-            appCl = AccessController.doPrivileged((PrivilegedAction<ClassLoader>)
-                () -> createModuleLoader(appLoader, modulePath, env._add_modules));
+            appCl = AccessController.doPrivileged((PrivilegedAction<ClassLoader>) () ->
+                createModuleLoader(appLoader, modulePath, env._add_modules));
         } else {
             appCl = appLoader;
         }
@@ -871,8 +865,8 @@ public final class Context {
      */
     public Object loadWithNewGlobal(Object from, Object...args) throws IOException {
         var oldGlobal = getGlobal();
-        var newGlobal = AccessController.doPrivileged((PrivilegedAction<Global>)
-            () -> newGlobal(), CREATE_GLOBAL_ACC_CTXT);
+        var newGlobal = AccessController.doPrivileged((PrivilegedAction<Global>) () ->
+            newGlobal(), CREATE_GLOBAL_ACC_CTXT);
         // initialize newly created Global instance
         initGlobal(newGlobal);
         setGlobal(newGlobal);
@@ -1163,8 +1157,8 @@ public final class Context {
 
         var cf = parent.configuration().resolve(finder, ModuleFinder.of(), Set.of(mn));
 
-        PrivilegedAction<ModuleLayer> pa = () -> parent.defineModules(cf, name -> loader);
-        var layer = AccessController.doPrivileged(pa, GET_LOADER_ACC_CTXT);
+        var layer = AccessController.doPrivileged((PrivilegedAction<ModuleLayer>) () ->
+            parent.defineModules(cf, name -> loader), GET_LOADER_ACC_CTXT);
 
         var m = layer.findModule(mn).get();
         assert m.getLayer() == layer;
@@ -1333,8 +1327,8 @@ public final class Context {
     }
 
     private ScriptLoader createNewLoader() {
-        return AccessController.doPrivileged((PrivilegedAction<ScriptLoader>)
-            () -> new ScriptLoader(Context.this), CREATE_LOADER_ACC_CTXT);
+        return AccessController.doPrivileged((PrivilegedAction<ScriptLoader>) () ->
+            new ScriptLoader(Context.this), CREATE_LOADER_ACC_CTXT);
     }
 
     private long getUniqueScriptId() {

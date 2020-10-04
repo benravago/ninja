@@ -125,12 +125,8 @@ public final class NashornScriptEngine extends AbstractScriptEngine implements C
         // throw ParseException on first error from script
         var errMgr = new Context.ThrowErrorManager();
         // create new Nashorn Context
-        this.nashornContext = AccessController.doPrivileged(new PrivilegedAction<Context>() {
-            @Override
-            public Context run() {
-                return new Context(options, errMgr, appLoader, classFilter);
-            }
-        }, CREATE_CONTEXT_ACC_CTXT);
+        this.nashornContext = AccessController.doPrivileged((PrivilegedAction<Context>) () ->
+            new Context(options, errMgr, appLoader, classFilter), CREATE_CONTEXT_ACC_CTXT);
 
         // cache this option that is used often
         this._global_per_engine = nashornContext.getEnv()._global_per_engine;
@@ -335,12 +331,8 @@ public final class NashornScriptEngine extends AbstractScriptEngine implements C
 
     // Create a new Nashorn Global object
     private Global createNashornGlobal() {
-        var newGlobal = AccessController.doPrivileged(new PrivilegedAction<Global>() {
-            @Override
-            public Global run() {
-                return nashornContext.newGlobal();
-            }
-        }, CREATE_GLOBAL_ACC_CTXT);
+        var newGlobal = AccessController.doPrivileged((PrivilegedAction<Global>) () ->
+            nashornContext.newGlobal(), CREATE_GLOBAL_ACC_CTXT);
 
         nashornContext.initGlobal(newGlobal, this);
 

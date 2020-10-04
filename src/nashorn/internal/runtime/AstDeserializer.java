@@ -38,16 +38,12 @@ import nashorn.internal.ir.FunctionNode;
  */
 final class AstDeserializer {
     static FunctionNode deserialize(byte[] serializedAst) {
-        return AccessController.doPrivileged(new PrivilegedAction<FunctionNode>() {
-            @Override
-            public FunctionNode run() {
-                try {
-                    return (FunctionNode)
-                        new ObjectInputStream(new InflaterInputStream(new ByteArrayInputStream(serializedAst))).readObject();
-                } catch (ClassNotFoundException | IOException e) {
-                    // This is internal, can't happen
-                    throw new AssertionError("Unexpected exception deserializing function", e);
-                }
+        return AccessController.doPrivileged((PrivilegedAction<FunctionNode>) () -> {
+            try {
+                return (FunctionNode) new ObjectInputStream(new InflaterInputStream(new ByteArrayInputStream(serializedAst))).readObject();
+            } catch (ClassNotFoundException | IOException e) {
+                // This is internal, can't happen
+                throw new AssertionError("Unexpected exception deserializing function", e);
             }
         });
     }

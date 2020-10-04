@@ -98,7 +98,7 @@ abstract class NashornLoader extends SecureClassLoader {
         } catch (Exception ex) {
             Util.uncheck(ex);
         }
-        final PrivilegedAction<Void> pa = () -> {
+        AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
             try {
                 addModuleExport = clazz.getDeclaredMethod("addExport", Module.class);
                 addModuleExport.setAccessible(true);
@@ -106,8 +106,7 @@ abstract class NashornLoader extends SecureClassLoader {
                 Util.uncheck(ex);
             }
             return null;
-        };
-        AccessController.doPrivileged(pa);
+        });
     }
 
     final void addModuleExport(Module to) {
@@ -204,15 +203,14 @@ abstract class NashornLoader extends SecureClassLoader {
     }
 
     private static byte[] readModuleManipulatorBytes() {
-        PrivilegedAction<byte[]> pa = () -> {
+        return AccessController.doPrivileged((PrivilegedAction<byte[]>) () -> {
             var res = "/"+ MODULE_MANIPULATOR_NAME.replace('.', '/') + ".class";
-            try (InputStream in = NashornLoader.class.getResourceAsStream(res)) {
+            try (var in = NashornLoader.class.getResourceAsStream(res)) {
                 return in.readAllBytes();
             } catch (IOException exp) {
                 throw new UncheckedIOException(exp);
             }
-        };
-        return AccessController.doPrivileged(pa);
+        });
     }
 
 }

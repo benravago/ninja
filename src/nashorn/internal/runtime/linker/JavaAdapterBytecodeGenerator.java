@@ -38,10 +38,8 @@ import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -1075,14 +1073,11 @@ final class JavaAdapterBytecodeGenerator {
      * @return a collection of method infos representing those methods that we never override in adapter classes.
      */
     private static Collection<MethodInfo> getExcludedMethods() {
-        return AccessController.doPrivileged(new PrivilegedAction<Collection<MethodInfo>>() {
-            @Override
-            public Collection<MethodInfo> run() {
-                try {
-                    return List.of( new MethodInfo(Object.class, "finalize"), new MethodInfo(Object.class, "clone") );
-                } catch (NoSuchMethodException e) {
-                    throw new AssertionError(e);
-                }
+        return AccessController.doPrivileged((PrivilegedAction<Collection<MethodInfo>>) () -> {
+            try {
+                return List.of( new MethodInfo(Object.class, "finalize"), new MethodInfo(Object.class, "clone") );
+            } catch (NoSuchMethodException e) {
+                throw new AssertionError(e);
             }
         }, GET_DECLARED_MEMBERS_ACC_CTXT);
     }

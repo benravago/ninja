@@ -55,7 +55,6 @@ import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.RETURN;
 
 import nashorn.api.scripting.ScriptObjectMirror;
-import nashorn.internal.objects.Global;
 import nashorn.internal.runtime.Context;
 import nashorn.internal.runtime.ECMAException;
 import nashorn.internal.runtime.JSType;
@@ -207,21 +206,16 @@ public final class JavaAdapterServices {
         cw.visitEnd();
         var bytes = cw.toByteArray();
 
-        var loader = AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
-            @Override
-            public ClassLoader run() {
-                return new SecureClassLoader(null) {
-                    @Override
-                    protected Class<?> findClass(String name) throws ClassNotFoundException {
-                        if(name.equals(className)) {
-                            return defineClass(name, bytes, 0, bytes.length, new ProtectionDomain(
-                                new CodeSource(null, (CodeSigner[])null), new Permissions()));
-                        }
-                        throw new ClassNotFoundException(name);
+        var loader = AccessController.doPrivileged((PrivilegedAction<ClassLoader>) () ->
+            new SecureClassLoader(null) {
+                @Override
+                protected Class<?> findClass(String name) throws ClassNotFoundException {
+                    if (name.equals(className)) {
+                        return defineClass(name, bytes, 0, bytes.length, new ProtectionDomain(new CodeSource(null, (CodeSigner[])null), new Permissions()));
                     }
-                };
-            }
-        });
+                    throw new ClassNotFoundException(name);
+                }
+            });
 
         try {
             return MethodHandles.publicLookup().findStatic(Class.forName(className, true, loader), "invoke", MethodType.methodType(void.class, MethodHandle.class, Object.class));

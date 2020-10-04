@@ -153,12 +153,8 @@ public final class JavaAdapterFactory {
     }
 
     private static ProtectionDomain getProtectionDomain(Class<?> clazz) {
-        return AccessController.doPrivileged(new PrivilegedAction<ProtectionDomain>() {
-            @Override
-            public ProtectionDomain run() {
-                return clazz.getProtectionDomain();
-            }
-        });
+        return AccessController.doPrivileged((PrivilegedAction<ProtectionDomain>) () ->
+            clazz.getProtectionDomain());
     }
 
     /**
@@ -240,16 +236,13 @@ public final class JavaAdapterFactory {
         }
 
         var effectiveSuperClass = superClass == null ? Object.class : superClass;
-        return AccessController.doPrivileged(new PrivilegedAction<AdapterInfo>() {
-            @Override
-            public AdapterInfo run() {
-                try {
-                    return new AdapterInfo(effectiveSuperClass, interfaces, definingClassAndLoader);
-                } catch (AdaptationException e) {
-                    return new AdapterInfo(e.getAdaptationResult());
-                } catch (RuntimeException e) {
-                    return new AdapterInfo(new AdaptationResult(Outcome.ERROR_OTHER, e, Arrays.toString(types), e.toString()));
-                }
+        return AccessController.doPrivileged((PrivilegedAction<AdapterInfo>) () -> {
+            try {
+                return new AdapterInfo(effectiveSuperClass, interfaces, definingClassAndLoader);
+            } catch (AdaptationException e) {
+                return new AdapterInfo(e.getAdaptationResult());
+            } catch (RuntimeException e) {
+                return new AdapterInfo(new AdaptationResult(Outcome.ERROR_OTHER, e, Arrays.toString(types), e.toString()));
             }
         }, CREATE_ADAPTER_INFO_ACC_CTXT);
     }

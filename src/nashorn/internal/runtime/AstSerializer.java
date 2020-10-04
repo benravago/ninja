@@ -42,7 +42,7 @@ final class AstSerializer {
     static byte[] serialize(FunctionNode fn) {
         var out = new ByteArrayOutputStream();
         var deflater = new Deflater(COMPRESSION_LEVEL);
-        try (ObjectOutputStream oout = new ObjectOutputStream(new DeflaterOutputStream(out, deflater))) {
+        try (var oout = new ObjectOutputStream(new DeflaterOutputStream(out, deflater))) {
             oout.writeObject(fn);
         } catch (IOException e) {
             throw new AssertionError("Unexpected exception serializing function", e);

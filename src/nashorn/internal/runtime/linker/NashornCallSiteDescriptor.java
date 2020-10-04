@@ -185,19 +185,19 @@ public final class NashornCallSiteDescriptor extends CallSiteDescriptor {
      * Given call site flags, returns the operation name encoded in them.
      */
     public static String getOperationName(int flags) {
-        switch(flags & OPERATION_MASK) {
-            case 0: return "GET_PROPERTY";
-            case 1: return "GET_ELEMENT";
-            case 2: return "GET_METHOD_PROPERTY";
-            case 3: return "GET_METHOD_ELEMENT";
-            case 4: return "SET_PROPERTY";
-            case 5: return "SET_ELEMENT";
-            case 6: return "REMOVE_PROPERTY";
-            case 7: return "REMOVE_ELEMENT";
-            case 8: return "CALL";
-            case 9: return "NEW";
-            default: throw new AssertionError();
-        }
+        return switch (flags & OPERATION_MASK) {
+            case 0 -> "GET_PROPERTY";
+            case 1 -> "GET_ELEMENT";
+            case 2 -> "GET_METHOD_PROPERTY";
+            case 3 -> "GET_METHOD_ELEMENT";
+            case 4 -> "SET_PROPERTY";
+            case 5 -> "SET_ELEMENT";
+            case 6 -> "REMOVE_PROPERTY";
+            case 7 -> "REMOVE_ELEMENT";
+            case 8 -> "CALL";
+            case 9 -> "NEW";
+            default -> throw new AssertionError();
+        };
     }
 
     /**
@@ -251,7 +251,8 @@ public final class NashornCallSiteDescriptor extends CallSiteDescriptor {
         if (csd instanceof NashornCallSiteDescriptor) {
             return ((NashornCallSiteDescriptor)csd).getLookupPrivileged();
         }
-        return AccessController.doPrivileged((PrivilegedAction<Lookup>)()->csd.getLookup(), GET_LOOKUP_PERMISSION_CONTEXT);
+        return AccessController.doPrivileged((PrivilegedAction<Lookup>) () ->
+            csd.getLookup(), GET_LOOKUP_PERMISSION_CONTEXT);
     }
 
     @Override
