@@ -28,6 +28,7 @@ package nashorn.internal.ir;
 import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectOutputStream;
+
 import nashorn.internal.codegen.CompileUnit;
 import nashorn.internal.ir.annotations.Immutable;
 import nashorn.internal.ir.visitor.NodeVisitor;
@@ -37,7 +38,6 @@ import nashorn.internal.ir.visitor.NodeVisitor;
  */
 @Immutable
 public class SplitNode extends LexicalContextStatement implements CompileUnitHolder {
-    private static final long serialVersionUID = 1L;
 
     /** Split node method name. */
     private final String name;
@@ -50,34 +50,29 @@ public class SplitNode extends LexicalContextStatement implements CompileUnitHol
 
     /**
      * Constructor
-     *
-     * @param name        name of split node
-     * @param body        body of split code
-     * @param compileUnit compile unit to use for the body
      */
-    public SplitNode(final String name, final Block body, final CompileUnit compileUnit) {
+    public SplitNode(String name, Block body, CompileUnit compileUnit) {
         super(body.getFirstStatementLineNumber(), body.getToken(), body.getFinish());
-        this.name        = name;
-        this.body        = body;
+        this.name = name;
+        this.body = body;
         this.compileUnit = compileUnit;
     }
 
-    private SplitNode(final SplitNode splitNode, final Block body, final CompileUnit compileUnit) {
+    private SplitNode(SplitNode splitNode, Block body, CompileUnit compileUnit) {
         super(splitNode);
-        this.name        = splitNode.name;
-        this.body        = body;
+        this.name = splitNode.name;
+        this.body = body;
         this.compileUnit = compileUnit;
     }
 
     /**
      * Get the body for this split node - i.e. the actual code it encloses
-     * @return body for split node
      */
     public Block getBody() {
         return body;
     }
 
-    private SplitNode setBody(final LexicalContext lc, final Block body) {
+    private SplitNode setBody(LexicalContext lc, Block body) {
         if (this.body == body) {
             return this;
         }
@@ -85,7 +80,7 @@ public class SplitNode extends LexicalContextStatement implements CompileUnitHol
     }
 
     @Override
-    public Node accept(final LexicalContext lc, final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(LexicalContext lc, NodeVisitor<? extends LexicalContext> visitor) {
         if (visitor.enterSplitNode(this)) {
             return visitor.leaveSplitNode(setBody(lc, (Block)body.accept(visitor)));
         }
@@ -93,16 +88,15 @@ public class SplitNode extends LexicalContextStatement implements CompileUnitHol
     }
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printType) {
-        sb.append("<split>(");
-        sb.append(compileUnit.getClass().getSimpleName());
-        sb.append(") ");
+    public void toString(StringBuilder sb, boolean printType) {
+        sb.append("<split>(")
+          .append(compileUnit.getClass().getSimpleName())
+          .append(") ");
         body.toString(sb, printType);
     }
 
     /**
      * Get the name for this split node
-     * @return name
      */
     public String getName() {
         return name;
@@ -110,7 +104,6 @@ public class SplitNode extends LexicalContextStatement implements CompileUnitHol
 
     /**
      * Get the compile unit for this split node
-     * @return compile unit
      */
     @Override
     public CompileUnit getCompileUnit() {
@@ -119,20 +112,17 @@ public class SplitNode extends LexicalContextStatement implements CompileUnitHol
 
     /**
      * Set the compile unit for this split node
-     * @param lc lexical context
-     * @param compileUnit compile unit
-     * @return new node if changed, otherwise same node
      */
-    public SplitNode setCompileUnit(final LexicalContext lc, final CompileUnit compileUnit) {
+    public SplitNode setCompileUnit(LexicalContext lc, CompileUnit compileUnit) {
         if (this.compileUnit == compileUnit) {
             return this;
         }
         return Node.replaceInLexicalContext(lc, this, new SplitNode(this, body, compileUnit));
     }
 
-    private void writeObject(final ObjectOutputStream out) throws IOException {
-        // We are only serializing the AST after we run SplitIntoFunctions; no SplitNodes can remain for the
-        // serialization.
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        // We are only serializing the AST after we run SplitIntoFunctions; no SplitNodes can remain for the serialization.
         throw new NotSerializableException(getClass().getName());
     }
+
 }

@@ -32,9 +32,8 @@ final class NonExtensibleArrayFilter extends ArrayFilter {
 
     /**
      * Constructor
-     * @param underlying array
      */
-    NonExtensibleArrayFilter(final ArrayData underlying) {
+    NonExtensibleArrayFilter(ArrayData underlying) {
         super(underlying);
     }
 
@@ -44,16 +43,16 @@ final class NonExtensibleArrayFilter extends ArrayFilter {
     }
 
     @Override
-    public ArrayData slice(final long from, final long to) {
+    public ArrayData slice(long from, long to) {
         return new NonExtensibleArrayFilter(underlying.slice(from, to));
     }
 
-    private ArrayData extensionCheck(final int index) {
-        return this; //	throw typeError(Global.instance(), "object.non.extensible", String.valueOf(index), ScriptRuntime.safeToString(this));
+    private ArrayData extensionCheck(int index) {
+        return this; // throw typeError(Global.instance(), "object.non.extensible", String.valueOf(index), ScriptRuntime.safeToString(this));
     }
 
     @Override
-    public ArrayData set(final int index, final Object value) {
+    public ArrayData set(int index, Object value) {
         if (has(index)) {
             return underlying.set(index, value);
         }
@@ -61,7 +60,7 @@ final class NonExtensibleArrayFilter extends ArrayFilter {
     }
 
     @Override
-    public ArrayData set(final int index, final int value) {
+    public ArrayData set(int index, int value) {
         if (has(index)) {
             return underlying.set(index, value);
         }
@@ -69,10 +68,11 @@ final class NonExtensibleArrayFilter extends ArrayFilter {
     }
 
     @Override
-    public ArrayData set(final int index, final double value) {
+    public ArrayData set(int index, double value) {
         if (has(index)) {
             return underlying.set(index, value);
         }
         return extensionCheck(index);
     }
+
 }

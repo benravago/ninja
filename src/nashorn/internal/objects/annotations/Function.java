@@ -34,30 +34,33 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation to specify a JavaScript "function" property.
- * Note that -1 means varargs. So, -2 is used as invalid arity.
  *
+ * Note that -1 means varargs. So, -2 is used as invalid arity.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Function {
-    /**
-     * @return the name of the property. If empty, the name is inferred.
-     */
-    public String name() default "";
 
     /**
-     * @return the attribute flags for this function.
+     * The name of the property.
+     * If empty, the name is inferred.
      */
-    public int attributes() default DEFAULT_ATTRIBUTES;
+    String name() default "";
 
     /**
-     * @return the arity of the function. By default computed from the method
-     *         signature.
+     * The attribute flags for this function.
      */
-    public int arity() default -2;
+    int attributes() default DEFAULT_ATTRIBUTES;
 
     /**
-     * @return where this function lives.
+     * The arity of the function.
+     * By default computed from the method signature.
      */
-    public Where where() default Where.PROTOTYPE;
+    int arity() default -2;
+
+    /**
+     * Where this function lives.
+     */
+    Where where() default Where.PROTOTYPE;
+
 }

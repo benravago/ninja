@@ -25,28 +25,27 @@
 package nashorn.internal.codegen;
 
 import java.io.Serializable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
+
 import nashorn.internal.codegen.types.Type;
 
 /**
- * Abstraction for labels, separating a label from the underlying
- * byte code emitter. Also augmenting label with e.g. a name
- * for easier debugging and reading code
+ * Abstraction for labels, separating a label from the underlying byte code emitter.
  *
- * see -Dnashorn.codegen.debug, --log=codegen
+ * Also augmenting label with e.g. a name for easier debugging and reading code
  */
 public final class Label implements Serializable {
-    private static final long serialVersionUID = 1L;
 
-    //byte code generation evaluation type stack for consistency check
-    //and correct opcode selection. one per label as a label may be a
-    //join point
+    /**
+     * Byte code generation evaluation type stack for consistency check and correct opcode selection.
+     * One per label as a label may be a join point
+     */
     static final class Stack implements Cloneable {
+
         static final int NON_LOAD = -1;
 
         Type[] data;
@@ -55,6 +54,7 @@ public final class Label implements Serializable {
 
         List<Type> localVariableTypes;
         int firstTemp; // index of the first temporary local variable
+
         // Bitmap marking last slot belonging to a single symbol.
         BitSet symbolBoundary;
 
@@ -77,10 +77,10 @@ public final class Label implements Serializable {
             sp = 0;
         }
 
-        void push(final Type type) {
+        void push(Type type) {
             if (data.length == sp) {
-                final Type[] newData = new Type[sp * 2];
-                final int[]  newLocalLoad = new int[sp * 2];
+                var newData = new Type[sp * 2];
+                var newLocalLoad = new int[sp * 2];
                 System.arraycopy(data, 0, newData, 0, sp);
                 System.arraycopy(localLoads, 0, newLocalLoad, 0, sp);
                 data = newData;
@@ -95,43 +95,39 @@ public final class Label implements Serializable {
             return peek(0);
         }
 
-        Type peek(final int n) {
-            final int pos = sp - 1 - n;
+        Type peek(int n) {
+            var pos = sp - 1 - n;
             return pos < 0 ? null : data[pos];
         }
 
         /**
          * Retrieve the top <code>count</code> types on the stack without modifying it.
-         *
-         * @param count number of types to return
-         * @return array of Types
          */
-        Type[] getTopTypes(final int count) {
-            final Type[] topTypes = new Type[count];
+        Type[] getTopTypes(int count) {
+            var topTypes = new Type[count];
             System.arraycopy(data, sp - count, topTypes, 0, count);
             return topTypes;
         }
 
-        int[] getLocalLoads(final int from, final int to) {
-            final int count = to - from;
-            final int[] topLocalLoads = new int[count];
+        int[] getLocalLoads(int from, int to) {
+            var count = to - from;
+            var topLocalLoads = new int[count];
             System.arraycopy(localLoads, from, topLocalLoads, 0, count);
             return topLocalLoads;
         }
 
         /**
          * Returns the number of used local variable slots, including all live stack-store temporaries.
-         * @return the number of used local variable slots, including all live stack-store temporaries.
          */
         int getUsedSlotsWithLiveTemporaries() {
             // There are at least as many as are declared by the current blocks.
-            int usedSlots = firstTemp;
+            var usedSlots = firstTemp;
             // Look at every load on the stack, and bump the number of used slots up by the temporaries seen there.
-            for(int i = sp; i-->0;) {
-                final int slot = localLoads[i];
-                if(slot != Label.Stack.NON_LOAD) {
-                    final int afterSlot = slot + localVariableTypes.get(slot).getSlots();
-                    if(afterSlot > usedSlots) {
+            for (var i = sp; i-->0;) {
+                var slot = localLoads[i];
+                if (slot != Label.Stack.NON_LOAD) {
+                    var afterSlot = slot + localVariableTypes.get(slot).getSlots();
+                    if (afterSlot > usedSlots) {
                         usedSlots = afterSlot;
                     }
                 }
@@ -140,23 +136,21 @@ public final class Label implements Serializable {
         }
 
         /**
-         *
          * @param joinOrigin the stack from the other branch.
          */
-        void joinFrom(final Stack joinOrigin, final boolean breakTarget) {
+        void joinFrom(Stack joinOrigin, boolean breakTarget) {
             assert isStackCompatible(joinOrigin);
-            if(breakTarget) {
-                // As we're joining labels that can jump across block boundaries, the number of local variables can
-                // differ, and we should always respect the one having less variables.
+            if (breakTarget) {
+                // As we're joining labels that can jump across block boundaries, the number of local variables can differ, and we should always respect the one having less variables.
                 firstTemp = Math.min(firstTemp, joinOrigin.firstTemp);
             } else {
                 assert firstTemp == joinOrigin.firstTemp;
             }
-            final int[] otherLoads = joinOrigin.localLoads;
-            int firstDeadTemp = firstTemp;
-            for(int i = 0; i < sp; ++i) {
-                final int localLoad = localLoads[i];
-                if(localLoad != otherLoads[i]) {
+            var otherLoads = joinOrigin.localLoads;
+            var firstDeadTemp = firstTemp;
+            for (var i = 0; i < sp; ++i) {
+                var localLoad = localLoads[i];
+                if (localLoad != otherLoads[i]) {
                     localLoads[i] = NON_LOAD;
                 } else if(localLoad >= firstDeadTemp) {
                     firstDeadTemp = localLoad + localVariableTypes.get(localLoad).getSlots();
@@ -168,19 +162,19 @@ public final class Label implements Serializable {
             mergeVariableTypes(joinOrigin, firstDeadTemp);
         }
 
-        private void mergeVariableTypes(final Stack joinOrigin, final int toSlot) {
-            final ListIterator<Type> it1 = localVariableTypes.listIterator();
-            final Iterator<Type> it2 = joinOrigin.localVariableTypes.iterator();
+        private void mergeVariableTypes(Stack joinOrigin, int toSlot) {
+            var it1 = localVariableTypes.listIterator();
+            var it2 = joinOrigin.localVariableTypes.iterator();
 
-            for(int i = 0; i < toSlot; ++i) {
-                final Type thisType = it1.next();
-                final Type otherType = it2.next();
-                if(otherType == Type.UNKNOWN) {
+            for (var i = 0; i < toSlot; ++i) {
+                var thisType = it1.next();
+                var otherType = it2.next();
+                if (otherType == Type.UNKNOWN) {
                     // Variables that are <unknown> on the other branch will become <unknown> here too.
                     it1.set(Type.UNKNOWN);
                 } else if (thisType != otherType) {
-                    if(thisType.isObject() && otherType.isObject()) {
-                        // different object types are merged into Object.
+                    if (thisType.isObject() && otherType.isObject()) {
+                        // Different object types are merged into Object.
                         // TODO: maybe find most common superclass?
                         it1.set(Type.OBJECT);
                     } else {
@@ -190,34 +184,31 @@ public final class Label implements Serializable {
             }
         }
 
-        void joinFromTry(final Stack joinOrigin) {
-            // As we're joining labels that can jump across block boundaries, the number of local variables can
-            // differ, and we should always respect the one having less variables.
+        void joinFromTry(Stack joinOrigin) {
+            // As we're joining labels that can jump across block boundaries, the number of local variables can differ, and we should always respect the one having less variables.
             firstTemp = Math.min(firstTemp, joinOrigin.firstTemp);
             assert isVariablePartitioningEqual(joinOrigin, firstTemp);
             mergeVariableTypes(joinOrigin, firstTemp);
         }
 
-        private int getFirstDeadLocal(final List<Type> types) {
-            int i = types.size();
-            for(final ListIterator<Type> it = types.listIterator(i);
-                it.hasPrevious() && it.previous() == Type.UNKNOWN;
-                --i) {
+        private int getFirstDeadLocal(List<Type> types) {
+            var i = types.size();
+            for (var it = types.listIterator(i); it.hasPrevious() && it.previous() == Type.UNKNOWN; --i) {
                 // no body
             }
 
             // Respect symbol boundaries; we never chop off half a symbol's storage
-            while(!symbolBoundary.get(i - 1)) {
+            while (!symbolBoundary.get(i - 1)) {
                 ++i;
             }
             return i;
         }
 
-        private boolean isStackCompatible(final Stack other) {
+        private boolean isStackCompatible(Stack other) {
             if (sp != other.sp) {
                 return false;
             }
-            for (int i = 0; i < sp; i++) {
+            for (var i = 0; i < sp; i++) {
                 if (!data[i].isEquivalentTo(other.data[i])) {
                     return false;
                 }
@@ -225,21 +216,21 @@ public final class Label implements Serializable {
             return true;
         }
 
-        private boolean isVariablePartitioningEqual(final Stack other, final int toSlot) {
+        private boolean isVariablePartitioningEqual(Stack other, int toSlot) {
             // No difference in the symbol boundaries before the toSlot
-            final BitSet diff = other.getSymbolBoundaryCopy();
+            var diff = other.getSymbolBoundaryCopy();
             diff.xor(symbolBoundary);
             return diff.previousSetBit(toSlot - 1) == -1;
         }
 
-        void markDeadLocalVariables(final int fromSlot, final int slotCount) {
-            final int localCount = localVariableTypes.size();
-            if(fromSlot >= localCount) {
+        void markDeadLocalVariables(int fromSlot, int slotCount) {
+            var localCount = localVariableTypes.size();
+            if (fromSlot >= localCount) {
                 return;
             }
-            final int toSlot = Math.min(fromSlot + slotCount, localCount);
+            var toSlot = Math.min(fromSlot + slotCount, localCount);
             invalidateLocalLoadsOnStack(fromSlot, toSlot);
-            for(int i = fromSlot; i < toSlot; ++i) {
+            for (var i = fromSlot; i < toSlot; ++i) {
                 localVariableTypes.set(i, Type.UNKNOWN);
             }
         }
@@ -254,22 +245,20 @@ public final class Label implements Serializable {
         }
 
         /**
-         * Returns a list of local variable slot types, but for those symbols that have multiple values, only the slot
-         * holding the widest type is marked as live.
-         * @return a list of widest local variable slot types.
+         * Returns a list of local variable slot types, but for those symbols that have multiple values, only the slot holding the widest type is marked as live.
          */
-        List<Type> getWidestLiveLocals(final List<Type> lvarTypes) {
-            final List<Type> widestLiveLocals = new ArrayList<>(lvarTypes);
-            boolean keepNextValue = true;
-            final int size = widestLiveLocals.size();
-            for(int i = size - 1; i-- > 0;) {
-                if(symbolBoundary.get(i)) {
+        List<Type> getWidestLiveLocals(List<Type> lvarTypes) {
+            var widestLiveLocals = new ArrayList<Type>(lvarTypes);
+            var keepNextValue = true;
+            var size = widestLiveLocals.size();
+            for (var i = size - 1; i-- > 0;) {
+                if (symbolBoundary.get(i)) {
                     keepNextValue = true;
                 }
-                final Type t = widestLiveLocals.get(i);
-                if(t != Type.UNKNOWN) {
-                    if(keepNextValue) {
-                        if(t != Type.SLOT_2) {
+                var t = widestLiveLocals.get(i);
+                if (t != Type.UNKNOWN) {
+                    if (keepNextValue) {
+                        if (t != Type.SLOT_2) {
                             keepNextValue = false;
                         }
                     } else {
@@ -281,13 +270,13 @@ public final class Label implements Serializable {
             return widestLiveLocals;
         }
 
-        String markSymbolBoundariesInLvarTypesDescriptor(final String lvarDescriptor) {
-            final char[] chars = lvarDescriptor.toCharArray();
-            int j = 0;
-            for(int i = 0; i < chars.length; ++i) {
-                final char c = chars[i];
-                final int nextj = j + CodeGeneratorLexicalContext.getTypeForSlotDescriptor(c).getSlots();
-                if(!symbolBoundary.get(nextj - 1)) {
+        String markSymbolBoundariesInLvarTypesDescriptor(String lvarDescriptor) {
+            var chars = lvarDescriptor.toCharArray();
+            var j = 0;
+            for (var i = 0; i < chars.length; ++i) {
+                var c = chars[i];
+                var nextj = j + CodeGeneratorLexicalContext.getTypeForSlotDescriptor(c).getSlots();
+                if (!symbolBoundary.get(nextj - 1)) {
                     chars[i] = Character.toLowerCase(c);
                 }
                 j = nextj;
@@ -303,19 +292,19 @@ public final class Label implements Serializable {
         @Override
         public Stack clone() {
             try {
-                final Stack clone = (Stack)super.clone();
+                var clone = (Stack)super.clone();
                 clone.data = data.clone();
                 clone.localLoads = localLoads.clone();
                 clone.symbolBoundary = getSymbolBoundaryCopy();
                 clone.localVariableTypes = getLocalVariableTypesCopy();
                 return clone;
-            } catch(final CloneNotSupportedException e) {
+            } catch(CloneNotSupportedException e) {
                 throw new AssertionError("", e);
             }
         }
 
         private Stack cloneWithEmptyStack() {
-            final Stack stack = clone();
+            var stack = clone();
             stack.sp = 0;
             return stack;
         }
@@ -324,22 +313,21 @@ public final class Label implements Serializable {
             return localLoads[sp - 1];
         }
 
-        void markLocalLoad(final int slot) {
+        void markLocalLoad(int slot) {
             localLoads[sp - 1] = slot;
         }
 
         /**
          * Performs various bookeeping when a value is stored in a local variable slot.
          * @param slot the slot written to
-         * @param onlySymbolLiveValue if true, this is the symbol's only live value, and other values of the symbol
-         * should be marked dead
+         * @param onlySymbolLiveValue if true, this is the symbol's only live value, and other values of the symbol should be marked dead
          * @param type the type written to the slot
          */
-        void onLocalStore(final Type type, final int slot, final boolean onlySymbolLiveValue) {
-            if(onlySymbolLiveValue) {
-                final int fromSlot = slot == 0 ? 0 : (symbolBoundary.previousSetBit(slot - 1) + 1);
-                final int toSlot = symbolBoundary.nextSetBit(slot) + 1;
-                for(int i = fromSlot; i < toSlot; ++i) {
+        void onLocalStore(Type type, int slot, boolean onlySymbolLiveValue) {
+            if (onlySymbolLiveValue) {
+                var fromSlot = slot == 0 ? 0 : (symbolBoundary.previousSetBit(slot - 1) + 1);
+                var toSlot = symbolBoundary.nextSetBit(slot) + 1;
+                for (var i = fromSlot; i < toSlot; ++i) {
                     localVariableTypes.set(i, Type.UNKNOWN);
                 }
                 invalidateLocalLoadsOnStack(fromSlot, toSlot);
@@ -348,33 +336,32 @@ public final class Label implements Serializable {
             }
 
             localVariableTypes.set(slot, type);
-            if(type.isCategory2()) {
+            if (type.isCategory2()) {
                 localVariableTypes.set(slot + 1, Type.SLOT_2);
             }
         }
 
         /**
-         * Given a slot range, invalidate knowledge about local loads on stack from these slots (because they're being
-         * killed).
+         * Given a slot range, invalidate knowledge about local loads on stack from these slots (because they're being killed).
          * @param fromSlot first slot, inclusive.
          * @param toSlot last slot, exclusive.
          */
-        private void invalidateLocalLoadsOnStack(final int fromSlot, final int toSlot) {
-            for(int i = 0; i < sp; ++i) {
-                final int localLoad = localLoads[i];
-                if(localLoad >= fromSlot && localLoad < toSlot) {
+        private void invalidateLocalLoadsOnStack(int fromSlot, int toSlot) {
+            for (var i = 0; i < sp; ++i) {
+                var localLoad = localLoads[i];
+                if (localLoad >= fromSlot && localLoad < toSlot) {
                     localLoads[i] = NON_LOAD;
                 }
             }
         }
 
         /**
-         * Marks a range of slots as belonging to a defined local variable. The slots will start out with no live value
-         * in them.
+         * Marks a range of slots as belonging to a defined local variable.
+         * The slots will start out with no live value in them.
          * @param fromSlot first slot, inclusive.
          * @param toSlot last slot, exclusive.
          */
-        void defineBlockLocalVariable(final int fromSlot, final int toSlot) {
+        void defineBlockLocalVariable(int fromSlot, int toSlot) {
             defineLocalVariable(fromSlot, toSlot);
             assert firstTemp < toSlot;
             firstTemp = toSlot;
@@ -385,32 +372,30 @@ public final class Label implements Serializable {
          * @param width the required width (in slots) for the new variable.
          * @return the bytecode slot index where the newly allocated local begins.
          */
-        int defineTemporaryLocalVariable(final int width) {
-            final int fromSlot = getUsedSlotsWithLiveTemporaries();
+        int defineTemporaryLocalVariable(int width) {
+            var fromSlot = getUsedSlotsWithLiveTemporaries();
             defineLocalVariable(fromSlot, fromSlot + width);
             return fromSlot;
         }
 
         /**
-         * Marks a range of slots as belonging to a defined temporary local variable. The slots will start out with no
-         * live value in them.
-         * @param fromSlot first slot, inclusive.
-         * @param toSlot last slot, exclusive.
+         * Marks a range of slots as belonging to a defined temporary local variable.
+         * The slots will start out with no live value in them.
          */
-        void defineTemporaryLocalVariable(final int fromSlot, final int toSlot) {
+        void defineTemporaryLocalVariable(int fromSlot, int toSlot) {
             defineLocalVariable(fromSlot, toSlot);
         }
 
-        private void defineLocalVariable(final int fromSlot, final int toSlot) {
+        private void defineLocalVariable(int fromSlot, int toSlot) {
             assert !hasLoadsOnStack(fromSlot, toSlot);
             assert fromSlot < toSlot;
             symbolBoundary.clear(fromSlot, toSlot - 1);
             symbolBoundary.set(toSlot - 1);
-            final int lastExisting = Math.min(toSlot, localVariableTypes.size());
-            for(int i = fromSlot; i < lastExisting; ++i) {
+            var lastExisting = Math.min(toSlot, localVariableTypes.size());
+            for (var i = fromSlot; i < lastExisting; ++i) {
                 localVariableTypes.set(i, Type.UNKNOWN);
             }
-            for(int i = lastExisting; i < toSlot; ++i) {
+            for (var i = lastExisting; i < toSlot; ++i) {
                 localVariableTypes.add(i, Type.UNKNOWN);
             }
         }
@@ -418,22 +403,22 @@ public final class Label implements Serializable {
         /**
          * Undefines all local variables past the specified slot.
          * @param fromSlot the first slot to be undefined
-         * @param canTruncateSymbol if false, the fromSlot must be either the first slot of a symbol, or the first slot
-         * after the last symbol. If true, the fromSlot can be in the middle of the storage area for a symbol. This
-         * should be used with care - it is only meant for use in optimism exception handlers.
+         * @param canTruncateSymbol if false, the fromSlot must be either the first slot of a symbol, or the first slot after the last symbol.
+         * If true, the fromSlot can be in the middle of the storage area for a symbol.
+         * This should be used with care - it is only meant for use in optimism exception handlers.
          */
-        void undefineLocalVariables(final int fromSlot, final boolean canTruncateSymbol) {
-            final int lvarCount = localVariableTypes.size();
+        void undefineLocalVariables(int fromSlot, boolean canTruncateSymbol) {
+            var lvarCount = localVariableTypes.size();
             assert lvarCount == symbolBoundary.length();
             assert !hasLoadsOnStack(fromSlot, lvarCount);
-            if(canTruncateSymbol) {
-                if(fromSlot > 0) {
+            if (canTruncateSymbol) {
+                if (fromSlot > 0) {
                     symbolBoundary.set(fromSlot - 1);
                 }
             } else {
                 assert fromSlot == 0 || symbolBoundary.get(fromSlot - 1);
             }
-            if(fromSlot < lvarCount) {
+            if (fromSlot < lvarCount) {
                 symbolBoundary.clear(fromSlot, lvarCount);
                 localVariableTypes.subList(fromSlot, lvarCount).clear();
             }
@@ -442,7 +427,7 @@ public final class Label implements Serializable {
             assert symbolBoundary.length() == fromSlot;
         }
 
-        private void markAsOptimisticCatchHandler(final int liveLocalCount) {
+        private void markAsOptimisticCatchHandler(int liveLocalCount) {
             // Live temporaries that are no longer on stack are undefined
             undefineLocalVariables(liveLocalCount, true);
             // Temporaries are promoted
@@ -451,11 +436,11 @@ public final class Label implements Serializable {
             localVariableTypes.subList(firstTemp, localVariableTypes.size()).clear();
             assert symbolBoundary.length() == firstTemp;
             // Generalize all reference types to Object, and promote boolean to int
-            for(final ListIterator<Type> it = localVariableTypes.listIterator(); it.hasNext();) {
-                final Type type = it.next();
-                if(type == Type.BOOLEAN) {
+            for (var it = localVariableTypes.listIterator(); it.hasNext();) {
+                var type = it.next();
+                if (type == Type.BOOLEAN) {
                     it.set(Type.INT);
-                } else if(type.isObject() && type != Type.OBJECT) {
+                } else if (type.isObject() && type != Type.OBJECT) {
                     it.set(Type.OBJECT);
                 }
             }
@@ -467,10 +452,10 @@ public final class Label implements Serializable {
          * @param toSlot end of the range (exclusive)
          * @return true if any loads on the stack come from the specified slot range.
          */
-        boolean hasLoadsOnStack(final int fromSlot, final int toSlot) {
-            for(int i = 0; i < sp; ++i) {
-                final int load = localLoads[i];
-                if(load >= fromSlot && load < toSlot) {
+        boolean hasLoadsOnStack(int fromSlot, int toSlot) {
+            for (var i = 0; i < sp; ++i) {
+                var load = localLoads[i];
+                if (load >= fromSlot && load < toSlot) {
                     return true;
                 }
             }
@@ -480,10 +465,10 @@ public final class Label implements Serializable {
         @Override
         public String toString() {
             return "stack=" + Arrays.toString(Arrays.copyOf(data, sp))
-                 + ", symbolBoundaries=" + String.valueOf(symbolBoundary)
-                 + ", firstTemp=" + firstTemp
-                 + ", localTypes=" + String.valueOf(localVariableTypes)
-                 ;
+                + ", symbolBoundaries=" + String.valueOf(symbolBoundary)
+                + ", firstTemp=" + firstTemp
+                + ", localTypes=" + String.valueOf(localVariableTypes)
+                ;
         }
     }
 
@@ -508,25 +493,23 @@ public final class Label implements Serializable {
     private transient boolean breakTarget;
 
     /**
-     * Constructor
-     *
+     * Constructor.
      * @param name name of this label
      */
-    public Label(final String name) {
+    public Label(String name) {
         super();
         this.name = name;
-        this.id   = nextId++;
+        this.id = nextId++;
     }
 
     /**
      * Copy constructor
-     *
      * @param label a label to clone
      */
-    public Label(final Label label) {
+    public Label(Label label) {
         super();
         this.name = label.name;
-        this.id   = label.id;
+        this.id = label.id;
     }
 
     org.objectweb.asm.Label getLabel() {
@@ -540,19 +523,19 @@ public final class Label implements Serializable {
         return stack;
     }
 
-    void joinFrom(final Label.Stack joinOrigin) {
+    void joinFrom(Label.Stack joinOrigin) {
         this.reachable = true;
-        if(stack == null) {
+        if (stack == null) {
             stack = joinOrigin.clone();
         } else {
             stack.joinFrom(joinOrigin, breakTarget);
         }
     }
 
-    void joinFromTry(final Label.Stack joinOrigin, final boolean isOptimismHandler) {
+    void joinFromTry(Label.Stack joinOrigin, boolean isOptimismHandler) {
         this.reachable = true;
         if (stack == null) {
-            if(!isOptimismHandler) {
+            if (!isOptimismHandler) {
                 stack = joinOrigin.cloneWithEmptyStack();
                 // Optimism handler needs temporaries to remain live, others don't.
                 stack.undefineLocalVariables(stack.firstTemp, false);
@@ -572,16 +555,16 @@ public final class Label implements Serializable {
     }
 
     void onCatch() {
-        if(stack != null) {
+        if (stack != null) {
             stack = stack.cloneWithEmptyStack();
         }
     }
-    void markAsOptimisticCatchHandler(final Label.Stack currentStack, final int liveLocalCount) {
+    void markAsOptimisticCatchHandler(Label.Stack currentStack, int liveLocalCount) {
         stack = currentStack.cloneWithEmptyStack();
         stack.markAsOptimisticCatchHandler(liveLocalCount);
     }
 
-    void markAsOptimisticContinuationHandlerFor(final Label afterConsumeStackLabel) {
+    void markAsOptimisticContinuationHandlerFor(Label afterConsumeStackLabel) {
         stack = afterConsumeStackLabel.stack.cloneWithEmptyStack();
     }
 
@@ -589,7 +572,7 @@ public final class Label implements Serializable {
         return reachable;
     }
 
-    boolean isAfter(final Label other) {
+    boolean isAfter(Label other) {
         return label.getOffset() > other.label.getOffset();
     }
 
@@ -602,4 +585,5 @@ public final class Label implements Serializable {
         }
         return str;
     }
+
 }

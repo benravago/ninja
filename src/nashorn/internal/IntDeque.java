@@ -29,14 +29,14 @@ package nashorn.internal;
  * Small helper class for fast int deques
  */
 public class IntDeque {
+
     private int[] deque = new int[16];
     private int nextFree = 0;
 
     /**
-     * Push an int value
-     * @param value value
+     * Push an int value.
      */
-    public void push(final int value) {
+    public void push(int value) {
         if (nextFree == deque.length) {
             final int[] newDeque = new int[nextFree * 2];
             System.arraycopy(deque, 0, newDeque, 0, nextFree);
@@ -46,16 +46,14 @@ public class IntDeque {
     }
 
     /**
-     * Pop an int value
-     * @return value
+     * Pop an int value.
      */
     public int pop() {
         return deque[--nextFree];
     }
 
     /**
-     * Peek
-     * @return top value
+     * Peek at top value.
      */
     public int peek() {
         return deque[nextFree - 1];
@@ -63,7 +61,6 @@ public class IntDeque {
 
     /**
      * Get the value of the top element and increment it.
-     * @return top value
      */
     public int getAndIncrement() {
         return deque[nextFree - 1]++;
@@ -71,17 +68,16 @@ public class IntDeque {
 
     /**
      * Decrement the value of the top element and return it.
-     * @return decremented top value
      */
     public int decrementAndGet() {
         return --deque[nextFree - 1];
     }
 
     /**
-     * Check if deque is empty
-     * @return true if empty
+     * Check if deque is empty.
      */
     public boolean isEmpty() {
         return nextFree == 0;
     }
+
 }

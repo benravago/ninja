@@ -40,10 +40,8 @@ class ScriptArrayIterator extends ArrayLikeIterator<Object> {
 
     /**
      * Constructor
-     * @param array array to iterate over
-     * @param includeUndefined should undefined elements be included in iteration
      */
-    protected ScriptArrayIterator(final ScriptObject array, final boolean includeUndefined) {
+    protected ScriptArrayIterator(ScriptObject array, boolean includeUndefined) {
         super(includeUndefined);
         this.array = array;
         this.length = array.getArray().length();
@@ -51,7 +49,6 @@ class ScriptArrayIterator extends ArrayLikeIterator<Object> {
 
     /**
      * Is the current index still inside the array
-     * @return true if inside the array
      */
     protected boolean indexInArray() {
         return index < length;
@@ -77,7 +74,6 @@ class ScriptArrayIterator extends ArrayLikeIterator<Object> {
                 bumpIndex();
             }
         }
-
         return indexInArray();
     }
 
@@ -85,4 +81,5 @@ class ScriptArrayIterator extends ArrayLikeIterator<Object> {
     public void remove() {
         array.delete(index); // false
     }
+
 }

@@ -32,37 +32,33 @@ import nashorn.internal.ir.visitor.NodeVisitor;
  * A wrapper for an expression that is in a position to be a join predecessor.
  */
 public class JoinPredecessorExpression extends Expression implements JoinPredecessor {
-    private static final long serialVersionUID = 1L;
 
     private final Expression expression;
     private final LocalVariableConversion conversion;
 
     /**
-     * A no-arg constructor does not wrap any expression on its own, but can be used as a place to contain a local
-     * variable conversion in a place where an expression can otherwise stand.
+     * A no-arg constructor does not wrap any expression on its own, but can be used as a place to contain a local variable conversion in a place where an expression can otherwise stand.
      */
     public JoinPredecessorExpression() {
         this(null);
     }
 
     /**
-     * A constructor for wrapping an expression and making it a join predecessor. Typically used on true and false
-     * subexpressions of the ternary node as well as on the operands of short-circuiting logical expressions {@code &&}
-     * and {@code ||}.
-     * @param expression the expression to wrap
+     * A constructor for wrapping an expression and making it a join predecessor.
+     * Typically used on true and false subexpressions of the ternary node as well as on the operands of short-circuiting logical expressions {@code &&} and {@code ||}.
      */
-    public JoinPredecessorExpression(final Expression expression) {
+    public JoinPredecessorExpression(Expression expression) {
         this(expression, null);
     }
 
-    private JoinPredecessorExpression(final Expression expression, final LocalVariableConversion conversion) {
+    private JoinPredecessorExpression(Expression expression, LocalVariableConversion conversion) {
         super(expression == null ? 0L : expression.getToken(), expression == null ? 0 : expression.getStart(), expression == null ? 0 : expression.getFinish());
         this.expression = expression;
         this.conversion = conversion;
     }
 
     @Override
-    public JoinPredecessor setLocalVariableConversion(final LexicalContext lc, final LocalVariableConversion conversion) {
+    public JoinPredecessor setLocalVariableConversion(LexicalContext lc, LocalVariableConversion conversion) {
         if(conversion == this.conversion) {
             return this;
         }
@@ -86,7 +82,6 @@ public class JoinPredecessorExpression extends Expression implements JoinPredece
 
     /**
      * Returns the underlying expression.
-     * @return the underlying expression.
      */
     public Expression getExpression() {
         return expression;
@@ -94,11 +89,9 @@ public class JoinPredecessorExpression extends Expression implements JoinPredece
 
     /**
      * Sets the underlying expression.
-     * @param expression the new underlying expression
-     * @return this or modified join predecessor expression object.
      */
-    public JoinPredecessorExpression setExpression(final Expression expression) {
-        if(expression == this.expression) {
+    public JoinPredecessorExpression setExpression(Expression expression) {
+        if (expression == this.expression) {
             return this;
         }
         return new JoinPredecessorExpression(expression, conversion);
@@ -110,20 +103,20 @@ public class JoinPredecessorExpression extends Expression implements JoinPredece
     }
 
     @Override
-    public Node accept(final NodeVisitor<? extends LexicalContext> visitor) {
-        if(visitor.enterJoinPredecessorExpression(this)) {
-            final Expression expr = getExpression();
+    public Node accept(NodeVisitor<? extends LexicalContext> visitor) {
+        if (visitor.enterJoinPredecessorExpression(this)) {
+            var expr = getExpression();
             return visitor.leaveJoinPredecessorExpression(expr == null ? this : setExpression((Expression)expr.accept(visitor)));
         }
         return this;
     }
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printType) {
-        if(expression != null) {
+    public void toString(StringBuilder sb, boolean printType) {
+        if (expression != null) {
             expression.toString(sb, printType);
         }
-        if(conversion != null) {
+        if (conversion != null) {
             conversion.toString(sb);
         }
     }

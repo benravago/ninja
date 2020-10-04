@@ -27,11 +27,11 @@ package nashorn.internal.ir;
 import nashorn.internal.codegen.types.Type;
 
 /**
- * Is this a node that can be optimistically typed? This means that it
- * has a probable type but it's not available through static analysis
+ * Is this a node that can be optimistically typed?
  *
- * The follow nodes are optimistic, with reasons therefore given within
- * parenthesis
+ * This means that it has a probable type but it's not available through static analysis
+ *
+ * The follow nodes are optimistic, with reasons therefore given within parenthesis
  *
  * @see IndexNode  (dynamicGetIndex)
  * @see BinaryNode (local calculations to strongly typed bytecode)
@@ -41,52 +41,41 @@ import nashorn.internal.codegen.types.Type;
  * @see IdentNode  (dynamicGet)
  */
 public interface Optimistic {
-    /**
-     * Unique node ID that is associated with an invokedynamic call that mail
-     * fail and its callsite. This is so that nodes can be regenerated less
-     * pessimistically the next generation if an assumption failed
-     *
-     * @return unique node id
-     */
-    public int getProgramPoint();
 
     /**
-     * Set the node number for this node, associating with a unique per-function
-     * program point
-     * @param programPoint the node number
-     * @return new node, or same if unchanged
+     * Unique node ID that is associated with an invokedynamic call that mail fail and its callsite.
+     * This is so that nodes can be regenerated less pessimistically the next generation if an assumption failed
      */
-    public Optimistic setProgramPoint(final int programPoint);
+    int getProgramPoint();
+
+    /**
+     * Set the node number for this node, associating with a unique per-function program point
+     */
+    Optimistic setProgramPoint(int programPoint);
 
     /**
      * Is it possible for this particular implementor to actually have any optimism?
-     * SHIFT operators for instance are binary nodes, but never optimistic. Multiply
-     * operators are. We might want to refurbish the type hierarchy to fix this.
-     * @return true if theoretically optimistic
+     * SHIFT operators for instance are binary nodes, but never optimistic.
+     * Multiply operators are.
+     * We might want to refurbish the type hierarchy to fix this.
      */
-    public boolean canBeOptimistic();
+    boolean canBeOptimistic();
 
     /**
-     * Get the most optimistic type for this node. Typically we start out as
-     * an int, and then at runtime we bump this up to number and then Object
-     *
-     * @return optimistic type to be used in code generation
+     * Get the most optimistic type for this node.
+     * Typically we start out as an int, and then at runtime we bump this up to number and then Object.
      */
-    public Type getMostOptimisticType();
+    Type getMostOptimisticType();
 
     /**
-     * Most pessimistic type that is guaranteed to be safe.  Typically this is
-     * number for arithmetic operations that can overflow, or Object for an add
-     *
-     * @return pessimistic type guaranteed to never overflow
+     * Most pessimistic type that is guaranteed to be safe.
+     * Typically this is number for arithmetic operations that can overflow, or Object for an add.
      */
-    public Type getMostPessimisticType();
+    Type getMostPessimisticType();
 
     /**
      * Set the override type
-     *
-     * @param type the type
-     * @return a node equivalent to this one except for the requested change.
      */
-    public Optimistic setType(final Type type);
+    Optimistic setType(Type type);
+
 }

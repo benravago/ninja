@@ -29,13 +29,12 @@ import nashorn.internal.ir.annotations.Ignore;
 import nashorn.internal.ir.visitor.NodeVisitor;
 
 /**
- * Synthetic AST node that represents return from a split fragment of a split function for control flow reasons (break
- * or continue into a target outside the current fragment). It has no JavaScript source representation and only occurs
- * in synthetic functions created by the split-into-functions transformation. It is different from a return node in
- * that the return value is irrelevant, and doesn't affect the function's return type calculation.
+ * Synthetic AST node that represents return from a split fragment of a split function for control flow reasons (break or continue into a target outside the current fragment).
+ *
+ * It has no JavaScript source representation and only occurs in synthetic functions created by the split-into-functions transformation.
+ * It is different from a return node in that the return value is irrelevant, and doesn't affect the function's return type calculation.
  */
 public final class SplitReturn extends Statement {
-    private static final long serialVersionUID = 1L;
 
     /** The sole instance of this AST node. */
     @Ignore
@@ -51,16 +50,17 @@ public final class SplitReturn extends Statement {
     }
 
     @Override
-    public Node accept(final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(NodeVisitor<? extends LexicalContext> visitor) {
         return visitor.enterSplitReturn(this) ? visitor.leaveSplitReturn(this) : this;
     }
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printType) {
+    public void toString(StringBuilder sb, boolean printType) {
         sb.append(":splitreturn;");
     }
 
     private Object readResolve() {
         return INSTANCE;
     }
+
 }

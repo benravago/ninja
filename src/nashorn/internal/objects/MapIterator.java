@@ -38,6 +38,7 @@ import static nashorn.internal.runtime.ECMAErrors.typeError;
  */
 @ScriptClass("MapIterator")
 public class MapIterator extends AbstractIterator {
+
     // initialized by nasgen
     private static PropertyMap $nasgenmap$;
 
@@ -50,11 +51,8 @@ public class MapIterator extends AbstractIterator {
 
     /**
      * Constructor for Map iterators.
-     * @param map the map to iterate over
-     * @param iterationKind the iteration kind
-     * @param global the current global object
      */
-    MapIterator(final NativeMap map, final IterationKind iterationKind, final Global global) {
+    MapIterator(NativeMap map, IterationKind iterationKind, Global global) {
         super(global.getMapIteratorPrototype(), $nasgenmap$);
         this.iterator = map.getJavaMap().getIterator();
         this.iterationKind = iterationKind;
@@ -63,13 +61,9 @@ public class MapIterator extends AbstractIterator {
 
     /**
      * ES6 23.1.5.2.1 %MapIteratorPrototype%.next()
-     *
-     * @param self the self reference
-     * @param arg the argument
-     * @return the next result
      */
     @Function
-    public static Object next(final Object self, final Object arg) {
+    public static Object next(Object self, Object arg) {
         if (!(self instanceof MapIterator)) {
             throw typeError("not.a.map.iterator", ScriptRuntime.safeToString(self));
         }
@@ -82,12 +76,12 @@ public class MapIterator extends AbstractIterator {
     }
 
     @Override
-    protected  IteratorResult next(final Object arg) {
+    protected  IteratorResult next(Object arg) {
         if (iterator == null) {
             return makeResult(Undefined.getUndefined(), Boolean.TRUE, global);
         }
 
-        final LinkedMap.Node node = iterator.next();
+        var node = iterator.next();
 
         if (node == null) {
             iterator = null;
@@ -95,7 +89,7 @@ public class MapIterator extends AbstractIterator {
         }
 
         if (iterationKind == IterationKind.KEY_VALUE) {
-            final NativeArray array = new NativeArray(new Object[] {node.getKey(), node.getValue()});
+            var array = new NativeArray(new Object[] {node.getKey(), node.getValue()});
             return makeResult(array, Boolean.FALSE, global);
         }
 

@@ -37,8 +37,8 @@ import nashorn.internal.codegen.types.Type;
 import nashorn.internal.ir.FunctionNode;
 
 /**
- * Class that contains information allowing us to look up a method handle implementing a JavaScript function
- * from a generated class. This is used both for code coming from codegen and for persistent serialized code.
+ * Class that contains information allowing us to look up a method handle implementing a JavaScript function from a generated class.
+ * This is used both for code coming from codegen and for persistent serialized code.
  */
 public final class FunctionInitializer implements Serializable {
 
@@ -48,30 +48,26 @@ public final class FunctionInitializer implements Serializable {
     private transient Map<Integer, Type> invalidatedProgramPoints;
     private transient Class<?> code;
 
-    private static final long serialVersionUID = -5420835725902966692L;
-
     /**
      * Constructor.
-     *
      * @param functionNode the function node
      */
-    public FunctionInitializer(final FunctionNode functionNode) {
+    public FunctionInitializer(FunctionNode functionNode) {
         this(functionNode, null);
     }
 
     /**
      * Constructor.
-     *
      * @param functionNode the function node
      * @param invalidatedProgramPoints invalidated program points
      */
-    public FunctionInitializer(final FunctionNode functionNode, final Map<Integer, Type> invalidatedProgramPoints) {
-        this.className  = functionNode.getCompileUnit().getUnitClassName();
+    public FunctionInitializer(FunctionNode functionNode, Map<Integer, Type> invalidatedProgramPoints) {
+        this.className = functionNode.getCompileUnit().getUnitClassName();
         this.methodType = new FunctionSignature(functionNode).getMethodType();
         this.flags = functionNode.getFlags();
         this.invalidatedProgramPoints = invalidatedProgramPoints;
 
-        final CompileUnit cu = functionNode.getCompileUnit();
+        var cu = functionNode.getCompileUnit();
         if (cu != null) {
             this.code = cu.getCode();
         }
@@ -81,8 +77,6 @@ public final class FunctionInitializer implements Serializable {
 
     /**
      * Returns the name of the class implementing the function.
-     *
-     * @return the class name
      */
     public String getClassName() {
         return className;
@@ -90,8 +84,6 @@ public final class FunctionInitializer implements Serializable {
 
     /**
      * Returns the type of the method implementing the function.
-     *
-     * @return the method type
      */
     public MethodType getMethodType() {
         return methodType;
@@ -99,8 +91,6 @@ public final class FunctionInitializer implements Serializable {
 
     /**
      * Returns the function flags.
-     *
-     * @return function flags
      */
     public int getFlags() {
         return flags;
@@ -108,8 +98,6 @@ public final class FunctionInitializer implements Serializable {
 
     /**
      * Returns the class implementing the function.
-     *
-     * @return the class
      */
     public Class<?> getCode() {
         return code;
@@ -117,9 +105,8 @@ public final class FunctionInitializer implements Serializable {
 
     /**
      * Set the class implementing the function
-     * @param code the class
      */
-    void setCode(final Class<?> code) {
+    void setCode(Class<?> code) {
         // Make sure code has not been set and has expected class name
         if (this.code != null) {
             throw new IllegalStateException("code already set");
@@ -130,20 +117,19 @@ public final class FunctionInitializer implements Serializable {
 
     /**
      * Returns the map of invalidated program points.
-     *
-     * @return invalidated program points
      */
     public Map<Integer, Type> getInvalidatedProgramPoints() {
         return invalidatedProgramPoints;
     }
 
-    private void writeObject(final ObjectOutputStream out) throws IOException {
+    private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
         Type.writeTypeMap(invalidatedProgramPoints, out);
     }
 
-    private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         invalidatedProgramPoints = Type.readTypeMap(in);
     }
+
 }

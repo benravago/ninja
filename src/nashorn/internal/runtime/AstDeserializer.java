@@ -37,14 +37,14 @@ import nashorn.internal.ir.FunctionNode;
  * The format is a standard Java serialization stream, deflated.
  */
 final class AstDeserializer {
-    static FunctionNode deserialize(final byte[] serializedAst) {
+    static FunctionNode deserialize(byte[] serializedAst) {
         return AccessController.doPrivileged(new PrivilegedAction<FunctionNode>() {
             @Override
             public FunctionNode run() {
                 try {
-                    return (FunctionNode)new ObjectInputStream(new InflaterInputStream(
-                        new ByteArrayInputStream(serializedAst))).readObject();
-                } catch (final ClassNotFoundException | IOException e) {
+                    return (FunctionNode)
+                        new ObjectInputStream(new InflaterInputStream(new ByteArrayInputStream(serializedAst))).readObject();
+                } catch (ClassNotFoundException | IOException e) {
                     // This is internal, can't happen
                     throw new AssertionError("Unexpected exception deserializing function", e);
                 }

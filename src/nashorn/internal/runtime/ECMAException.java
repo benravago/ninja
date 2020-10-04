@@ -35,17 +35,15 @@ import nashorn.internal.codegen.CompilerConstants.Call;
 import nashorn.internal.codegen.CompilerConstants.FieldAccess;
 
 /**
- * Exception used to implement ECMAScript "throw" from scripts. The actual thrown
- * object from script need not be a Java exception and so it is wrapped as an
- * instance field called "thrown" here. This exception class is also used to
- * represent ECMA errors thrown from runtime code (for example, TypeError,
- * ReferenceError thrown from Nashorn engine runtime).
+ * Exception used to implement ECMAScript "throw" from scripts.
+ *
+ * The actual thrown object from script need not be a Java exception and so it is wrapped as an instance field called "thrown" here.
+ * This exception class is also used to represent ECMA errors thrown from runtime code (for example, TypeError, ReferenceError thrown from Nashorn engine runtime).
  */
 @SuppressWarnings("serial")
 public final class ECMAException extends NashornException {
-    /**
-     * Method handle pointing to the constructor {@link ECMAException#create(Object, String, int, int)},
-     */
+
+    /** Method handle pointing to the constructor {@link ECMAException#create(Object, String, int, int)}, */
     public static final Call CREATE = staticCallNoLookup(ECMAException.class, "create", ECMAException.class, Object.class, String.class, int.class, int.class);
 
     /** Field handle to the{@link ECMAException#thrown} field, so that it can be accessed from generated code */
@@ -58,13 +56,12 @@ public final class ECMAException extends NashornException {
 
     /**
      * Constructor. Called from the factory method 'create'.
-     *
      * @param thrown    object to be thrown
      * @param fileName  script file name
      * @param line      line number of throw
      * @param column    column number of throw
      */
-    private ECMAException(final Object thrown, final String fileName, final int line, final int column) {
+    private ECMAException(Object thrown, String fileName, int line, int column) {
         super(ScriptRuntime.safeToString(thrown), asThrowable(thrown), fileName, line, column);
         this.thrown = thrown;
         setExceptionToThrown();
@@ -72,11 +69,10 @@ public final class ECMAException extends NashornException {
 
     /**
      * Constructor. This is called from the runtime code.
-     *
      * @param thrown   object to be thrown
      * @param cause    Java exception that triggered this throw
      */
-    public ECMAException(final Object thrown, final Throwable cause) {
+    public ECMAException(Object thrown, Throwable cause) {
         super(ScriptRuntime.safeToString(thrown), cause);
         this.thrown = thrown;
         setExceptionToThrown();
@@ -85,20 +81,18 @@ public final class ECMAException extends NashornException {
     /**
      * Factory method to retrieve the underlying exception or create an exception.
      * This method is called from the generated code.
-     *
      * @param thrown    object to be thrown
      * @param fileName  script file name
      * @param line      line number of throw
      * @param column    column number of throw
      * @return ECMAException object
      */
-    public static ECMAException create(final Object thrown, final String fileName, final int line, final int column) {
-        // If thrown object is an Error or sub-object like TypeError, then
-        // an ECMAException object has been already initialized at constructor.
+    public static ECMAException create(Object thrown, String fileName, int line, int column) {
+        // If thrown object is an Error or sub-object like TypeError, then an ECMAException object has been already initialized at constructor.
         if (thrown instanceof ScriptObject) {
-            final Object exception = getException((ScriptObject)thrown);
+            var exception = getException((ScriptObject)thrown);
             if (exception instanceof ECMAException) {
-                final ECMAException ee = (ECMAException)exception;
+                var ee = (ECMAException)exception;
                 // Make sure exception has correct thrown reference because that's what will end up getting caught.
                 if (ee.getThrown() == thrown) {
                     // copy over file name, line number and column number.
@@ -115,7 +109,6 @@ public final class ECMAException extends NashornException {
 
     /**
      * Get the thrown object
-     * @return thrown object
      */
     @Override
     public Object getThrown() {
@@ -124,10 +117,10 @@ public final class ECMAException extends NashornException {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        final String fileName = getFileName();
-        final int line = getLineNumber();
-        final int column = getColumnNumber();
+        var sb = new StringBuilder();
+        var fileName = getFileName();
+        var line = getLineNumber();
+        var column = getColumnNumber();
 
         if (fileName != null) {
             sb.append(fileName);
@@ -149,13 +142,9 @@ public final class ECMAException extends NashornException {
     }
 
     /**
-     * Get the {@link ECMAException}, i.e. the underlying Java object for the
-     * JavaScript error object from a {@link ScriptObject} representing an error
-     *
-     * @param errObj the error object
-     * @return a {@link ECMAException}
+     * Get the {@link ECMAException}, i.e. the underlying Java object for the JavaScript error object from a {@link ScriptObject} representing an error
      */
-    public static Object getException(final ScriptObject errObj) {
+    public static Object getException(ScriptObject errObj) {
         // Exclude inherited properties that may belong to errors in the prototype chain.
         if (errObj.hasOwnProperty(ECMAException.EXCEPTION_PROPERTY)) {
             return errObj.get(ECMAException.EXCEPTION_PROPERTY);
@@ -165,12 +154,9 @@ public final class ECMAException extends NashornException {
 
     /**
      * Print the stack trace for a {@code ScriptObject} representing an error
-     *
-     * @param errObj the error object
-     * @return undefined
      */
-    public static Object printStackTrace(final ScriptObject errObj) {
-        final Object exception = getException(errObj);
+    public static Object printStackTrace(ScriptObject errObj) {
+        var exception = getException(errObj);
         if (exception instanceof Throwable) {
             ((Throwable)exception).printStackTrace(Context.getCurrentErr());
         } else {
@@ -181,12 +167,11 @@ public final class ECMAException extends NashornException {
 
     /**
      * Get the line number for a {@code ScriptObject} representing an error
-     *
      * @param errObj the error object
      * @return the line number, or undefined if wrapped exception is not a ParserException
      */
-    public static Object getLineNumber(final ScriptObject errObj) {
-        final Object e = getException(errObj);
+    public static Object getLineNumber(ScriptObject errObj) {
+        var e = getException(errObj);
         if (e instanceof NashornException) {
             return ((NashornException)e).getLineNumber();
         } else if (e instanceof ScriptException) {
@@ -198,12 +183,11 @@ public final class ECMAException extends NashornException {
 
     /**
      * Get the column number for a {@code ScriptObject} representing an error
-     *
      * @param errObj the error object
      * @return the column number, or undefined if wrapped exception is not a ParserException
      */
-    public static Object getColumnNumber(final ScriptObject errObj) {
-        final Object e = getException(errObj);
+    public static Object getColumnNumber(ScriptObject errObj) {
+        var e = getException(errObj);
         if (e instanceof NashornException) {
             return ((NashornException)e).getColumnNumber();
         } else if (e instanceof ScriptException) {
@@ -215,12 +199,11 @@ public final class ECMAException extends NashornException {
 
     /**
      * Get the file name for a {@code ScriptObject} representing an error
-     *
      * @param errObj the error object
      * @return the file name, or undefined if wrapped exception is not a ParserException
      */
-    public static Object getFileName(final ScriptObject errObj) {
-        final Object e = getException(errObj);
+    public static Object getFileName(ScriptObject errObj) {
+        var e = getException(errObj);
         if (e instanceof NashornException) {
             return ((NashornException)e).getFileName();
         } else if (e instanceof ScriptException) {
@@ -232,15 +215,14 @@ public final class ECMAException extends NashornException {
 
     /**
      * Stateless string conversion for an error object
-     *
      * @param errObj the error object
      * @return string representation of {@code errObj}
      */
-    public static String safeToString(final ScriptObject errObj) {
+    public static String safeToString(ScriptObject errObj) {
         Object name = UNDEFINED;
         try {
             name = errObj.get("name");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             //ignored
         }
 
@@ -253,7 +235,7 @@ public final class ECMAException extends NashornException {
         Object msg = UNDEFINED;
         try {
             msg = errObj.get("message");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             //ignored
         }
 
@@ -274,20 +256,19 @@ public final class ECMAException extends NashornException {
         return name + ": " + msg;
     }
 
-    private static Throwable asThrowable(final Object obj) {
+    private static Throwable asThrowable(Object obj) {
         return (obj instanceof Throwable)? (Throwable)obj : null;
     }
 
     private void setExceptionToThrown() {
         /*
          * Nashorn extension: errorObject.nashornException
-         * Expose this exception via "nashornException" property of on the
-         * thrown object. This exception object can be used to print stack
-         * trace and fileName, line number etc. from script code.
+         * Expose this exception via "nashornException" property of on the thrown object.
+         * This exception object can be used to print stack trace and fileName, line number etc. from script code.
          */
 
         if (thrown instanceof ScriptObject) {
-            final ScriptObject sobj = (ScriptObject)thrown;
+            var sobj = (ScriptObject)thrown;
             if (!sobj.has(EXCEPTION_PROPERTY)) {
                 sobj.addOwnProperty(EXCEPTION_PROPERTY, Property.NOT_ENUMERABLE, this);
             } else {
@@ -295,4 +276,5 @@ public final class ECMAException extends NashornException {
             }
         }
     }
+
 }

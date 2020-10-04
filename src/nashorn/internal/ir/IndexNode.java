@@ -28,37 +28,31 @@ package nashorn.internal.ir;
 import nashorn.internal.codegen.types.Type;
 import nashorn.internal.ir.annotations.Immutable;
 import nashorn.internal.ir.visitor.NodeVisitor;
+
 /**
  * IR representation of an indexed access (brackets operator.)
  */
 @Immutable
 public final class IndexNode extends BaseNode {
-    private static final long serialVersionUID = 1L;
 
     /** Property index. */
     private final Expression index;
 
     /**
      * Constructors
-     *
-     * @param token   token
-     * @param finish  finish
-     * @param base    base node for access
-     * @param index   index for access
      */
-    public IndexNode(final long token, final int finish, final Expression base, final Expression index) {
+    public IndexNode(long token, int finish, Expression base, Expression index) {
         super(token, finish, base, false, false);
         this.index = index;
     }
 
-    private IndexNode(final IndexNode indexNode, final Expression base, final Expression index, final boolean isFunction,
-                      final Type type, final int programPoint, final boolean isSuper) {
+    private IndexNode(IndexNode indexNode, Expression base, Expression index, boolean isFunction, Type type, int programPoint, boolean isSuper) {
         super(indexNode, base, isFunction, type, programPoint, isSuper);
         this.index = index;
     }
 
     @Override
-    public Node accept(final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(NodeVisitor<? extends LexicalContext> visitor) {
         if (visitor.enterIndexNode(this)) {
             return visitor.leaveIndexNode(
                 setBase((Expression)base.accept(visitor)).
@@ -68,8 +62,8 @@ public final class IndexNode extends BaseNode {
     }
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printType) {
-        final boolean needsParen = tokenType().needsParens(base.tokenType(), true);
+    public void toString(StringBuilder sb, boolean printType) {
+        var needsParen = tokenType().needsParens(base.tokenType(), true);
 
         if (needsParen) {
             sb.append('(');
@@ -92,13 +86,12 @@ public final class IndexNode extends BaseNode {
 
     /**
      * Get the index expression for this IndexNode
-     * @return the index
      */
     public Expression getIndex() {
         return index;
     }
 
-    private IndexNode setBase(final Expression base) {
+    private IndexNode setBase(Expression base) {
         if (this.base == base) {
             return this;
         }
@@ -107,18 +100,16 @@ public final class IndexNode extends BaseNode {
 
     /**
      * Set the index expression for this node
-     * @param index new index expression
-     * @return a node equivalent to this one except for the requested change.
      */
-    public IndexNode setIndex(final Expression index) {
-        if(this.index == index) {
+    public IndexNode setIndex(Expression index) {
+        if (this.index == index) {
             return this;
         }
         return new IndexNode(this, base, index, isFunction(), type, programPoint, isSuper());
     }
 
     @Override
-    public IndexNode setType(final Type type) {
+    public IndexNode setType(Type type) {
         if (this.type == type) {
             return this;
         }
@@ -134,7 +125,7 @@ public final class IndexNode extends BaseNode {
     }
 
     @Override
-    public IndexNode setProgramPoint(final int programPoint) {
+    public IndexNode setProgramPoint(int programPoint) {
         if (this.programPoint == programPoint) {
             return this;
         }
@@ -148,4 +139,5 @@ public final class IndexNode extends BaseNode {
         }
         return new IndexNode(this, base, index, isFunction(), type, programPoint, true);
     }
+
 }

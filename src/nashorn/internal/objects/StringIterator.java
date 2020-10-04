@@ -46,7 +46,7 @@ public class StringIterator extends AbstractIterator {
     private int nextIndex = 0;
     private final Global global;
 
-    StringIterator(final String iteratedString, final Global global) {
+    StringIterator(String iteratedString, Global global) {
         super(global.getStringIteratorPrototype(), $nasgenmap$);
         this.iteratedString = iteratedString;
         this.global = global;
@@ -54,13 +54,9 @@ public class StringIterator extends AbstractIterator {
 
     /**
      * ES6 21.1.5.2.1 %StringIteratorPrototype%.next()
-     *
-     * @param self the self reference
-     * @param arg the argument
-     * @return the next result
      */
     @Function
-    public static Object next(final Object self, final Object arg) {
+    public static Object next(Object self, Object arg) {
         if (!(self instanceof StringIterator)) {
             throw typeError("not.a.string.iterator", ScriptRuntime.safeToString(self));
         }
@@ -73,9 +69,9 @@ public class StringIterator extends AbstractIterator {
     }
 
     @Override
-    protected IteratorResult next(final Object arg) {
-        final int index = nextIndex;
-        final String string = iteratedString;
+    protected IteratorResult next(Object arg) {
+        var index = nextIndex;
+        var string = iteratedString;
 
         if (string == null || index >= string.length()) {
             // ES6 21.1.5.2.1 step 8
@@ -83,9 +79,9 @@ public class StringIterator extends AbstractIterator {
             return makeResult(Undefined.getUndefined(), Boolean.TRUE, global);
         }
 
-        final char first = string.charAt(index);
+        var first = string.charAt(index);
         if (first >= 0xd800 && first <= 0xdbff && index < string.length() - 1) {
-            final char second = string.charAt(index + 1);
+            var second = string.charAt(index + 1);
             if (second >= 0xdc00 && second <= 0xdfff) {
                 nextIndex += 2;
                 return makeResult(String.valueOf(new char[] {first, second}), Boolean.FALSE, global);
@@ -95,4 +91,5 @@ public class StringIterator extends AbstractIterator {
         nextIndex++;
         return makeResult(String.valueOf(first), Boolean.FALSE, global);
     }
+
 }

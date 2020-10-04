@@ -49,19 +49,18 @@ import static org.objectweb.asm.Opcodes.ISUB;
 import static org.objectweb.asm.Opcodes.IUSHR;
 import static org.objectweb.asm.Opcodes.IXOR;
 import static org.objectweb.asm.Opcodes.SIPUSH;
+import org.objectweb.asm.MethodVisitor;
+
+import nashorn.internal.codegen.CompilerConstants;
+import nashorn.internal.runtime.JSType;
 import static nashorn.internal.codegen.CompilerConstants.staticCallNoLookup;
 import static nashorn.internal.runtime.JSType.UNDEFINED_INT;
 import static nashorn.internal.runtime.UnwarrantedOptimismException.INVALID_PROGRAM_POINT;
-
-import org.objectweb.asm.MethodVisitor;
-import nashorn.internal.codegen.CompilerConstants;
-import nashorn.internal.runtime.JSType;
 
 /**
  * Type class: INT
  */
 class IntType extends BitwiseType {
-    private static final long serialVersionUID = 1L;
 
     private static final CompilerConstants.Call TO_STRING = staticCallNoLookup(Integer.class, "toString", String.class, int.class);
     private static final CompilerConstants.Call VALUE_OF  = staticCallNoLookup(Integer.class, "valueOf", Integer.class, int.class);
@@ -86,49 +85,37 @@ class IntType extends BitwiseType {
     }
 
     @Override
-    public Type ldc(final MethodVisitor method, final Object c) {
+    public Type ldc(MethodVisitor method, Object c) {
         assert c instanceof Integer;
 
-        final int value = ((Integer) c);
+        int value = ((Integer) c);
 
         switch (value) {
-        case -1:
-            method.visitInsn(ICONST_M1);
-            break;
-        case 0:
-            method.visitInsn(ICONST_0);
-            break;
-        case 1:
-            method.visitInsn(ICONST_1);
-            break;
-        case 2:
-            method.visitInsn(ICONST_2);
-            break;
-        case 3:
-            method.visitInsn(ICONST_3);
-            break;
-        case 4:
-            method.visitInsn(ICONST_4);
-            break;
-        case 5:
-            method.visitInsn(ICONST_5);
-            break;
-        default:
-            if (value == (byte) value) {
-                method.visitIntInsn(BIPUSH, value);
-            } else if (value == (short) value) {
-                method.visitIntInsn(SIPUSH, value);
-            } else {
-                method.visitLdcInsn(c);
+
+            case -1 -> method.visitInsn(ICONST_M1);
+            case 0 -> method.visitInsn(ICONST_0);
+            case 1 -> method.visitInsn(ICONST_1);
+            case 2 -> method.visitInsn(ICONST_2);
+            case 3 -> method.visitInsn(ICONST_3);
+            case 4 -> method.visitInsn(ICONST_4);
+            case 5 -> method.visitInsn(ICONST_5);
+
+            default -> {
+                if (value == (byte) value) {
+                    method.visitIntInsn(BIPUSH, value);
+                } else if (value == (short) value) {
+                    method.visitIntInsn(SIPUSH, value);
+                } else {
+                    method.visitLdcInsn(c);
+                }
             }
-            break;
         }
 
         return Type.INT;
     }
 
     @Override
-    public Type convert(final MethodVisitor method, final Type to) {
+    public Type convert(MethodVisitor method, Type to) {
         if (to.isEquivalentTo(this)) {
             return to;
         }
@@ -151,8 +138,8 @@ class IntType extends BitwiseType {
     }
 
     @Override
-    public Type add(final MethodVisitor method, final int programPoint) {
-        if(programPoint == INVALID_PROGRAM_POINT) {
+    public Type add(MethodVisitor method, int programPoint) {
+        if (programPoint == INVALID_PROGRAM_POINT) {
             method.visitInsn(IADD);
         } else {
             ldc(method, programPoint);
@@ -162,57 +149,57 @@ class IntType extends BitwiseType {
     }
 
     @Override
-    public Type shr(final MethodVisitor method) {
+    public Type shr(MethodVisitor method) {
         method.visitInsn(IUSHR);
         return INT;
     }
 
     @Override
-    public Type sar(final MethodVisitor method) {
+    public Type sar(MethodVisitor method) {
         method.visitInsn(ISHR);
         return INT;
     }
 
     @Override
-    public Type shl(final MethodVisitor method) {
+    public Type shl(MethodVisitor method) {
         method.visitInsn(ISHL);
         return INT;
     }
 
     @Override
-    public Type and(final MethodVisitor method) {
+    public Type and(MethodVisitor method) {
         method.visitInsn(IAND);
         return INT;
     }
 
     @Override
-    public Type or(final MethodVisitor method) {
+    public Type or(MethodVisitor method) {
         method.visitInsn(IOR);
         return INT;
     }
 
     @Override
-    public Type xor(final MethodVisitor method) {
+    public Type xor(MethodVisitor method) {
         method.visitInsn(IXOR);
         return INT;
     }
 
     @Override
-    public Type load(final MethodVisitor method, final int slot) {
+    public Type load(MethodVisitor method, int slot) {
         assert slot != -1;
         method.visitVarInsn(ILOAD, slot);
         return INT;
     }
 
     @Override
-    public void store(final MethodVisitor method, final int slot) {
+    public void store(MethodVisitor method, int slot) {
         assert slot != -1;
         method.visitVarInsn(ISTORE, slot);
     }
 
     @Override
-    public Type sub(final MethodVisitor method, final int programPoint) {
-        if(programPoint == INVALID_PROGRAM_POINT) {
+    public Type sub(MethodVisitor method, int programPoint) {
+        if (programPoint == INVALID_PROGRAM_POINT) {
             method.visitInsn(ISUB);
         } else {
             ldc(method, programPoint);
@@ -222,8 +209,8 @@ class IntType extends BitwiseType {
     }
 
     @Override
-    public Type mul(final MethodVisitor method, final int programPoint) {
-        if(programPoint == INVALID_PROGRAM_POINT) {
+    public Type mul(MethodVisitor method, int programPoint) {
+        if (programPoint == INVALID_PROGRAM_POINT) {
             method.visitInsn(IMUL);
         } else {
             ldc(method, programPoint);
@@ -233,7 +220,7 @@ class IntType extends BitwiseType {
     }
 
     @Override
-    public Type div(final MethodVisitor method, final int programPoint) {
+    public Type div(MethodVisitor method, int programPoint) {
         if (programPoint == INVALID_PROGRAM_POINT) {
             JSType.DIV_ZERO.invoke(method);
         } else {
@@ -244,7 +231,7 @@ class IntType extends BitwiseType {
     }
 
     @Override
-    public Type rem(final MethodVisitor method, final int programPoint) {
+    public Type rem(MethodVisitor method, int programPoint) {
         if (programPoint == INVALID_PROGRAM_POINT) {
             JSType.REM_ZERO.invoke(method);
         } else {
@@ -255,8 +242,8 @@ class IntType extends BitwiseType {
     }
 
     @Override
-    public Type neg(final MethodVisitor method, final int programPoint) {
-        if(programPoint == INVALID_PROGRAM_POINT) {
+    public Type neg(MethodVisitor method, int programPoint) {
+        if (programPoint == INVALID_PROGRAM_POINT) {
             method.visitInsn(INEG);
         } else {
             ldc(method, programPoint);
@@ -266,29 +253,29 @@ class IntType extends BitwiseType {
     }
 
     @Override
-    public void _return(final MethodVisitor method) {
+    public void doReturn(MethodVisitor method) {
         method.visitInsn(IRETURN);
     }
 
     @Override
-    public Type loadUndefined(final MethodVisitor method) {
+    public Type loadUndefined(MethodVisitor method) {
         method.visitLdcInsn(UNDEFINED_INT);
         return INT;
     }
 
     @Override
-    public Type loadForcedInitializer(final MethodVisitor method) {
+    public Type loadForcedInitializer(MethodVisitor method) {
         method.visitInsn(ICONST_0);
         return INT;
     }
 
     @Override
-    public Type cmp(final MethodVisitor method, final boolean isCmpG) {
+    public Type cmp(MethodVisitor method, boolean isCmpG) {
         throw new UnsupportedOperationException("cmp" + (isCmpG ? 'g' : 'l'));
     }
 
     @Override
-    public Type cmp(final MethodVisitor method) {
+    public Type cmp(MethodVisitor method) {
         throw new UnsupportedOperationException("cmp");
     }
 

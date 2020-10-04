@@ -35,7 +35,6 @@ class ParserContextLabelNode extends ParserContextBaseNode {
 
     /**
      * Constructor
-     *
      * @param name The name of the label
      */
     public ParserContextLabelNode(final String name) {
@@ -44,9 +43,9 @@ class ParserContextLabelNode extends ParserContextBaseNode {
 
     /**
      * Returns the name of the label
-     * @return name of label
      */
     public String getLabelName() {
         return name;
     }
+
 }

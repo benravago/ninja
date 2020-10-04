@@ -47,6 +47,7 @@ import nashorn.internal.runtime.regexp.RegExpFactory;
  * Base class for parsers.
  */
 public abstract class AbstractParser {
+
     /** Source to parse. */
     protected final Source source;
 
@@ -93,32 +94,27 @@ public abstract class AbstractParser {
 
     /**
      * Construct a parser.
-     *
      * @param source     Source to parse.
      * @param errors     Error reporting manager.
      * @param lineOffset Offset from which lines should be counted
      */
-    protected AbstractParser(final Source source, final ErrorManager errors, final int lineOffset) {
+    protected AbstractParser(Source source, ErrorManager errors, int lineOffset) {
         if (source.getLength() > Token.LENGTH_MASK) {
             throw new IllegalArgumentException("Source exceeds size limit of " + Token.LENGTH_MASK + " bytes");
         }
-        this.source       = source;
-        this.errors       = errors;
-        this.k            = -1;
-        this.token        = Token.toDesc(EOL, 0, 1);
-        this.type         = EOL;
-        this.last         = EOL;
-        this.lineOffset   = lineOffset;
+        this.source = source;
+        this.errors = errors;
+        this.k = -1;
+        this.token = Token.toDesc(EOL, 0, 1);
+        this.type = EOL;
+        this.last = EOL;
+        this.lineOffset = lineOffset;
     }
 
     /**
      * Get the ith token.
-     *
-     * @param i Index of token.
-     *
-     * @return  the token
      */
-    protected final long getToken(final int i) {
+    protected final long getToken(int i) {
         // Make sure there are enough tokens available.
         while (i > stream.last()) {
             // If we need to buffer more for lookahead.
@@ -135,20 +131,14 @@ public abstract class AbstractParser {
 
     /**
      * Return the tokenType of the ith token.
-     *
-     * @param i Index of token
-     *
-     * @return the token type
      */
-    protected final TokenType T(final int i) {
+    protected final TokenType T(int i) {
         // Get token descriptor and extract tokenType.
         return Token.descType(getToken(i));
     }
 
     /**
      * Seek next token that is not an EOL or comment.
-     *
-     * @return tokenType of next token.
      */
     protected final TokenType next() {
         do {
@@ -160,8 +150,6 @@ public abstract class AbstractParser {
 
     /**
      * Seek next token or EOL (skipping comments.)
-     *
-     * @return tokenType of next token.
      */
     protected final TokenType nextOrEOL() {
         do {
@@ -184,8 +172,8 @@ public abstract class AbstractParser {
             return;
         }
 
-        final String comment = (String) lexer.getValueOf(token);
-        final int len = comment.length();
+        var comment = (String) lexer.getValueOf(token);
+        var len = comment.length();
         // 4 characters for directive comment marker //@\s or //#\s
         if (len > 4 && comment.substring(4).startsWith(SOURCE_URL_PREFIX)) {
             source.setExplicitURL(comment.substring(4 + SOURCE_URL_PREFIX.length()));
@@ -194,8 +182,6 @@ public abstract class AbstractParser {
 
     /**
      * Seek next token.
-     *
-     * @return tokenType of next token.
      */
     private TokenType nextToken() {
         // Capture last token type, but ignore comments (which are irrelevant for the purpose of newline detection).
@@ -206,7 +192,7 @@ public abstract class AbstractParser {
 
             // Set up next token.
             k++;
-            final long lastToken = token;
+            var lastToken = token;
             previousToken = token;
             token = getToken(k);
             type = Token.descType(token);
@@ -217,7 +203,7 @@ public abstract class AbstractParser {
             }
 
             if (type == EOL) {
-                line         = Token.descLength(token);
+                line = Token.descLength(token);
                 linePosition = Token.descPosition(token);
             } else {
                 start = Token.descPosition(token);
@@ -230,94 +216,80 @@ public abstract class AbstractParser {
 
     /**
      * Get the message string for a message ID and arguments
-     *
-     * @param msgId The Message ID
-     * @param args  The arguments
-     *
-     * @return The message string
      */
-    protected static String message(final String msgId, final String... args) {
+    protected static String message(String msgId, String... args) {
         return ECMAErrors.getMessage("parser.error." + msgId, args);
     }
 
     /**
      * Report an error.
-     *
      * @param message    Error message.
      * @param errorToken Offending token.
      * @return ParserException upon failure. Caller should throw and not ignore
      */
-    protected final ParserException error(final String message, final long errorToken) {
+    protected final ParserException error(String message, long errorToken) {
         return error(JSErrorType.SYNTAX_ERROR, message, errorToken);
     }
 
     /**
      * Report an error.
-     *
      * @param errorType  The error type
      * @param message    Error message.
      * @param errorToken Offending token.
      * @return ParserException upon failure. Caller should throw and not ignore
      */
-    protected final ParserException error(final JSErrorType errorType, final String message, final long errorToken) {
-        final int position  = Token.descPosition(errorToken);
-        final int lineNum   = source.getLine(position);
-        final int columnNum = source.getColumn(position);
-        final String formatted = ErrorManager.format(message, source, lineNum, columnNum, errorToken);
+    protected final ParserException error(JSErrorType errorType, String message, long errorToken) {
+        var position = Token.descPosition(errorToken);
+        var lineNum = source.getLine(position);
+        var columnNum = source.getColumn(position);
+        var formatted = ErrorManager.format(message, source, lineNum, columnNum, errorToken);
         return new ParserException(errorType, formatted, source, lineNum, columnNum, errorToken);
     }
 
     /**
      * Report an error.
-     *
      * @param message Error message.
      * @return ParserException upon failure. Caller should throw and not ignore
      */
-    protected final ParserException error(final String message) {
+    protected final ParserException error(String message) {
         return error(JSErrorType.SYNTAX_ERROR, message);
     }
 
     /**
      * Report an error.
-     *
      * @param errorType  The error type
      * @param message    Error message.
      * @return ParserException upon failure. Caller should throw and not ignore
      */
-    protected final ParserException error(final JSErrorType errorType, final String message) {
+    protected final ParserException error(JSErrorType errorType, String message) {
         // TODO - column needs to account for tabs.
-        final int position = Token.descPosition(token);
-        final int column = position - linePosition;
-        final String formatted = ErrorManager.format(message, source, line, column, token);
+        var position = Token.descPosition(token);
+        var column = position - linePosition;
+        var formatted = ErrorManager.format(message, source, line, column, token);
         return new ParserException(errorType, formatted, source, line, column, token);
     }
 
     /**
      * Report a warning to the error manager.
-     *
      * @param errorType  The error type of the warning
      * @param message    Warning message.
      * @param errorToken error token
      */
-    protected final void warning(final JSErrorType errorType, final String message, final long errorToken) {
+    protected final void warning(JSErrorType errorType, String message, long errorToken) {
         errors.warning(error(errorType, message, errorToken));
     }
 
     /**
      * Generate 'expected' message.
-     *
-     * @param expected Expected tokenType.
-     *
-     * @return the message string
      */
-    protected final String expectMessage(final TokenType expected) {
-        final String tokenString = Token.toString(source, token);
+    protected final String expectMessage(TokenType expected) {
+        var tokenString = Token.toString(source, token);
         String msg;
 
         if (expected == null) {
             msg = AbstractParser.message("expected.stmt", tokenString);
         } else {
-            final String expectedName = expected.getNameOrType();
+            var expectedName = expected.getNameOrType();
             msg = AbstractParser.message("expected", expectedName, tokenString);
         }
 
@@ -326,24 +298,16 @@ public abstract class AbstractParser {
 
     /**
      * Check current token and advance to the next token.
-     *
-     * @param expected Expected tokenType.
-     *
-     * @throws ParserException on unexpected token type
      */
-    protected final void expect(final TokenType expected) throws ParserException {
+    protected final void expect(TokenType expected) throws ParserException {
         expectDontAdvance(expected);
         next();
     }
 
     /**
      * Check current token, but don't advance to the next token.
-     *
-     * @param expected Expected tokenType.
-     *
-     * @throws ParserException on unexpected token type
      */
-    protected final void expectDontAdvance(final TokenType expected) throws ParserException {
+    protected final void expectDontAdvance(TokenType expected) throws ParserException {
         if (type != expected) {
             throw error(expectMessage(expected));
         }
@@ -351,17 +315,16 @@ public abstract class AbstractParser {
 
     /**
      * Check next token, get its value and advance.
-     *
      * @param  expected Expected tokenType.
      * @return The JavaScript value of the token
      * @throws ParserException on unexpected token type
      */
-    protected final Object expectValue(final TokenType expected) throws ParserException {
+    protected final Object expectValue(TokenType expected) throws ParserException {
         if (type != expected) {
             throw error(expectMessage(expected));
         }
 
-        final Object value = getValue();
+        var value = getValue();
 
         next();
 
@@ -370,8 +333,6 @@ public abstract class AbstractParser {
 
     /**
      * Get the value of the current token.
-     *
-     * @return JavaScript value of the token.
      */
     protected final Object getValue() {
         return getValue(token);
@@ -379,15 +340,11 @@ public abstract class AbstractParser {
 
     /**
      * Get the value of a specific token
-     *
-     * @param valueToken the token
-     *
-     * @return JavaScript value of the token
      */
-    protected final Object getValue(final long valueToken) {
+    protected final Object getValue(long valueToken) {
         try {
             return lexer.getValueOf(valueToken);
-        } catch (final ParserException e) {
+        } catch (ParserException e) {
             errors.error(e);
         }
 
@@ -396,15 +353,13 @@ public abstract class AbstractParser {
 
     /**
      * Get ident.
-     *
-     * @return Ident node.
      */
     protected final IdentNode getIdent() {
         // Capture IDENT token.
-        long identToken = token;
+        var identToken = token;
 
         // Get IDENT.
-        final String ident = (String)expectValue(IDENT);
+        var ident = (String)expectValue(IDENT);
         if (ident == null) {
             return null;
         }
@@ -413,63 +368,53 @@ public abstract class AbstractParser {
     }
 
     /**
-     * Creates a new {@link IdentNode} as if invoked with a {@link IdentNode#IdentNode(long, int, String)
-     * constructor} but making sure that the {@code name} is deduplicated within this parse job.
+     * Creates a new {@link IdentNode} as if invoked with a {@link IdentNode#IdentNode(long, int, String) constructor} but making sure that the {@code name} is deduplicated within this parse job.
      * @param identToken the token for the new {@code IdentNode}
      * @param identFinish the finish for the new {@code IdentNode}
      * @param name the name for the new {@code IdentNode}. It will be de-duplicated.
-     * @return a newly constructed {@code IdentNode} with the specified token, finish, and name; the name will
-     * be deduplicated.
+     * @return a newly constructed {@code IdentNode} with the specified token, finish, and name; the name will be deduplicated.
      */
-    protected IdentNode createIdentNode(final long identToken, final int identFinish, final String name) {
-        final String existingName = canonicalNames.putIfAbsent(name, name);
-        final String canonicalName = existingName != null ? existingName : name;
+    protected IdentNode createIdentNode(long identToken, int identFinish, String name) {
+        var existingName = canonicalNames.putIfAbsent(name, name);
+        var canonicalName = existingName != null ? existingName : name;
         return new IdentNode(identToken, identFinish, canonicalName);
     }
 
     /**
      * Check if current token is in identifier name
-     *
-     * @return true if current token is an identifier name
      */
     protected final boolean isIdentifierName() {
-        final TokenKind kind = type.getKind();
+        var kind = type.getKind();
         if (kind == TokenKind.KEYWORD || kind == TokenKind.FUTURE) {
             return true;
         }
 
         // only literals allowed are null, false and true
         if (kind == TokenKind.LITERAL) {
-            switch (type) {
-                case FALSE:
-                case NULL:
-                case TRUE:
-                    return true;
-                default:
-                    return false;
-            }
+            return switch (type) {
+                case FALSE, NULL, TRUE -> true;
+                default -> false;
+            };
         }
 
         // Fake out identifier.
-        final long identToken = Token.recast(token, IDENT);
+        var identToken = Token.recast(token, IDENT);
         // Get IDENT.
-        final String ident = (String)getValue(identToken);
+        var ident = (String)getValue(identToken);
         return !ident.isEmpty() && Character.isJavaIdentifierStart(ident.charAt(0));
     }
 
     /**
      * Create an IdentNode from the current token
-     *
-     * @return an IdentNode representing the current token
      */
     protected final IdentNode getIdentifierName() {
         if (type == IDENT) {
             return getIdent();
         } else if (isIdentifierName()) {
             // Fake out identifier.
-            final long identToken = Token.recast(token, IDENT);
+            var identToken = Token.recast(token, IDENT);
             // Get IDENT.
-            final String ident = (String)getValue(identToken);
+            var ident = (String)getValue(identToken);
             next();
             // Create IDENT node.
             return createIdentNode(identToken, finish, ident);
@@ -481,16 +426,15 @@ public abstract class AbstractParser {
 
     /**
      * Create a LiteralNode from the current token
-     *
      * @return LiteralNode representing the current token
      * @throws ParserException if any literals fails to parse
      */
     protected final LiteralNode<?> getLiteral() throws ParserException {
         // Capture LITERAL token.
-        final long literalToken = token;
+        var literalToken = token;
 
         // Create literal node.
-        final Object value = getValue();
+        var value = getValue();
         // Advance to have a correct finish
         next();
 
@@ -504,10 +448,10 @@ public abstract class AbstractParser {
             node = LiteralNode.newInstance(literalToken, finish, (String)value);
         } else if (value instanceof LexerToken) {
             if (value instanceof RegexToken) {
-                final RegexToken regex = (RegexToken)value;
+                var regex = (RegexToken)value;
                 try {
                     RegExpFactory.validate(regex.getExpression(), regex.getOptions());
-                } catch (final ParserException e) {
+                } catch (ParserException e) {
                     throw error(e.getMessage());
                 }
             }
@@ -518,4 +462,5 @@ public abstract class AbstractParser {
 
         return node;
     }
+
 }

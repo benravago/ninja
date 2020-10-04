@@ -25,8 +25,6 @@
 
 package nashorn.internal.runtime.arrays;
 
-import static nashorn.internal.runtime.ECMAErrors.typeError;
-
 import nashorn.internal.objects.Global;
 import nashorn.internal.runtime.PropertyDescriptor;
 
@@ -34,7 +32,8 @@ import nashorn.internal.runtime.PropertyDescriptor;
  * ArrayData after the array has been sealed by Object.seal call.
  */
 class SealedArrayFilter extends ArrayFilter {
-    SealedArrayFilter(final ArrayData underlying) {
+
+    SealedArrayFilter(ArrayData underlying) {
         super(underlying);
     }
 
@@ -44,22 +43,23 @@ class SealedArrayFilter extends ArrayFilter {
     }
 
     @Override
-    public ArrayData slice(final long from, final long to) {
+    public ArrayData slice(long from, long to) {
         return getUnderlying().slice(from, to);
     }
 
     @Override
-    public boolean canDelete(final int index) {
+    public boolean canDelete(int index) {
         return canDelete(ArrayIndex.toLongIndex(index));
     }
 
     @Override
-    public boolean canDelete(final long longIndex) {
-    	return false; // throw typeError("cant.delete.property", Long.toString(longIndex), "sealed array");
+    public boolean canDelete(long longIndex) {
+        return false; // throw typeError("cant.delete.property", Long.toString(longIndex), "sealed array");
     }
 
     @Override
-    public PropertyDescriptor getDescriptor(final Global global, final int index) {
+    public PropertyDescriptor getDescriptor(Global global, int index) {
         return global.newDataDescriptor(getObject(index), false, true, true);
     }
+
 }

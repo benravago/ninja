@@ -33,4 +33,5 @@ class ParserContextSwitchNode extends ParserContextBaseNode implements ParserCon
     public boolean isBreakableWithoutLabel() {
         return true;
     }
+
 }

@@ -25,7 +25,6 @@
 
 package nashorn.internal.runtime.arrays;
 
-import static nashorn.internal.runtime.ECMAErrors.typeError;
 import nashorn.internal.objects.Global;
 import nashorn.internal.runtime.PropertyDescriptor;
 import nashorn.internal.runtime.ScriptRuntime;
@@ -34,7 +33,8 @@ import nashorn.internal.runtime.ScriptRuntime;
  * ArrayData after the array has been frozen by Object.freeze call.
  */
 final class FrozenArrayFilter extends SealedArrayFilter {
-    FrozenArrayFilter(final ArrayData underlying) {
+
+    FrozenArrayFilter(ArrayData underlying) {
         super(underlying);
     }
 
@@ -44,33 +44,34 @@ final class FrozenArrayFilter extends SealedArrayFilter {
     }
 
     @Override
-    public PropertyDescriptor getDescriptor(final Global global, final int index) {
+    public PropertyDescriptor getDescriptor(Global global, int index) {
         return global.newDataDescriptor(getObject(index), false, true, false);
     }
 
     @Override
-    public ArrayData set(final int index, final int value) {
+    public ArrayData set(int index, int value) {
         return this; // throw typeError("cant.set.property", Integer.toString(index), "frozen array");
     }
 
     @Override
-    public ArrayData set(final int index, final double value) {
+    public ArrayData set(int index, double value) {
         return this; // throw typeError("cant.set.property", Integer.toString(index), "frozen array");
     }
 
     @Override
-    public ArrayData set(final int index, final Object value) {
+    public ArrayData set(int index, Object value) {
         return this; // throw typeError("cant.set.property", Integer.toString(index), "frozen array");
     }
 
     @Override
-    public ArrayData push(final Object... items) {
-        return this; //nop
+    public ArrayData push(Object... items) {
+        return this; // nop
     }
 
     @Override
     public Object pop() {
-        final int len = (int)underlying.length();
+        var len = (int)underlying.length();
         return len == 0 ? ScriptRuntime.UNDEFINED : underlying.getObject(len - 1);
     }
+
 }

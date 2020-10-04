@@ -33,7 +33,7 @@ import nashorn.internal.runtime.ScriptObject;
  */
 final class ReverseScriptObjectIterator extends ScriptObjectIterator {
 
-    ReverseScriptObjectIterator(final ScriptObject obj, final boolean includeUndefined) {
+    ReverseScriptObjectIterator(ScriptObject obj, boolean includeUndefined) {
         super(obj, includeUndefined);
         this.index = JSType.toUint32(obj.getLength()) - 1;
     }
@@ -52,4 +52,5 @@ final class ReverseScriptObjectIterator extends ScriptObjectIterator {
     protected long bumpIndex() {
         return index--;
     }
+
 }

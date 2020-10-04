@@ -32,6 +32,7 @@ import nashorn.internal.ir.Statement;
  * Base class for parser context nodes
  */
 abstract class ParserContextBaseNode implements ParserContextNode {
+
     /**
      * Flags for this node
      */
@@ -46,9 +47,6 @@ abstract class ParserContextBaseNode implements ParserContextNode {
         this.statements = new ArrayList<>();
     }
 
-    /**
-     * @return The flags for this node
-     */
     @Override
     public int getFlags() {
         return flags;
@@ -56,54 +54,44 @@ abstract class ParserContextBaseNode implements ParserContextNode {
 
     /**
      * Returns a single flag
-     * @param flag flag
-     * @return A single flag
      */
-    protected int getFlag(final int flag) {
+    protected int getFlag(int flag) {
         return (flags & flag);
     }
 
     /**
-     * @param flag flag
-     * @return the new flags
+     * Sets a single flag
      */
     @Override
-    public int setFlag(final int flag) {
+    public int setFlag(int flag) {
         flags |= flag;
         return flags;
     }
 
-    /**
-     * @return The list of statements that belongs to this node
-     */
     @Override
     public List<Statement> getStatements() {
         return statements;
     }
 
-    /**
-     * @param statements statements
-     */
     @Override
-    public void setStatements(final List<Statement> statements) {
+    public void setStatements(List<Statement> statements) {
         this.statements = statements;
     }
 
     /**
      * Adds a statement at the end of the statement list
-     * @param statement The statement to add
      */
     @Override
-    public void appendStatement(final Statement statement) {
+    public void appendStatement(Statement statement) {
         this.statements.add(statement);
     }
 
     /**
      * Adds a statement at the beginning of the statement list
-     * @param statement The statement to add
      */
     @Override
-    public void prependStatement(final Statement statement) {
+    public void prependStatement(Statement statement) {
         this.statements.add(0, statement);
     }
+
 }

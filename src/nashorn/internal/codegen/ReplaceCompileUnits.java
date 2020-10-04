@@ -26,7 +26,7 @@
 package nashorn.internal.codegen;
 
 import java.util.ArrayList;
-import java.util.List;
+
 import nashorn.internal.ir.CompileUnitHolder;
 import nashorn.internal.ir.FunctionNode;
 import nashorn.internal.ir.LiteralNode;
@@ -43,35 +43,33 @@ abstract class ReplaceCompileUnits extends SimpleNodeVisitor {
 
     /**
      * Override to provide a replacement for an old compile unit.
-     * @param oldUnit the old compile unit to replace
-     * @return the compile unit's replacement.
      */
-    abstract CompileUnit getReplacement(final CompileUnit oldUnit);
+    abstract CompileUnit getReplacement(CompileUnit oldUnit);
 
-    CompileUnit getExistingReplacement(final CompileUnitHolder node) {
-        final CompileUnit oldUnit = node.getCompileUnit();
+    CompileUnit getExistingReplacement(CompileUnitHolder node) {
+        var oldUnit = node.getCompileUnit();
         assert oldUnit != null;
 
-        final CompileUnit newUnit = getReplacement(oldUnit);
+        var newUnit = getReplacement(oldUnit);
         assert newUnit != null;
 
         return newUnit;
     }
 
     @Override
-    public Node leaveFunctionNode(final FunctionNode node) {
+    public Node leaveFunctionNode(FunctionNode node) {
         return node.setCompileUnit(lc, getExistingReplacement(node));
     }
 
     @Override
-    public Node leaveLiteralNode(final LiteralNode<?> node) {
+    public Node leaveLiteralNode(LiteralNode<?> node) {
         if (node instanceof ArrayLiteralNode) {
-            final ArrayLiteralNode aln = (ArrayLiteralNode)node;
+            var aln = (ArrayLiteralNode)node;
             if (aln.getSplitRanges() == null) {
                 return node;
             }
-            final List<Splittable.SplitRange> newArrayUnits = new ArrayList<>();
-            for (final Splittable.SplitRange au : aln.getSplitRanges()) {
+            var newArrayUnits = new ArrayList<Splittable.SplitRange>();
+            for (var au : aln.getSplitRanges()) {
                 newArrayUnits.add(new Splittable.SplitRange(getExistingReplacement(au), au.getLow(), au.getHigh()));
             }
             return aln.setSplitRanges(lc, newArrayUnits);
@@ -80,15 +78,16 @@ abstract class ReplaceCompileUnits extends SimpleNodeVisitor {
     }
 
     @Override
-    public Node leaveObjectNode(final ObjectNode objectNode) {
-        final List<Splittable.SplitRange> ranges = objectNode.getSplitRanges();
+    public Node leaveObjectNode(ObjectNode objectNode) {
+        var ranges = objectNode.getSplitRanges();
         if (ranges != null) {
-            final List<Splittable.SplitRange> newRanges = new ArrayList<>();
-            for (final Splittable.SplitRange range : ranges) {
+            var newRanges = new ArrayList<Splittable.SplitRange>();
+            for (var range : ranges) {
                 newRanges.add(new Splittable.SplitRange(getExistingReplacement(range), range.getLow(), range.getHigh()));
             }
             return objectNode.setSplitRanges(lc, newRanges);
         }
         return super.leaveObjectNode(objectNode);
     }
+
 }

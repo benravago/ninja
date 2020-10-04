@@ -33,7 +33,6 @@ import nashorn.internal.ir.visitor.NodeVisitor;
  */
 @Immutable
 public final class IfNode extends Statement implements JoinPredecessor {
-    private static final long serialVersionUID = 1L;
 
     /** Test expression. */
     private final Expression test;
@@ -45,30 +44,22 @@ public final class IfNode extends Statement implements JoinPredecessor {
     private final Block fail;
 
     /**
-     * Local variable conversions that need to be performed after test if it evaluates to false, and there's no else
-     * branch.
+     * Local variable conversions that need to be performed after test if it evaluates to false, and there's no else branch.
      */
     private final LocalVariableConversion conversion;
 
     /**
      * Constructor
-     *
-     * @param lineNumber line number
-     * @param token      token
-     * @param finish     finish
-     * @param test       test
-     * @param pass       block to execute when test passes
-     * @param fail       block to execute when test fails or null
      */
-    public IfNode(final int lineNumber, final long token, final int finish, final Expression test, final Block pass, final Block fail) {
+    public IfNode(int lineNumber, long token, int finish, Expression test, Block pass, Block fail) {
         super(lineNumber, token, finish);
         this.test = test;
-        this.pass = pass;
-        this.fail = fail;
+        this.pass = pass; // block to execute when test passes
+        this.fail = fail; // block to execute when test fails or null
         this.conversion = null;
     }
 
-    private IfNode(final IfNode ifNode, final Expression test, final Block pass, final Block fail, final LocalVariableConversion conversion) {
+    private IfNode(IfNode ifNode, Expression test, Block pass, Block fail, LocalVariableConversion conversion) {
         super(ifNode);
         this.test = test;
         this.pass = pass;
@@ -82,19 +73,18 @@ public final class IfNode extends Statement implements JoinPredecessor {
     }
 
     @Override
-    public Node accept(final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(NodeVisitor<? extends LexicalContext> visitor) {
         if (visitor.enterIfNode(this)) {
             return visitor.leaveIfNode(
                 setTest((Expression)test.accept(visitor)).
                 setPass((Block)pass.accept(visitor)).
                 setFail(fail == null ? null : (Block)fail.accept(visitor)));
         }
-
         return this;
     }
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printTypes) {
+    public void toString(StringBuilder sb, boolean printTypes) {
         sb.append("if (");
         test.toString(sb, printTypes);
         sb.append(')');
@@ -102,13 +92,12 @@ public final class IfNode extends Statement implements JoinPredecessor {
 
     /**
      * Get the else block of this IfNode
-     * @return the else block, or null if none exists
      */
     public Block getFail() {
         return fail;
     }
 
-    private IfNode setFail(final Block fail) {
+    private IfNode setFail(Block fail) {
         if (this.fail == fail) {
             return this;
         }
@@ -117,13 +106,12 @@ public final class IfNode extends Statement implements JoinPredecessor {
 
     /**
      * Get the then block for this IfNode
-     * @return the then block
      */
     public Block getPass() {
         return pass;
     }
 
-    private IfNode setPass(final Block pass) {
+    private IfNode setPass(Block pass) {
         if (this.pass == pass) {
             return this;
         }
@@ -132,7 +120,6 @@ public final class IfNode extends Statement implements JoinPredecessor {
 
     /**
      * Get the test expression for this IfNode
-     * @return the test expression
      */
     public Expression getTest() {
         return test;
@@ -140,10 +127,8 @@ public final class IfNode extends Statement implements JoinPredecessor {
 
     /**
      * Reset the test expression for this IfNode
-     * @param test a new test expression
-     * @return new or same IfNode
      */
-    public IfNode setTest(final Expression test) {
+    public IfNode setTest(Expression test) {
         if (this.test == test) {
             return this;
         }
@@ -151,8 +136,8 @@ public final class IfNode extends Statement implements JoinPredecessor {
     }
 
     @Override
-    public IfNode setLocalVariableConversion(final LexicalContext lc, final LocalVariableConversion conversion) {
-        if(this.conversion == conversion) {
+    public IfNode setLocalVariableConversion(LexicalContext lc, LocalVariableConversion conversion) {
+        if (this.conversion == conversion) {
             return this;
         }
         return new IfNode(this, test, pass, fail, conversion);
@@ -162,4 +147,5 @@ public final class IfNode extends Statement implements JoinPredecessor {
     public LocalVariableConversion getLocalVariableConversion() {
         return conversion;
     }
+
 }

@@ -28,34 +28,28 @@ package nashorn.internal.runtime;
 import java.lang.invoke.SwitchPoint;
 
 /**
- * This class represents a property map that can be shared among multiple prototype objects, allowing all inheriting
- * top-level objects to also share one property map. This class is only used for prototype objects, the
- * top-level objects use ordinary {@link PropertyMap}s with the {@link PropertyMap#sharedProtoMap} field
- * set to the expected shared prototype map.
- *
- * <p>When an instance of this class is evolved because a property is added, removed, or modified in an object
- * using it, the {@link #invalidateSwitchPoint()} method is invoked to signal to all callsites and inheriting
- * objects that the assumption of a single shared prototype map is no longer valid. The property map resulting
- * from the modification will no longer be an instance of this class.</p>
+ * This class represents a property map that can be shared among multiple prototype objects, allowing all inheriting top-level objects to also share one property map.
+ * This class is only used for prototype objects, the top-level objects use ordinary {@link PropertyMap}s with the {@link PropertyMap#sharedProtoMap} field set to the expected shared prototype map.
+ * <p>
+ * When an instance of this class is evolved because a property is added, removed, or modified in an object using it, the {@link #invalidateSwitchPoint()} method is invoked to signal to all callsites and inheriting objects that the assumption of a single shared prototype map is no longer valid.
+ * The property map resulting from the modification will no longer be an instance of this class.</p>
  */
 public final class SharedPropertyMap extends PropertyMap {
 
     @SuppressWarnings("serial") // Not statically typed as Serializable
     private SwitchPoint switchPoint;
 
-    private static final long serialVersionUID = 2166297719721778876L;
-
     /**
      * Create a new shared property map from the given {@code map}.
      * @param map property map to copy
      */
-    SharedPropertyMap(final PropertyMap map) {
+    SharedPropertyMap(PropertyMap map) {
         super(map);
         this.switchPoint = new SwitchPoint();
     }
 
     @Override
-    public void propertyChanged(final Property property) {
+    public void propertyChanged(Property property) {
         invalidateSwitchPoint();
         super.propertyChanged(property);
     }
@@ -80,4 +74,5 @@ public final class SharedPropertyMap extends PropertyMap {
             switchPoint = null;
         }
     }
+
 }

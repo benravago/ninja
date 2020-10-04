@@ -29,23 +29,21 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
+
 import nashorn.internal.codegen.types.Type;
 
 /**
- * Symbol is a symbolic address for a value ("variable" if you wish). Identifiers in JavaScript source, as well as
- * certain synthetic variables created by the compiler are represented by Symbol objects. Symbols can address either
- * local variable slots in bytecode ("slotted symbol"), or properties in scope objects ("scoped symbol"). A symbol can
- * also end up being defined but then not used during symbol assignment calculations; such symbol will be neither
- * scoped, nor slotted; it represents a dead variable (it might be written to, but is never read). Finally, a symbol can
- * be both slotted and in scope. This special case can only occur with bytecode method parameters. They all come in as
- * slotted, but if they are used by a nested function (or eval) then they will be copied into the scope object, and used
- * from there onwards. Two further special cases are parameters stored in {@code NativeArguments} objects and parameters
- * stored in {@code Object[]} parameter to variable-arity functions. Those use the {@code #getFieldIndex()} property to
- * refer to their location.
+ * Symbol is a symbolic address for a value ("variable" if you wish).
+ *
+ * Identifiers in JavaScript source, as well as certain synthetic variables created by the compiler are represented by Symbol objects.
+ * Symbols can address either local variable slots in bytecode ("slotted symbol"), or properties in scope objects ("scoped symbol").
+ * A symbol can also end up being defined but then not used during symbol assignment calculations; such symbol will be neither scoped, nor slotted; it represents a dead variable (it might be written to, but is never read).
+ * Finally, a symbol can be both slotted and in scope. This special case can only occur with bytecode method parameters.
+ * They all come in as slotted, but if they are used by a nested function (or eval) then they will be copied into the scope object, and used from there onwards.
+ * Two further special cases are parameters stored in {@code NativeArguments} objects and parameters stored in {@code Object[]} parameter to variable-arity functions.
+ * Those use the {@code #getFieldIndex()} property to refer to their location.
  */
-
 public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable {
-    private static final long serialVersionUID = 1L;
 
     /** Is this Global */
     public static final int IS_GLOBAL   = 1;
@@ -89,8 +87,10 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
     /** Symbol flags. */
     private int flags;
 
-    /** First bytecode method local variable slot for storing the value(s) of this variable. -1 indicates the variable
-     * is not stored in local variable slots or it is not yet known. */
+    /**
+     * First bytecode method local variable slot for storing the value(s) of this variable.
+     * -1 indicates the variable is not stored in local variable slots or it is not yet known.
+     */
     private transient int firstSlot = -1;
 
     /** Field number in scope or property; array index in varargs when not using arguments object. */
@@ -101,26 +101,23 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Constructor
-     *
-     * @param name  name of symbol
-     * @param flags symbol flags
      */
-    public Symbol(final String name, final int flags) {
-        this.name       = name;
-        this.flags      = flags;
+    public Symbol(String name, int flags) {
+        this.name = name;
+        this.flags = flags;
     }
 
     @Override
     public Symbol clone() {
         try {
             return (Symbol)super.clone();
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw new AssertionError(e);
         }
     }
 
-    private static String align(final String string, final int max) {
-        final StringBuilder sb = new StringBuilder();
+    private static String align(String string, int max) {
+        var sb = new StringBuilder();
         sb.append(string.substring(0, Math.min(string.length(), max)));
 
         while (sb.length() < max) {
@@ -131,36 +128,34 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Debugging .
-     *
-     * @param stream Stream to print to.
      */
 
-    void print(final PrintWriter stream) {
-        final StringBuilder sb = new StringBuilder();
+    void print(PrintWriter stream) {
+        var sb = new StringBuilder();
 
-        sb.append(align(name, 20)).
-            append(": ").
-            append(", ").
-            append(align(firstSlot == -1 ? "none" : "" + firstSlot, 10));
+        sb.append(align(name, 20))
+          .append(": ")
+          .append(", ")
+          .append(align(firstSlot == -1 ? "none" : "" + firstSlot, 10));
 
         switch (flags & KINDMASK) {
-        case IS_GLOBAL:
-            sb.append(" global");
-            break;
-        case IS_VAR:
-            if (isConst()) {
-                sb.append(" const");
-            } else if (isLet()) {
-                sb.append(" let");
-            } else {
-                sb.append(" var");
+            // default -> {}
+
+            case IS_GLOBAL -> {
+                sb.append(" global");
             }
-            break;
-        case IS_PARAM:
-            sb.append(" param");
-            break;
-        default:
-            break;
+            case IS_VAR -> {
+                if (isConst()) {
+                    sb.append(" const");
+                } else if (isLet()) {
+                    sb.append(" let");
+                } else {
+                    sb.append(" var");
+                }
+            }
+            case IS_PARAM -> {
+                sb.append(" param");
+            }
         }
 
         if (isScope()) {
@@ -186,22 +181,16 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Compare the the symbol kind with another.
-     *
-     * @param other Other symbol's flags.
-     * @return True if symbol has less kind.
      */
-    public boolean less(final int other) {
+    public boolean less(int other) {
         return (flags & KINDMASK) < (other & KINDMASK);
     }
 
     /**
      * Allocate a slot for this symbol.
-     *
-     * @param needsSlot True if symbol needs a slot.
-     * @return the symbol
      */
-    public Symbol setNeedsSlot(final boolean needsSlot) {
-        if(needsSlot) {
+    public Symbol setNeedsSlot(boolean needsSlot) {
+        if (needsSlot) {
             assert !isScope();
             flags |= HAS_SLOT;
         } else {
@@ -212,8 +201,6 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Return the number of slots required for the symbol.
-     *
-     * @return Number of slots.
      */
     public int slotCount() {
         return ((flags & HAS_INT_VALUE)    == 0 ? 0 : 1) +
@@ -227,24 +214,26 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
 
-        sb.append(name).
-            append(' ');
+        sb.append(name)
+          .append(' ');
 
         if (hasSlot()) {
-            sb.append(' ').
-                append('(').
-                append("slot=").
-                append(firstSlot).append(' ');
-            if((flags & HAS_INT_VALUE) != 0) { sb.append('I'); }
-            if((flags & HAS_DOUBLE_VALUE) != 0) { sb.append('D'); }
-            if((flags & HAS_OBJECT_VALUE) != 0) { sb.append('O'); }
+            sb.append(' ')
+              .append('(')
+              .append("slot=")
+              .append(firstSlot).append(' ');
+
+            if ((flags & HAS_INT_VALUE) != 0) { sb.append('I'); }
+            if ((flags & HAS_DOUBLE_VALUE) != 0) { sb.append('D'); }
+            if ((flags & HAS_OBJECT_VALUE) != 0) { sb.append('O'); }
+
             sb.append(')');
         }
 
         if (isScope()) {
-            if(isGlobal()) {
+            if (isGlobal()) {
                 sb.append(" G");
             } else {
                 sb.append(" S");
@@ -255,25 +244,23 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
     }
 
     @Override
-    public int compareTo(final Symbol other) {
+    public int compareTo(Symbol other) {
         return name.compareTo(other.name);
     }
 
     /**
-     * Does this symbol have an allocated bytecode slot? Note that having an allocated bytecode slot doesn't necessarily
-     * mean the symbol's value will be stored in it. Namely, a function parameter can have a bytecode slot, but if it is
-     * in scope, then the bytecode slot will not be used. See {@link #isBytecodeLocal()}.
-     *
-     * @return true if this symbol has a local bytecode slot
+     * Does this symbol have an allocated bytecode slot?
+     * Note that having an allocated bytecode slot doesn't necessarily mean the symbol's value will be stored in it.
+     * Namely, a function parameter can have a bytecode slot, but if it is in scope, then the bytecode slot will not be used. See {@link #isBytecodeLocal()}.
      */
     public boolean hasSlot() {
         return (flags & HAS_SLOT) != 0;
     }
 
     /**
-     * Is this symbol a local variable stored in bytecode local variable slots? This is true for a slotted variable that
-     * is not in scope. (E.g. a parameter that is in scope is slotted, but it will not be a local variable).
-     * @return true if this symbol is using bytecode local slots for its storage.
+     * Is this symbol a local variable stored in bytecode local variable slots?
+     * This is true for a slotted variable that is not in scope.
+     * (E.g. a parameter that is in scope is slotted, but it will not be a local variable).
      */
     public boolean isBytecodeLocal() {
         return hasSlot() && !isScope();
@@ -281,17 +268,14 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Returns true if this symbol is dead (it is a local variable that is statically proven to never be read in any type).
-     * @return true if this symbol is dead
      */
     public boolean isDead() {
         return (flags & (HAS_SLOT | IS_SCOPE)) == 0;
     }
 
     /**
-     * Check if this is a symbol in scope. Scope symbols cannot, for obvious reasons
-     * be stored in byte code slots on the local frame
-     *
-     * @return true if this is scoped
+     * Check if this is a symbol in scope.
+     * Scope symbols cannot, for obvious reasons be stored in byte code slots on the local frame
      */
     public boolean isScope() {
         assert (flags & KINDMASK) != IS_GLOBAL || (flags & IS_SCOPE) == IS_SCOPE : "global without scope flag";
@@ -300,7 +284,6 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Check if this symbol is a function declaration
-     * @return true if a function declaration
      */
     public boolean isFunctionDeclaration() {
         return (flags & IS_FUNCTION_DECLARATION) != 0;
@@ -308,12 +291,11 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Flag this symbol as scope as described in {@link Symbol#isScope()}
-     * @return the symbol
      */
     public Symbol setIsScope() {
         if (!isScope()) {
             flags |= IS_SCOPE;
-            if(!isParam()) {
+            if (!isParam()) {
                 flags &= ~HAS_SLOT;
             }
         }
@@ -331,7 +313,6 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Check if this symbol is a variable
-     * @return true if variable
      */
     public boolean isVar() {
         return (flags & KINDMASK) == IS_VAR;
@@ -339,7 +320,6 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Check if this symbol is a global (undeclared) variable
-     * @return true if global
      */
     public boolean isGlobal() {
         return (flags & KINDMASK) == IS_GLOBAL;
@@ -347,7 +327,6 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Check if this symbol is a function parameter
-     * @return true if parameter
      */
     public boolean isParam() {
         return (flags & KINDMASK) == IS_PARAM;
@@ -355,7 +334,6 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Check if this is a program (script) level definition
-     * @return true if program level
      */
     public boolean isProgramLevel() {
         return (flags & IS_PROGRAM_LEVEL) != 0;
@@ -363,16 +341,13 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Check if this symbol is a constant
-     * @return true if a constant
      */
     public boolean isConst() {
         return (flags & IS_CONST) != 0;
     }
 
     /**
-     * Check if this is an internal symbol, without an explicit JavaScript source
-     * code equivalent
-     * @return true if internal
+     * Check if this is an internal symbol, without an explicit JavaScript source code equivalent
      */
     public boolean isInternal() {
         return (flags & IS_INTERNAL) != 0;
@@ -380,7 +355,6 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Check if this symbol represents {@code this}
-     * @return true if this
      */
     public boolean isThis() {
         return (flags & IS_THIS) != 0;
@@ -388,7 +362,6 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Check if this symbol is a let
-     * @return true if let
      */
     public boolean isLet() {
         return (flags & IS_LET) != 0;
@@ -396,7 +369,6 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Flag this symbol as a function's self-referencing symbol.
-     * @return true if this symbol as a function's self-referencing symbol.
      */
     public boolean isFunctionSelf() {
         return (flags & IS_FUNCTION_SELF) != 0;
@@ -404,7 +376,6 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Is this a block scoped symbol
-     * @return true if block scoped
      */
     public boolean isBlockScoped() {
         return isLet() || isConst();
@@ -412,7 +383,6 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Has this symbol been declared
-     * @return true if declared
      */
     public boolean hasBeenDeclared() {
         return (flags & HAS_BEEN_DECLARED) != 0;
@@ -428,10 +398,7 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
     }
 
     /**
-     * Get the index of the field used to store this symbol, should it be an AccessorProperty
-     * and get allocated in a JO-prefixed ScriptObject subclass.
-     *
-     * @return field index
+     * Get the index of the field used to store this symbol, should it be an AccessorProperty and get allocated in a JO-prefixed ScriptObject subclass.
      */
     public int getFieldIndex() {
         assert fieldIndex != -1 : "fieldIndex must be initialized " + fieldIndex;
@@ -439,13 +406,9 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
     }
 
     /**
-     * Set the index of the field used to store this symbol, should it be an AccessorProperty
-     * and get allocated in a JO-prefixed ScriptObject subclass.
-     *
-     * @param fieldIndex field index - a positive integer
-     * @return the symbol
+     * Set the index of the field used to store this symbol, should it be an AccessorProperty and get allocated in a JO-prefixed ScriptObject subclass.
      */
-    public Symbol setFieldIndex(final int fieldIndex) {
+    public Symbol setFieldIndex(int fieldIndex) {
         if (this.fieldIndex != fieldIndex) {
             this.fieldIndex = fieldIndex;
         }
@@ -454,7 +417,6 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Get the symbol flags
-     * @return flags
      */
     public int getFlags() {
         return flags;
@@ -462,10 +424,8 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Set the symbol flags
-     * @param flags flags
-     * @return the symbol
      */
-    public Symbol setFlags(final int flags) {
+    public Symbol setFlags(int flags) {
         if (this.flags != flags) {
             this.flags = flags;
         }
@@ -474,10 +434,8 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Set a single symbol flag
-     * @param flag flag to set
-     * @return the symbol
      */
-    public Symbol setFlag(final int flag) {
+    public Symbol setFlag(int flag) {
         if ((this.flags & flag) == 0) {
             this.flags |= flag;
         }
@@ -486,10 +444,8 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Clears a single symbol flag
-     * @param flag flag to set
-     * @return the symbol
      */
-    public Symbol clearFlag(final int flag) {
+    public Symbol clearFlag(int flag) {
         if ((this.flags & flag) != 0) {
             this.flags &= ~flag;
         }
@@ -498,7 +454,6 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Get the name of this symbol
-     * @return symbol name
      */
     public String getName() {
         return name;
@@ -506,7 +461,6 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Get the index of the first bytecode slot for this symbol
-     * @return byte code slot
      */
     public int getFirstSlot() {
         assert isSlotted();
@@ -515,18 +469,16 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Get the index of the bytecode slot for this symbol for storing a value of the specified type.
-     * @param type the requested type
-     * @return byte code slot
      */
-    public int getSlot(final Type type) {
+    public int getSlot(Type type) {
         assert isSlotted();
-        int typeSlot = firstSlot;
-        if(type.isBoolean() || type.isInteger()) {
+        var typeSlot = firstSlot;
+        if (type.isBoolean() || type.isInteger()) {
             assert (flags & HAS_INT_VALUE) != 0;
             return typeSlot;
         }
         typeSlot += ((flags & HAS_INT_VALUE) == 0 ? 0 : 1);
-        if(type.isNumber()) {
+        if (type.isNumber()) {
             assert (flags & HAS_DOUBLE_VALUE) != 0;
             return typeSlot;
         }
@@ -537,13 +489,11 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Returns true if this symbol has a local variable slot for storing a value of specific type.
-     * @param type the type
-     * @return true if this symbol has a local variable slot for storing a value of specific type.
      */
-    public boolean hasSlotFor(final Type type) {
-        if(type.isBoolean() || type.isInteger()) {
+    public boolean hasSlotFor(Type type) {
+        if (type.isBoolean() || type.isInteger()) {
             return (flags & HAS_INT_VALUE) != 0;
-        } else if(type.isNumber()) {
+        } else if (type.isNumber()) {
             return (flags & HAS_DOUBLE_VALUE) != 0;
         }
         assert type.isObject();
@@ -552,12 +502,11 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Marks this symbol as having a local variable slot for storing a value of specific type.
-     * @param type the type
      */
-    public void setHasSlotFor(final Type type) {
-        if(type.isBoolean() || type.isInteger()) {
+    public void setHasSlotFor(Type type) {
+        if (type.isBoolean() || type.isInteger()) {
             setFlag(HAS_INT_VALUE);
-        } else if(type.isNumber()) {
+        } else if (type.isNumber()) {
             setFlag(HAS_DOUBLE_VALUE);
         } else {
             assert type.isObject();
@@ -576,7 +525,6 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Get the symbol's use count
-     * @return the number of times the symbol is used in code.
      */
     public int getUseCount() {
         return useCount;
@@ -584,10 +532,8 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
 
     /**
      * Set the bytecode slot for this symbol
-     * @param  firstSlot valid bytecode slot
-     * @return the symbol
      */
-    public Symbol setFirstSlot(final int firstSlot) {
+    public Symbol setFirstSlot(int firstSlot) {
         assert firstSlot >= 0 && firstSlot <= 65535;
         if (firstSlot != this.firstSlot) {
             this.firstSlot = firstSlot;
@@ -596,17 +542,10 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
     }
 
     /**
-     * From a lexical context, set this symbol as needing scope, which
-     * will set flags for the defining block that will be written when
-     * block is popped from the lexical context stack, used by codegen
-     * when flags need to be tagged, but block is in the
-     * middle of evaluation and cannot be modified.
-     *
-     * @param  lc     lexical context
-     * @param  symbol symbol
-     * @return the symbol
+     * From a lexical context, set this symbol as needing scope, which will set flags for the defining block that will be written when block is popped from the lexical context stack.
+     * Used by codegen when flags need to be tagged, but block is in the middle of evaluation and cannot be modified.
      */
-    public static Symbol setSymbolIsScope(final LexicalContext lc, final Symbol symbol) {
+    public static Symbol setSymbolIsScope(LexicalContext lc, Symbol symbol) {
         symbol.setIsScope();
         if (!symbol.isGlobal()) {
             lc.setBlockNeedsScope(lc.getDefiningBlock(symbol));
@@ -614,7 +553,7 @@ public final class Symbol implements Comparable<Symbol>, Cloneable, Serializable
         return symbol;
     }
 
-    private void readObject(final ObjectInputStream in) throws ClassNotFoundException, IOException {
+    private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException {
         in.defaultReadObject();
         firstSlot = -1;
         fieldIndex = -1;

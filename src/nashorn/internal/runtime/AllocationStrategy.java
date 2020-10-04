@@ -40,7 +40,6 @@ import nashorn.internal.codegen.ObjectClassGenerator;
  * Encapsulates the allocation strategy for a function when used as a constructor.
  */
 final public class AllocationStrategy implements Serializable {
-    private static final long serialVersionUID = 1L;
 
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
@@ -64,7 +63,7 @@ final public class AllocationStrategy implements Serializable {
      * @param fieldCount number of fields in the allocated object
      * @param dualFields whether to use dual field representation
      */
-    public AllocationStrategy(final int fieldCount, final boolean dualFields) {
+    public AllocationStrategy(int fieldCount, boolean dualFields) {
         this.fieldCount = fieldCount;
         this.dualFields = dualFields;
     }
@@ -79,12 +78,10 @@ final public class AllocationStrategy implements Serializable {
 
     /**
      * Get the property map for the allocated object.
-     * @param prototype the prototype object
-     * @return the property map
      */
-    synchronized PropertyMap getAllocatorMap(final ScriptObject prototype) {
+    synchronized PropertyMap getAllocatorMap(ScriptObject prototype) {
         assert prototype != null;
-        final PropertyMap protoMap = prototype.getMap();
+        var protoMap = prototype.getMap();
 
         if (lastMap != null) {
             if (!lastMap.hasSharedProtoMap()) {
@@ -92,10 +89,10 @@ final public class AllocationStrategy implements Serializable {
                     return lastMap.allocatorMap;
                 }
                 if (lastMap.hasSameProtoMap(protoMap) && lastMap.hasUnchangedProtoMap()) {
-                    // Convert to shared prototype map. Allocated objects will use the same property map
-                    // that can be used as long as none of the prototypes modify the shared proto map.
-                    final PropertyMap allocatorMap = PropertyMap.newMap(null, getAllocatorClassName(), 0, fieldCount, 0);
-                    final SharedPropertyMap sharedProtoMap = new SharedPropertyMap(protoMap);
+                    // Convert to shared prototype map.
+                    // Allocated objects will use the same property map that can be used as long as none of the prototypes modify the shared proto map.
+                    var allocatorMap = PropertyMap.newMap(null, getAllocatorClassName(), 0, fieldCount, 0);
+                    var sharedProtoMap = new SharedPropertyMap(protoMap);
                     allocatorMap.setSharedProtoMap(sharedProtoMap);
                     prototype.setMap(sharedProtoMap);
                     lastMap = new AllocatorMap(prototype, protoMap, allocatorMap);
@@ -109,7 +106,7 @@ final public class AllocationStrategy implements Serializable {
             }
         }
 
-        final PropertyMap allocatorMap = PropertyMap.newMap(null, getAllocatorClassName(), 0, fieldCount, 0);
+        var allocatorMap = PropertyMap.newMap(null, getAllocatorClassName(), 0, fieldCount, 0);
         lastMap = new AllocatorMap(prototype, protoMap, allocatorMap);
 
         return allocatorMap;
@@ -117,14 +114,11 @@ final public class AllocationStrategy implements Serializable {
 
     /**
      * Allocate an object with the given property map
-     * @param map the property map
-     * @return the allocated object
      */
-    ScriptObject allocate(final PropertyMap map) {
+    ScriptObject allocate(PropertyMap map) {
         try {
             if (allocator == null) {
-                allocator = MH.findStatic(LOOKUP, Context.forStructureClass(getAllocatorClassName()),
-                        CompilerConstants.ALLOCATE.symbolName(), MH.type(ScriptObject.class, PropertyMap.class));
+                allocator = MH.findStatic(LOOKUP, Context.forStructureClass(getAllocatorClassName()), CompilerConstants.ALLOCATE.symbolName(), MH.type(ScriptObject.class, PropertyMap.class));
             }
             return (ScriptObject)allocator.invokeExact(map);
         } catch (Throwable t) {
@@ -143,22 +137,22 @@ final public class AllocationStrategy implements Serializable {
 
         private final PropertyMap allocatorMap;
 
-        AllocatorMap(final ScriptObject prototype, final PropertyMap protoMap, final PropertyMap allocMap) {
+        AllocatorMap(ScriptObject prototype, PropertyMap protoMap, PropertyMap allocMap) {
             this.prototype = new WeakReference<>(prototype);
             this.prototypeMap = new WeakReference<>(protoMap);
             this.allocatorMap = allocMap;
         }
 
-        boolean hasSamePrototype(final ScriptObject proto) {
+        boolean hasSamePrototype(ScriptObject proto) {
             return prototype.get() == proto;
         }
 
-        boolean hasSameProtoMap(final PropertyMap protoMap) {
+        boolean hasSameProtoMap(PropertyMap protoMap) {
             return prototypeMap.get() == protoMap || allocatorMap.getSharedProtoMap() == protoMap;
         }
 
         boolean hasUnchangedProtoMap() {
-            final ScriptObject proto = prototype.get();
+            var proto = prototype.get();
             return proto != null && proto.getMap() == prototypeMap.get();
         }
 
@@ -175,4 +169,5 @@ final public class AllocationStrategy implements Serializable {
         }
 
     }
+
 }

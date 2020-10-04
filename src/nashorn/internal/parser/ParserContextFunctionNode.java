@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+
 import nashorn.internal.codegen.Namespace;
 import nashorn.internal.ir.Expression;
 import nashorn.internal.ir.FunctionNode;
@@ -83,14 +84,14 @@ class ParserContextFunctionNode extends ParserContextBaseNode {
      * @param kind  Function kind
      * @param parameters The parameters of the function
      */
-    public ParserContextFunctionNode(final long token, final IdentNode ident, final String name, final Namespace namespace, final int line, final FunctionNode.Kind kind, final List<IdentNode> parameters) {
-        this.ident      = ident;
-        this.namespace  = namespace;
-        this.line       = line;
-        this.kind       = kind;
-        this.name       = name;
+    public ParserContextFunctionNode(long token, IdentNode ident, String name, Namespace namespace, int line, FunctionNode.Kind kind, List<IdentNode> parameters) {
+        this.ident = ident;
+        this.namespace = namespace;
+        this.line = line;
+        this.kind = kind;
+        this.name = name;
         this.parameters = parameters;
-        this.token      = token;
+        this.token = token;
     }
 
     /**
@@ -108,7 +109,6 @@ class ParserContextFunctionNode extends ParserContextBaseNode {
     }
 
     /**
-     *
      * @return true if function is the program function
      */
     public boolean isProgram() {
@@ -123,7 +123,6 @@ class ParserContextFunctionNode extends ParserContextBaseNode {
     }
 
     /**
-     * Returns true if any of the blocks in this function create their own scope.
      * @return true if any of the blocks in this function create their own scope.
      */
     public boolean hasScopeBlock() {
@@ -135,7 +134,7 @@ class ParserContextFunctionNode extends ParserContextBaseNode {
      * @param base prefix for name
      * @return base if no collision exists, otherwise a name prefix with base
      */
-    public String uniqueName(final String base) {
+    public String uniqueName(String base) {
         return namespace.uniqueName(base);
     }
 
@@ -154,27 +153,24 @@ class ParserContextFunctionNode extends ParserContextBaseNode {
     }
 
     /**
-     * Get parameters
      * @return The parameters of the function
      */
     public List<IdentNode> getParameters() {
         return parameters;
     }
 
-    void setParameters(final List<IdentNode> parameters) {
+    void setParameters(List<IdentNode> parameters) {
         this.parameters = parameters;
     }
 
     /**
-     * Return ES6 function parameter expressions
-     *
      * @return ES6 function parameter expressions
      */
     public Map<IdentNode, Expression> getParameterExpressions() {
         return parameterExpressions;
     }
 
-    void addParameterExpression(final IdentNode ident, final Expression node) {
+    void addParameterExpression(IdentNode ident, Expression node) {
         if (parameterExpressions == null) {
             parameterExpressions = new HashMap<>();
         }
@@ -183,11 +179,9 @@ class ParserContextFunctionNode extends ParserContextBaseNode {
 
     /**
      * Set last token
-     * @param token New last token
      */
-    public void setLastToken(final long token) {
+    public void setLastToken(long token) {
         this.lastToken = token;
-
     }
 
     /**
@@ -199,7 +193,6 @@ class ParserContextFunctionNode extends ParserContextBaseNode {
 
     /**
      * Returns the ParserState of when the parsing of this function was ended
-     * @return endParserState The end parser state
      */
     public Object getEndParserState() {
         return endParserState;
@@ -207,15 +200,13 @@ class ParserContextFunctionNode extends ParserContextBaseNode {
 
     /**
      * Sets the ParserState of when the parsing of this function was ended
-     * @param endParserState The end parser state
      */
-    public void setEndParserState(final Object endParserState) {
+    public void setEndParserState(Object endParserState) {
         this.endParserState = endParserState;
     }
 
     /**
      * Returns the if of this function
-     * @return The function id
      */
     public int getId() {
         return isProgram() ? -1 : Token.descPosition(token);
@@ -223,8 +214,6 @@ class ParserContextFunctionNode extends ParserContextBaseNode {
 
     /**
      * Returns the debug flags for this function.
-     *
-     * @return the debug flags
      */
     int getDebugFlags() {
         return debugFlags;
@@ -232,10 +221,8 @@ class ParserContextFunctionNode extends ParserContextBaseNode {
 
     /**
      * Sets a debug flag for this function.
-     *
-     * @param debugFlag the debug flag
      */
-    void setDebugFlag(final int debugFlag) {
+    void setDebugFlag(int debugFlag) {
         debugFlags |= debugFlag;
     }
 
@@ -251,7 +238,7 @@ class ParserContextFunctionNode extends ParserContextBaseNode {
         return getFlag(FunctionNode.ES6_IS_SUBCLASS_CONSTRUCTOR) != 0;
     }
 
-    boolean addParameterBinding(final IdentNode bindingIdentifier) {
+    boolean addParameterBinding(IdentNode bindingIdentifier) {
         if (Parser.isArguments(bindingIdentifier)) {
             setFlag(FunctionNode.DEFINES_ARGUMENTS);
         }
@@ -275,7 +262,7 @@ class ParserContextFunctionNode extends ParserContextBaseNode {
         return simpleParameterList;
     }
 
-    public void setSimpleParameterList(final boolean simpleParameterList) {
+    public void setSimpleParameterList(boolean simpleParameterList) {
         this.simpleParameterList = simpleParameterList;
     }
 
@@ -283,7 +270,8 @@ class ParserContextFunctionNode extends ParserContextBaseNode {
         return module;
     }
 
-    public void setModule(final Module module) {
+    public void setModule(Module module) {
         this.module = module;
     }
+
 }

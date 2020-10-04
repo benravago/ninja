@@ -24,11 +24,9 @@
  */
 package nashorn.internal.codegen;
 
-import static nashorn.internal.runtime.UnwarrantedOptimismException.FIRST_PROGRAM_POINT;
-import static nashorn.internal.runtime.linker.NashornCallSiteDescriptor.MAX_PROGRAM_POINT_VALUE;
-
 import java.util.HashSet;
 import java.util.Set;
+
 import nashorn.internal.IntDeque;
 import nashorn.internal.ir.AccessNode;
 import nashorn.internal.ir.BinaryNode;
@@ -42,6 +40,8 @@ import nashorn.internal.ir.Optimistic;
 import nashorn.internal.ir.UnaryNode;
 import nashorn.internal.ir.VarNode;
 import nashorn.internal.ir.visitor.SimpleNodeVisitor;
+import static nashorn.internal.runtime.UnwarrantedOptimismException.FIRST_PROGRAM_POINT;
+import static nashorn.internal.runtime.linker.NashornCallSiteDescriptor.MAX_PROGRAM_POINT_VALUE;
 
 /**
  * Find program points in the code that are needed for optimistic assumptions
@@ -52,26 +52,26 @@ class ProgramPoints extends SimpleNodeVisitor {
     private final Set<Node> noProgramPoint = new HashSet<>();
 
     private int next() {
-        final int next = nextProgramPoint.getAndIncrement();
-        if(next > MAX_PROGRAM_POINT_VALUE) {
+        var next = nextProgramPoint.getAndIncrement();
+        if (next > MAX_PROGRAM_POINT_VALUE) {
             throw new AssertionError("Function has more than " + MAX_PROGRAM_POINT_VALUE + " program points");
         }
         return next;
     }
 
     @Override
-    public boolean enterFunctionNode(final FunctionNode functionNode) {
+    public boolean enterFunctionNode(FunctionNode functionNode) {
         nextProgramPoint.push(FIRST_PROGRAM_POINT);
         return true;
     }
 
     @Override
-    public Node leaveFunctionNode(final FunctionNode functionNode) {
+    public Node leaveFunctionNode(FunctionNode functionNode) {
         nextProgramPoint.pop();
         return functionNode;
     }
 
-    private Expression setProgramPoint(final Optimistic optimistic) {
+    private Expression setProgramPoint(Optimistic optimistic) {
         if (noProgramPoint.contains(optimistic)) {
             return (Expression)optimistic;
         }
@@ -79,13 +79,13 @@ class ProgramPoints extends SimpleNodeVisitor {
     }
 
     @Override
-    public boolean enterVarNode(final VarNode varNode) {
+    public boolean enterVarNode(VarNode varNode) {
         noProgramPoint.add(varNode.getName());
         return true;
     }
 
     @Override
-    public boolean enterIdentNode(final IdentNode identNode) {
+    public boolean enterIdentNode(IdentNode identNode) {
         if (identNode.isInternal()) {
             noProgramPoint.add(identNode);
         }
@@ -93,35 +93,36 @@ class ProgramPoints extends SimpleNodeVisitor {
     }
 
     @Override
-    public Node leaveIdentNode(final IdentNode identNode) {
-        if(identNode.isPropertyName()) {
+    public Node leaveIdentNode(IdentNode identNode) {
+        if (identNode.isPropertyName()) {
             return identNode;
         }
         return setProgramPoint(identNode);
     }
 
     @Override
-    public Node leaveCallNode(final CallNode callNode) {
+    public Node leaveCallNode(CallNode callNode) {
         return setProgramPoint(callNode);
     }
 
     @Override
-    public Node leaveAccessNode(final AccessNode accessNode) {
+    public Node leaveAccessNode(AccessNode accessNode) {
         return setProgramPoint(accessNode);
     }
 
     @Override
-    public Node leaveIndexNode(final IndexNode indexNode) {
+    public Node leaveIndexNode(IndexNode indexNode) {
         return setProgramPoint(indexNode);
     }
 
     @Override
-    public Node leaveBinaryNode(final BinaryNode binaryNode) {
+    public Node leaveBinaryNode(BinaryNode binaryNode) {
         return setProgramPoint(binaryNode);
     }
 
     @Override
-    public Node leaveUnaryNode(final UnaryNode unaryNode) {
+    public Node leaveUnaryNode(UnaryNode unaryNode) {
         return setProgramPoint(unaryNode);
     }
+
 }

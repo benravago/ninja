@@ -26,22 +26,12 @@
 package nashorn.internal.runtime;
 
 /**
- * Interface for getting and setting properties from script objects
- * This can be a plugin point for e.g. tagged values or alternative
- * array property getters.
+ * Interface for getting and setting properties from script objects.
+ * This can be a plugin point for e.g. tagged values or alternative array property getters.
  *
- * The interface is engineered with the combinatorially exhaustive
- * combination of types by purpose, for speed, as currently HotSpot is not
- * good enough at removing boxing.
+ * The interface is engineered with the combinatorially exhaustive combination of types by purpose, for speed, as currently HotSpot is not good enough at removing boxing.
  */
 public interface PropertyAccess {
-    /**
-     * Get the value for a given key and return it as an int
-     * @param key the key
-     * @param programPoint or INVALID_PROGRAM_POINT if pessimistic
-     * @return the value
-     */
-    public int getInt(Object key, int programPoint);
 
     /**
      * Get the value for a given key and return it as an int
@@ -49,7 +39,7 @@ public interface PropertyAccess {
      * @param programPoint or INVALID_PROGRAM_POINT if pessimistic
      * @return the value
      */
-    public int getInt(double key, int programPoint);
+    int getInt(Object key, int programPoint);
 
     /**
      * Get the value for a given key and return it as an int
@@ -57,7 +47,15 @@ public interface PropertyAccess {
      * @param programPoint or INVALID_PROGRAM_POINT if pessimistic
      * @return the value
      */
-    public int getInt(int key, int programPoint);
+    int getInt(double key, int programPoint);
+
+    /**
+     * Get the value for a given key and return it as an int
+     * @param key the key
+     * @param programPoint or INVALID_PROGRAM_POINT if pessimistic
+     * @return the value
+     */
+    int getInt(int key, int programPoint);
 
     /**
      * Get the value for a given key and return it as a double
@@ -65,7 +63,7 @@ public interface PropertyAccess {
      * @param programPoint or INVALID_PROGRAM_POINT if pessimistic
      * @return the value
      */
-    public double getDouble(Object key, int programPoint);
+    double getDouble(Object key, int programPoint);
 
     /**
      * Get the value for a given key and return it as a double
@@ -73,7 +71,7 @@ public interface PropertyAccess {
      * @param programPoint or INVALID_PROGRAM_POINT if pessimistic
      * @return the value
      */
-    public double getDouble(double key, int programPoint);
+    double getDouble(double key, int programPoint);
 
     /**
      * Get the value for a given key and return it as a double
@@ -81,28 +79,28 @@ public interface PropertyAccess {
      * @param programPoint or INVALID_PROGRAM_POINT if pessimistic
      * @return the value
      */
-    public double getDouble(int key, int programPoint);
+    double getDouble(int key, int programPoint);
 
     /**
      * Get the value for a given key and return it as an Object
      * @param key the key
      * @return the value
      */
-    public Object get(Object key);
+    Object get(Object key);
 
     /**
      * Get the value for a given key and return it as an Object
      * @param key the key
      * @return the value
      */
-    public Object get(double key);
+    Object get(double key);
 
     /**
      * Get the value for a given key and return it as an Object
      * @param key the key
      * @return the value
      */
-    public Object get(int key);
+    Object get(int key);
 
     /**
      * Set the value of a given key
@@ -110,7 +108,7 @@ public interface PropertyAccess {
      * @param value   the value
      * @param flags   call site flags
      */
-    public void set(Object key, int value, int flags);
+    void set(Object key, int value, int flags);
 
     /**
      * Set the value of a given key
@@ -118,7 +116,7 @@ public interface PropertyAccess {
      * @param value   the value
      * @param flags   call site flags
      */
-    public void set(Object key, double value, int flags);
+    void set(Object key, double value, int flags);
 
     /**
      * Set the value of a given key
@@ -126,7 +124,7 @@ public interface PropertyAccess {
      * @param value   the value
      * @param flags   call site flags
      */
-    public void set(Object key, Object value, int flags);
+    void set(Object key, Object value, int flags);
 
     /**
      * Set the value of a given key
@@ -134,7 +132,7 @@ public interface PropertyAccess {
      * @param value   the value
      * @param flags   call site flags
      */
-    public void set(double key, int value, int flags);
+    void set(double key, int value, int flags);
 
     /**
      * Set the value of a given key
@@ -142,7 +140,7 @@ public interface PropertyAccess {
      * @param value   the value
      * @param flags   call site flags
      */
-    public void set(double key, double value, int flags);
+    void set(double key, double value, int flags);
 
     /**
      * Set the value of a given key
@@ -150,7 +148,7 @@ public interface PropertyAccess {
      * @param value   the value
      * @param flags   call site flags
      */
-    public void set(double key, Object value, int flags);
+    void set(double key, Object value, int flags);
 
     /**
      * Set the value of a given key
@@ -158,7 +156,7 @@ public interface PropertyAccess {
      * @param value   the value
      * @param flags   call site flags
      */
-    public void set(int key, int value, int flags);
+    void set(int key, int value, int flags);
 
     /**
      * Set the value of a given key
@@ -166,7 +164,7 @@ public interface PropertyAccess {
      * @param value   the value
      * @param flags   call site flags
      */
-    public void set(int key, double value, int flags);
+    void set(int key, double value, int flags);
 
     /**
      * Set the value of a given key
@@ -174,68 +172,69 @@ public interface PropertyAccess {
      * @param value   the value
      * @param flags   call site flags
      */
-    public void set(int key, Object value, int flags);
+    void set(int key, Object value, int flags);
 
     /**
      * Check if the given key exists anywhere in the proto chain
      * @param key the key
      * @return true if key exists
      */
-    public boolean has(Object key);
+    boolean has(Object key);
 
     /**
      * Check if the given key exists anywhere in the proto chain
      * @param key the key
      * @return true if key exists
      */
-    public boolean has(int key);
+    boolean has(int key);
 
     /**
      * Check if the given key exists anywhere in the proto chain
      * @param key the key
      * @return true if key exists
      */
-    public boolean has(double key);
+    boolean has(double key);
 
     /**
      * Check if the given key exists directly in the implementor
      * @param key the key
      * @return true if key exists
      */
-    public boolean hasOwnProperty(Object key);
+    boolean hasOwnProperty(Object key);
 
     /**
      * Check if the given key exists directly in the implementor
      * @param key the key
      * @return true if key exists
      */
-    public boolean hasOwnProperty(int key);
+    boolean hasOwnProperty(int key);
 
     /**
      * Check if the given key exists directly in the implementor
      * @param key the key
      * @return true if key exists
      */
-    public boolean hasOwnProperty(double key);
+    boolean hasOwnProperty(double key);
 
     /**
      * Delete a property with the given key from the implementor
      * @param key    the key
      * @return true if deletion succeeded, false otherwise
      */
-    public boolean delete(int key);
+    boolean delete(int key);
 
     /**
      * Delete a property with the given key from the implementor
      * @param key    the key
      * @return true if deletion succeeded, false otherwise
      */
-    public boolean delete(double key);
+    boolean delete(double key);
 
     /**
      * Delete a property with the given key from the implementor
      * @param key    the key
      * @return true if deletion succeeded, false otherwise
      */
-    public boolean delete(Object key);
+    boolean delete(Object key);
+
 }

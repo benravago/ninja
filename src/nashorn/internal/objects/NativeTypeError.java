@@ -43,6 +43,9 @@ import nashorn.internal.runtime.ScriptObject;
 @ScriptClass("Error")
 public final class NativeTypeError extends ScriptObject {
 
+    // initialized by nasgen
+    private static PropertyMap $nasgenmap$;
+
     /** message property in instance */
     @Property(name = NativeError.MESSAGE, attributes = Attribute.NOT_ENUMERABLE)
     public Object instMessage;
@@ -59,11 +62,8 @@ public final class NativeTypeError extends ScriptObject {
     @Property(attributes = Attribute.NOT_ENUMERABLE)
     public Object nashornException;
 
-    // initialized by nasgen
-    private static PropertyMap $nasgenmap$;
-
     @SuppressWarnings("LeakingThisInConstructor")
-    NativeTypeError(final Object msg, final Global global) {
+    NativeTypeError(Object msg, Global global) {
         super(global.getTypeErrorPrototype(), $nasgenmap$);
         if (msg != UNDEFINED) {
             this.instMessage = JSType.toString(msg);
@@ -73,7 +73,7 @@ public final class NativeTypeError extends ScriptObject {
         NativeError.initException(this);
     }
 
-    private NativeTypeError(final Object msg) {
+    private NativeTypeError(Object msg) {
         this(msg, Global.instance());
     }
 
@@ -84,17 +84,10 @@ public final class NativeTypeError extends ScriptObject {
 
     /**
      * ECMA 15.11.6.5 TypeError
-     *
-     * Constructor
-     *
-     * @param newObj was this error instantiated with the new operator
-     * @param self   self reference
-     * @param msg    error message
-     *
-     * @return new TypeError
      */
     @Constructor(name = "TypeError")
-    public static NativeTypeError constructor(final boolean newObj, final Object self, final Object msg) {
+    public static NativeTypeError constructor(boolean newObj, Object self, Object msg) {
         return new NativeTypeError(msg);
     }
+
 }

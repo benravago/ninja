@@ -36,7 +36,7 @@ public class IteratorResult extends ScriptObject {
     // initialized by nasgen
     private static PropertyMap $nasgenmap$;
 
-    IteratorResult(final Object value, final Boolean done, final Global global) {
+    IteratorResult(Object value, Boolean done, Global global) {
         super(global.getObjectPrototype(), $nasgenmap$);
         this.value = value;
         this.done = done;

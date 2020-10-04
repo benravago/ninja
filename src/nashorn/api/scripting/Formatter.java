@@ -25,52 +25,40 @@
 
 package nashorn.api.scripting;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Formatter is a class to get the type conversion between javascript types and
- * java types for the format (sprintf) method working.
+ * Formatter is a class to get the type conversion between javascript types and java types for the format (sprintf) method working.
  *
- * <p>In javascript the type for numbers can be different from the format type
- * specifier. For format type '%d', '%o', '%x', '%X' double need to be
- * converted to integer. For format type 'e', 'E', 'f', 'g', 'G', 'a', 'A'
- * integer needs to be converted to double.
+ * <p>In javascript the type for numbers can be different from the format type specifier.
+ * For format type '%d', '%o', '%x', '%X' double need to be converted to integer.
+ * For format type 'e', 'E', 'f', 'g', 'G', 'a', 'A' integer needs to be converted to double.
  *
  * <p>Format type "%c" and javascript string needs special handling.
  *
- * <p>The javascript date objects can be handled if they are type double (the
- * related javascript code will convert with Date.getTime() to double). So
- * double date types are converted to long.
+ * <p>The javascript date objects can be handled if they are type double (the related javascript code will convert with Date.getTime() to double).
+ * So double date types are converted to long.
  *
  * <p>Pattern and the logic for parameter position: java.util.Formatter
- *
  */
 final class Formatter {
-
-    private Formatter() {
-    }
+    private Formatter() {}
 
     /**
-     * Method which converts javascript types to java types for the
-     * String.format method (jrunscript function sprintf).
-     *
-     * @param format a format string
-     * @param args arguments referenced by the format specifiers in format
-     * @return a formatted string
+     * Method which converts javascript types to java types for the String.format method (jrunscript function sprintf).
+     * 'format' is a format string. 'args' are arguments referenced by the format specifiers in format.
      */
-    static String format(final String format, final Object[] args) {
-        final Matcher m = FS_PATTERN.matcher(format);
-        int positionalParameter = 1;
+    static String format(String format, Object[] args) {
+        var m = FS_PATTERN.matcher(format);
+        var positionalParameter = 1;
 
         while (m.find()) {
-            int index = index(m.group(1));
-            final boolean previous = isPreviousArgument(m.group(2));
-            final char conversion = m.group(6).charAt(0);
+            var index = index(m.group(1));
+            var previous = isPreviousArgument(m.group(2));
+            var conversion = m.group(6).charAt(0);
 
             // skip over some formats
-            if (index < 0 || previous
-                    || conversion == 'n' || conversion == '%') {
+            if (index < 0 || previous || conversion == 'n' || conversion == '%') {
                 continue;
             }
 
@@ -85,7 +73,7 @@ final class Formatter {
             }
 
             // current argument
-            final Object arg = args[index - 1];
+            var arg = args[index - 1];
 
             // for date we convert double to long
             if (m.group(5) != null) {
@@ -96,43 +84,32 @@ final class Formatter {
             } else {
                 // we have to convert some types
                 switch (conversion) {
-                    case 'd':
-                    case 'o':
-                    case 'x':
-                    case 'X':
+                    // default -> {}
+
+                    case 'd', 'o', 'x', 'X' -> {
                         if (arg instanceof Double) {
                             // convert double to long
                             args[index - 1] = ((Double) arg).longValue();
-                        } else if (arg instanceof String
-                                && ((String) arg).length() > 0) {
+                        } else if (arg instanceof String && ((String) arg).length() > 0) {
                             // convert string (first character) to int
                             args[index - 1] = (int) ((String) arg).charAt(0);
                         }
-                        break;
-                    case 'e':
-                    case 'E':
-                    case 'f':
-                    case 'g':
-                    case 'G':
-                    case 'a':
-                    case 'A':
+                    }
+                    case 'e', 'E', 'f', 'g', 'G', 'a', 'A' -> {
                         if (arg instanceof Integer) {
                             // convert integer to double
                             args[index - 1] = ((Integer) arg).doubleValue();
                         }
-                        break;
-                    case 'c':
+                    }
+                    case 'c' -> {
                         if (arg instanceof Double) {
                             // convert double to integer
                             args[index - 1] = ((Double) arg).intValue();
-                        } else if (arg instanceof String
-                                && ((String) arg).length() > 0) {
+                        } else if (arg instanceof String && ((String) arg).length() > 0) {
                             // get the first character from string
                             args[index - 1] = (int) ((String) arg).charAt(0);
                         }
-                        break;
-                    default:
-                        break;
+                    }
                 }
             }
         }
@@ -142,17 +119,16 @@ final class Formatter {
 
     /**
      * Method to parse the integer of the argument index.
-     *
-     * @param s string to parse
-     * @return -1 if parsing failed, 0 if string is null, > 0 integer
+     * 's' is string to parse.
+     * Returns -1 if parsing failed, 0 if string is null, > 0 integer
      */
-    private static int index(final String s) {
-        int index = -1;
+    private static int index(String s) {
+        var index = -1;
 
         if (s != null) {
             try {
                 index = Integer.parseInt(s.substring(0, s.length() - 1));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 //ignored
             }
         } else {
@@ -163,23 +139,16 @@ final class Formatter {
     }
 
     /**
-     * Method to check if a string contains '&lt;'. This is used to find out if
-     * previous parameter is used.
-     *
-     * @param s string to check
-     * @return true if '&lt;' is in the string, else false
+     * Method to check if a string contains '&lt;'.
+     * This is used to find out if previous parameter is used.
+     * 's' is the string to check.
+     * Returns true if '&lt;' is in the string, else false
      */
-    private static boolean isPreviousArgument(final String s) {
+    private static boolean isPreviousArgument(String s) {
         return (s != null && s.indexOf('<') >= 0);
     }
 
-    // %[argument_index$][flags][width][.precision][t]conversion
-    private static final String formatSpecifier =
-            "%(\\d+\\$)?([-#+ 0,(\\<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z%])";
-    // compiled format string
-    private static final Pattern FS_PATTERN;
+    // compiled format string // %[argument_index$][flags][width][.precision][t]conversion
+    private static final Pattern FS_PATTERN = Pattern.compile("%(\\d+\\$)?([-#+ 0,(\\<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z%])");
 
-    static {
-        FS_PATTERN = Pattern.compile(formatSpecifier);
-    }
 }

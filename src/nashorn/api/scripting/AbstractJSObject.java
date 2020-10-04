@@ -33,107 +33,107 @@ import java.util.Set;
 /**
  * This is the base class for nashorn ScriptObjectMirror class.
  *
- * This class can also be subclassed by an arbitrary Java class. Nashorn will
- * treat objects of such classes just like nashorn script objects. Usual nashorn
- * operations like obj[i], obj.foo, obj.func(), delete obj.foo will be delegated
- * to appropriate method call of this class.
+ * This class can also be subclassed by an arbitrary Java class.
+ * Nashorn will treat objects of such classes just like nashorn script objects.
+ * Usual nashorn operations like obj[i], obj.foo, obj.func(), delete obj.foo will be delegated to appropriate method call of this class.
  *
  * @since 1.8u40
  */
 public abstract class AbstractJSObject implements JSObject {
+
     /**
      * The default constructor.
      */
     public AbstractJSObject() {}
 
     /**
-     * @implSpec This implementation always throws UnsupportedOperationException
+     * This implementation always throws UnsupportedOperationException
      */
     @Override
-    public Object call(final Object thiz, final Object... args) {
+    public Object call(Object thiz, Object... args) {
         throw new UnsupportedOperationException("call");
     }
 
     /**
-     * @implSpec This implementation always throws UnsupportedOperationException
+     * This implementation always throws UnsupportedOperationException
      */
     @Override
-    public Object newObject(final Object... args) {
+    public Object newObject(Object... args) {
         throw new UnsupportedOperationException("newObject");
     }
 
     /**
-     * @implSpec This imlementation always throws UnsupportedOperationException
+     * This imlementation always throws UnsupportedOperationException
      */
     @Override
-    public Object eval(final String s) {
+    public Object eval(String s) {
         throw new UnsupportedOperationException("eval");
     }
 
     /**
-     * @implSpec This implementation always returns null
+     * This implementation always returns null
      */
     @Override
-    public Object getMember(final String name) {
+    public Object getMember(String name) {
         Objects.requireNonNull(name);
         return null;
     }
 
     /**
-     * @implSpec This implementation always returns null
+     * This implementation always returns null
      */
     @Override
-    public Object getSlot(final int index) {
+    public Object getSlot(int index) {
         return null;
     }
 
     /**
-     * @implSpec This implementation always returns false
+     * This implementation always returns false
      */
     @Override
-    public boolean hasMember(final String name) {
+    public boolean hasMember(String name) {
         Objects.requireNonNull(name);
         return false;
     }
 
     /**
-     * @implSpec This implementation always returns false
+     * This implementation always returns false
      */
     @Override
-    public boolean hasSlot(final int slot) {
+    public boolean hasSlot(int slot) {
         return false;
     }
 
     /**
-     * @implSpec This implementation is a no-op
+     * This implementation is a no-op
      */
     @Override
-    public void removeMember(final String name) {
+    public void removeMember(String name) {
         Objects.requireNonNull(name);
         //empty
     }
 
     /**
-     * @implSpec This implementation is a no-op
+     * This implementation is a no-op
      */
     @Override
-    public void setMember(final String name, final Object value) {
+    public void setMember(String name, Object value) {
         Objects.requireNonNull(name);
         //empty
     }
 
     /**
-     * @implSpec This implementation is a no-op
+     * This implementation is a no-op
      */
     @Override
-    public void setSlot(final int index, final Object value) {
+    public void setSlot(int index, Object value) {
         //empty
     }
 
     // property and value iteration
 
     /**
-     * @implSpec This implementation returns empty set
+     * This implementation returns empty set
      */
     @Override
     public Set<String> keySet() {
@@ -141,7 +141,7 @@ public abstract class AbstractJSObject implements JSObject {
     }
 
     /**
-     * @implSpec This implementation returns empty set
+     * This implementation returns empty set
      */
     @Override
     public Collection<Object> values() {
@@ -151,15 +151,15 @@ public abstract class AbstractJSObject implements JSObject {
     // JavaScript instanceof check
 
     /**
-     * @implSpec This implementation always returns false
+     * This implementation always returns false
      */
     @Override
-    public boolean isInstance(final Object instance) {
+    public boolean isInstance(Object instance) {
         return false;
     }
 
     @Override
-    public boolean isInstanceOf(final Object clazz) {
+    public boolean isInstanceOf(Object clazz) {
         if (clazz instanceof JSObject) {
             return ((JSObject)clazz).isInstance(this);
         }
@@ -173,7 +173,7 @@ public abstract class AbstractJSObject implements JSObject {
     }
 
     /**
-     * @implSpec This implementation always returns false
+     * This implementation always returns false
      */
     @Override
     public boolean isFunction() {
@@ -181,7 +181,7 @@ public abstract class AbstractJSObject implements JSObject {
     }
 
     /**
-     * @implSpec This implementation always returns false
+     * This implementation always returns false
      */
     @Override
     public boolean isArray() {

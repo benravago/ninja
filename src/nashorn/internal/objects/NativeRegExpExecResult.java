@@ -37,11 +37,14 @@ import nashorn.internal.runtime.arrays.ArrayData;
 import nashorn.internal.runtime.regexp.RegExpResult;
 
 /**
- * Objects of this class are used to represent return values from
- * RegExp.prototype.exec method.
+ * Objects of this class are used to represent return values from RegExp.prototype.exec method.
  */
 @ScriptClass("RegExpExecResult")
 public final class NativeRegExpExecResult extends ScriptObject {
+
+    // initialized by nasgen
+    private static PropertyMap $nasgenmap$;
+
     /** index property */
     @Property
     public Object index;
@@ -50,10 +53,7 @@ public final class NativeRegExpExecResult extends ScriptObject {
     @Property
     public Object input;
 
-    // initialized by nasgen
-    private static PropertyMap $nasgenmap$;
-
-    NativeRegExpExecResult(final RegExpResult result, final Global global) {
+    NativeRegExpExecResult(RegExpResult result, Global global) {
         super(global.getArrayPrototype(), $nasgenmap$);
         setIsArray();
         this.setArray(ArrayData.allocate(result.getGroups().clone()));
@@ -66,29 +66,19 @@ public final class NativeRegExpExecResult extends ScriptObject {
         return "Array";
     }
 
-    /**
-     * Length getter
-     * @param self self reference
-     * @return length property value
-     */
     @Getter(attributes = Attribute.NOT_ENUMERABLE | Attribute.NOT_CONFIGURABLE)
-    public static Object length(final Object self) {
+    public static Object length(Object self) {
         if (self instanceof ScriptObject) {
             return (double) JSType.toUint32(((ScriptObject)self).getArray().length());
         }
-
         return 0;
     }
 
-    /**
-     * Length setter
-     * @param self self reference
-     * @param length property value
-     */
     @Setter(attributes = Attribute.NOT_ENUMERABLE | Attribute.NOT_CONFIGURABLE)
-    public static void length(final Object self, final Object length) {
+    public static void length(Object self, Object length) {
         if (self instanceof ScriptObject) {
             ((ScriptObject)self).setLength(NativeArray.validLength(length));
         }
     }
+
 }

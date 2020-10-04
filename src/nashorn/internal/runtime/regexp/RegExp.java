@@ -26,6 +26,7 @@
 package nashorn.internal.runtime.regexp;
 
 import java.util.regex.MatchResult;
+
 import nashorn.internal.runtime.BitVector;
 import nashorn.internal.runtime.ECMAErrors;
 import nashorn.internal.runtime.ParserException;
@@ -54,43 +55,37 @@ public abstract class RegExp {
 
     /**
      * Constructor.
-     *
-     * @param source the source string
-     * @param flags the flags string
      */
-    protected RegExp(final String source, final String flags) {
+    protected RegExp(String source, String flags) {
         this.source = source.length() == 0 ? "(?:)" : source;
-        for (int i = 0; i < flags.length(); i++) {
-            final char ch = flags.charAt(i);
+        for (var i = 0; i < flags.length(); i++) {
+            var ch = flags.charAt(i);
             switch (ch) {
-            case 'g':
-                if (this.global) {
-                    throwParserException("repeated.flag", "g");
+                case 'g' -> {
+                    if (this.global) {
+                        throwParserException("repeated.flag", "g");
+                    }
+                    this.global = true;
                 }
-                this.global = true;
-                break;
-            case 'i':
-                if (this.ignoreCase) {
-                    throwParserException("repeated.flag", "i");
+                case 'i' -> {
+                    if (this.ignoreCase) {
+                        throwParserException("repeated.flag", "i");
+                    }
+                    this.ignoreCase = true;
                 }
-                this.ignoreCase = true;
-                break;
-            case 'm':
-                if (this.multiline) {
-                    throwParserException("repeated.flag", "m");
+                case 'm' -> {
+                    if (this.multiline) {
+                        throwParserException("repeated.flag", "m");
+                    }
+                    this.multiline = true;
                 }
-                this.multiline = true;
-                break;
-            default:
-                throwParserException("unsupported.flag", Character.toString(ch));
+                default -> throwParserException("unsupported.flag", Character.toString(ch));
             }
         }
     }
 
     /**
      * Get the source pattern of this regular expression.
-     *
-     * @return the source string
      */
     public String getSource() {
         return source;
@@ -98,17 +93,13 @@ public abstract class RegExp {
 
     /**
      * Set the global flag of this regular expression to {@code global}.
-     *
-     * @param global the new global flag
      */
-    public void setGlobal(final boolean global) {
+    public void setGlobal(boolean global) {
         this.global = global;
     }
 
     /**
      * Get the global flag of this regular expression.
-     *
-     * @return the global flag
      */
     public boolean isGlobal() {
         return global;
@@ -116,8 +107,6 @@ public abstract class RegExp {
 
     /**
      * Get the ignore-case flag of this regular expression.
-     *
-     * @return the ignore-case flag
      */
     public boolean isIgnoreCase() {
         return ignoreCase;
@@ -125,8 +114,6 @@ public abstract class RegExp {
 
     /**
      * Get the multiline flag of this regular expression.
-     *
-     * @return the multiline flag
      */
     public boolean isMultiline() {
         return multiline;
@@ -134,30 +121,21 @@ public abstract class RegExp {
 
     /**
      * Get a bitset indicating which of the groups in this regular expression are inside a negative lookahead.
-     *
-     * @return the groups-in-negative-lookahead bitset
      */
     public BitVector getGroupsInNegativeLookahead() {
         return groupsInNegativeLookahead;
     }
 
     /**
-     * Match this regular expression against {@code str}, starting at index {@code start}
-     * and return a {@link MatchResult} with the result.
-     *
-     * @param str the string
-     * @return the matcher
+     * Match this regular expression against {@code str}, starting at index {@code start} and return a {@link MatchResult} with the result.
      */
     public abstract RegExpMatcher match(String str);
 
     /**
      * Throw a regexp parser exception.
-     *
-     * @param key the message key
-     * @param str string argument
-     * @throws nashorn.internal.runtime.ParserException unconditionally
      */
-    protected static void throwParserException(final String key, final String str) throws ParserException {
+    protected static void throwParserException(String key, String str) throws ParserException {
         throw new ParserException(ECMAErrors.getMessage("parser.error.regex." + key, str));
     }
+
 }

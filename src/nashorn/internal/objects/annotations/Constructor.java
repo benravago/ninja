@@ -36,16 +36,18 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Constructor {
-    /**
-     * @return the name of the constructor function. If empty, the name is
-     *         inferred.
-     */
-    public String name() default "";
 
     /**
-     * @return the arity of the function. By default computed from the method
-     *         signature. Note that -1 means varargs. So, -2 is used as invalid
-     *         arity.
+     * The name of the constructor function.
+     * If empty, the name is inferred.
      */
-    public int arity() default -2;
+    String name() default "";
+
+    /**
+     * The arity of the function.
+     * By default computed from the method signature.
+     * Note that -1 means varargs. So, -2 is used as invalid arity.
+     */
+    int arity() default -2;
+
 }

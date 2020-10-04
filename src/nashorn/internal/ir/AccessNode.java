@@ -34,36 +34,28 @@ import nashorn.internal.ir.visitor.NodeVisitor;
  */
 @Immutable
 public final class AccessNode extends BaseNode {
-    private static final long serialVersionUID = 1L;
 
     /** Property name. */
     private final String property;
 
     /**
      * Constructor
-     *
-     * @param token     token
-     * @param finish    finish
-     * @param base      base node
-     * @param property  property
      */
-    public AccessNode(final long token, final int finish, final Expression base, final String property) {
+    public AccessNode(long token, int finish, Expression base, String property) {
         super(token, finish, base, false, false);
         this.property = property;
     }
 
-    private AccessNode(final AccessNode accessNode, final Expression base, final String property, final boolean isFunction,
-                       final Type type, final int id, final boolean isSuper) {
+    private AccessNode(AccessNode accessNode, Expression base, String property, boolean isFunction, Type type, int id, boolean isSuper) {
         super(accessNode, base, isFunction, type, id, isSuper);
         this.property = property;
     }
 
     /**
      * Assist in IR navigation.
-     * @param visitor IR navigating visitor.
      */
     @Override
-    public Node accept(final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(NodeVisitor<? extends LexicalContext> visitor) {
         if (visitor.enterAccessNode(this)) {
             return visitor.leaveAccessNode(
                 setBase((Expression)base.accept(visitor)));
@@ -72,8 +64,8 @@ public final class AccessNode extends BaseNode {
     }
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printType) {
-        final boolean needsParen = tokenType().needsParens(getBase().tokenType(), true);
+    public void toString(StringBuilder sb, boolean printType) {
+        var needsParen = tokenType().needsParens(getBase().tokenType(), true);
 
         if (printType) {
             optimisticTypeToString(sb);
@@ -95,14 +87,12 @@ public final class AccessNode extends BaseNode {
 
     /**
      * Get the property name
-     *
-     * @return the property name
      */
     public String getProperty() {
         return property;
     }
 
-    private AccessNode setBase(final Expression base) {
+    private AccessNode setBase(Expression base) {
         if (this.base == base) {
             return this;
         }
@@ -110,7 +100,7 @@ public final class AccessNode extends BaseNode {
     }
 
     @Override
-    public AccessNode setType(final Type type) {
+    public AccessNode setType(Type type) {
         if (this.type == type) {
             return this;
         }
@@ -118,7 +108,7 @@ public final class AccessNode extends BaseNode {
     }
 
     @Override
-    public AccessNode setProgramPoint(final int programPoint) {
+    public AccessNode setProgramPoint(int programPoint) {
         if (this.programPoint == programPoint) {
             return this;
         }
@@ -140,4 +130,5 @@ public final class AccessNode extends BaseNode {
         }
         return new AccessNode(this, base, property, isFunction(), type, programPoint, true);
     }
+
 }

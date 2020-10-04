@@ -181,7 +181,7 @@ public enum TokenType {
     EXECSTRING     (LITERAL,  null),
     IDENT          (LITERAL,  null),
     REGEX          (LITERAL,  null),
-    XML            (LITERAL,  null),
+    // XML         (LITERAL,  null),
     OBJECT         (LITERAL,  null),
     ARRAY          (LITERAL,  null),
     TEMPLATE       (LITERAL,  null),
@@ -213,15 +213,15 @@ public enum TokenType {
     /** Cache values to avoid cloning. */
     private static final TokenType[] values;
 
-    TokenType(final TokenKind kind, final String name) {
-        next              = null;
-        this.kind         = kind;
-        this.name         = name;
-        precedence        = 0;
-        isLeftAssociative = false;
+    TokenType(TokenKind kind, String name) {
+        this.next = null;
+        this.kind = kind;
+        this.name = name;
+        this.precedence = 0;
+        this.isLeftAssociative = false;
     }
 
-    TokenType(final TokenKind kind, final String name, final int precedence, final boolean isLeftAssociative) {
+    TokenType(TokenKind kind, String name, int precedence, boolean isLeftAssociative) {
         next                   = null;
         this.kind              = kind;
         this.name              = name;
@@ -231,26 +231,20 @@ public enum TokenType {
 
     /**
      * Determines if the token has greater precedence than other.
-     *
      * @param other  Compare token.
      * @param isLeft Is to the left of the other.
-     *
      * @return {@code true} if greater precedence.
      */
-    public boolean needsParens(final TokenType other, final boolean isLeft) {
-        return other.precedence != 0 &&
-               (precedence > other.precedence ||
-               precedence == other.precedence && isLeftAssociative && !isLeft);
+    public boolean needsParens(TokenType other, boolean isLeft) {
+        return other.precedence != 0 && (precedence > other.precedence || precedence == other.precedence && isLeftAssociative && !isLeft);
     }
 
     /**
      * Determines if the type is a valid operator.
-     *
      * @param noIn {@code true} if IN operator should be ignored.
-     *
      * @return {@code true} if valid operator.
      */
-    public boolean isOperator(final boolean noIn) {
+    public boolean isOperator(boolean noIn) {
         return kind == BINARY && (!noIn || this != IN) && precedence != 0;
     }
 
@@ -271,7 +265,7 @@ public enum TokenType {
         return next;
     }
 
-    public void setNext(final TokenType next) {
+    public void setNext(TokenType next) {
         this.next = next;
     }
 
@@ -287,7 +281,7 @@ public enum TokenType {
         return isLeftAssociative;
     }
 
-    boolean startsWith(final char c) {
+    boolean startsWith(char c) {
         return name != null && name.length() > 0 && name.charAt(0) == c;
     }
 
@@ -304,4 +298,5 @@ public enum TokenType {
         // Avoid cloning of enumeration.
         values = TokenType.values();
     }
+
 }

@@ -39,18 +39,15 @@ import nashorn.internal.runtime.Context;
  * @see Logger
  */
 public interface Loggable {
+
     /**
-     * Initialize a logger, by asking Context to get or create it
-     * and then keep it in a table by name
-     *
-     * @param context context
-     * @return the initialized logger
+     * Initialize a logger, by asking Context to get or create it and then keep it in a table by name
      */
-    public DebugLogger initLogger(final Context context);
+    DebugLogger initLogger(Context context);
 
     /**
      * Return the logger in use
-     * @return logger
      */
-    public DebugLogger getLogger();
+    DebugLogger getLogger();
+
 }

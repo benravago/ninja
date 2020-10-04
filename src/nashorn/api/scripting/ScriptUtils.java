@@ -26,8 +26,10 @@
 package nashorn.api.scripting;
 
 import java.lang.invoke.MethodHandle;
+
 import jdk.dynalink.beans.StaticClass;
 import jdk.dynalink.linker.LinkerServices;
+
 import nashorn.internal.Util;
 import nashorn.internal.runtime.Context;
 import nashorn.internal.runtime.ScriptFunction;
@@ -43,49 +45,38 @@ public final class ScriptUtils {
     private ScriptUtils() {}
 
     /**
-     * Method which converts javascript types to java types for the
-     * String.format method (jrunscript function sprintf).
-     *
-     * @param format a format string
-     * @param args arguments referenced by the format specifiers in format
-     * @return a formatted string
+     * Method which converts javascript types to java types for the String.format method (jrunscript function sprintf).
+     * 'format' is a format string.
+     * 'args' are the arguments referenced by the format specifiers in format
      */
-    public static String format(final String format, final Object[] args) {
+    public static String format(String format, Object[] args) {
         return Formatter.format(format, args);
     }
 
     /**
-     * Create a wrapper function that calls {@code func} synchronized on {@code sync} or, if that is undefined,
-     * {@code self}. Used to implement "sync" function in resources/mozilla_compat.js.
-     *
-     * @param func the function to wrap
-     * @param sync the object to synchronize on
-     * @return a synchronizing wrapper function
-     * @throws IllegalArgumentException if func does not represent a script function
+     * Create a wrapper function that calls {@code func} synchronized on {@code sync} or, if that is undefined, {@code self}.
+     * Used to implement "sync" function in resources/mozilla_compat.js.
+     * 'func' is the function to wrap.
+     * 'sync' is the object to synchronize on.
      */
-    public static Object makeSynchronizedFunction(final Object func, final Object sync) {
-        final Object unwrapped = unwrap(func);
+    public static Object makeSynchronizedFunction(Object func, Object sync) {
+        var unwrapped = unwrap(func);
         if (unwrapped instanceof ScriptFunction) {
             return ((ScriptFunction)unwrapped).createSynchronized(unwrap(sync));
         }
-
         throw new IllegalArgumentException();
     }
 
     /**
      * Make a script object mirror on given object if needed.
-     *
-     * @param obj object to be wrapped
-     * @return wrapped object
-     * @throws IllegalArgumentException if obj cannot be wrapped
      */
-    public static ScriptObjectMirror wrap(final Object obj) {
+    public static ScriptObjectMirror wrap(Object obj) {
         if (obj instanceof ScriptObjectMirror) {
             return (ScriptObjectMirror)obj;
         }
 
         if (obj instanceof ScriptObject) {
-            final ScriptObject sobj = (ScriptObject)obj;
+            var sobj = (ScriptObject)obj;
             return (ScriptObjectMirror) ScriptObjectMirror.wrap(sobj, Context.getGlobal());
         }
 
@@ -94,60 +85,45 @@ public final class ScriptUtils {
 
     /**
      * Unwrap a script object mirror if needed.
-     *
-     * @param obj object to be unwrapped
-     * @return unwrapped object
      */
-    public static Object unwrap(final Object obj) {
+    public static Object unwrap(Object obj) {
         if (obj instanceof ScriptObjectMirror) {
             return ScriptObjectMirror.unwrap(obj, Context.getGlobal());
         }
-
         return obj;
     }
 
     /**
      * Wrap an array of object to script object mirrors if needed.
-     *
-     * @param args array to be unwrapped
-     * @return wrapped array
      */
-    public static Object[] wrapArray(final Object[] args) {
+    public static Object[] wrapArray(Object[] args) {
         if (args == null || args.length == 0) {
             return args;
         }
-
         return ScriptObjectMirror.wrapArray(args, Context.getGlobal());
     }
 
     /**
      * Unwrap an array of script object mirrors if needed.
-     *
-     * @param args array to be unwrapped
-     * @return unwrapped array
      */
-    public static Object[] unwrapArray(final Object[] args) {
+    public static Object[] unwrapArray(Object[] args) {
         if (args == null || args.length == 0) {
             return args;
         }
-
         return ScriptObjectMirror.unwrapArray(args, Context.getGlobal());
     }
 
     /**
      * Convert the given object to the given type.
-     *
-     * @param obj object to be converted
-     * @param type destination type to convert to. type is either a Class
-     * or nashorn representation of a Java type returned by Java.type() call in script.
-     * @return converted object
+     * 'obj' is the object to be converted.
+     * 'type' is the destination type to convert to; either a Class or nashorn representation of a Java type returned by Java.type() call in script.
      */
-    public static Object convert(final Object obj, final Object type) {
+    public static Object convert(Object obj, Object type) {
         if (obj == null) {
             return null;
         }
 
-        final Class<?> clazz;
+        Class<?> clazz;
         if (type instanceof Class) {
             clazz = (Class<?>)type;
         } else if (type instanceof StaticClass) {
@@ -156,9 +132,9 @@ public final class ScriptUtils {
             throw new IllegalArgumentException("type expected");
         }
 
-        final LinkerServices linker = Bootstrap.getLinkerServices();
-        final Object objToConvert = unwrap(obj);
-        final MethodHandle converter = linker.getTypeConverter(objToConvert.getClass(), clazz);
+        var linker = Bootstrap.getLinkerServices();
+        var objToConvert = unwrap(obj);
+        var converter = linker.getTypeConverter(objToConvert.getClass(), clazz);
         if (converter == null) {
             // no supported conversion!
             throw new UnsupportedOperationException("conversion not supported");
@@ -170,4 +146,5 @@ public final class ScriptUtils {
             return Util.uncheck(t);
         }
     }
+
 }

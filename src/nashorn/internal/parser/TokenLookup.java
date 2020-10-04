@@ -30,9 +30,10 @@ import static nashorn.internal.parser.TokenType.IDENT;
 
 /**
  * Fast lookup of operators and keywords.
- *
  */
 public final class TokenLookup {
+    private TokenLookup() {}
+
     /**
      * Lookup table for tokens.
      */
@@ -58,9 +59,9 @@ public final class TokenLookup {
         table = new TokenType[tableLength];
 
         // For each token type.
-        for (final TokenType tokenType : TokenType.getValues()) {
+        for (var tokenType : TokenType.getValues()) {
             // Get the name.
-            final String name = tokenType.getName();
+            var name = tokenType.getName();
 
             // Filter tokens.
             if (name == null) {
@@ -70,19 +71,19 @@ public final class TokenLookup {
             // Ignore null and special.
             if (tokenType.getKind() != SPECIAL) {
                 // Get the first character of the name.
-                final char first = name.charAt(0);
+                var first = name.charAt(0);
                 // Translate that character into a table index.
-                final int index = first - tableBase;
+                var index = first - tableBase;
                 assert index < tableLength : "Token name does not fit lookup table";
 
                 // Get the length of the token so that the longest come first.
-                final int length = tokenType.getLength();
+                var length = tokenType.getLength();
                 // Prepare for table insert.
                 TokenType prev = null;
                 TokenType next = table[index];
 
                 // Find the right spot in the table.
-                while(next != null && next.getLength() > length) {
+                while (next != null && next.getLength() > length) {
                     prev = next;
                     next = next.getNext();
                 }
@@ -99,39 +100,34 @@ public final class TokenLookup {
         }
     }
 
-    private TokenLookup() {
-    }
-
     /**
      * Lookup keyword.
-     *
      * @param content parse content char array
      * @param position index of position to start looking
      * @param length   max length to scan
-     *
      * @return token type for keyword
      */
-    public static TokenType lookupKeyword(final char[] content, final int position, final int length) {
+    public static TokenType lookupKeyword(char[] content, int position, int length) {
         assert table != null : "Token lookup table is not initialized";
 
         // First character of keyword.
-        final char first = content[position];
+        var first = content[position];
 
         // Must be lower case character.
         if ('a' <= first && first <= 'z') {
             // Convert to table index.
-            final int index = first - tableBase;
+            var index = first - tableBase;
             // Get first bucket entry.
-            TokenType tokenType = table[index];
+            var tokenType = table[index];
 
             // Search bucket list.
             while (tokenType != null) {
-                final int tokenLength = tokenType.getLength();
+                var tokenLength = tokenType.getLength();
 
                 // if we have a length match maybe a keyword.
                 if (tokenLength == length) {
                     // Do an exact compare of string.
-                    final String name = tokenType.getName();
+                    var name = tokenType.getName();
                     int i;
                     for (i = 0; i < length; i++) {
                         if (content[position + i] != name.charAt(i)) {
@@ -160,55 +156,51 @@ public final class TokenLookup {
 
     /**
      * Lookup operator.
-     *
      * @param ch0 0th char in stream
      * @param ch1 1st char in stream
      * @param ch2 2nd char in stream
      * @param ch3 3rd char in stream
-     *
      * @return the token type for the operator
      */
-    public static TokenType lookupOperator(final char ch0, final char ch1, final char ch2, final char ch3) {
+    public static TokenType lookupOperator(char ch0, char ch1, char ch2, char ch3) {
         assert table != null : "Token lookup table is not initialized";
 
         // Ignore keyword entries.
         if (tableBase < ch0 && ch0 <= tableLimit && !('a' <= ch0 && ch0 <= 'z')) {
             // Convert to index.
-            final int index = ch0 - tableBase;
+            var index = ch0 - tableBase;
             // Get first bucket entry.
             TokenType tokenType = table[index];
 
             // Search bucket list.
             while (tokenType != null) {
-                final String name = tokenType.getName();
+                var name = tokenType.getName();
 
                 switch (name.length()) {
-                case 1:
-                    // One character entry.
-                    return tokenType;
-                case 2:
-                    // Two character entry.
-                    if (name.charAt(1) == ch1) {
+                    // default -> {}
+
+                    case 1 -> {
+                        // One character entry.
                         return tokenType;
+                        }
+                    case 2 -> {
+                        // Two character entry.
+                        if (name.charAt(1) == ch1) {
+                            return tokenType;
+                        }
                     }
-                    break;
-                case 3:
-                    // Three character entry.
-                    if (name.charAt(1) == ch1 &&
-                        name.charAt(2) == ch2) {
-                        return tokenType;
+                    case 3 -> {
+                        // Three character entry.
+                        if (name.charAt(1) == ch1 && name.charAt(2) == ch2) {
+                            return tokenType;
+                        }
                     }
-                    break;
-                case 4:
-                    // Four character entry.
-                    if (name.charAt(1) == ch1 &&
-                        name.charAt(2) == ch2 &&
-                        name.charAt(3) == ch3) {
-                        return tokenType;
+                    case 4 -> {
+                        // Four character entry.
+                        if (name.charAt(1) == ch1 && name.charAt(2) == ch2 && name.charAt(3) == ch3) {
+                            return tokenType;
+                        }
                     }
-                    break;
-                default:
-                    break;
                 }
 
                 // Try next token.
@@ -219,4 +211,5 @@ public final class TokenLookup {
         // Not found.
         return null;
     }
+
 }

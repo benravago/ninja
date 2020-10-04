@@ -26,6 +26,7 @@
 package nashorn.internal.objects;
 
 import java.util.Objects;
+
 import nashorn.internal.objects.annotations.Property;
 import nashorn.internal.objects.annotations.ScriptClass;
 import nashorn.internal.runtime.JSType;
@@ -36,14 +37,16 @@ import nashorn.internal.runtime.ScriptObject;
 import nashorn.internal.runtime.ScriptRuntime;
 
 /**
- * Generic Property descriptor is used to represent attributes an object property
- * that is neither a data property descriptor nor an accessor property descriptor.
+ * Generic Property descriptor is used to represent attributes an object property that is neither a data property descriptor nor an accessor property descriptor.
  *
  * See ECMA 8.10 The Property Descriptor and Property Identifier Specification Types
- *
  */
 @ScriptClass("GenericPropertyDescriptor")
 public final class GenericPropertyDescriptor extends ScriptObject implements PropertyDescriptor {
+
+    // initialized by nasgen
+    private static PropertyMap $nasgenmap$;
+
     /** Is the property configurable? */
     @Property
     public Object configurable;
@@ -52,13 +55,10 @@ public final class GenericPropertyDescriptor extends ScriptObject implements Pro
     @Property
     public Object enumerable;
 
-    // initialized by nasgen
-    private static PropertyMap $nasgenmap$;
-
-    GenericPropertyDescriptor(final boolean configurable, final boolean enumerable, final Global global) {
+    GenericPropertyDescriptor(boolean configurable, boolean enumerable, Global global) {
         super(global.getObjectPrototype(), $nasgenmap$);
         this.configurable = configurable;
-        this.enumerable   = enumerable;
+        this.enumerable = enumerable;
     }
 
     @Override
@@ -93,37 +93,37 @@ public final class GenericPropertyDescriptor extends ScriptObject implements Pro
     }
 
     @Override
-    public void setConfigurable(final boolean flag) {
+    public void setConfigurable(boolean flag) {
         this.configurable = flag;
     }
 
     @Override
-    public void setEnumerable(final boolean flag) {
+    public void setEnumerable(boolean flag) {
         this.enumerable = flag;
     }
 
     @Override
-    public void setWritable(final boolean flag) {
+    public void setWritable(boolean flag) {
         throw new UnsupportedOperationException("set writable");
     }
 
     @Override
-    public void setValue(final Object value) {
+    public void setValue(Object value) {
         throw new UnsupportedOperationException("set value");
     }
 
     @Override
-    public void setGetter(final Object getter) {
+    public void setGetter(Object getter) {
         throw new UnsupportedOperationException("set getter");
     }
 
     @Override
-    public void setSetter(final Object setter) {
+    public void setSetter(Object setter) {
         throw new UnsupportedOperationException("set setter");
     }
 
     @Override
-    public PropertyDescriptor fillFrom(final ScriptObject sobj) {
+    public PropertyDescriptor fillFrom(ScriptObject sobj) {
         if (sobj.has(CONFIGURABLE)) {
             this.configurable = JSType.toBoolean(sobj.get(CONFIGURABLE));
         } else {
@@ -145,7 +145,7 @@ public final class GenericPropertyDescriptor extends ScriptObject implements Pro
     }
 
     @Override
-    public boolean hasAndEquals(final PropertyDescriptor other) {
+    public boolean hasAndEquals(PropertyDescriptor other) {
         if (has(CONFIGURABLE) && other.has(CONFIGURABLE)) {
             if (isConfigurable() != other.isConfigurable()) {
                 return false;
@@ -162,7 +162,7 @@ public final class GenericPropertyDescriptor extends ScriptObject implements Pro
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -170,9 +170,8 @@ public final class GenericPropertyDescriptor extends ScriptObject implements Pro
             return false;
         }
 
-        final GenericPropertyDescriptor other = (GenericPropertyDescriptor)obj;
-        return ScriptRuntime.sameValue(configurable, other.configurable) &&
-               ScriptRuntime.sameValue(enumerable, other.enumerable);
+        var other = (GenericPropertyDescriptor)obj;
+        return ScriptRuntime.sameValue(configurable, other.configurable) && ScriptRuntime.sameValue(enumerable, other.enumerable);
     }
 
     @Override
@@ -182,9 +181,10 @@ public final class GenericPropertyDescriptor extends ScriptObject implements Pro
 
     @Override
     public int hashCode() {
-        int hash = 7;
+        var hash = 7;
         hash = 97 * hash + Objects.hashCode(this.configurable);
         hash = 97 * hash + Objects.hashCode(this.enumerable);
         return hash;
     }
+
 }

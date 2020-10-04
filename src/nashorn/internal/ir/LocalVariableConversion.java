@@ -28,37 +28,33 @@ package nashorn.internal.ir;
 import nashorn.internal.codegen.types.Type;
 
 /**
- * Class describing one or more local variable conversions that needs to be performed on entry to a control flow join
- * point. Note that the class is named as a singular "Conversion" and not a plural "Conversions", but instances of the
- * class have a reference to the next conversion, so multiple conversions are always represented with a single instance
- * that is a head of a linked list of instances.
+ * Class describing one or more local variable conversions that needs to be performed on entry to a control flow join point.
+ *
+ * Note that the class is named as a singular "Conversion" and not a plural "Conversions", but instances of the class have a reference to the next conversion, so multiple conversions are always represented with a single instance that is a head of a linked list of instances.
  * @see JoinPredecessor
  */
 public final class LocalVariableConversion {
+
     private final Symbol symbol;
+
     // TODO: maybe introduce a type pair class? These will often be repeated.
     private final Type from;
     private final Type to;
+
     private final LocalVariableConversion next;
 
     /**
      * Creates a new object representing a local variable conversion.
-     * @param symbol the symbol representing the local variable whose value is being converted.
-     * @param from the type value is being converted from.
-     * @param to the type value is being converted to.
-     * @param next next conversion at the same join point, if any (the conversion object implements a singly-linked
-     * list of conversions).
      */
-    public LocalVariableConversion(final Symbol symbol, final Type from, final Type to, final LocalVariableConversion next) {
-        this.symbol = symbol;
-        this.from = from;
-        this.to = to;
-        this.next = next;
+    public LocalVariableConversion(Symbol symbol, Type from, Type to, LocalVariableConversion next) {
+        this.symbol = symbol; // the symbol representing the local variable whose value is being converted.
+        this.from = from;     // the type value is being converted from.
+        this.to = to;         // the type value is being converted to.
+        this.next = next;     // next conversion at the same join point, if any (the conversion object implements a singly-linked list of conversions).
     }
 
     /**
      * Returns the type being converted from.
-     * @return the type being converted from.
      */
     public Type getFrom() {
         return from;
@@ -66,7 +62,6 @@ public final class LocalVariableConversion {
 
     /**
      * Returns the type being converted to.
-     * @return the type being converted to.
      */
     public Type getTo() {
         return to;
@@ -74,7 +69,6 @@ public final class LocalVariableConversion {
 
     /**
      * Returns the next conversion at the same join point, or null if this is the last one.
-     * @return the next conversion at the same join point.
      */
     public LocalVariableConversion getNext() {
         return next;
@@ -82,16 +76,15 @@ public final class LocalVariableConversion {
 
     /**
      * Returns the symbol representing the local variable whose value is being converted.
-     * @return the symbol representing the local variable whose value is being converted.
      */
     public Symbol getSymbol() {
         return symbol;
     }
 
     /**
-     * Returns true if this conversion is live. A conversion is live if the symbol has a slot for the conversion's
-     * {@link #getTo() to} type. If a conversion is dead, it can be omitted in code generator.
-     * @return true if this conversion is live.
+     * Returns true if this conversion is live.
+     * A conversion is live if the symbol has a slot for the conversion's {@link #getTo() to} type.
+     * If a conversion is dead, it can be omitted in code generator.
      */
     public boolean isLive() {
         return symbol.hasSlotFor(to);
@@ -99,7 +92,6 @@ public final class LocalVariableConversion {
 
     /**
      * Returns true if this conversion {@link #isLive()}, or if any of its {@link #getNext()} conversions are live.
-     * @return true if this conversion, or any conversion following it, are live.
      */
     public boolean isAnyLive() {
         return isLive() || isAnyLive(next);
@@ -107,19 +99,15 @@ public final class LocalVariableConversion {
 
     /**
      * Returns true if the passed join predecessor has {@link #isAnyLive()} conversion.
-     * @param jp the join predecessor being examined.
-     * @return true if the join predecessor conversion is not null and {@link #isAnyLive()}.
      */
-    public static boolean hasLiveConversion(final JoinPredecessor jp) {
+    public static boolean hasLiveConversion(JoinPredecessor jp) {
         return isAnyLive(jp.getLocalVariableConversion());
     }
 
     /**
      * Returns true if the passed conversion is not null, and it {@link #isAnyLive()}.
-     * @parameter conv the conversion being tested for liveness.
-     * @return true if the conversion is not null and {@link #isAnyLive()}.
      */
-    private static boolean isAnyLive(final LocalVariableConversion conv) {
+    private static boolean isAnyLive(LocalVariableConversion conv) {
         return conv != null && conv.isAnyLive();
     }
 
@@ -130,11 +118,9 @@ public final class LocalVariableConversion {
 
     /**
      * Generates a string representation of this conversion in the passed string builder.
-     * @param sb the string builder in which to generate a string representation of this conversion.
-     * @return the passed in string builder.
      */
-    public StringBuilder toString(final StringBuilder sb) {
-        if(isLive()) {
+    public StringBuilder toString(StringBuilder sb) {
+        if (isLive()) {
             return toStringNext(sb.append('\u27e6'), true).append("\u27e7 ");
         }
         return next == null ? sb : next.toString(sb);
@@ -142,17 +128,14 @@ public final class LocalVariableConversion {
 
     /**
      * Generates a string representation of the passed conversion in the passed string builder.
-     * @param conv the conversion to render in the string builder.
-     * @param sb the string builder in which to generate a string representation of this conversion.
-     * @return the passed in string builder.
      */
-    public static StringBuilder toString(final LocalVariableConversion conv, final StringBuilder sb) {
+    public static StringBuilder toString(LocalVariableConversion conv, StringBuilder sb) {
         return conv == null ? sb : conv.toString(sb);
     }
 
-    private StringBuilder toStringNext(final StringBuilder sb, final boolean first) {
-        if(isLive()) {
-            if(!first) {
+    private StringBuilder toStringNext(StringBuilder sb, boolean first) {
+        if (isLive()) {
+            if (!first) {
                 sb.append(", ");
             }
             sb.append(symbol.getName()).append(':').append(getTypeChar(from)).append('\u2192').append(getTypeChar(to));
@@ -161,14 +144,15 @@ public final class LocalVariableConversion {
         return next == null ? sb : next.toStringNext(sb, first);
     }
 
-    private static char getTypeChar(final Type type) {
-        if(type == Type.UNDEFINED) {
+    private static char getTypeChar(Type type) {
+        if (type == Type.UNDEFINED) {
             return 'U';
-        } else if(type.isObject()) {
+        } else if (type.isObject()) {
             return 'O';
-        } else if(type == Type.BOOLEAN) {
+        } else if (type == Type.BOOLEAN) {
             return 'Z';
         }
         return type.getBytecodeStackType();
     }
+
 }

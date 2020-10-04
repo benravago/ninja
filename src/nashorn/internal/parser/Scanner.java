@@ -59,33 +59,29 @@ public class Scanner {
      * @param start   position index in content where to start
      * @param length  length of input
      */
-    protected Scanner(final char[] content, final int line, final int start, final int length) {
-        this.content  = content;
+    protected Scanner(char[] content, int line, int start, int length) {
+        this.content = content;
         this.position = start;
-        this.limit    = start + length;
-        this.line     = line;
+        this.limit = start + length;
+        this.line = line;
 
         reset(position);
     }
 
     /**
-     * Constructor
-     *
+     * Constructor.
      * Scan content from beginning to end. Content given as a string
-     *
-     * @param content content to scan
      */
-    protected Scanner(final String content) {
+    protected Scanner(String content) {
         this(content.toCharArray(), 0, 0, content.length());
     }
 
     /**
      * Copy constructor
-     *
      * @param scanner  scanner
      * @param state    state, the state is a tuple {position, limit, line} only visible internally
      */
-    Scanner(final Scanner scanner, final State state) {
+    Scanner(Scanner scanner, State state) {
         content  = scanner.content;
         position = state.position;
         limit    = state.limit;
@@ -98,6 +94,7 @@ public class Scanner {
      * Information needed to restore previous state.
      */
     static class State {
+
         /** Position in content. */
         public final int position;
 
@@ -107,7 +104,7 @@ public class Scanner {
         /** Current line number. */
         public final int line;
 
-        State(final int position, final int limit, final int line) {
+        State(int position, int limit, int line) {
             this.position = position;
             this.limit    = limit;
             this.line     = line;
@@ -115,9 +112,8 @@ public class Scanner {
 
         /**
          * Change the limit for a new scanner.
-         * @param limit New limit.
          */
-        void setLimit(final int limit) {
+        void setLimit(int limit) {
             this.limit = limit;
         }
 
@@ -128,7 +124,6 @@ public class Scanner {
 
     /**
      * Save the state of the scan.
-     * @return Captured state.
      */
     State saveState() {
         return new State(position, limit, line);
@@ -136,9 +131,8 @@ public class Scanner {
 
     /**
      * Restore the state of the scan.
-     * @param state Captured state.
      */
-    void restoreState(final State state) {
+    void restoreState(State state) {
         position = state.position;
         line     = state.line;
 
@@ -147,7 +141,6 @@ public class Scanner {
 
     /**
      * Returns true of scanner is at end of input
-     * @return true if no more input
      */
     protected final boolean atEOF() {
         return position == limit;
@@ -158,7 +151,7 @@ public class Scanner {
      * @param i Index of character.
      * @return ith character or '\0' if beyond limit.
      */
-    protected final char charAt(final int i) {
+    protected final char charAt(int i) {
         // Get a character from the content, '\0' if beyond the end of file.
         return i < limit ? content[i] : '\0';
     }
@@ -167,7 +160,7 @@ public class Scanner {
      * Reset to a character position.
      * @param i Position in content.
      */
-    protected final void reset(final int i) {
+    protected final void reset(int i) {
         ch0 = charAt(i);
         ch1 = charAt(i + 1);
         ch2 = charAt(i + 2);
@@ -179,7 +172,7 @@ public class Scanner {
      * Skip ahead a number of characters.
      * @param n Number of characters to skip.
      */
-    protected final void skip(final int n) {
+    protected final void skip(int n) {
         if (n == 1 && !atEOF()) {
             ch0 = ch1;
             ch1 = ch2;
@@ -190,4 +183,5 @@ public class Scanner {
             reset(position + n);
         }
     }
+
 }

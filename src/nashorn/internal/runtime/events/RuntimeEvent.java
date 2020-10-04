@@ -26,16 +26,18 @@
 package nashorn.internal.runtime.events;
 
 import java.util.logging.Level;
+
 import nashorn.internal.runtime.options.Options;
 
 /**
  * Class for representing a runtime event, giving less global dependencies than logger.
- * Every {@link NativeDebug} object keeps a queue of RuntimeEvents that can be explored
- * through the debug API.
+ *
+ * Every {@link NativeDebug} object keeps a queue of RuntimeEvents that can be explored through the debug API.
  *
  * @param <T> class of the value this event wraps
  */
 public class RuntimeEvent<T> {
+
     /** Queue size for the runtime event buffer */
     public static final int RUNTIME_EVENT_QUEUE_SIZE = Options.getIntProperty("nashorn.runtime.event.queue.size", 1024);
 
@@ -44,18 +46,14 @@ public class RuntimeEvent<T> {
 
     /**
      * Constructor
-     *
-     * @param level  log level for runtime event to create
-     * @param object object to wrap
      */
-    public RuntimeEvent(final Level level, final T object) {
+    public RuntimeEvent(Level level, T object) {
         this.level = level;
         this.value = object;
     }
 
     /**
      * Return the value wrapped in this runtime event
-     * @return value
      */
     public final T getValue() {
         return value;
@@ -63,24 +61,23 @@ public class RuntimeEvent<T> {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
 
-        sb.append('[').
-            append(level).
-            append("] ").
-            append(value == null ? "null" : getValueClass().getSimpleName()).
-            append(" value=").
-            append(value);
+        sb.append('[')
+          .append(level)
+          .append("] ")
+          .append(value == null ? "null" : getValueClass().getSimpleName())
+          .append(" value=")
+          .append(value);
 
         return sb.toString();
     }
 
     /**
-     * Descriptor for this runtime event, must be overridden and
-     * implemented, e.g. "RewriteException"
-     * @return event name
+     * Descriptor for this runtime event, must be overridden and implemented, e.g. "RewriteException"
      */
     public final Class<?> getValueClass() {
         return value.getClass();
     }
+
 }

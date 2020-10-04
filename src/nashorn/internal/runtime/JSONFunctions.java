@@ -44,42 +44,39 @@ public final class JSONFunctions {
 
     private static MethodHandle getREVIVER_INVOKER() {
         return Context.getGlobal().getDynamicInvoker(REVIVER_INVOKER,
-                new Callable<MethodHandle>() {
-                    @Override
-                    public MethodHandle call() {
-                        return Bootstrap.createDynamicCallInvoker(Object.class,
-                            Object.class, Object.class, String.class, Object.class);
-                    }
-                });
+            new Callable<MethodHandle>() {
+                @Override
+                public MethodHandle call() {
+                    return Bootstrap.createDynamicCallInvoker(Object.class, Object.class, Object.class, String.class, Object.class);
+                }
+            });
     }
 
     /**
      * Returns JSON-compatible quoted version of the given string.
-     *
      * @param str String to be quoted
      * @return JSON-compatible quoted string
      */
-    public static String quote(final String str) {
+    public static String quote(String str) {
         return JSONParser.quote(str);
     }
 
     /**
      * Parses the given JSON text string and returns object representation.
-     *
      * @param text JSON text to be parsed
      * @param reviver  optional value: function that takes two parameters (key, value)
      * @return Object representation of JSON text given
      */
-    public static Object parse(final Object text, final Object reviver) {
-        final String     str    = JSType.toString(text);
-        final Global     global = Context.getGlobal();
-        final boolean    dualFields = ((ScriptObject) global).useDualFields();
-        final JSONParser parser = new JSONParser(str, global, dualFields);
-        final Object     value;
+    public static Object parse(Object text, Object reviver) {
+        var str = JSType.toString(text);
+        var global = Context.getGlobal();
+        var dualFields = ((ScriptObject) global).useDualFields();
+        var parser = new JSONParser(str, global, dualFields);
+        Object value;
 
         try {
             value = parser.parse();
-        } catch (final ParserException e) {
+        } catch (ParserException e) {
             throw ECMAErrors.syntaxError(e, "invalid.json", e.getMessage());
         }
 
@@ -91,9 +88,9 @@ public final class JSONFunctions {
     // parse helpers
 
     // apply 'reviver' function if available
-    private static Object applyReviver(final Global global, final Object unfiltered, final Object reviver) {
+    private static Object applyReviver(Global global, Object unfiltered, Object reviver) {
         if (Bootstrap.isCallable(reviver)) {
-            final ScriptObject root = global.newObject();
+            var root = global.newObject();
             root.addOwnProperty("", Property.WRITABLE_ENUMERABLE_CONFIGURABLE, unfiltered);
             return walk(root, "", reviver);
         }
@@ -101,15 +98,15 @@ public final class JSONFunctions {
     }
 
     // This is the abstract "Walk" operation from the spec.
-    private static Object walk(final ScriptObject holder, final Object name, final Object reviver) {
-        final Object val = holder.get(name);
+    private static Object walk(ScriptObject holder, Object name, Object reviver) {
+        var val = holder.get(name);
         if (val instanceof ScriptObject) {
-            final ScriptObject     valueObj = (ScriptObject)val;
+            var valueObj = (ScriptObject)val;
             if (valueObj.isArray()) {
-                final int length = JSType.toInteger(valueObj.getLength());
-                for (int i = 0; i < length; i++) {
-                    final String key = Integer.toString(i);
-                    final Object newElement = walk(valueObj, key, reviver);
+                var length = JSType.toInteger(valueObj.getLength());
+                for (var i = 0; i < length; i++) {
+                    var key = Integer.toString(i);
+                    var newElement = walk(valueObj, key, reviver);
 
                     if (newElement == ScriptRuntime.UNDEFINED) {
                         valueObj.delete(i); // false
@@ -118,9 +115,9 @@ public final class JSONFunctions {
                     }
                 }
             } else {
-                final String[] keys = valueObj.getOwnKeys(false);
-                for (final String key : keys) {
-                    final Object newElement = walk(valueObj, key, reviver);
+                var keys = valueObj.getOwnKeys(false);
+                for (var key : keys) {
+                    var newElement = walk(valueObj, key, reviver);
 
                     if (newElement == ScriptRuntime.UNDEFINED) {
                         valueObj.delete(key); // false
@@ -140,8 +137,8 @@ public final class JSONFunctions {
     }
 
     // add a new property if does not exist already, or else set old property
-    private static void setPropertyValue(final ScriptObject sobj, final String name, final Object value) {
-        final int index = ArrayIndex.getArrayIndex(name);
+    private static void setPropertyValue(ScriptObject sobj, String name, Object value) {
+        var index = ArrayIndex.getArrayIndex(name);
         if (ArrayIndex.isValidArrayIndex(index)) {
             // array index key
             sobj.defineOwnProperty(index, value);

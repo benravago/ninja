@@ -33,7 +33,6 @@ import nashorn.internal.ir.visitor.NodeVisitor;
  */
 @Immutable
 public final class CatchNode extends Statement {
-    private static final long serialVersionUID = 1L;
 
     /** Exception binding identifier or binding pattern. */
     private final Expression exception;
@@ -48,17 +47,8 @@ public final class CatchNode extends Statement {
 
     /**
      * Constructors
-     *
-     * @param lineNumber         lineNumber
-     * @param token              token
-     * @param finish             finish
-     * @param exception          variable name or pattern of exception
-     * @param exceptionCondition exception condition
-     * @param body               catch body
-     * @param isSyntheticRethrow true if this node is a synthetically generated rethrow node.
      */
-    public CatchNode(final int lineNumber, final long token, final int finish, final Expression exception,
-            final Expression exceptionCondition, final Block body, final boolean isSyntheticRethrow) {
+    public CatchNode(int lineNumber, long token, int finish, Expression exception, Expression exceptionCondition, Block body, boolean isSyntheticRethrow) {
         super(lineNumber, token, finish);
         if (exception instanceof IdentNode) {
             this.exception = ((IdentNode) exception).setIsInitializedHere();
@@ -72,26 +62,25 @@ public final class CatchNode extends Statement {
         this.isSyntheticRethrow = isSyntheticRethrow;
     }
 
-    private CatchNode(final CatchNode catchNode, final Expression exception, final Expression exceptionCondition,
-            final Block body, final boolean isSyntheticRethrow) {
+    private CatchNode(CatchNode catchNode, Expression exception, Expression exceptionCondition, Block body, boolean isSyntheticRethrow) {
         super(catchNode);
-        this.exception          = exception;
+        this.exception = exception;
         this.exceptionCondition = exceptionCondition;
-        this.body               = body;
+        this.body = body;
         this.isSyntheticRethrow = isSyntheticRethrow;
     }
 
     /**
      * Assist in IR navigation.
-     * @param visitor IR navigating visitor.
      */
     @Override
-    public Node accept(final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(NodeVisitor<? extends LexicalContext> visitor) {
         if (visitor.enterCatchNode(this)) {
             return visitor.leaveCatchNode(
-                    setException((Expression) exception.accept(visitor)).
-                            setExceptionCondition(exceptionCondition == null ? null : (Expression) exceptionCondition.accept(visitor)).
-                            setBody((Block) body.accept(visitor)));
+                setException((Expression) exception.accept(visitor)).
+                setExceptionCondition(exceptionCondition == null ? null : (Expression) exceptionCondition.accept(visitor)).
+                setBody((Block) body.accept(visitor))
+            );
         }
         return this;
     }
@@ -102,7 +91,7 @@ public final class CatchNode extends Statement {
     }
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printTypes) {
+    public void toString(StringBuilder sb, boolean printTypes) {
         sb.append(" catch (");
         exception.toString(sb, printTypes);
 
@@ -115,8 +104,6 @@ public final class CatchNode extends Statement {
 
     /**
      * Get the binding pattern representing the exception thrown
-     *
-     * @return the exception binding pattern
      */
     public Expression getException() {
         return exception;
@@ -124,9 +111,6 @@ public final class CatchNode extends Statement {
 
     /**
      * Get the identifier representing the exception thrown
-     *
-     * @return the exception identifier
-     * @throws ClassCastException if exception set is not binding identifier
      */
     public IdentNode getExceptionIdentifier() {
         return (IdentNode) exception;
@@ -134,7 +118,6 @@ public final class CatchNode extends Statement {
 
     /**
      * Get the exception condition for this catch block
-     * @return the exception condition
      */
     public Expression getExceptionCondition() {
         return exceptionCondition;
@@ -142,10 +125,8 @@ public final class CatchNode extends Statement {
 
     /**
      * Reset the exception condition for this catch block
-     * @param exceptionCondition the new exception condition
-     * @return new or same CatchNode
      */
-    public CatchNode setExceptionCondition(final Expression exceptionCondition) {
+    public CatchNode setExceptionCondition(Expression exceptionCondition) {
         if (this.exceptionCondition == exceptionCondition) {
             return this;
         }
@@ -154,7 +135,6 @@ public final class CatchNode extends Statement {
 
     /**
      * Get the body for this catch block
-     * @return the catch block body
      */
     public Block getBody() {
         return body;
@@ -162,23 +142,19 @@ public final class CatchNode extends Statement {
 
     /**
      * Resets the exception of a catch block
-     *
-     * @param exception new exception which can be binding identifier or binding
-     * pattern
-     * @return new catch node if changed, same otherwise
      */
-    public CatchNode setException(final Expression exception) {
+    public CatchNode setException(Expression exception) {
         if (this.exception == exception) {
             return this;
         }
-        /*check if exception is legitimate*/
+        /* check if exception is legitimate */
         if (!((exception instanceof IdentNode) || (exception instanceof LiteralNode.ArrayLiteralNode) || (exception instanceof ObjectNode))) {
             throw new IllegalArgumentException("invalid catch parameter");
         }
         return new CatchNode(this, exception, exceptionCondition, body, isSyntheticRethrow);
     }
 
-    private CatchNode setBody(final Block body) {
+    private CatchNode setBody(Block body) {
         if (this.body == body) {
             return this;
         }
@@ -186,13 +162,11 @@ public final class CatchNode extends Statement {
     }
 
     /**
-     * Is this catch block a non-JavaScript constructor, for example created as
-     * part of the rethrow mechanism of a finally block in Lower? Then we just
-     * pass the exception on and need not unwrap whatever is in the ECMAException
-     * object catch symbol
-     * @return true if a finally synthetic rethrow
+     * Is this catch block a non-JavaScript constructor, for example created as part of the rethrow mechanism of a finally block in Lower?
+     * Then we just pass the exception on and need not unwrap whatever is in the ECMAException object catch symbol
      */
     public boolean isSyntheticRethrow() {
         return isSyntheticRethrow;
     }
+
 }

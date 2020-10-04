@@ -25,12 +25,12 @@
 
 package nashorn.internal.objects;
 
-import static nashorn.internal.codegen.CompilerConstants.specialCall;
-
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+
 import nashorn.internal.objects.annotations.Attribute;
 import nashorn.internal.objects.annotations.Constructor;
 import nashorn.internal.objects.annotations.Function;
@@ -42,33 +42,30 @@ import nashorn.internal.runtime.PropertyMap;
 import nashorn.internal.runtime.ScriptObject;
 import nashorn.internal.runtime.arrays.ArrayData;
 import nashorn.internal.runtime.arrays.TypedArrayData;
+import static nashorn.internal.codegen.CompilerConstants.specialCall;
 
 /**
  * Int32 array for the TypedArray extension
  */
 @ScriptClass("Int32Array")
 public final class NativeInt32Array extends ArrayBufferView {
-    /**
-     * The size in bytes of each element in the array.
-     */
+
+    // initialized by nasgen
+    private static PropertyMap $nasgenmap$;
+
+    // The size in bytes of each element in the array.
     @Property(attributes = Attribute.NOT_ENUMERABLE | Attribute.NOT_WRITABLE | Attribute.NOT_CONFIGURABLE, where = Where.CONSTRUCTOR)
     public static final int BYTES_PER_ELEMENT = 4;
 
-    // initialized by nasgen
-    @SuppressWarnings("unused")
-    private static PropertyMap $nasgenmap$;
-
     private static final Factory FACTORY = new Factory(BYTES_PER_ELEMENT) {
         @Override
-        public ArrayBufferView construct(final NativeArrayBuffer buffer, final int byteOffset, final int length) {
+        public ArrayBufferView construct(NativeArrayBuffer buffer, int byteOffset, int length) {
             return new NativeInt32Array(buffer, byteOffset, length);
         }
-
         @Override
-        public Int32ArrayData createArrayData(final ByteBuffer nb, final int start, final int length) {
+        public Int32ArrayData createArrayData(ByteBuffer nb, int start, int length) {
             return new Int32ArrayData(nb.asIntBuffer(), start, length);
         }
-
         @Override
         public String getClassName() {
             return "Int32Array";
@@ -80,7 +77,7 @@ public final class NativeInt32Array extends ArrayBufferView {
         private static final MethodHandle GET_ELEM = specialCall(MethodHandles.lookup(), Int32ArrayData.class, "getElem", int.class, int.class).methodHandle();
         private static final MethodHandle SET_ELEM = specialCall(MethodHandles.lookup(), Int32ArrayData.class, "setElem", void.class, int.class, int.class).methodHandle();
 
-        private Int32ArrayData(final IntBuffer nb, final int start, final int end) {
+        private Int32ArrayData(IntBuffer nb, int start, int end) {
             super((nb.position(start).limit(end)).slice(), end - start);
         }
 
@@ -94,20 +91,20 @@ public final class NativeInt32Array extends ArrayBufferView {
             return SET_ELEM;
         }
 
-        private int getElem(final int index) {
+        private int getElem(int index) {
             try {
                 return nb.get(index);
-            } catch (final IndexOutOfBoundsException e) {
+            } catch (IndexOutOfBoundsException e) {
                 throw new ClassCastException(); //force relink - this works for unoptimistic too
             }
         }
 
-        private void setElem(final int index, final int elem) {
+        private void setElem(int index, int elem) {
             try {
                 if (index < nb.limit()) {
                     nb.put(index, elem);
                 }
-            } catch (final IndexOutOfBoundsException e) {
+            } catch (IndexOutOfBoundsException e) {
                 throw new ClassCastException();
             }
         }
@@ -123,62 +120,53 @@ public final class NativeInt32Array extends ArrayBufferView {
         }
 
         @Override
-        public int getInt(final int index) {
+        public int getInt(int index) {
             return getElem(index);
         }
 
         @Override
-        public int getIntOptimistic(final int index, final int programPoint) {
+        public int getIntOptimistic(int index, int programPoint) {
             return getElem(index);
         }
 
         @Override
-        public double getDouble(final int index) {
+        public double getDouble(int index) {
             return getInt(index);
         }
 
         @Override
-        public double getDoubleOptimistic(final int index, final int programPoint) {
+        public double getDoubleOptimistic(int index, int programPoint) {
             return getElem(index);
         }
 
         @Override
-        public Object getObject(final int index) {
+        public Object getObject(int index) {
             return getInt(index);
         }
 
         @Override
-        public ArrayData set(final int index, final Object value) {
+        public ArrayData set(int index, Object value) {
             return set(index, JSType.toInt32(value));
         }
 
         @Override
-        public ArrayData set(final int index, final int value) {
+        public ArrayData set(int index, int value) {
             setElem(index, value);
             return this;
         }
 
         @Override
-        public ArrayData set(final int index, final double value) {
+        public ArrayData set(int index, double value) {
             return set(index, (int)value);
         }
     }
 
-    /**
-     * Constructor
-     *
-     * @param newObj is this typed array instantiated with the new operator
-     * @param self   self reference
-     * @param args   args
-     *
-     * @return new typed array
-     */
     @Constructor(arity = 1)
-    public static NativeInt32Array constructor(final boolean newObj, final Object self, final Object... args) {
+    public static NativeInt32Array constructor(boolean newObj, Object self, Object... args) {
         return (NativeInt32Array)constructorImpl(newObj, args, FACTORY);
     }
 
-    NativeInt32Array(final NativeArrayBuffer buffer, final int byteOffset, final int length) {
+    NativeInt32Array(NativeArrayBuffer buffer, int byteOffset, int length) {
         super(buffer, byteOffset, length);
     }
 
@@ -187,56 +175,27 @@ public final class NativeInt32Array extends ArrayBufferView {
         return FACTORY;
     }
 
-    /**
-     * Set values
-     * @param self   self reference
-     * @param array  multiple values of array's type to set
-     * @param offset optional start index, interpreted  0 if undefined
-     * @return undefined
-     */
     @Function(attributes = Attribute.NOT_ENUMERABLE)
-    protected static Object set(final Object self, final Object array, final Object offset) {
+    protected static Object set(Object self, Object array, Object offset) {
         return ArrayBufferView.setImpl(self, array, offset);
     }
 
-    /**
-     * Returns a new TypedArray view of the ArrayBuffer store for this TypedArray,
-     * referencing the elements at begin, inclusive, up to end, exclusive. If either
-     * begin or end is negative, it refers to an index from the end of the array,
-     * as opposed to from the beginning.
-     * <p>
-     * If end is unspecified, the subarray contains all elements from begin to the end
-     * of the TypedArray. The range specified by the begin and end values is clamped to
-     * the valid index range for the current array. If the computed length of the new
-     * TypedArray would be negative, it is clamped to zero.
-     * <p>
-     * The returned TypedArray will be of the same type as the array on which this
-     * method is invoked.
-     *
-     * @param self self reference
-     * @param begin begin position
-     * @param end end position
-     *
-     * @return sub array
-     */
     @Function(attributes = Attribute.NOT_ENUMERABLE)
-    protected static NativeInt32Array subarray(final Object self, final Object begin, final Object end) {
+    protected static NativeInt32Array subarray(Object self, Object begin, Object end) {
         return (NativeInt32Array)ArrayBufferView.subarrayImpl(self, begin, end);
     }
 
     /**
      * ECMA 6 22.2.3.30 %TypedArray%.prototype [ @@iterator ] ( )
-     *
-     * @param self the self reference
-     * @return an iterator over the array's values
      */
     @Function(attributes = Attribute.NOT_ENUMERABLE, name = "@@iterator")
-    public static Object getIterator(final Object self) {
+    public static Object getIterator(Object self) {
         return ArrayIterator.newArrayValueIterator(self);
     }
 
     @Override
-    protected ScriptObject getPrototype(final Global global) {
+    protected ScriptObject getPrototype(Global global) {
         return global.getInt32ArrayPrototype();
     }
+
 }

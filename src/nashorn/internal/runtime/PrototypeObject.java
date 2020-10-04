@@ -35,10 +35,11 @@ import nashorn.internal.objects.Global;
 
 /**
  * Instances of this class serve as "prototype" object for script functions.
- * The purpose is to expose "constructor" property from "prototype". Also, nasgen
- * generated prototype classes extend from this class.
+ * The purpose is to expose "constructor" property from "prototype".
+ * Also, nasgen generated prototype classes extend from this class.
  */
 public class PrototypeObject extends ScriptObject {
+
     private static final PropertyMap map$;
 
     private Object constructor;
@@ -47,12 +48,12 @@ public class PrototypeObject extends ScriptObject {
     private static final MethodHandle SET_CONSTRUCTOR = findOwnMH("setConstructor", void.class, Object.class, Object.class);
 
     static {
-        final ArrayList<Property> properties = new ArrayList<>(1);
+        var properties = new ArrayList<Property>(1);
         properties.add(AccessorProperty.create("constructor", Property.NOT_ENUMERABLE, GET_CONSTRUCTOR, SET_CONSTRUCTOR));
         map$ = PropertyMap.newMap(properties);
     }
 
-    private PrototypeObject(final Global global, final PropertyMap map) {
+    private PrototypeObject(Global global, PropertyMap map) {
         super(global.getObjectPrototype(), map != map$? map.addAll(map$) : map$);
     }
 
@@ -65,19 +66,17 @@ public class PrototypeObject extends ScriptObject {
 
     /**
      * PropertyObject constructor
-     *
      * @param map property map
      */
-    protected PrototypeObject(final PropertyMap map) {
+    protected PrototypeObject(PropertyMap map) {
         this(Global.instance(), map);
     }
 
     /**
      * PropertyObject constructor
-     *
      * @param func constructor function
      */
-    protected PrototypeObject(final ScriptFunction func) {
+    protected PrototypeObject(ScriptFunction func) {
         this(Global.instance(), map$);
         this.constructor = func;
     }
@@ -87,10 +86,8 @@ public class PrototypeObject extends ScriptObject {
      * @param self self reference
      * @return constructor, probably, but not necessarily, a {@link ScriptFunction}
      */
-    public static Object getConstructor(final Object self) {
-        return (self instanceof PrototypeObject) ?
-            ((PrototypeObject)self).getConstructor() :
-            UNDEFINED;
+    public static Object getConstructor(Object self) {
+        return (self instanceof PrototypeObject) ? ((PrototypeObject)self).getConstructor() : UNDEFINED;
     }
 
     /**
@@ -98,7 +95,7 @@ public class PrototypeObject extends ScriptObject {
      * @param self self reference
      * @param constructor constructor, probably, but not necessarily, a {@link ScriptFunction}
      */
-    public static void setConstructor(final Object self, final Object constructor) {
+    public static void setConstructor(Object self, Object constructor) {
         if (self instanceof PrototypeObject) {
             ((PrototypeObject)self).setConstructor(constructor);
         }
@@ -108,11 +105,12 @@ public class PrototypeObject extends ScriptObject {
         return constructor;
     }
 
-    private void setConstructor(final Object constructor) {
+    private void setConstructor(Object constructor) {
         this.constructor = constructor;
     }
 
-    private static MethodHandle findOwnMH(final String name, final Class<?> rtype, final Class<?>... types) {
+    private static MethodHandle findOwnMH(String name, Class<?> rtype, Class<?>... types) {
         return MH.findStatic(MethodHandles.lookup(), PrototypeObject.class, name, MH.type(rtype, types));
     }
+
 }

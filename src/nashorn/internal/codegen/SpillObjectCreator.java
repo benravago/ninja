@@ -25,10 +25,8 @@
 
 package nashorn.internal.codegen;
 
-import static nashorn.internal.codegen.CompilerConstants.constructorNoLookup;
-import static nashorn.internal.codegen.CompilerConstants.virtualCallNoLookup;
-
 import java.util.List;
+
 import nashorn.internal.codegen.types.Type;
 import nashorn.internal.ir.Expression;
 import nashorn.internal.ir.LiteralNode;
@@ -41,6 +39,9 @@ import nashorn.internal.runtime.arrays.ArrayData;
 import nashorn.internal.runtime.arrays.ArrayIndex;
 import nashorn.internal.scripts.JD;
 import nashorn.internal.scripts.JO;
+import static nashorn.internal.codegen.CompilerConstants.constructorNoLookup;
+import static nashorn.internal.codegen.CompilerConstants.virtualCallNoLookup;
+
 
 /**
  * An object creator that uses spill properties.
@@ -48,45 +49,44 @@ import nashorn.internal.scripts.JO;
 public final class SpillObjectCreator extends ObjectCreator<Expression> {
 
     /**
-     * Constructor
-     *
+     * Constructor.
      * @param codegen  code generator
      * @param tuples   tuples for key, symbol, value
      */
-    SpillObjectCreator(final CodeGenerator codegen, final List<MapTuple<Expression>> tuples) {
+    SpillObjectCreator(CodeGenerator codegen, List<MapTuple<Expression>> tuples) {
         super(codegen, tuples, false, false);
         makeMap();
     }
 
     @Override
-    public void createObject(final MethodEmitter method) {
+    public void createObject(MethodEmitter method) {
         assert !isScope() : "spill scope objects are not currently supported";
 
-        final int          length        = tuples.size();
-        final boolean      dualFields    = codegen.useDualFields();
-        final int          spillLength   = ScriptObject.spillAllocationLength(length);
-        final long[]       jpresetValues = dualFields ? new long[spillLength] : null;
-        final Object[]     opresetValues = new Object[spillLength];
-        final Class<?>     objectClass   = getAllocatorClass();
-        ArrayData          arrayData     = ArrayData.allocate(ScriptRuntime.EMPTY_ARRAY);
+        var length = tuples.size();
+        var dualFields = codegen.useDualFields();
+        var spillLength = ScriptObject.spillAllocationLength(length);
+        var jpresetValues = dualFields ? new long[spillLength] : null;
+        var opresetValues = new Object[spillLength];
+        var objectClass = getAllocatorClass();
+        var arrayData = ArrayData.allocate(ScriptRuntime.EMPTY_ARRAY);
 
         // Compute constant property values
-        int pos = 0;
-        for (final MapTuple<Expression> tuple : tuples) {
-            final String     key   = tuple.key;
-            final Expression value = tuple.value;
+        var pos = 0;
+        for (var tuple : tuples) {
+            var key = tuple.key;
+            var value = tuple.value;
 
             //this is a nop of tuple.key isn't e.g. "apply" or another special name
             method.invalidateSpecialName(tuple.key);
 
             if (value != null) {
-                final Object constantValue = LiteralNode.objectAsConstant(value);
+                var constantValue = LiteralNode.objectAsConstant(value);
                 if (constantValue != LiteralNode.POSTSET_MARKER) {
-                    final Property property = propertyMap.findProperty(key);
+                    var property = propertyMap.findProperty(key);
                     if (property != null) {
                         // normal property key
                         property.setType(dualFields ? JSType.unboxedFieldType(constantValue) : Object.class);
-                        final int slot = property.getSlot();
+                        var slot = property.getSlot();
                         if (dualFields && constantValue instanceof Number) {
                             jpresetValues[slot] = ObjectClassGenerator.pack((Number)constantValue);
                         } else {
@@ -94,9 +94,9 @@ public final class SpillObjectCreator extends ObjectCreator<Expression> {
                         }
                     } else {
                         // array index key
-                        final long oldLength = arrayData.length();
-                        final int  index     = ArrayIndex.getArrayIndex(key);
-                        final long longIndex = ArrayIndex.toLongIndex(index);
+                        var oldLength = arrayData.length();
+                        var index = ArrayIndex.getArrayIndex(key);
+                        var longIndex = ArrayIndex.toLongIndex(index);
 
                         assert ArrayIndex.isValidArrayIndex(index);
 
@@ -147,21 +147,21 @@ public final class SpillObjectCreator extends ObjectCreator<Expression> {
     }
 
     @Override
-    public void populateRange(final MethodEmitter method, final Type objectType, final int objectSlot, final int start, final int end) {
+    public void populateRange(MethodEmitter method, Type objectType, int objectSlot, int start, int end) {
         method.load(objectType, objectSlot);
 
         // set postfix values
-        for (int i = start; i < end; i++) {
-            final MapTuple<Expression> tuple = tuples.get(i);
+        for (var i = start; i < end; i++) {
+            var tuple = tuples.get(i);
 
             if (LiteralNode.isConstant(tuple.value)) {
                 continue;
             }
 
-            final Property property = propertyMap.findProperty(tuple.key);
+            var property = propertyMap.findProperty(tuple.key);
 
             if (property == null) {
-                final int index = ArrayIndex.getArrayIndex(tuple.key);
+                var index = ArrayIndex.getArrayIndex(tuple.key);
                 assert ArrayIndex.isValidArrayIndex(index);
                 method.dup();
                 loadIndex(method, ArrayIndex.toLongIndex(index));
@@ -179,13 +179,13 @@ public final class SpillObjectCreator extends ObjectCreator<Expression> {
     @Override
     protected PropertyMap makeMap() {
         assert propertyMap == null : "property map already initialized";
-        final Class<? extends ScriptObject> clazz = getAllocatorClass();
+        var clazz = getAllocatorClass();
         propertyMap = new MapCreator<>(clazz, tuples).makeSpillMap(false, codegen.useDualFields());
         return propertyMap;
     }
 
     @Override
-    protected void loadValue(final Expression expr, final Type type) {
+    protected void loadValue(Expression expr, Type type) {
         // Use generic type in order to avoid conversion between object types
         codegen.loadExpressionAsType(expr, Type.generic(type));
     }
@@ -194,4 +194,5 @@ public final class SpillObjectCreator extends ObjectCreator<Expression> {
     protected Class<? extends ScriptObject> getAllocatorClass() {
         return codegen.useDualFields() ? JD.class : JO.class;
     }
+
 }

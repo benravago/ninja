@@ -51,41 +51,28 @@ enum Condition {
     GE,
     GT;
 
-    static int toUnary(final Condition c) {
+    static int toUnary(Condition c) {
         switch (c) {
-        case EQ:
-            return IFEQ;
-        case NE:
-            return IFNE;
-        case LE:
-            return IFLE;
-        case LT:
-            return IFLT;
-        case GE:
-            return IFGE;
-        case GT:
-            return IFGT;
-        default:
-            throw new UnsupportedOperationException("toUnary:" + c.toString());
+            case EQ: return IFEQ;
+            case NE: return IFNE;
+            case LE: return IFLE;
+            case LT: return IFLT;
+            case GE: return IFGE;
+            case GT: return IFGT;
+            default: throw new UnsupportedOperationException("toUnary:" + c.toString());
         }
     }
 
-    static int toBinary(final Condition c, final boolean isObject) {
+    static int toBinary(Condition c, boolean isObject) {
         switch (c) {
-        case EQ:
-            return isObject ? IF_ACMPEQ : IF_ICMPEQ;
-        case NE:
-            return isObject ? IF_ACMPNE : IF_ICMPNE;
-        case LE:
-            return IF_ICMPLE;
-        case LT:
-            return IF_ICMPLT;
-        case GE:
-            return IF_ICMPGE;
-        case GT:
-            return IF_ICMPGT;
-        default:
-            throw new UnsupportedOperationException("toBinary:" + c.toString());
+            case EQ: return isObject ? IF_ACMPEQ : IF_ICMPEQ;
+            case NE: return isObject ? IF_ACMPNE : IF_ICMPNE;
+            case LE: return IF_ICMPLE;
+            case LT: return IF_ICMPLT;
+            case GE: return IF_ICMPGE;
+            case GT: return IF_ICMPGT;
+            default: throw new UnsupportedOperationException("toBinary:" + c.toString());
         }
     }
+
 }

@@ -31,6 +31,7 @@ import java.util.Arrays;
  * Faster implementation of BitSet
  */
 public final class BitVector implements Cloneable {
+
     /** Number of bits per slot. */
     private static final int BITSPERSLOT = 64;
 
@@ -57,68 +58,58 @@ public final class BitVector implements Cloneable {
      * Constructor
      * @param length initial length in bits
      */
-    public BitVector(final long length) {
-        final int need = (int)growthNeeded(length);
+    public BitVector(long length) {
+        var need = (int)growthNeeded(length);
         this.bits = new long[need];
     }
 
     /**
      * Copy constructor
-     * @param bits a bits array from another bit vector
      */
-    public BitVector(final long[] bits) {
+    public BitVector(long[] bits) {
         this.bits = bits.clone();
     }
 
     /**
      * Copy another BitVector into this one
-     * @param other the source
      */
-    public void copy(final BitVector other) {
+    public void copy(BitVector other) {
         bits = other.bits.clone();
     }
 
     /**
      * Calculate the number of slots need for the specified length of bits.
-     * @param length Number of bits required.
-     * @return Number of slots needed.
      */
-    private static long slotsNeeded(final long length) {
+    private static long slotsNeeded(long length) {
         return (length + BITMASK) >> BITSHIFT;
     }
 
     /**
-     * Calculate the number of slots need for the specified length of bits
-     * rounded to allocation quanta.
-     * @param length Number of bits required.
-     * @return Number of slots needed rounded to allocation quanta.
+     * Calculate the number of slots need for the specified length of bits rounded to allocation quanta.
      */
-    private static long growthNeeded(final long length) {
+    private static long growthNeeded(long length) {
         return (slotsNeeded(length) + SLOTSQUANTA - 1) / SLOTSQUANTA * SLOTSQUANTA;
     }
 
     /**
      * Return a slot from bits, zero if slot is beyond length.
-     * @param index Slot index.
-     * @return Slot value.
      */
-    private long slot(final int index) {
+    private long slot(int index) {
         return 0 <= index && index < bits.length ? bits[index] : 0L;
     }
 
     /**
      * Resize the bit vector to accommodate the new length.
-     * @param length Number of bits required.
      */
-    public void resize(final long length) {
-        final int need = (int)growthNeeded(length);
+    public void resize(long length) {
+        var need = (int)growthNeeded(length);
 
         if (bits.length != need) {
             bits = Arrays.copyOf(bits, need);
         }
 
-        final int shift = (int)(length & BITMASK);
-        int slot = (int)(length >> BITSHIFT);
+        var shift = (int)(length & BITMASK);
+        var slot = (int)(length >> BITSHIFT);
 
         if (shift != 0) {
             bits[slot] &= (1L << shift) - 1;
@@ -132,37 +123,33 @@ public final class BitVector implements Cloneable {
 
     /**
      * Set a bit in the bit vector.
-     * @param bit Bit number.
      */
-    public void set(final long bit) {
+    public void set(long bit) {
         bits[(int)(bit >> BITSHIFT)] |= (1L << (int)(bit & BITMASK));
     }
 
     /**
      * Clear a bit in the bit vector.
-     * @param bit Bit number.
      */
-    public void clear(final long bit) {
+    public void clear(long bit) {
         bits[(int)(bit >> BITSHIFT)] &= ~(1L << (int)(bit & BITMASK));
     }
 
     /**
      * Toggle a bit in the bit vector.
-     * @param bit Bit number.
      */
-    public void toggle(final long bit) {
+    public void toggle(long bit) {
         bits[(int)(bit >> BITSHIFT)] ^= (1L << (int)(bit & BITMASK));
     }
 
     /**
      * Sets all bits in the vector up to the length.
-     *
      * @param length max bit where to stop setting bits
      */
-    public void setTo(final long length) {
+    public void setTo(long length) {
         if (0 < length) {
-            final int lastWord = (int)(length >> BITSHIFT);
-            final long lastBits = (1L << (int)(length & BITMASK)) - 1L;
+            var lastWord = (int)(length >> BITSHIFT);
+            var lastBits = (1L << (int)(length & BITMASK)) - 1L;
             Arrays.fill(bits, 0, lastWord, ~0L);
 
             if (lastBits != 0L) {
@@ -180,33 +167,27 @@ public final class BitVector implements Cloneable {
 
     /**
      * Test if bit is set in the bit vector.
-     * @param bit Bit number.
-     * @return true if bit in question is set
      */
-    public boolean isSet(final long bit) {
+    public boolean isSet(long bit) {
         return (bits[(int)(bit >> BITSHIFT)] & (1L << (int)(bit & BITMASK))) != 0;
     }
 
     /**
      * Test if a bit is clear in the bit vector.
-     * @param bit Bit number.
-     * @return true if bit in question is clear
      */
-    public boolean isClear(final long bit) {
+    public boolean isClear(long bit) {
         return (bits[(int)(bit >> BITSHIFT)] & (1L << (int)(bit & BITMASK))) == 0;
     }
 
     /**
      * Shift bits to the left by shift.
-     * @param shift  Amount of shift.
-     * @param length Length of vector after shift.
      */
-    public void shiftLeft(final long shift, final long length) {
+    public void shiftLeft(long shift, long length) {
         if (shift != 0) {
-            final int leftShift  = (int)(shift & BITMASK);
-            final int rightShift = BITSPERSLOT - leftShift;
-            final int slotShift  = (int)(shift >> BITSHIFT);
-            final int slotCount  = bits.length - slotShift;
+            var leftShift  = (int)(shift & BITMASK);
+            var rightShift = BITSPERSLOT - leftShift;
+            var slotShift  = (int)(shift >> BITSHIFT);
+            var slotCount  = bits.length - slotShift;
             int slot, from;
 
             if (leftShift == 0) {
@@ -225,17 +206,15 @@ public final class BitVector implements Cloneable {
 
     /**
      * Shift bits to the right by shift.
-     * @param shift  Amount of shift.
-     * @param length Length of vector after shift.
      */
-    public void shiftRight(final long shift, final long length) {
+    public void shiftRight(long shift, long length) {
         // Make room.
         resize(length);
 
         if (shift != 0) {
-            final int rightShift  = (int)(shift & BITMASK);
-            final int leftShift = BITSPERSLOT - rightShift;
-            final int slotShift  = (int)(shift >> BITSHIFT);
+            var rightShift  = (int)(shift & BITMASK);
+            var leftShift = BITSPERSLOT - rightShift;
+            var slotShift  = (int)(shift >> BITSHIFT);
             int slot, from;
 
             if (leftShift == 0) {
@@ -257,15 +236,13 @@ public final class BitVector implements Cloneable {
 
     /**
      * Set a bit range.
-     * @param fromIndex  from index (inclusive)
-     * @param toIndex    to index (exclusive)
      */
-    public void setRange(final long fromIndex, final long toIndex) {
+    public void setRange(long fromIndex, long toIndex) {
         if (fromIndex < toIndex) {
-            final int firstWord = (int)(fromIndex >> BITSHIFT);
-            final int lastWord = (int)(toIndex - 1 >> BITSHIFT);
-            final long firstBits = (~0L << fromIndex);
-            final long lastBits = (~0L >>> -toIndex);
+            var firstWord = (int)(fromIndex >> BITSHIFT);
+            var lastWord = (int)(toIndex - 1 >> BITSHIFT);
+            var firstBits = (~0L << fromIndex);
+            var lastBits = (~0L >>> -toIndex);
             if (firstWord == lastWord) {
                 bits[firstWord] |= firstBits & lastBits;
             } else {
@@ -275,4 +252,5 @@ public final class BitVector implements Cloneable {
             }
         }
     }
+
 }

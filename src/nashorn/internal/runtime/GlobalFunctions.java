@@ -35,6 +35,7 @@ import java.util.Locale;
  * Utilities used by Global class.
  */
 public final class GlobalFunctions {
+    private GlobalFunctions() {}
 
     /** Methodhandle to implementation of ECMA 15.1.2.2, parseInt */
     public static final MethodHandle PARSEINT = findOwnMH("parseInt", double.class, Object.class, Object.class, Object.class);
@@ -92,61 +93,52 @@ public final class GlobalFunctions {
 
     private static final String UNESCAPED = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@*_+-./";
 
-    private GlobalFunctions() {
-    }
-
     /**
      * ECMA 15.1.2.2 parseInt implementation
-     *
      * @param self   self reference
      * @param string string to parse
      * @param rad    radix
-     *
      * @return numeric type representing string contents as an int
      */
-    public static double parseInt(final Object self, final Object string, final Object rad) {
+    public static double parseInt(Object self, Object string, Object rad) {
         return parseIntInternal(JSType.trimLeft(JSType.toString(string)), JSType.toInt32(rad));
     }
 
     /**
      * ECMA 15.1.2.2 parseInt implementation specialized for int radix
-     *
      * @param self   self reference
      * @param string string to parse
      * @param rad    radix
-     *
      * @return numeric type representing string contents as an int
      */
-    public static double parseInt(final Object self, final Object string, final int rad) {
+    public static double parseInt(Object self, Object string, int rad) {
         return parseIntInternal(JSType.trimLeft(JSType.toString(string)), rad);
     }
 
     /**
      * ECMA 15.1.2.2 parseInt implementation specialized for no radix argument
-     *
      * @param self   self reference
      * @param string string to parse
-     *
      * @return numeric type representing string contents as an int
      */
-    public static double parseInt(final Object self, final Object string) {
+    public static double parseInt(Object self, Object string) {
         return parseIntInternal(JSType.trimLeft(JSType.toString(string)), 0);
     }
 
-    private static double parseIntInternal(final String str, final int rad) {
-        final int length = str.length();
-        int radix = rad;
+    private static double parseIntInternal(String str, int rad) {
+        var length = str.length();
+        var radix = rad;
 
         // empty string is not valid
         if (length == 0) {
             return Double.NaN;
         }
 
-        boolean negative = false;
+        var negative = false;
         int idx = 0;
 
         // checking for the sign character
-        final char firstChar = str.charAt(idx);
+        var firstChar = str.charAt(idx);
         if (firstChar < '0') {
             // Possible leading "+" or "-"
             if (firstChar == '-') {
@@ -158,7 +150,7 @@ public final class GlobalFunctions {
             idx++;
         }
 
-        boolean stripPrefix = true;
+        var stripPrefix = true;
 
         if (radix != 0) {
             if (radix < 2 || radix > 36) {
@@ -173,8 +165,8 @@ public final class GlobalFunctions {
         }
         // strip "0x" or "0X" and treat radix as 16
         if (stripPrefix && ((idx + 1) < length)) {
-            final char c1 = str.charAt(idx);
-            final char c2 = str.charAt(idx + 1);
+            var c1 = str.charAt(idx);
+            var c2 = str.charAt(idx + 1);
             if (c1 == '0' && (c2 == 'x' || c2 == 'X')) {
                 radix = 16;
                 // skip "0x" or "0X"
@@ -185,7 +177,7 @@ public final class GlobalFunctions {
         double result = 0.0;
         int digit;
         // we should see at least one valid digit
-        boolean entered = false;
+        var entered = false;
         while (idx < length) {
             digit = fastDigit(str.charAt(idx++), radix);
             if (digit < 0) {
@@ -202,24 +194,22 @@ public final class GlobalFunctions {
 
     /**
      * ECMA 15.1.2.3 parseFloat implementation
-     *
      * @param self   self reference
      * @param string string to parse
-     *
      * @return numeric type representing string contents
      */
-    public static double parseFloat(final Object self, final Object string) {
-        final String str    = JSType.trimLeft(JSType.toString(string));
-        final int    length = str.length();
+    public static double parseFloat(Object self, Object string) {
+        var str = JSType.trimLeft(JSType.toString(string));
+        var length = str.length();
 
         // empty string is not valid
         if (length == 0) {
             return Double.NaN;
         }
 
-        int     start    = 0;
-        boolean negative = false;
-        char    ch       = str.charAt(0);
+        var start = 0;
+        var negative = false;
+        var ch = str.charAt(0);
 
         if (ch == '-') {
             start++;
@@ -244,60 +234,47 @@ public final class GlobalFunctions {
             }
         }
 
-        boolean dotSeen    = false;
-        boolean exponentOk = false;
-        int exponentOffset = -1;
+        var dotSeen = false;
+        var exponentOk = false;
+        var exponentOffset = -1;
         int end;
 
-loop:
+        loop:
         for (end = start; end < length; end++) {
             ch = str.charAt(end);
 
             switch (ch) {
-            case '.':
-                // dot allowed only once
-                if (exponentOffset != -1 || dotSeen) {
+                case '.' -> {
+                    // dot allowed only once
+                    if (exponentOffset != -1 || dotSeen) {
+                        break loop;
+                    }
+                    dotSeen = true;
+                }
+                case 'e', 'E' -> {
+                    // 'e'/'E' allow only once
+                    if (exponentOffset != -1) {
+                        break loop;
+                    }
+                    exponentOffset = end;
+                }
+                case '+', '-' -> {
+                    // Sign of the exponent. But allowed only if the
+                    // previous char in the string was 'e' or 'E'.
+                    if (exponentOffset != end - 1) {
+                        break loop;
+                    }
+                }
+                case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
+                    if (exponentOffset != -1) {
+                        // seeing digit after 'e' or 'E'
+                        exponentOk = true;
+                    }
+                }
+                default -> {
+                    // ignore garbage at the end
                     break loop;
                 }
-                dotSeen = true;
-                break;
-
-            case 'e':
-            case 'E':
-                // 'e'/'E' allow only once
-                if (exponentOffset != -1) {
-                    break loop;
-                }
-                exponentOffset = end;
-                break;
-
-            case '+':
-            case '-':
-                // Sign of the exponent. But allowed only if the
-                // previous char in the string was 'e' or 'E'.
-                if (exponentOffset != end - 1) {
-                    break loop;
-                }
-                break;
-
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                if (exponentOffset != -1) {
-                    // seeing digit after 'e' or 'E'
-                    exponentOk = true;
-                }
-                break;
-
-            default: // ignore garbage at the end
-                break loop;
             }
         }
 
@@ -311,106 +288,92 @@ loop:
         }
 
         try {
-            final double result = Double.valueOf(str.substring(start, end));
+            var result = Double.valueOf(str.substring(start, end));
             return negative ? -result : result;
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             return Double.NaN;
         }
     }
 
     /**
      * ECMA 15.1.2.4, isNaN implementation
-     *
      * @param self    self reference
      * @param number  number to check
-     *
      * @return true if number is NaN
      */
-    public static boolean isNaN(final Object self, final Object number) {
+    public static boolean isNaN(Object self, Object number) {
         return Double.isNaN(JSType.toNumber(number));
     }
 
     /**
      * ECMA 15.1.2.5, isFinite implementation
-     *
      * @param self   self reference
      * @param number number to check
-     *
      * @return true if number is infinite
      */
-    public static boolean isFinite(final Object self, final Object number) {
-        final double value = JSType.toNumber(number);
+    public static boolean isFinite(Object self, Object number) {
+        var value = JSType.toNumber(number);
         return ! (Double.isInfinite(value) || Double.isNaN(value));
     }
 
 
     /**
      * ECMA 15.1.3.3, encodeURI implementation
-     *
      * @param self  self reference
      * @param uri   URI to encode
-     *
      * @return encoded URI
      */
-    public static Object encodeURI(final Object self, final Object uri) {
+    public static Object encodeURI(Object self, Object uri) {
         return URIUtils.encodeURI(self, JSType.toString(uri));
     }
 
     /**
      * ECMA 15.1.3.4, encodeURIComponent implementation
-     *
      * @param self  self reference
      * @param uri   URI component to encode
-     *
      * @return encoded URIComponent
      */
-    public static Object encodeURIComponent(final Object self, final Object uri) {
+    public static Object encodeURIComponent(Object self, Object uri) {
         return URIUtils.encodeURIComponent(self, JSType.toString(uri));
     }
 
     /**
      * ECMA 15.1.3.1, decodeURI implementation
-     *
      * @param self  self reference
      * @param uri   URI to decode
-     *
      * @return decoded URI
      */
-    public static Object decodeURI(final Object self, final Object uri) {
+    public static Object decodeURI(Object self, Object uri) {
         return URIUtils.decodeURI(self, JSType.toString(uri));
     }
 
     /**
      * ECMA 15.1.3.2, decodeURIComponent implementation
-     *
      * @param self  self reference
      * @param uri   URI component to encode
-     *
      * @return decoded URI
      */
-    public static Object decodeURIComponent(final Object self, final Object uri) {
+    public static Object decodeURIComponent(Object self, Object uri) {
         return URIUtils.decodeURIComponent(self, JSType.toString(uri));
     }
 
     /**
      * ECMA B.2.1, escape implementation
-     *
      * @param self    self reference
      * @param string  string to escape
-     *
      * @return escaped string
      */
-    public static String escape(final Object self, final Object string) {
-        final String str = JSType.toString(string);
-        final int length = str.length();
+    public static String escape(Object self, Object string) {
+        var str = JSType.toString(string);
+        var length = str.length();
 
         if (length == 0) {
             return str;
         }
 
-        final StringBuilder sb = new StringBuilder();
-        for (int k = 0; k < length; k++) {
-            final char ch = str.charAt(k);
+        var sb = new StringBuilder();
+        for (var k = 0; k < length; k++) {
+            var ch = str.charAt(k);
             if (UNESCAPED.indexOf(ch) != -1) {
                 sb.append(ch);
             } else if (ch < 256) {
@@ -433,23 +396,21 @@ loop:
 
     /**
      * ECMA B.2.2, unescape implementation
-     *
      * @param self    self reference
      * @param string  string to unescape
-     *
      * @return unescaped string
      */
-    public static String unescape(final Object self, final Object string) {
-        final String str    = JSType.toString(string);
-        final int    length = str.length();
+    public static String unescape(Object self, Object string) {
+        var str = JSType.toString(string);
+        var length = str.length();
 
         if (length == 0) {
             return str;
         }
 
-        final StringBuilder sb = new StringBuilder();
-        for (int k = 0; k < length; k++) {
-            char ch = str.charAt(k);
+        var sb = new StringBuilder();
+        for (var k = 0; k < length; k++) {
+            var ch = str.charAt(k);
             if (ch != '%') {
                 sb.append(ch);
             } else {
@@ -460,7 +421,7 @@ loop:
                            sb.append(ch);
                            k += 5;
                            continue;
-                       } catch (final NumberFormatException e) {
+                       } catch (NumberFormatException e) {
                            //ignored
                        }
                    }
@@ -472,7 +433,7 @@ loop:
                         sb.append(ch);
                         k += 2;
                         continue;
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         //ignored
                     }
                 }
@@ -488,21 +449,17 @@ loop:
 
     /**
      * ECMA 15.3.4 Properties of the Function Prototype Object.
-     * The Function prototype object is itself a Function object
-     * (its [[Class]] is "Function") that, when invoked, accepts
-     * any arguments and returns undefined. This method is used to
-     * implement that anonymous function.
-     *
+     * The Function prototype object is itself a Function object (its [[Class]] is "Function") that, when invoked, accepts any arguments and returns undefined.
+     * This method is used to implement that anonymous function.
      * @param self  self reference
-     *
      * @return undefined
      */
-    public static Object anonymous(final Object self) {
+    public static Object anonymous(Object self) {
         return ScriptRuntime.UNDEFINED;
     }
 
-    private static int fastDigit(final int ch, final int radix) {
-        int n = -1;
+    private static int fastDigit(int ch, int radix) {
+        var n = -1;
         if (ch >= '0' && ch <= '9') {
             n = ch - '0';
         } else if (radix > 10) {
@@ -515,7 +472,8 @@ loop:
         return n < radix ? n : -1;
     }
 
-    private static MethodHandle findOwnMH(final String name, final Class<?> rtype, final Class<?>... types) {
+    private static MethodHandle findOwnMH(String name, Class<?> rtype, Class<?>... types) {
         return MH.findStatic(MethodHandles.lookup(), GlobalFunctions.class, name, MH.type(rtype, types));
     }
+
 }

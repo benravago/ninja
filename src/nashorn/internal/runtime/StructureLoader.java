@@ -40,6 +40,7 @@ import nashorn.internal.codegen.ObjectClassGenerator;
  * Responsible for on the fly construction of structure classes.
  */
 final class StructureLoader extends NashornLoader {
+
     private static final String SINGLE_FIELD_PREFIX = binaryName(SCRIPTS_PACKAGE) + '.' + JS_OBJECT_SINGLE_FIELD_PREFIX.symbolName();
     private static final String DUAL_FIELD_PREFIX   = binaryName(SCRIPTS_PACKAGE) + '.' + JS_OBJECT_DUAL_FIELD_PREFIX.symbolName();
 
@@ -48,7 +49,7 @@ final class StructureLoader extends NashornLoader {
     /**
      * Constructor.
      */
-    StructureLoader(final ClassLoader parent) {
+    StructureLoader(ClassLoader parent) {
         super(parent);
 
         // new structures module, it's exports, read edges
@@ -62,42 +63,36 @@ final class StructureLoader extends NashornLoader {
         NASHORN_MODULE.addReads(structuresModule);
     }
 
-    private Module createModule(final String moduleName) {
-        final ModuleDescriptor descriptor =
-            ModuleDescriptor.newModule(moduleName, Set.of(Modifier.SYNTHETIC))
-                            .requires(NASHORN_MODULE.getName())
-                            .packages(Set.of(SCRIPTS_PKG))
-                            .build();
+    private Module createModule(String moduleName) {
+        var descriptor = ModuleDescriptor.newModule(moduleName,
+            Set.of(Modifier.SYNTHETIC))
+                .requires(NASHORN_MODULE.getName())
+                .packages(Set.of(SCRIPTS_PKG))
+                .build();
 
-        final Module mod = Context.createModuleTrusted(descriptor, this);
+        var mod = Context.createModuleTrusted(descriptor, this);
         loadModuleManipulator();
         return mod;
     }
 
     /**
      * Returns true if the class name represents a structure object with dual primitive/object fields.
-     * @param name a class name
-     * @return true if a dual field structure class
      */
-    private static boolean isDualFieldStructure(final String name) {
+    private static boolean isDualFieldStructure(String name) {
         return name.startsWith(DUAL_FIELD_PREFIX);
     }
 
     /**
      * Returns true if the class name represents a structure object with single object-only fields.
-     * @param name a class name
-     * @return true if a single field structure class
      */
-    static boolean isSingleFieldStructure(final String name) {
+    static boolean isSingleFieldStructure(String name) {
         return name.startsWith(SINGLE_FIELD_PREFIX);
     }
 
     /**
      * Returns true if the class name represents a Nashorn structure object.
-     * @param name a class name
-     * @return true if a structure class
      */
-    static boolean isStructureClass(final String name) {
+    static boolean isStructureClass(String name) {
         return isDualFieldStructure(name) || isSingleFieldStructure(name);
     }
 
@@ -106,7 +101,7 @@ final class StructureLoader extends NashornLoader {
     }
 
     @Override
-    protected Class<?> findClass(final String name) throws ClassNotFoundException {
+    protected Class<?> findClass(String name) throws ClassNotFoundException {
         if (isDualFieldStructure(name)) {
             return generateClass(name, name.substring(DUAL_FIELD_PREFIX.length()), true);
         } else if (isSingleFieldStructure(name)) {
@@ -117,14 +112,15 @@ final class StructureLoader extends NashornLoader {
 
     /**
      * Generate a layout class.
-     * @param name       Name of class.
+     * @param name Name of class.
      * @param descriptor Layout descriptor.
      * @return Generated class.
      */
-    private Class<?> generateClass(final String name, final String descriptor, final boolean dualFields) {
-        final Context context = Context.getContextTrusted();
+    private Class<?> generateClass(String name, String descriptor, boolean dualFields) {
+        var context = Context.getContextTrusted();
 
-        final byte[] code = new ObjectClassGenerator(context, dualFields).generate(descriptor);
+        var code = new ObjectClassGenerator(context, dualFields).generate(descriptor);
         return defineClass(name, code, 0, code.length, new ProtectionDomain(null, getPermissions(null)));
     }
+
 }

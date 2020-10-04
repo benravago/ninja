@@ -25,16 +25,17 @@
 
 package nashorn.internal.codegen;
 
-import static nashorn.internal.lookup.Lookup.MH;
-
 import java.lang.invoke.MethodType;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import nashorn.internal.codegen.types.Type;
 import nashorn.internal.ir.Expression;
 import nashorn.internal.ir.FunctionNode;
 import nashorn.internal.runtime.ScriptFunction;
 import nashorn.internal.runtime.linker.LinkerCallSite;
+import static nashorn.internal.lookup.Lookup.MH;
 
 /**
  * Class that generates function signatures for dynamic calls
@@ -54,47 +55,41 @@ public final class FunctionSignature {
     private final MethodType methodType;
 
     /**
-     * Constructor
-     *
+     * Constructor.
      * Create a FunctionSignature given arguments as AST Nodes
-     *
      * @param hasSelf   does the function have a self slot?
      * @param hasCallee does the function need a callee variable
      * @param retType   what is the return type
      * @param args      argument list of AST Nodes
      */
-    public FunctionSignature(final boolean hasSelf, final boolean hasCallee, final Type retType, final List<? extends Expression> args) {
+    public FunctionSignature(boolean hasSelf, boolean hasCallee, Type retType, List<? extends Expression> args) {
         this(hasSelf, hasCallee, retType, FunctionSignature.typeArray(args));
     }
 
     /**
-     * Constructor
-     *
+     * Constructor.
      * Create a FunctionSignature given arguments as AST Nodes
-     *
      * @param hasSelf does the function have a self slot?
      * @param hasCallee does the function need a callee variable
      * @param retType what is the return type
      * @param nArgs   number of arguments
      */
-    public FunctionSignature(final boolean hasSelf, final boolean hasCallee, final Type retType, final int nArgs) {
+    public FunctionSignature(boolean hasSelf, boolean hasCallee, Type retType, int nArgs) {
         this(hasSelf, hasCallee, retType, FunctionSignature.objectArgs(nArgs));
     }
 
     /**
-     * Constructor
-     *
+     * Constructor.
      * Create a FunctionSignature given argument types only
-     *
      * @param hasSelf   does the function have a self slot?
      * @param hasCallee does the function have a callee slot?
      * @param retType   what is the return type
      * @param argTypes  argument list of AST Nodes
      */
-    private FunctionSignature(final boolean hasSelf, final boolean hasCallee, final Type retType, final Type... argTypes) {
-        final boolean isVarArg;
+    private FunctionSignature(boolean hasSelf, boolean hasCallee, Type retType, Type... argTypes) {
+        boolean isVarArg;
 
-        int count = 1;
+        var count = 1;
 
         if (argTypes == null) {
             isVarArg = true;
@@ -112,7 +107,7 @@ public final class FunctionSignature {
 
         paramTypes = new Type[count];
 
-        int next = 0;
+        var next = 0;
         if (hasCallee) {
             paramTypes[next++] = Type.typeFor(ScriptFunction.class);
         }
@@ -124,8 +119,8 @@ public final class FunctionSignature {
         if (isVarArg) {
             paramTypes[next] = Type.OBJECT_ARRAY;
         } else if (argTypes != null) {
-            for (int j = 0; next < count;) {
-                final Type type = argTypes[j++];
+            for (var j = 0; next < count;) {
+                var type = argTypes[j++];
                 // TODO: for now, turn java/lang/String into java/lang/Object as we aren't as specific.
                 paramTypes[next++] = type.isObject() ? Type.OBJECT : type;
             }
@@ -136,8 +131,8 @@ public final class FunctionSignature {
         this.returnType = retType;
         this.descriptor = Type.getMethodDescriptor(returnType, paramTypes);
 
-        final List<Class<?>> paramTypeList = new ArrayList<>();
-        for (final Type paramType : paramTypes) {
+        var paramTypeList = new ArrayList<Class<?>>();
+        for (var paramType : paramTypes) {
             paramTypeList.add(paramType.getTypeClass());
         }
 
@@ -145,37 +140,24 @@ public final class FunctionSignature {
     }
 
     /**
-     * Create a function signature given a function node, using as much
-     * type information for parameters and return types that is available
-     *
-     * @param functionNode the function node
+     * Create a function signature given a function node, using as much type information for parameters and return types that is available
      */
-    public FunctionSignature(final FunctionNode functionNode) {
-        this(
-            true,
-            functionNode.needsCallee(),
-            functionNode.getReturnType(),
-            (functionNode.isVarArg() && !functionNode.isProgram()) ?
-                null :
-                functionNode.getParameters());
+    public FunctionSignature(FunctionNode functionNode) {
+        this(true, functionNode.needsCallee(), functionNode.getReturnType(), (functionNode.isVarArg() && !functionNode.isProgram()) ? null : functionNode.getParameters());
     }
 
     /**
      * Internal function that converts an array of nodes to their Types
-     *
-     * @param args node arg list
-     *
-     * @return the array of types
      */
-    private static Type[] typeArray(final List<? extends Expression> args) {
+    private static Type[] typeArray(List<? extends Expression> args) {
         if (args == null) {
             return null;
         }
 
-        final Type[] typeArray = new Type[args.size()];
+        var typeArray = new Type[args.size()];
 
-        int pos = 0;
-        for (final Expression arg : args) {
+        var pos = 0;
+        for (var arg : args) {
             typeArray[pos++] = arg.getType();
         }
 
@@ -196,7 +178,6 @@ public final class FunctionSignature {
 
     /**
      * Get the param types for this function signature
-     * @return cloned vector of param types
      */
     public Type[] getParamTypes() {
         return paramTypes.clone();
@@ -204,7 +185,6 @@ public final class FunctionSignature {
 
     /**
      * Return the {@link MethodType} for this function signature
-     * @return the method type
      */
     public MethodType getMethodType() {
         return methodType;
@@ -212,15 +192,14 @@ public final class FunctionSignature {
 
     /**
      * Return the return type for this function signature
-     * @return the return type
      */
     public Type getReturnType() {
         return returnType;
     }
 
-    private static Type[] objectArgs(final int nArgs) {
-        final Type[] array = new Type[nArgs];
-        for (int i = 0; i < nArgs; i++) {
+    private static Type[] objectArgs(int nArgs) {
+        var array = new Type[nArgs];
+        for (var i = 0; i < nArgs; i++) {
             array[i] = Type.OBJECT;
         }
         return array;

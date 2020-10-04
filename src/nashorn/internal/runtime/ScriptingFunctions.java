@@ -50,15 +50,16 @@ import nashorn.internal.objects.NativeArray;
  * Global functions supported only in scripting mode.
  */
 public final class ScriptingFunctions {
+    private ScriptingFunctions() {}
 
     /** Handle to implementation of {@link ScriptingFunctions#readLine} - Nashorn extension */
     public static final MethodHandle READLINE = findOwnMH("readLine", Object.class, Object.class, Object.class);
 
     /** Handle to implementation of {@link ScriptingFunctions#readFully} - Nashorn extension */
-    public static final MethodHandle READFULLY = findOwnMH("readFully",     Object.class, Object.class, Object.class);
+    public static final MethodHandle READFULLY = findOwnMH("readFully", Object.class, Object.class, Object.class);
 
     /** Handle to implementation of {@link ScriptingFunctions#exec} - Nashorn extension */
-    public static final MethodHandle EXEC = findOwnMH("exec",     Object.class, Object.class, Object[].class);
+    public static final MethodHandle EXEC = findOwnMH("exec", Object.class, Object.class, Object[].class);
 
     /** EXEC name - special property used by $EXEC API. */
     public static final String EXEC_NAME = "$EXEC";
@@ -78,35 +79,26 @@ public final class ScriptingFunctions {
     /** Name of the environment variable for the current working directory. */
     public static final String PWD_NAME  = "PWD";
 
-    private ScriptingFunctions() {
-    }
-
     /**
      * Nashorn extension: global.readLine (scripting-mode-only)
      * Read one line of input from the standard input.
-     *
      * @param self   self reference
      * @param prompt String used as input prompt
-     *
      * @return line that was read
-     *
      * @throws IOException if an exception occurs
      */
-    public static Object readLine(final Object self, final Object prompt) throws IOException {
+    public static Object readLine(Object self, Object prompt) throws IOException {
         return readLine(prompt);
     }
 
     /**
      * Nashorn extension: Read the entire contents of a text file and return as String.
-     *
      * @param self self reference
      * @param file The input file whose content is read.
-     *
      * @return String content of the input file.
-     *
      * @throws IOException if an exception occurs
      */
-    public static Object readFully(final Object self, final Object file) throws IOException {
+    public static Object readFully(Object self, Object file) throws IOException {
         File f = null;
 
         if (file instanceof File) {
@@ -124,21 +116,19 @@ public final class ScriptingFunctions {
 
     /**
      * Nashorn extension: exec a string in a separate process.
-     *
      * @param self   self reference
      * @param args   In one of four forms
      *               1. String script, String input
      *               2. String script, InputStream input, OutputStream output, OutputStream error
      *               3. Array scriptTokens, String input
      *               4. Array scriptTokens, InputStream input, OutputStream output, OutputStream error
-     *
      * @return output string from the request if in form of 1. or 3., empty string otherwise
      */
-    public static Object exec(final Object self, final Object... args) {
-        final Object arg0 = args.length > 0 ? args[0] : UNDEFINED;
-        final Object arg1 = args.length > 1 ? args[1] : UNDEFINED;
-        final Object arg2 = args.length > 2 ? args[2] : UNDEFINED;
-        final Object arg3 = args.length > 3 ? args[3] : UNDEFINED;
+    public static Object exec(Object self, Object... args) {
+        var arg0 = args.length > 0 ? args[0] : UNDEFINED;
+        var arg1 = args.length > 1 ? args[1] : UNDEFINED;
+        var arg2 = args.length > 2 ? args[2] : UNDEFINED;
+        var arg3 = args.length > 3 ? args[3] : UNDEFINED;
 
         InputStream inputStream = null;
         OutputStream outputStream = null;
@@ -148,7 +138,7 @@ public final class ScriptingFunctions {
         String inputString = null;
 
         if (arg0 instanceof NativeArray) {
-            final String[] array = (String[])JSType.toJavaArray(arg0, String.class);
+            var array = (String[])JSType.toJavaArray(arg0, String.class);
             tokens = new ArrayList<>();
             tokens.addAll(Arrays.asList(array));
         } else {
@@ -170,14 +160,14 @@ public final class ScriptingFunctions {
         }
 
         // Current global is need to fetch additional inputs and for additional results.
-        final ScriptObject global = Context.getGlobal();
+        var global = Context.getGlobal();
 
         // Capture ENV property state.
-        final Map<String, String> environment = new HashMap<>();
-        final Object env = global.get(ENV_NAME);
+        var environment = new HashMap<String, String>();
+        var env = global.get(ENV_NAME);
 
         if (env instanceof ScriptObject) {
-            final ScriptObject envProperties = (ScriptObject)env;
+            var envProperties = (ScriptObject)env;
 
             // Copy ENV variables.
             envProperties.entrySet().stream().forEach((entry) -> {
@@ -186,11 +176,11 @@ public final class ScriptingFunctions {
         }
 
         // get the $EXEC function object from the global object
-        final Object exec = global.get(EXEC_NAME);
+        var exec = global.get(EXEC_NAME);
         assert exec instanceof ScriptObject : EXEC_NAME + " is not a script object!";
 
         // Execute the commands
-        final CommandExecutor executor = new CommandExecutor();
+        var executor = new CommandExecutor();
         executor.setInputString(inputString);
         executor.setInputStream(inputStream);
         executor.setOutputStream(outputStream);
@@ -203,9 +193,9 @@ public final class ScriptingFunctions {
             executor.process(script);
         }
 
-        final String outString = executor.getOutputString();
-        final String errString = executor.getErrorString();
-        final int exitCode = executor.getExitCode();
+        var outString = executor.getOutputString();
+        var errString = executor.getErrorString();
+        var exitCode = executor.getExitCode();
 
         // Set globals for secondary results.
         global.set(OUT_NAME, outString, 0);
@@ -216,12 +206,11 @@ public final class ScriptingFunctions {
         return outString;
     }
 
-    // Implementation for pluggable "readLine" functionality
-    // Used by njs interactive mode
+    // Implementation for pluggable "readLine" functionality Used by njs interactive mode
 
     private static Function<String, String> readLineHelper;
 
-    public static void setReadLineHelper(final Function<String, String> func) {
+    public static void setReadLineHelper(Function<String, String> func) {
         readLineHelper = Objects.requireNonNull(func);
     }
 
@@ -229,18 +218,19 @@ public final class ScriptingFunctions {
         return readLineHelper;
     }
 
-    public static String readLine(final Object prompt) throws IOException {
-        final String p = (prompt != UNDEFINED)? JSType.toString(prompt) : "";
+    public static String readLine(Object prompt) throws IOException {
+        var p = (prompt != UNDEFINED)? JSType.toString(prompt) : "";
         if (readLineHelper != null) {
             return readLineHelper.apply(p);
         } else {
             System.out.print(p);
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            var reader = new BufferedReader(new InputStreamReader(System.in));
             return reader.readLine();
         }
     }
 
-    private static MethodHandle findOwnMH(final String name, final Class<?> rtype, final Class<?>... types) {
+    private static MethodHandle findOwnMH(String name, Class<?> rtype, Class<?>... types) {
         return MH.findStatic(MethodHandles.lookup(), ScriptingFunctions.class, name, MH.type(rtype, types));
     }
+
 }

@@ -35,33 +35,26 @@ import nashorn.internal.ir.visitor.NodeVisitor;
  * IR for CoverParenthesizedExpressionAndArrowParameterList, used only during parsing.
  */
 public final class ExpressionList extends Expression {
-    private static final long serialVersionUID = 1L;
 
     private final List<Expression> expressions;
 
     /**
      * Constructor.
-     *
-     * @param token token
-     * @param finish finish
-     * @param expressions expression
      */
-    public ExpressionList(final long token, final int finish, final List<Expression> expressions) {
+    public ExpressionList(long token, int finish, List<Expression> expressions) {
         super(token, finish);
         this.expressions = expressions;
     }
 
     /**
      * Get the list of expressions.
-     *
-     * @return the list of expressions
      */
     public List<Expression> getExpressions() {
         return Collections.unmodifiableList(expressions);
     }
 
     @Override
-    public Node accept(final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(NodeVisitor<? extends LexicalContext> visitor) {
         throw new UnsupportedOperationException();
     }
 
@@ -71,10 +64,10 @@ public final class ExpressionList extends Expression {
     }
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printType) {
+    public void toString(StringBuilder sb, boolean printType) {
         sb.append("(");
-        boolean first = true;
-        for (final Expression expression : expressions) {
+        var first = true;
+        for (var expression : expressions) {
             if (first) {
                 first = false;
             } else {
@@ -84,4 +77,5 @@ public final class ExpressionList extends Expression {
         }
         sb.append(")");
     }
+
 }

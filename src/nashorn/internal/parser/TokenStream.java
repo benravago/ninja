@@ -26,14 +26,10 @@
 package nashorn.internal.parser;
 
 /**
- *
- */
-
-/**
  * Handles streaming of tokens between lexer and parser.
- *
  */
 public class TokenStream {
+
     /** Initial buffer size. */
     private static final int INITIAL_SIZE = 256;
 
@@ -68,9 +64,9 @@ public class TokenStream {
      * @param position Current position in buffer.
      * @return Next position in buffer.
      */
-    private int next(final int position) {
+    private int next(int position) {
         // Next position.
-        int next = position + 1;
+        var next = position + 1;
 
         // If exceeds buffer length.
         if (next >= buffer.length) {
@@ -86,9 +82,9 @@ public class TokenStream {
      * @param k Seek position.
      * @return Position in buffer.
      */
-    private int index(final int k) {
+    private int index(int k) {
         // Bias k.
-        int index = k - (base - out);
+        var index = k - (base - out);
 
         // If wrap around.
         if (index >= buffer.length) {
@@ -100,7 +96,6 @@ public class TokenStream {
 
     /**
      * Test to see if stream is empty.
-     * @return True if stream is empty.
      */
     public boolean isEmpty() {
         return count == 0;
@@ -108,7 +103,6 @@ public class TokenStream {
 
     /**
      * Test to see if stream is full.
-     * @return True if stream is full.
      */
     public boolean isFull() {
         return count == buffer.length;
@@ -116,7 +110,6 @@ public class TokenStream {
 
     /**
      * Get the number of tokens in the buffer.
-     * @return Number of tokens.
      */
     public int count() {
         return count;
@@ -124,7 +117,6 @@ public class TokenStream {
 
     /**
      * Get the index of the first token in the stream.
-     * @return Index of first buffered token in the stream.
      */
     public int first() {
         return base;
@@ -132,7 +124,6 @@ public class TokenStream {
 
     /**
      * Get the index of the last token in the stream.
-     * @return Index of last buffered token in the stream.
      */
     public int last() {
         return base + count - 1;
@@ -156,7 +147,7 @@ public class TokenStream {
      * Put a token descriptor to the stream.
      * @param token Token descriptor to add.
      */
-    public void put(final long token) {
+    public void put(long token) {
         if (count == buffer.length) {
             grow();
         }
@@ -168,10 +159,8 @@ public class TokenStream {
 
     /**
      * Get the kth token descriptor from the stream.
-     * @param k index
-     * @return Token descriptor.
      */
-    public long get(final int k) {
+    public long get(int k) {
         return buffer[index(k)];
     }
 
@@ -179,7 +168,7 @@ public class TokenStream {
      * Advances the base of the stream.
      * @param k Position of token to be the new base.
      */
-    public void commit(final int k) {
+    public void commit(int k) {
         // Advance out.
         out = index(k);
         // Adjust count.
@@ -193,13 +182,13 @@ public class TokenStream {
      */
     public void grow() {
         // Allocate new buffer.
-        final long[] newBuffer = new long[buffer.length * 2];
+        var newBuffer = new long[buffer.length * 2];
 
         // If single chunk.
         if (in > out) {
             System.arraycopy(buffer, out, newBuffer, 0, count);
         } else {
-            final int portion = buffer.length - out;
+            var portion = buffer.length - out;
             System.arraycopy(buffer, out, newBuffer, 0, portion);
             System.arraycopy(buffer, 0, newBuffer, portion, count - portion);
         }
@@ -213,4 +202,5 @@ public class TokenStream {
     void reset() {
         in = out = count = base = 0;
     }
+
 }

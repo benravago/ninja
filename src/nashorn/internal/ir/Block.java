@@ -26,6 +26,7 @@
 package nashorn.internal.ir;
 
 import java.io.PrintWriter;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,6 +34,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import nashorn.internal.codegen.Label;
 import nashorn.internal.ir.annotations.Immutable;
 import nashorn.internal.ir.visitor.NodeVisitor;
@@ -42,7 +44,6 @@ import nashorn.internal.ir.visitor.NodeVisitor;
  */
 @Immutable
 public class Block extends Node implements BreakableNode, Terminal, Flags<Block> {
-    private static final long serialVersionUID = 1L;
 
     /** List of statements */
     protected final List<Statement> statements;
@@ -68,14 +69,13 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
     public static final int NEEDS_SCOPE        = 1 << 0;
 
     /**
-     * Is this block tagged as terminal based on its contents
-     * (usually the last statement)
+     * Is this block tagged as terminal based on its contents (usually the last statement)
      */
     public static final int IS_TERMINAL        = 1 << 2;
 
     /**
-     * Is this block the eager global scope - i.e. the original program. This isn't true for the
-     * outermost level of recompiles
+     * Is this block the eager global scope - i.e. the original program.
+     * This isn't true for the outermost level of recompiles
      */
     public static final int IS_GLOBAL_SCOPE    = 1 << 3;
 
@@ -85,12 +85,14 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
     public static final int IS_SYNTHETIC       = 1 << 4;
 
     /**
-     * Is this the function body block? May not be the first, if parameter list contains expressions.
+     * Is this the function body block?
+     * May not be the first, if parameter list contains expressions.
      */
     public static final int IS_BODY            = 1 << 5;
 
     /**
-     * Is this the parameter initialization block? If present, must be the first block, immediately wrapping the function body block.
+     * Is this the parameter initialization block?
+     * If present, must be the first block, immediately wrapping the function body block.
      */
     public static final int IS_PARAMETER_BLOCK = 1 << 6;
 
@@ -100,67 +102,47 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
     public static final int IS_SWITCH_BLOCK    = 1 << 7;
 
     /**
-     * Is this block tagged as breakable based on its contents
-     * (block having labelled break statement)
+     * Is this block tagged as breakable based on its contents (block having labelled break statement)
      */
     public static final int IS_BREAKABLE       = 1 << 8;
 
     /**
      * Constructor
-     *
-     * @param token      The first token of the block
-     * @param finish     The index of the last character
-     * @param flags      The flags of the block
-     * @param statements All statements in the block
      */
-    public Block(final long token, final int finish, final int flags, final Statement... statements) {
+    public Block(long token, int finish, int flags, Statement... statements) {
         super(token, finish);
-
         this.statements = Arrays.asList(statements);
         this.symbols    = new LinkedHashMap<>();
         this.entryLabel = new Label("block_entry");
         this.breakLabel = new Label("block_break");
-        final int len = statements.length;
-        final int terminalFlags = len > 0 && statements[len - 1].hasTerminalFlags() ? IS_TERMINAL : 0;
+        var len = statements.length;
+        var terminalFlags = len > 0 && statements[len - 1].hasTerminalFlags() ? IS_TERMINAL : 0;
         this.flags = terminalFlags | flags;
         this.conversion = null;
     }
 
     /**
      * Constructs a new block
-     *
-     * @param token The first token of the block
-     * @param finish The index of the last character
-     * @param statements All statements in the block
      */
-    public Block(final long token, final int finish, final Statement...statements){
+    public Block(long token, int finish, Statement...statements){
         this(token, finish, IS_SYNTHETIC, statements);
     }
 
     /**
      * Constructs a new block
-     *
-     * @param token The first token of the block
-     * @param finish The index of the last character
-     * @param statements All statements in the block
      */
-    public Block(final long token, final int finish, final List<Statement> statements){
+    public Block(long token, int finish, List<Statement> statements){
         this(token, finish, IS_SYNTHETIC, statements);
     }
 
     /**
      * Constructor
-     *
-     * @param token      The first token of the block
-     * @param finish     The index of the last character
-     * @param flags      The flags of the block
-     * @param statements All statements in the block
      */
-    public Block(final long token, final int finish, final int flags, final List<Statement> statements) {
+    public Block(long token, int finish, int flags, List<Statement> statements) {
         this(token, finish, flags, statements.toArray(new Statement[0]));
     }
 
-    private Block(final Block block, final int finish, final List<Statement> statements, final int flags, final Map<String, Symbol> symbols, final LocalVariableConversion conversion) {
+    private Block(Block block, int finish, List<Statement> statements, int flags, Map<String, Symbol> symbols, LocalVariableConversion conversion) {
         super(block, finish);
         this.statements = statements;
         this.flags      = flags;
@@ -173,7 +155,6 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
     /**
      * Is this block the outermost eager global scope - i.e. the primordial program?
      * Used for global anchor point for scope depth computation for recompilation code
-     * @return true if outermost eager global scope
      */
     public boolean isGlobalScope() {
         return getFlag(IS_GLOBAL_SCOPE);
@@ -181,29 +162,24 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
 
     /**
      * Returns true if this block defines any symbols.
-     * @return true if this block defines any symbols.
      */
     public boolean hasSymbols() {
         return !symbols.isEmpty();
     }
 
     /**
-     * Replaces symbols defined in this block with different symbols. Used to ensure symbol tables are
-     * immutable upon construction and have copy-on-write semantics. Note that this method only replaces the
-     * symbols in the symbol table, it does not act on any contained AST nodes that might reference the symbols.
+     * Replaces symbols defined in this block with different symbols.
+     * Used to ensure symbol tables are immutable upon construction and have copy-on-write semantics.
+     * Note that this method only replaces the symbols in the symbol table, it does not act on any contained AST nodes that might reference the symbols.
      * Those should be updated separately as this method is meant to be used as part of such an update pass.
-     * @param lc the current lexical context
-     * @param replacements the map of symbol replacements
-     * @return a new block with replaced symbols, or this block if none of the replacements modified the symbol
-     * table.
      */
-    public Block replaceSymbols(final LexicalContext lc, final Map<Symbol, Symbol> replacements) {
+    public Block replaceSymbols(LexicalContext lc, Map<Symbol, Symbol> replacements) {
         if (symbols.isEmpty()) {
             return this;
         }
-        final LinkedHashMap<String, Symbol> newSymbols = new LinkedHashMap<>(symbols);
-        for (final Map.Entry<String, Symbol> entry: newSymbols.entrySet()) {
-            final Symbol newSymbol = replacements.get(entry.getValue());
+        var newSymbols = new LinkedHashMap<String, Symbol>(symbols);
+        for (var entry : newSymbols.entrySet()) {
+            var newSymbol = replacements.get(entry.getValue());
             assert newSymbol != null : "Missing replacement for " + entry.getKey();
             entry.setValue(newSymbol);
         }
@@ -212,35 +188,29 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
 
     /**
      * Returns a copy of this block with a shallow copy of the symbol table.
-     * @return a copy of this block with a shallow copy of the symbol table.
      */
     public Block copyWithNewSymbols() {
         return new Block(this, finish, statements, flags, new LinkedHashMap<>(symbols), conversion);
     }
 
     @Override
-    public Node ensureUniqueLabels(final LexicalContext lc) {
+    public Node ensureUniqueLabels(LexicalContext lc) {
         return Node.replaceInLexicalContext(lc, this, new Block(this, finish, statements, flags, symbols, conversion));
     }
 
     /**
      * Assist in IR navigation.
-     *
-     * @param visitor IR navigating visitor.
-     * @return new or same node
      */
     @Override
-    public Node accept(final LexicalContext lc, final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(LexicalContext lc, NodeVisitor<? extends LexicalContext> visitor) {
         if (visitor.enterBlock(this)) {
             return visitor.leaveBlock(setStatements(lc, Node.accept(visitor, statements)));
         }
-
         return this;
     }
 
     /**
      * Get a copy of the list for all the symbols defined in this block
-     * @return symbol iterator
      */
     public List<Symbol> getSymbols() {
         return symbols.isEmpty() ? Collections.emptyList() : Collections.unmodifiableList(new ArrayList<>(symbols.values()));
@@ -248,51 +218,42 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
 
     /**
      * Retrieves an existing symbol defined in the current block.
-     * @param name the name of the symbol
-     * @return an existing symbol with the specified name defined in the current block, or null if this block doesn't
-     * define a symbol with this name.T
      */
-    public Symbol getExistingSymbol(final String name) {
+    public Symbol getExistingSymbol(String name) {
         return symbols.get(name);
     }
 
     /**
      * Test if this block represents a <code>catch</code> block in a <code>try</code> statement.
      * This is used by the Splitter as catch blocks are not be subject to splitting.
-     *
-     * @return true if this block represents a catch block in a try statement.
      */
     public boolean isCatchBlock() {
         return statements.size() == 1 && statements.get(0) instanceof CatchNode;
     }
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printType) {
-        for (final Node statement : statements) {
+    public void toString(StringBuilder sb, boolean printType) {
+        for (var statement : statements) {
             statement.toString(sb, printType);
             sb.append(';');
         }
     }
 
     /**
-     * Print symbols in block in alphabetical order, sorted on name
+     * Print symbols in block in alphabetical order, sorted on name.
      * Used for debugging, see the --print-symbols flag
-     *
-     * @param stream print writer to output symbols to
-     *
-     * @return true if symbols were found
      */
-    public boolean printSymbols(final PrintWriter stream) {
-        final List<Symbol> values = new ArrayList<>(symbols.values());
+    public boolean printSymbols(PrintWriter stream) {
+        var values = new ArrayList<Symbol>(symbols.values());
 
         Collections.sort(values, new Comparator<Symbol>() {
             @Override
-            public int compare(final Symbol s0, final Symbol s1) {
+            public int compare(Symbol s0, Symbol s1) {
                 return s0.getName().compareTo(s1.getName());
             }
         });
 
-        for (final Symbol symbol : values) {
+        for (var symbol : values) {
             symbol.print(stream);
         }
 
@@ -301,11 +262,8 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
 
     /**
      * Tag block as terminal or non terminal
-     * @param lc          lexical context
-     * @param isTerminal is block terminal
-     * @return same block, or new if flag changed
      */
-    public Block setIsTerminal(final LexicalContext lc, final boolean isTerminal) {
+    public Block setIsTerminal(LexicalContext lc, boolean isTerminal) {
         return isTerminal ? setFlag(lc, IS_TERMINAL) : clearFlag(lc, IS_TERMINAL);
     }
 
@@ -316,8 +274,6 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
 
     /**
      * Is this a terminal block, i.e. does it end control flow like ending with a throw or return?
-     *
-     * @return true if this node statement is terminal
      */
     @Override
     public boolean isTerminal() {
@@ -326,7 +282,6 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
 
     /**
      * Get the entry label for this block
-     * @return the entry label
      */
     public Label getEntryLabel() {
         return entryLabel;
@@ -338,8 +293,8 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
     }
 
     @Override
-    public Block setLocalVariableConversion(final LexicalContext lc, final LocalVariableConversion conversion) {
-        if(this.conversion == conversion) {
+    public Block setLocalVariableConversion(LexicalContext lc, LocalVariableConversion conversion) {
+        if (this.conversion == conversion) {
             return this;
         }
         return Node.replaceInLexicalContext(lc, this, new Block(this, finish, statements, flags, symbols, conversion));
@@ -352,8 +307,6 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
 
     /**
      * Get the list of statements in this block
-     *
-     * @return a list of statements
      */
     public List<Statement> getStatements() {
         return Collections.unmodifiableList(statements);
@@ -361,7 +314,6 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
 
     /**
      * Returns the number of statements in the block.
-     * @return the number of statements in the block.
      */
     public int getStatementCount() {
         return statements.size();
@@ -369,10 +321,9 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
 
     /**
      * Returns the line number of the first statement in the block.
-     * @return the line number of the first statement in the block, or -1 if the block has no statements.
      */
     public int getFirstStatementLineNumber() {
-        if(statements == null || statements.isEmpty()) {
+        if (statements == null || statements.isEmpty()) {
             return -1;
         }
         return statements.get(0).getLineNumber();
@@ -380,7 +331,6 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
 
     /**
      * Returns the last statement in the block.
-     * @return the last statement in the block, or null if the block has no statements.
      */
     public Statement getLastStatement() {
         return statements.isEmpty() ? null : statements.get(statements.size() - 1);
@@ -388,16 +338,12 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
 
     /**
      * Reset the statement list for this block
-     *
-     * @param lc lexical context
-     * @param statements new statement list
-     * @return new block if statements changed, identity of statements == block.statements
      */
-    public Block setStatements(final LexicalContext lc, final List<Statement> statements) {
+    public Block setStatements(LexicalContext lc, List<Statement> statements) {
         if (this.statements == statements) {
             return this;
         }
-        int lastFinish = 0;
+        var lastFinish = 0;
         if (!statements.isEmpty()) {
             lastFinish = statements.get(statements.size() - 1).getFinish();
         }
@@ -406,17 +352,13 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
 
     /**
      * Add or overwrite an existing symbol in the block
-     *
-     * @param symbol symbol
      */
-    public void putSymbol(final Symbol symbol) {
+    public void putSymbol(Symbol symbol) {
         symbols.put(symbol.getName(), symbol);
     }
 
     /**
      * Check whether scope is necessary for this Block
-     *
-     * @return true if this function needs a scope
      */
     public boolean needsScope() {
         return (flags & NEEDS_SCOPE) == NEEDS_SCOPE;
@@ -424,15 +366,13 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
 
     /**
      * Check whether this block is synthetic or not.
-     *
-     * @return true if this is a synthetic block
      */
     public boolean isSynthetic() {
         return (flags & IS_SYNTHETIC) == IS_SYNTHETIC;
     }
 
     @Override
-    public Block setFlags(final LexicalContext lc, final int flags) {
+    public Block setFlags(LexicalContext lc, int flags) {
         if (this.flags == flags) {
             return this;
         }
@@ -440,42 +380,37 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
     }
 
     @Override
-    public Block clearFlag(final LexicalContext lc, final int flag) {
+    public Block clearFlag(LexicalContext lc, int flag) {
         return setFlags(lc, flags & ~flag);
     }
 
     @Override
-    public Block setFlag(final LexicalContext lc, final int flag) {
+    public Block setFlag(LexicalContext lc, int flag) {
         return setFlags(lc, flags | flag);
     }
 
     @Override
-    public boolean getFlag(final int flag) {
+    public boolean getFlag(int flag) {
         return (flags & flag) == flag;
     }
 
     /**
      * Set the needs scope flag.
-     * @param lc lexicalContext
-     * @return new block if state changed, otherwise this
      */
-    public Block setNeedsScope(final LexicalContext lc) {
+    public Block setNeedsScope(LexicalContext lc) {
         if (needsScope()) {
             return this;
         }
-
         return Node.replaceInLexicalContext(lc, this, new Block(this, finish, statements, flags | NEEDS_SCOPE, symbols, conversion));
     }
 
     /**
-     * Computationally determine the next slot for this block,
-     * indexed from 0. Use this as a relative base when computing
-     * frames
-     * @return next slot
+     * Computationally determine the next slot for this block, indexed from 0.
+     * Use this as a relative base when computing frames
      */
     public int nextSlot() {
-        int next = 0;
-        for (final Symbol symbol : getSymbols()) {
+        var next = 0;
+        for (var symbol : getSymbols()) {
             if (symbol.hasSlot()) {
                 next += symbol.slotCount();
             }
@@ -486,14 +421,10 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
     /**
      * Determine whether this block needs to provide its scope object creator for use by its child nodes.
      * This is only necessary for synthetic parent blocks of for-in loops with lexical declarations.
-     *
      * @see ForNode#needsScopeCreator()
-     * @return true if child nodes need access to this block's scope creator
      */
     public boolean providesScopeCreator() {
-        return needsScope() && isSynthetic()
-                && (getLastStatement() instanceof ForNode)
-                && ((ForNode) getLastStatement()).needsScopeCreator();
+        return needsScope() && isSynthetic() && (getLastStatement() instanceof ForNode) && ((ForNode) getLastStatement()).needsScopeCreator();
     }
 
     @Override
@@ -507,14 +438,12 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
     }
 
     @Override
-    public Node accept(final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(NodeVisitor<? extends LexicalContext> visitor) {
         return Acceptor.accept(this, visitor);
     }
 
     /**
      * Checks if this is a function body.
-     *
-     * @return true if the function body flag is set
      */
     public boolean isFunctionBody() {
         return getFlag(IS_BODY);
@@ -522,8 +451,6 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
 
     /**
      * Checks if this is a parameter block.
-     *
-     * @return true if the parameter block flag is set
      */
     public boolean isParameterBlock() {
         return getFlag(IS_PARAMETER_BLOCK);
@@ -531,10 +458,9 @@ public class Block extends Node implements BreakableNode, Terminal, Flags<Block>
 
     /**
      * Checks whether this is a switch block.
-     *
-     * @return true if this is a switch block
      */
     public boolean isSwitchBlock() {
         return getFlag(IS_SWITCH_BLOCK);
     }
+
 }

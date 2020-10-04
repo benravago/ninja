@@ -30,21 +30,14 @@ import java.util.Map;
 
 /**
  * Interface for installing classes passed to the compiler.
- * As only the code generating package (i.e. Context) knows about
- * the ScriptLoader and it would be a security hazard otherwise
- * the Compiler is given an installation interface for its code.
- * <p>
- * The compiler still retains most of the state around code emission
- * and management internally, so this is to avoid passing around any
- * logic that isn't directly related to installing a class
- *
+ * As only the code generating package (i.e. Context) knows about the ScriptLoader and it would be a security hazard otherwise the Compiler is given an installation interface for its code.
+ * The compiler still retains most of the state around code emission and management internally, so this is to avoid passing around any logic that isn't directly related to installing a class
  */
 public interface CodeInstaller {
     /**
      * Return the {@link Context} associated with this code installer.
-     * @return the context.
      */
-    public Context getContext();
+    Context getContext();
 
     /**
      * Install a class.
@@ -52,7 +45,7 @@ public interface CodeInstaller {
      * @param bytecode  bytecode
      * @return the installed class
      */
-    public Class<?> install(final String className, final byte[] bytecode);
+    Class<?> install(String className, byte[] bytecode);
 
     /**
      * Initialize already installed classes.
@@ -60,17 +53,15 @@ public interface CodeInstaller {
      * @param source the source object for the classes
      * @param constants the runtime constants for the classes
      */
-    public void initialize(final Collection<Class<?>> classes, final Source source, final Object[] constants);
+    void initialize(Collection<Class<?>> classes, Source source, Object[] constants);
 
     /**
      * Get next unique script id
-     * @return unique script id
      */
-    public long getUniqueScriptId();
+    long getUniqueScriptId();
 
     /**
      * Store a compiled script for later reuse
-     *
      * @param cacheKey key to use in cache
      * @param source the script source
      * @param mainClassName the main class name
@@ -79,8 +70,7 @@ public interface CodeInstaller {
      * @param constants constants array
      * @param compilationId compilation id
      */
-    public void storeScript(final String cacheKey, final Source source, final String mainClassName, final Map<String, byte[]> classBytes,
-            final Map<Integer, FunctionInitializer> initializers, final Object[] constants, final int compilationId);
+    void storeScript(String cacheKey, Source source, String mainClassName, Map<String, byte[]> classBytes, Map<Integer, FunctionInitializer> initializers, Object[] constants, int compilationId);
 
     /**
      * Load a previously compiled script
@@ -88,30 +78,29 @@ public interface CodeInstaller {
      * @param functionKey the function id and signature
      * @return compiled script data
      */
-    public StoredScript loadScript(Source source, String functionKey);
+    StoredScript loadScript(Source source, String functionKey);
 
     /**
-     * Returns a code installer {@code #isCompatibleWith(CodeInstaller) compatible with} this installer, but
-     * is suitable for on-demand compilations. Can return itself if it is itself suitable.
+     * Returns a code installer {@code #isCompatibleWith(CodeInstaller) compatible with} this installer, but is suitable for on-demand compilations.
+     * Can return itself if it is itself suitable.
      * @return a compatible code installer suitable for on-demand compilations.
      */
-    public CodeInstaller getOnDemandCompilationInstaller();
+    CodeInstaller getOnDemandCompilationInstaller();
 
     /**
-     * Returns a code installer {@code #isCompatibleWith(CodeInstaller) compatible with} this installer, but
-     * is suitable for installation of multiple classes that reference each other by name. Should be used when
-     * a compilation job produces multiple compilation units. Can return itself if it is itself suitable.
+     * Returns a code installer {@code #isCompatibleWith(CodeInstaller) compatible with} this installer, but is suitable for installation of multiple classes that reference each other by name.
+     * Should be used when a compilation job produces multiple compilation units.
+     * Can return itself if it is itself suitable.
      * @return a compatible code installer suitable for installation of multiple classes.
      */
-    public CodeInstaller getMultiClassCodeInstaller();
+    CodeInstaller getMultiClassCodeInstaller();
 
     /**
-     * Returns true if this code installer is compatible with the other code installer. Compatibility is expected to be
-     * an equivalence relation, and installers are supposed to be compatible with those they create using
-     * {@link #getOnDemandCompilationInstaller()}.
+     * Returns true if this code installer is compatible with the other code installer.
+     * Compatibility is expected to be an equivalence relation, and installers are supposed to be compatible with those they create using {@link #getOnDemandCompilationInstaller()}.
      * @param other the other code installer tested for compatibility with this code installer.
      * @return true if this code installer is compatible with the other code installer.
      */
-    public boolean isCompatibleWith(CodeInstaller other);
+    boolean isCompatibleWith(CodeInstaller other);
 
 }

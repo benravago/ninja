@@ -31,12 +31,11 @@ import java.util.List;
  * Reverse iterator over a List
  */
 final class ReverseJavaListIterator extends JavaListIterator {
+
     /**
      * Constructor
-     * @param list list to iterate over
-     * @param includeUndefined should undefined elements be included in iteration
      */
-    public ReverseJavaListIterator(final List<?> list, final boolean includeUndefined) {
+    public ReverseJavaListIterator(List<?> list, boolean includeUndefined) {
         super(list, includeUndefined);
         this.index = list.size() - 1;
     }
@@ -55,4 +54,5 @@ final class ReverseJavaListIterator extends JavaListIterator {
     protected long bumpIndex() {
         return index--;
     }
+
 }

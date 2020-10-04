@@ -26,6 +26,7 @@
 package nashorn.internal.ir;
 
 import java.util.List;
+
 import nashorn.internal.codegen.Label;
 
 /**
@@ -34,10 +35,9 @@ import nashorn.internal.codegen.Label;
 public interface Labels {
 
     /**
-     * Return the labels associated with this node. Breakable nodes that
-     * aren't LoopNodes only have a break label - the location immediately
-     * afterwards the node in code
-     * @return list of labels representing locations around this node
+     * Return the labels associated with this node.
+     * Breakable nodes that aren't LoopNodes only have a break label - the location immediately afterwards the node in code
      */
-    public List<Label> getLabels();
+    List<Label> getLabels();
+
 }

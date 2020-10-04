@@ -25,6 +25,29 @@
 
 package nashorn.tools;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StreamTokenizer;
+import java.io.StringReader;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 import nashorn.api.scripting.NashornException;
 import nashorn.internal.codegen.Compiler;
 import nashorn.internal.codegen.Compiler.CompilationPhases;
@@ -43,28 +66,6 @@ import nashorn.internal.runtime.ScriptRuntime;
 import nashorn.internal.runtime.Symbol;
 import nashorn.internal.runtime.arrays.ArrayLikeIterator;
 import nashorn.internal.runtime.options.Options;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StreamTokenizer;
-import java.io.StringReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
-
 import static nashorn.internal.runtime.Source.sourceFor;
 
 /**
@@ -109,65 +110,44 @@ public class Shell implements PartialParser {
     /**
      * Constructor
      */
-    protected Shell() {
-    }
+    protected Shell() {}
 
     /**
      * Main entry point with the default input, output and error streams.
-     *
-     * @param args The command line arguments
      */
-    public static void main(final String[] args) {
+    public static void main(String[] args) {
         try {
-            final int exitCode = main(System.in, System.out, System.err, args);
+            var exitCode = main(System.in, System.out, System.err, args);
             if (exitCode != SUCCESS) {
                 System.exit(exitCode);
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             System.err.println(e); //bootstrapping, Context.err may not exist
             System.exit(IO_ERROR);
         }
     }
 
     /**
-     * Starting point for executing a {@code Shell}. Starts a shell with the
-     * given arguments and streams and lets it run until exit.
-     *
-     * @param in input stream for Shell
-     * @param out output stream for Shell
-     * @param err error stream for Shell
-     * @param args arguments to Shell
-     *
-     * @return exit code
-     *
-     * @throws IOException if there's a problem setting up the streams
+     * Starting point for executing a {@code Shell}.
+     * Starts a shell with the given arguments and streams and lets it run until exit.
      */
-    public static int main(final InputStream in, final OutputStream out, final OutputStream err, final String[] args) throws IOException {
+    public static int main(InputStream in, OutputStream out, OutputStream err, String[] args) throws IOException {
         return new Shell().run(in, out, err, args);
     }
 
     /**
      * Run method logic.
-     *
-     * @param in input stream for Shell
-     * @param out output stream for Shell
-     * @param err error stream for Shell
-     * @param args arguments to Shell
-     *
-     * @return exit code
-     *
-     * @throws IOException if there's a problem setting up the streams
      */
-    protected final int run(final InputStream in, final OutputStream out, final OutputStream err, final String[] args) throws IOException {
-        final Context context = makeContext(in, out, err, args);
+    protected final int run(InputStream in, OutputStream out, OutputStream err, String[] args) throws IOException {
+        var context = makeContext(in, out, err, args);
         if (context == null) {
             return COMMANDLINE_ERROR;
         }
 
-        final Global global = context.createGlobal();
-        final ScriptEnvironment env = context.getEnv();
+        var global = context.createGlobal();
+        var env = context.getEnv();
 
-        final List<String> files = env.getFiles();
+        var files = env.getFiles();
         if (files.isEmpty()) {
             return readEvalPrint(context, global);
         }
@@ -181,31 +161,24 @@ public class Shell implements PartialParser {
 
     /**
      * Make a new Nashorn Context to compile and/or run JavaScript files.
-     *
-     * @param in input stream for Shell
-     * @param out output stream for Shell
-     * @param err error stream for Shell
-     * @param args arguments to Shell
-     *
-     * @return null if there are problems with option parsing.
      */
-    private static Context makeContext(final InputStream in, final OutputStream out, final OutputStream err, final String[] args) {
-        final PrintStream pout = out instanceof PrintStream ? (PrintStream) out : new PrintStream(out);
-        final PrintStream perr = err instanceof PrintStream ? (PrintStream) err : new PrintStream(err);
-        final PrintWriter wout = new PrintWriter(pout, true);
-        final PrintWriter werr = new PrintWriter(perr, true);
+    private static Context makeContext(InputStream in, OutputStream out, OutputStream err, String[] args) {
+        var pout = out instanceof PrintStream ? (PrintStream) out : new PrintStream(out);
+        var perr = err instanceof PrintStream ? (PrintStream) err : new PrintStream(err);
+        var wout = new PrintWriter(pout, true);
+        var werr = new PrintWriter(perr, true);
 
         // Set up error handler.
-        final ErrorManager errors = new ErrorManager(werr);
+        var errors = new ErrorManager(werr);
         // Set up options.
-        final Options options = new Options("nashorn", werr);
+        var options = new Options("nashorn", werr);
 
         // parse options
         if (args != null) {
             try {
-                final String[] prepArgs = preprocessArgs(args);
+                var prepArgs = preprocessArgs(args);
                 options.process(prepArgs);
-            } catch (final IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 werr.println(bundle.getString("shell.usage"));
                 options.displayHelp(e);
                 return null;
@@ -214,17 +187,17 @@ public class Shell implements PartialParser {
 
         // detect scripting mode by any source's first character being '#'
         if (!options.getBoolean("scripting")) {
-            for (final String fileName : options.getFiles()) {
-                final File firstFile = new File(fileName);
+            for (var fileName : options.getFiles()) {
+                var firstFile = new File(fileName);
                 if (firstFile.isFile()) {
-                    try (final FileReader fr = new FileReader(firstFile)) {
-                        final int firstChar = fr.read();
+                    try (var fr = new FileReader(firstFile)) {
+                        var firstChar = fr.read();
                         // starts with '#
                         if (firstChar == '#') {
                             options.set("scripting", true);
                             break;
                         }
-                    } catch (final IOException e) {
+                    } catch (IOException e) {
                         // ignore this. File IO errors will be reported later anyway
                     }
                 }
@@ -235,64 +208,58 @@ public class Shell implements PartialParser {
     }
 
     /**
-     * Preprocess the command line arguments passed in by the shell. This method checks, for the first non-option
-     * argument, whether the file denoted by it begins with a shebang line. If so, it is assumed that execution in
-     * shebang mode is intended. The consequence of this is that the identified script file will be treated as the
-     * <em>only</em> script file, and all subsequent arguments will be regarded as arguments to the script.
+     * Preprocess the command line arguments passed in by the shell.
+     * This method checks, for the first non-option argument, whether the file denoted by it begins with a shebang line.
+     * If so, it is assumed that execution in shebang mode is intended.
+     * The consequence of this is that the identified script file will be treated as the <em>only</em> script file, and all subsequent arguments will be regarded as arguments to the script.
      * <p>
-     * This method canonicalizes the command line arguments to the form {@code <options> <script> -- <arguments>} if a
-     * shebang script is identified. On platforms that pass shebang arguments as single strings, the shebang arguments
-     * will be broken down into single arguments; whitespace is used as separator.
+     * This method canonicalizes the command line arguments to the form {@code <options> <script> -- <arguments>} if a shebang script is identified.
+     * On platforms that pass shebang arguments as single strings, the shebang arguments will be broken down into single arguments; whitespace is used as separator.
      * <p>
-     * Shebang mode is entered regardless of whether the script is actually run directly from the shell, or indirectly
-     * via the {@code njs} executable. It is the user's / script author's responsibility to ensure that the arguments
-     * given on the shebang line do not lead to a malformed argument sequence. In particular, the shebang arguments
-     * should not contain any whitespace for purposes other than separating arguments, as the different platforms deal
-     * with whitespace in different and incompatible ways.
+     * Shebang mode is entered regardless of whether the script is actually run directly from the shell, or indirectly via the {@code njs} executable.
+     * It is the user's / script author's responsibility to ensure that the arguments given on the shebang line do not lead to a malformed argument sequence.
+     * In particular, the shebang arguments should not contain any whitespace for purposes other than separating arguments, as the different platforms deal with whitespace in different and incompatible ways.
      * <p>
-     * @implNote Example:<ul>
+     * Example:<ul>
      * <li>Shebang line in {@code script.js}: {@code #!/path/to/njs}</li>
      * <li>Command line: {@code ./script.js arg2}</li>
      * <li>{@code args} array passed to Nashorn: {@code ./script.js,arg}</li>
      * <li>Required canonicalized arguments array: {@code ./script.js,--,arg2}</li>
      * </ul>
-     *
-     * @param args the command line arguments as passed into Nashorn.
-     * @return the passed and possibly canonicalized argument list
      */
-    private static String[] preprocessArgs(final String[] args) {
+    private static String[] preprocessArgs(String[] args) {
         if (args.length == 0) {
             return args;
         }
 
-        final List<String> processedArgs = new ArrayList<>();
+        var processedArgs = new ArrayList<String>();
         processedArgs.addAll(Arrays.asList(args));
 
-        // Nashorn supports passing multiple shebang arguments. On platforms that pass anything following the
-        // shebang interpreter notice as one argument, the first element of the argument array needs to be special-cased
-        // as it might actually contain several arguments. Mac OS X splits shebang arguments, other platforms don't.
+        // Nashorn supports passing multiple shebang arguments.
+        // On platforms that pass anything following the shebang interpreter notice as one argument, the first element of the argument array needs to be special-cased as it might actually contain several arguments.
+        // Mac OS X splits shebang arguments, other platforms don't.
         // This special handling is also only necessary if the first argument actually starts with an option.
         if (args[0].startsWith("-") && !System.getProperty("os.name", "generic").startsWith("Mac OS X")) {
             processedArgs.addAll(0, tokenizeString(processedArgs.remove(0)));
         }
 
-        int shebangFilePos = -1; // -1 signifies "none found"
+        var shebangFilePos = -1; // -1 signifies "none found"
         // identify a shebang file and its position in the arguments array (if any)
-        for (int i = 0; i < processedArgs.size(); ++i) {
+        for (var i = 0; i < processedArgs.size(); ++i) {
             final String a = processedArgs.get(i);
             if (!a.startsWith("-")) {
-                final Path p = Paths.get(a);
-                String l = "";
-                try (final BufferedReader r = Files.newBufferedReader(p)) {
+                var p = Paths.get(a);
+                var l = "";
+                try (var r = Files.newBufferedReader(p)) {
                     l = r.readLine();
-                } catch (final IOException ioe) {
+                } catch (IOException ioe) {
                     // ignore
                 }
                 if (l != null && l.startsWith("#!")) {
                     shebangFilePos = i;
                 }
-                // We're only checking the first non-option argument. If it's not a shebang file, we're in normal
-                // execution mode.
+                // We're only checking the first non-option argument.
+                // If it's not a shebang file, we're in normal execution mode.
                 break;
             }
         }
@@ -303,22 +270,20 @@ public class Shell implements PartialParser {
         return processedArgs.stream().toArray(String[]::new);
     }
 
-    public static List<String> tokenizeString(final String str) {
-        final StreamTokenizer tokenizer = new StreamTokenizer(new StringReader(str));
+    public static List<String> tokenizeString(String str) {
+        var tokenizer = new StreamTokenizer(new StringReader(str));
         tokenizer.resetSyntax();
         tokenizer.wordChars(0, 255);
         tokenizer.whitespaceChars(0, ' ');
         tokenizer.commentChar('#');
         tokenizer.quoteChar('"');
         tokenizer.quoteChar('\'');
-        final List<String> tokenList = new ArrayList<>();
-        final StringBuilder toAppend = new StringBuilder();
+        var tokenList = new ArrayList<String>();
+        var toAppend = new StringBuilder();
         while (nextToken(tokenizer) != StreamTokenizer.TT_EOF) {
-            final String s = tokenizer.sval;
-            // The tokenizer understands about honoring quoted strings and recognizes
-            // them as one token that possibly contains multiple space-separated words.
-            // It does not recognize quoted spaces, though, and will split after the
-            // escaping \ character. This is handled here.
+            var s = tokenizer.sval;
+            // The tokenizer understands about honoring quoted strings and recognizes them as one token that possibly contains multiple space-separated words.
+            // It does not recognize quoted spaces, though, and will split after the escaping \ character. This is handled here.
             if (s.endsWith("\\")) {
                 // omit trailing \, append space instead
                 toAppend.append(s.substring(0, s.length() - 1)).append(' ');
@@ -333,38 +298,31 @@ public class Shell implements PartialParser {
         return tokenList;
     }
 
-    private static int nextToken(final StreamTokenizer tokenizer) {
+    private static int nextToken(StreamTokenizer tokenizer) {
         try {
             return tokenizer.nextToken();
-        } catch (final IOException ioe) {
+        } catch (IOException ioe) {
             return StreamTokenizer.TT_EOF;
         }
     }
 
     /**
-     * Compiles the given script files in the command line
+     * Compiles the given script files in the command line.
      * This is called only when using the --compile-only flag
-     *
-     * @param context the nashorn context
-     * @param global the global scope
-     * @param files the list of script files to compile
-     *
-     * @return error code
-     * @throws IOException when any script file read results in I/O error
      */
-    private static int compileScripts(final Context context, final Global global, final List<String> files) throws IOException {
-        final Global oldGlobal = Context.getGlobal();
-        final boolean globalChanged = (oldGlobal != global);
-        final ScriptEnvironment env = context.getEnv();
+    private static int compileScripts(Context context, Global global, List<String> files) throws IOException {
+        var oldGlobal = Context.getGlobal();
+        var globalChanged = (oldGlobal != global);
+        var env = context.getEnv();
         try {
             if (globalChanged) {
                 Context.setGlobal(global);
             }
-            final ErrorManager errors = context.getErrorManager();
+            var errors = context.getErrorManager();
 
             // For each file on the command line.
-            for (final String fileName : files) {
-                final FunctionNode functionNode = new Parser(env, sourceFor(fileName, new File(fileName)), errors, 0, context.getLogger(Parser.class)).parse();
+            for (var fileName : files) {
+                var functionNode = new Parser(env, sourceFor(fileName, new File(fileName)), errors, 0, context.getLogger(Parser.class)).parse();
 
                 if (errors.getNumberOfErrors() != 0) {
                     return COMPILATION_ERROR;
@@ -390,35 +348,28 @@ public class Shell implements PartialParser {
 
     /**
      * Runs the given JavaScript files in the command line
-     *
-     * @param context the nashorn context
-     * @param global the global scope
-     * @param files the list of script files to run
-     *
-     * @return error code
-     * @throws IOException when any script file read results in I/O error
      */
-    private int runScripts(final Context context, final Global global, final List<String> files) throws IOException {
-        final Global oldGlobal = Context.getGlobal();
-        final boolean globalChanged = (oldGlobal != global);
+    private int runScripts(Context context, Global global, List<String> files) throws IOException {
+        var oldGlobal = Context.getGlobal();
+        var globalChanged = (oldGlobal != global);
         try {
             if (globalChanged) {
                 Context.setGlobal(global);
             }
-            final ErrorManager errors = context.getErrorManager();
+            var errors = context.getErrorManager();
 
             // For each file on the command line.
-            for (final String fileName : files) {
+            for (var fileName : files) {
                 if ("-".equals(fileName)) {
-                    final int res = readEvalPrint(context, global);
+                    var res = readEvalPrint(context, global);
                     if (res != SUCCESS) {
                         return res;
                     }
                     continue;
                 }
 
-                final File file = new File(fileName);
-                final ScriptFunction script = context.compileScript(sourceFor(fileName, file), global);
+                var file = new File(fileName);
+                var script = context.compileScript(sourceFor(fileName, file), global);
                 if (script == null || errors.getNumberOfErrors() != 0) {
                     if (context.getEnv()._parse_only && !errors.hasErrors()) {
                         continue; // No error, continue to consume all files in list
@@ -428,7 +379,7 @@ public class Shell implements PartialParser {
 
                 try {
                     apply(script, global);
-                } catch (final NashornException e) {
+                } catch (NashornException e) {
                     errors.error(e.toString());
                     if (context.getEnv()._dump_on_error) {
                         e.printStackTrace(context.getErr());
@@ -449,47 +400,41 @@ public class Shell implements PartialParser {
     }
 
     /**
-     * Hook to ScriptFunction "apply". A performance metering shell may
-     * introduce enter/exit timing here.
-     *
-     * @param target target function for apply
-     * @param self self reference for apply
-     *
-     * @return result of the function apply
+     * Hook to ScriptFunction "apply".
+     * A performance metering shell may introduce enter/exit timing here.
      */
-    protected Object apply(final ScriptFunction target, final Object self) {
+    protected Object apply(ScriptFunction target, Object self) {
         return ScriptRuntime.apply(target, self);
     }
 
     /**
      * Parse potentially partial code and keep track of the start of last expression.
      * This 'partial' parsing support is meant to be used for code-completion.
-     *
-     * @param context the nashorn context
-     * @param code code that is to be parsed
-     * @return the start index of the last expression parsed in the (incomplete) code.
      */
     @Override
-    public final int getLastExpressionStart(final Context context, final String code) {
+    public final int getLastExpressionStart(Context context, String code) {
         final int[] exprStart = { -1 };
 
-        final Parser p = new Parser(context.getEnv(), sourceFor("<partial_code>", code),new Context.ThrowErrorManager()) {
-            @Override
-            protected Expression expression() {
-                exprStart[0] = this.start;
-                return super.expression();
-            }
+        var p = new Parser(
+            context.getEnv(),
+            sourceFor("<partial_code>", code),
+            new Context.ThrowErrorManager()) {
+                @Override
+                protected Expression expression() {
+                    exprStart[0] = this.start;
+                    return super.expression();
+                }
 
-            @Override
-            protected Expression assignmentExpression(final boolean noIn) {
-                exprStart[0] = this.start;
-                return super.assignmentExpression(noIn);
-            }
-        };
+                @Override
+                protected Expression assignmentExpression(boolean noIn) {
+                    exprStart[0] = this.start;
+                    return super.assignmentExpression(noIn);
+                }
+            };
 
         try {
             p.parse();
-        } catch (final Exception ignored) {
+        } catch (Exception ignored) {
             // throw any parser exception, but we are partial parsing anyway
         }
 
@@ -499,18 +444,14 @@ public class Shell implements PartialParser {
 
     /**
      * read-eval-print loop for Nashorn shell.
-     *
-     * @param context the nashorn context
-     * @param global  global scope object to use
-     * @return return code
      */
-    protected int readEvalPrint(final Context context, final Global global) {
-        final String prompt = bundle.getString("shell.prompt");
-        final BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        final PrintWriter err = context.getErr();
-        final Global oldGlobal = Context.getGlobal();
-        final boolean globalChanged = (oldGlobal != global);
-        final ScriptEnvironment env = context.getEnv();
+    protected int readEvalPrint(Context context, Global global) {
+        var prompt = bundle.getString("shell.prompt");
+        var in = new BufferedReader(new InputStreamReader(System.in));
+        var err = context.getErr();
+        var oldGlobal = Context.getGlobal();
+        var globalChanged = (oldGlobal != global);
+        var env = context.getEnv();
 
         try {
             if (globalChanged) {
@@ -519,14 +460,14 @@ public class Shell implements PartialParser {
 
             global.addShellBuiltins();
 
-            while (true) {
+            for (;;) {
                 err.print(prompt);
                 err.flush();
 
-                String source = "";
+                var source = "";
                 try {
                     source = in.readLine();
-                } catch (final IOException ioe) {
+                } catch (IOException ioe) {
                     err.println(ioe.toString());
                 }
 
@@ -539,11 +480,11 @@ public class Shell implements PartialParser {
                 }
 
                 try {
-                    final Object res = context.eval(global, source, global, "<shell>");
+                    var res = context.eval(global, source, global, "<shell>");
                     if (res != ScriptRuntime.UNDEFINED) {
                         err.println(toString(res, global));
                     }
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     err.println(e);
                     if (env._dump_on_error) {
                         e.printStackTrace(err);
@@ -560,16 +501,10 @@ public class Shell implements PartialParser {
     }
 
     /**
-     * Converts {@code result} to a printable string. The reason we don't use {@link JSType#toString(Object)}
-     * or {@link ScriptRuntime#safeToString(Object)} is that we want to be able to render Symbol values
-     * even if they occur within an Array, and therefore have to implement our own Array to String
-     * conversion.
-     *
-     * @param result the result
-     * @param global the global object
-     * @return the string representation
+     * Converts {@code result} to a printable string.
+     * The reason we don't use {@link JSType#toString(Object)} or {@link ScriptRuntime#safeToString(Object)} is that we want to be able to render Symbol values even if they occur within an Array, and therefore have to implement our own Array to String conversion.
      */
-    protected static String toString(final Object result, final Global global) {
+    protected static String toString(Object result, Global global) {
         if (result instanceof Symbol) {
             // Normal implicit conversion of symbol to string would throw TypeError
             return result.toString();
@@ -580,13 +515,12 @@ public class Shell implements PartialParser {
         }
 
         if (isArrayWithDefaultToString(result, global)) {
-            // This should yield the same string as Array.prototype.toString but
-            // will not throw if the array contents include symbols.
-            final StringBuilder sb = new StringBuilder();
-            final Iterator<Object> iter = ArrayLikeIterator.arrayLikeIterator(result, true);
+            // This should yield the same string as Array.prototype.toString but will not throw if the array contents include symbols.
+            var sb = new StringBuilder();
+            var iter = ArrayLikeIterator.arrayLikeIterator(result, true);
 
             while (iter.hasNext()) {
-                final Object obj = iter.next();
+                var obj = iter.next();
 
                 if (obj != null && obj != ScriptRuntime.UNDEFINED) {
                     sb.append(toString(obj, global));
@@ -603,11 +537,12 @@ public class Shell implements PartialParser {
         return JSType.toString(result);
     }
 
-    private static boolean isArrayWithDefaultToString(final Object result, final Global global) {
+    private static boolean isArrayWithDefaultToString(Object result, Global global) {
         if (result instanceof ScriptObject) {
-            final ScriptObject sobj = (ScriptObject) result;
+            var sobj = (ScriptObject) result;
             return sobj.isArray() && sobj.get("toString") == global.getArrayPrototype().get("toString");
         }
         return false;
     }
+
 }

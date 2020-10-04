@@ -26,24 +26,21 @@
 package nashorn.internal.runtime.regexp;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.PatternSyntaxException;
+
 import nashorn.internal.parser.Lexer;
 import nashorn.internal.parser.Scanner;
 import nashorn.internal.runtime.BitVector;
 
 /**
  * Scan a JavaScript regexp, converting to Java regex if necessary.
- *
  */
 final class RegExpScanner extends Scanner {
 
-    /**
-     * String builder used to rewrite the pattern for the currently used regexp factory.
-     */
+    /** String builder used to rewrite the pattern for the currently used regexp factory. */
     private final StringBuilder sb;
 
     /** Expected token table */
@@ -70,26 +67,23 @@ final class RegExpScanner extends Scanner {
     private static final String NON_IDENT_ESCAPES = "$^*+(){}[]|\\.?-";
 
     private static class Capture {
+
         /** Zero-width negative lookaheads enclosing the capture. */
         private final int negLookaheadLevel;
         /** Sequential id of top-level negative lookaheads containing the capture. */
         private  final int negLookaheadGroup;
 
-        Capture(final int negLookaheadGroup, final int negLookaheadLevel) {
+        Capture(int negLookaheadGroup, int negLookaheadLevel) {
             this.negLookaheadGroup = negLookaheadGroup;
             this.negLookaheadLevel = negLookaheadLevel;
         }
 
         /**
-         * Returns true if this Capture can be referenced from the position specified by the
-         * group and level parameters. This is the case if either the group is not within
-         * a negative lookahead, or the position of the referrer is in the same negative lookahead.
-         *
-         * @param group current negative lookahead group
-         * @param level current negative lokahead level
-         * @return true if this capture group can be referenced from the given position
+         * Returns true if this Capture can be referenced from the position specified by the group and level parameters.
+         * This is the case if either the group is not within a negative lookahead, or the position of the referrer is in the same negative lookahead.
+         * Returns true if this capture group can be referenced from the given position
          */
-        boolean canBeReferencedFrom(final int group, final int level) {
+        boolean canBeReferencedFrom(int group, int level) {
             return this.negLookaheadLevel == 0 || (group == this.negLookaheadGroup && level >= this.negLookaheadLevel);
         }
 
@@ -97,9 +91,8 @@ final class RegExpScanner extends Scanner {
 
     /**
      * Constructor
-     * @param string the JavaScript regexp to parse
      */
-    private RegExpScanner(final String string) {
+    private RegExpScanner(String string) {
         super(string);
         sb = new StringBuilder(limit);
         reset(0);
@@ -109,14 +102,14 @@ final class RegExpScanner extends Scanner {
 
     private void processForwardReferences() {
 
-        final Iterator<Integer> iterator = forwardReferences.descendingIterator();
+        var iterator = forwardReferences.descendingIterator();
         while (iterator.hasNext()) {
-            final int pos = iterator.next();
-            final int num = iterator.next();
+            var pos = iterator.next();
+            var num = iterator.next();
             if (num > caps.size()) {
-                // Non-existing backreference. If the number begins with a valid octal convert it to
-                // Unicode escape and append the rest to a literal character sequence.
-                final StringBuilder buffer = new StringBuilder();
+                // Non-existing backreference.
+                // If the number begins with a valid octal convert it to Unicode escape and append the rest to a literal character sequence.
+                var buffer = new StringBuilder();
                 octalOrLiteral(Integer.toString(num), buffer);
                 sb.insert(pos, buffer);
             }
@@ -127,17 +120,13 @@ final class RegExpScanner extends Scanner {
 
     /**
      * Scan a JavaScript regexp string returning a Java safe regex string.
-     *
-     * @param string
-     *            JavaScript regexp string.
-     * @return Java safe regex string.
      */
-    public static RegExpScanner scan(final String string) {
-        final RegExpScanner scanner = new RegExpScanner(string);
+    public static RegExpScanner scan(String string) {
+        var scanner = new RegExpScanner(string);
 
         try {
             scanner.disjunction();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw new PatternSyntaxException(e.getMessage(), string, scanner.position);
         }
 
@@ -145,7 +134,7 @@ final class RegExpScanner extends Scanner {
 
         // Throw syntax error unless we parsed the entire JavaScript regexp without syntax errors
         if (scanner.position != string.length()) {
-            final String p = scanner.getStringBuilder().toString();
+            var p = scanner.getStringBuilder().toString();
             throw new PatternSyntaxException(string, p, p.length() + 1);
         }
 
@@ -162,8 +151,8 @@ final class RegExpScanner extends Scanner {
 
     BitVector getGroupsInNegativeLookahead() {
         BitVector vec = null;
-        for (int i = 0; i < caps.size(); i++) {
-            final Capture cap = caps.get(i);
+        for (var i = 0; i < caps.size(); i++) {
+            var cap = caps.get(i);
             if (cap.negLookaheadLevel > 0) {
                 if (vec == null) {
                     vec = new BitVector(caps.size() + 1);
@@ -176,28 +165,27 @@ final class RegExpScanner extends Scanner {
 
     /**
      * Commit n characters to the builder and to a given token
-     * @param n     Number of characters.
-     * @return Committed token
      */
-    private boolean commit(final int n) {
+    private boolean commit(int n) {
         switch (n) {
-        case 1:
-            sb.append(ch0);
-            skip(1);
-            break;
-        case 2:
-            sb.append(ch0);
-            sb.append(ch1);
-            skip(2);
-            break;
-        case 3:
-            sb.append(ch0);
-            sb.append(ch1);
-            sb.append(ch2);
-            skip(3);
-            break;
-        default:
-            assert false : "Should not reach here";
+            case 1 -> {
+                sb.append(ch0);
+                skip(1);
+            }
+            case 2 -> {
+                sb.append(ch0);
+                sb.append(ch1);
+                skip(2);
+            }
+            case 3 -> {
+                sb.append(ch0);
+                sb.append(ch1);
+                sb.append(ch2);
+                skip(3);
+            }
+            default -> {
+                assert false : "Should not reach here";
+            }
         }
 
         return true;
@@ -205,30 +193,27 @@ final class RegExpScanner extends Scanner {
 
     /**
      * Restart the buffers back at an earlier position.
-     *
-     * @param startIn
-     *            Position in the input stream.
-     * @param startOut
-     *            Position in the output stream.
+     * 'startIn' is the position in the input stream.
+     * 'startOut' is the position in the output stream.
      */
-    private void restart(final int startIn, final int startOut) {
+    private void restart(int startIn, int startOut) {
         reset(startIn);
         sb.setLength(startOut);
     }
 
-    private void push(final char ch) {
+    private void push(char ch) {
         expected.put(ch, expected.get(ch) + 1);
     }
 
-    private void pop(final char ch) {
+    private void pop(char ch) {
         expected.put(ch, Math.min(0, expected.get(ch) - 1));
     }
 
-    /*
+    /**
      * Recursive descent tokenizer starts below.
      */
 
-    /*
+    /**
      * Disjunction ::
      *      Alternative
      *      Alternative | Disjunction
@@ -245,7 +230,7 @@ final class RegExpScanner extends Scanner {
         }
     }
 
-    /*
+    /**
      * Alternative ::
      *      [empty]
      *      Alternative Term
@@ -256,15 +241,15 @@ final class RegExpScanner extends Scanner {
         }
     }
 
-    /*
+    /**
      * Term ::
      *      Assertion
      *      Atom
      *      Atom Quantifier
      */
     private boolean term() {
-        final int startIn  = position;
-        final int startOut = sb.length();
+        var startIn  = position;
+        var startOut = sb.length();
 
         if (assertion()) {
             return true;
@@ -279,7 +264,7 @@ final class RegExpScanner extends Scanner {
         return false;
     }
 
-    /*
+    /**
      * Assertion ::
      *      ^
      *      $
@@ -289,55 +274,52 @@ final class RegExpScanner extends Scanner {
      *      ( ? ! Disjunction )
      */
     private boolean assertion() {
-        final int startIn  = position;
-        final int startOut = sb.length();
+        var startIn  = position;
+        var startOut = sb.length();
 
         switch (ch0) {
-        case '^':
-        case '$':
-            return commit(1);
+            // default ->  {}
 
-        case '\\':
-            if (ch1 == 'b' || ch1 == 'B') {
-                return commit(2);
-            }
-            break;
-
-        case '(':
-            if (ch1 != '?') {
-                break;
-            }
-            if (ch2 != '=' && ch2 != '!') {
-                break;
-            }
-            final boolean isNegativeLookahead = (ch2 == '!');
-            commit(3);
-
-            if (isNegativeLookahead) {
-                if (negLookaheadLevel == 0) {
-                    negLookaheadGroup++;
-                }
-                negLookaheadLevel++;
-            }
-            disjunction();
-            if (isNegativeLookahead) {
-                negLookaheadLevel--;
-            }
-
-            if (ch0 == ')') {
+            case '^', '$' -> {
                 return commit(1);
             }
-            break;
+            case '\\' -> {
+                if (ch1 == 'b' || ch1 == 'B') {
+                    return commit(2);
+                }
+            }
+            case '(' -> {
+                if (ch1 != '?') {
+                    break;
+                }
+                if (ch2 != '=' && ch2 != '!') {
+                    break;
+                }
+                var isNegativeLookahead = (ch2 == '!');
+                commit(3);
 
-        default:
-            break;
+                if (isNegativeLookahead) {
+                    if (negLookaheadLevel == 0) {
+                        negLookaheadGroup++;
+                    }
+                    negLookaheadLevel++;
+                }
+                disjunction();
+                if (isNegativeLookahead) {
+                    negLookaheadLevel--;
+                }
+
+                if (ch0 == ')') {
+                    return commit(1);
+                }
+            }
         }
 
         restart(startIn, startOut);
         return false;
     }
 
-    /*
+    /**
      * Quantifier ::
      *      QuantifierPrefix
      *      QuantifierPrefix ?
@@ -352,7 +334,7 @@ final class RegExpScanner extends Scanner {
         return false;
     }
 
-    /*
+    /**
      * QuantifierPrefix ::
      *      *
      *      +
@@ -362,48 +344,46 @@ final class RegExpScanner extends Scanner {
      *      { DecimalDigits , DecimalDigits }
      */
     private boolean quantifierPrefix() {
-        final int startIn  = position;
-        final int startOut = sb.length();
+        var startIn  = position;
+        var startOut = sb.length();
 
         switch (ch0) {
-        case '*':
-        case '+':
-        case '?':
-            return commit(1);
+            // default ->  {}
 
-        case '{':
-            commit(1);
-
-            if (!decimalDigits()) {
-                break; // not a quantifier - back out
+            case '*', '+', '?' -> {
+                return commit(1);
             }
-            push('}');
-
-            if (ch0 == ',') {
+            case '{' -> {
                 commit(1);
-                decimalDigits();
+
+                if (!decimalDigits()) {
+                    break; // not a quantifier - back out
+                }
+                push('}');
+
+                if (ch0 == ',') {
+                    commit(1);
+                    decimalDigits();
+                }
+
+                if (ch0 == '}') {
+                    pop('}');
+                    commit(1);
+                } else {
+                    // Bad quantifier should be rejected but is accepted by all major engines
+                    restart(startIn, startOut);
+                    return false;
+                }
+
+                return true;
             }
-
-            if (ch0 == '}') {
-                pop('}');
-                commit(1);
-            } else {
-                // Bad quantifier should be rejected but is accepted by all major engines
-                restart(startIn, startOut);
-                return false;
-            }
-
-            return true;
-
-        default:
-            break;
         }
 
         restart(startIn, startOut);
         return false;
     }
 
-    /*
+    /**
      * Atom ::
      *      PatternCharacter
      *      .
@@ -414,8 +394,8 @@ final class RegExpScanner extends Scanner {
      *
      */
     private boolean atom() {
-        final int startIn  = position;
-        final int startOut = sb.length();
+        var startIn  = position;
+        var startOut = sb.length();
 
         if (patternCharacter()) {
             return true;
@@ -457,52 +437,42 @@ final class RegExpScanner extends Scanner {
         return false;
     }
 
-    /*
+    /**
      * PatternCharacter ::
      *      SourceCharacter but not any of: ^$\.*+?()[]{}|
      */
-    @SuppressWarnings("fallthrough")
     private boolean patternCharacter() {
         if (atEOF()) {
             return false;
         }
 
         switch (ch0) {
-        case '^':
-        case '$':
-        case '\\':
-        case '.':
-        case '*':
-        case '+':
-        case '?':
-        case '(':
-        case ')':
-        case '[':
-        case '|':
-            return false;
-
-        case '}':
-        case ']':
-            final int n = expected.get(ch0);
-            if (n != 0) {
+            case '^', '$', '\\', '.', '*', '+', '?', '(', ')', '[', '|': {
                 return false;
             }
-
-       case '{':
-           // if not a valid quantifier escape curly brace to match itself
-           // this ensures compatibility with other JS implementations
-           if (!quantifierPrefix()) {
-               sb.append('\\');
-               return commit(1);
-           }
-           return false;
-
-        default:
-            return commit(1); // SOURCECHARACTER
+            case '}', ']': {
+                final int n = expected.get(ch0);
+                if (n != 0) {
+                    return false;
+                }
+            }
+            // FALL-THROUGH
+            case '{': {
+               // if not a valid quantifier escape curly brace to match itself
+               // this ensures compatibility with other JS implementations
+               if (!quantifierPrefix()) {
+                   sb.append('\\');
+                   return commit(1);
+               }
+               return false;
+            }
+            default: {
+                return commit(1); // SOURCECHARACTER
+            }
         }
     }
 
-    /*
+    /**
      * AtomEscape ::
      *      DecimalEscape
      *      CharacterEscape
@@ -513,7 +483,7 @@ final class RegExpScanner extends Scanner {
         return decimalEscape() || characterClassEscape() || characterEscape() || identityEscape();
     }
 
-    /*
+    /**
      * CharacterEscape ::
      *      ControlEscape
      *      c ControlLetter
@@ -522,8 +492,8 @@ final class RegExpScanner extends Scanner {
      *      IdentityEscape
      */
     private boolean characterEscape() {
-        final int startIn  = position;
-        final int startOut = sb.length();
+        var startIn  = position;
+        var startOut = sb.length();
 
         if (controlEscape()) {
             return true;
@@ -545,17 +515,17 @@ final class RegExpScanner extends Scanner {
         return false;
     }
 
-    private boolean scanEscapeSequence(final char leader, final int length) {
-        final int startIn  = position;
-        final int startOut = sb.length();
+    private boolean scanEscapeSequence(char leader, int length) {
+        var startIn  = position;
+        var startOut = sb.length();
 
         if (ch0 != leader) {
             return false;
         }
 
         commit(1);
-        for (int i = 0; i < length; i++) {
-            final char ch0l = Character.toLowerCase(ch0);
+        for (var i = 0; i < length; i++) {
+            var ch0l = Character.toLowerCase(ch0);
             if ((ch0l >= 'a' && ch0l <= 'f') || isDecimalDigit(ch0)) {
                 commit(1);
             } else {
@@ -575,36 +545,27 @@ final class RegExpScanner extends Scanner {
         return scanEscapeSequence('u', 4);
     }
 
-    /*
+    /**
      * ControlEscape ::
      *      one of fnrtv
      */
     private boolean controlEscape() {
-        switch (ch0) {
-        case 'f':
-        case 'n':
-        case 'r':
-        case 't':
-        case 'v':
-            return commit(1);
-
-        default:
-            return false;
-        }
+        return switch (ch0) {
+            case 'f', 'n', 'r', 't', 'v' -> commit(1);
+            default -> false;
+        };
     }
 
-    /*
+    /**
      * ControlLetter ::
      *      one of abcdefghijklmnopqrstuvwxyz
      *      ABCDEFGHIJKLMNOPQRSTUVWXYZ
      */
     private boolean controlLetter() {
         // To match other engines we also accept '0'..'9' and '_' as control letters inside a character class.
-        if ((ch0 >= 'A' && ch0 <= 'Z') || (ch0 >= 'a' && ch0 <= 'z')
-                || (inCharClass && (isDecimalDigit(ch0) || ch0 == '_'))) {
-            // for some reason java regexps don't like control characters on the
-            // form "\\ca".match([string with ascii 1 at char0]). Translating
-            // them to unicode does it though.
+        if ((ch0 >= 'A' && ch0 <= 'Z') || (ch0 >= 'a' && ch0 <= 'z') || (inCharClass && (isDecimalDigit(ch0) || ch0 == '_'))) {
+            // for some reason java regexps don't like control characters on the form "\\ca".match([string with ascii 1 at char0]).
+            // Translating them to unicode does it, though.
             sb.setLength(sb.length() - 1);
             unicode(ch0 % 32, sb);
             skip(1);
@@ -613,7 +574,7 @@ final class RegExpScanner extends Scanner {
         return false;
     }
 
-    /*
+    /**
      * IdentityEscape ::
      *      SourceCharacter but not IdentifierPart
      *      <ZWJ>  (200c)
@@ -632,13 +593,13 @@ final class RegExpScanner extends Scanner {
         return commit(1);
     }
 
-    /*
+    /**
      * DecimalEscape ::
      *      DecimalIntegerLiteral [lookahead DecimalDigit]
      */
     private boolean decimalEscape() {
-        final int startIn  = position;
-        final int startOut = sb.length();
+        var startIn  = position;
+        var startOut = sb.length();
 
         if (ch0 == '0' && !isOctalDigit(ch1)) {
             skip(1);
@@ -653,7 +614,7 @@ final class RegExpScanner extends Scanner {
                 // We know this is an octal escape.
                 if (inCharClass) {
                     // Convert octal escape to unicode escape if inside character class.
-                    int octalValue = 0;
+                    var octalValue = 0;
                     while (isOctalDigit(ch0)) {
                         octalValue = octalValue * 8 + ch0 - '0';
                         skip(1);
@@ -667,7 +628,7 @@ final class RegExpScanner extends Scanner {
                 }
             } else {
                 // This should be a backreference, but could also be an octal escape or even a literal string.
-                int decimalValue = 0;
+                var decimalValue = 0;
                 while (isDecimalDigit(ch0)) {
                     decimalValue = decimalValue * 10 + ch0 - '0';
                     skip(1);
@@ -680,7 +641,7 @@ final class RegExpScanner extends Scanner {
 
                 } else if (decimalValue <= caps.size()) {
                     //  Captures inside a negative lookahead are undefined when referenced from the outside.
-                    final Capture capture = caps.get(decimalValue - 1);
+                    var capture = caps.get(decimalValue - 1);
                     if (!capture.canBeReferencedFrom(negLookaheadGroup, negLookaheadLevel)) {
                         // Outside reference to capture in negative lookahead, omit from output buffer.
                         sb.setLength(sb.length() - 1);
@@ -690,8 +651,7 @@ final class RegExpScanner extends Scanner {
                     }
                 } else {
                     // Forward references to a capture group are always undefined so we can omit it from the output buffer.
-                    // However, if the target capture does not exist, we need to rewrite the reference as hex escape
-                    // or literal string, so register the reference for later processing.
+                    // However, if the target capture does not exist, we need to rewrite the reference as hex escape or literal string, so register the reference for later processing.
                     sb.setLength(sb.length() - 1);
                     forwardReferences.add(decimalValue);
                     forwardReferences.add(sb.length());
@@ -705,15 +665,14 @@ final class RegExpScanner extends Scanner {
         return false;
     }
 
-    /*
+    /**
      * CharacterClassEscape ::
      *  one of dDsSwW
      */
     private boolean characterClassEscape() {
-        switch (ch0) {
         // java.util.regex requires translation of \s and \S to explicit character list
-        case 's':
-            if (RegExpFactory.usesJavaUtilRegex()) {
+        switch (ch0) {
+            case 's' -> {
                 sb.setLength(sb.length() - 1);
                 // No nested class required if we already are inside a character class
                 if (inCharClass) {
@@ -724,35 +683,30 @@ final class RegExpScanner extends Scanner {
                 skip(1);
                 return true;
             }
-            return commit(1);
-        case 'S':
-            if (RegExpFactory.usesJavaUtilRegex()) {
+            case 'S' -> {
                 sb.setLength(sb.length() - 1);
                 // In negative class we must use intersection to get double negation ("not anything else than space")
                 sb.append(inNegativeClass ? "&&[" : "[^").append(Lexer.getWhitespaceRegExp()).append(']');
                 skip(1);
                 return true;
             }
-            return commit(1);
-        case 'd':
-        case 'D':
-        case 'w':
-        case 'W':
-            return commit(1);
-
-        default:
-            return false;
+            case 'd', 'D', 'w', 'W' -> {
+                return commit(1);
+            }
+            default ->  {
+                return false;
+            }
         }
     }
 
-    /*
+    /**
      * CharacterClass ::
      *      [ [lookahead {^}] ClassRanges ]
      *      [ ^ ClassRanges ]
      */
     private boolean characterClass() {
-        final int startIn  = position;
-        final int startOut = sb.length();
+        var startIn  = position;
+        var startOut = sb.length();
 
         if (ch0 == '[') {
             try {
@@ -790,7 +744,7 @@ final class RegExpScanner extends Scanner {
         return false;
     }
 
-    /*
+    /**
      * ClassRanges ::
      *      [empty]
      *      NonemptyClassRanges
@@ -800,15 +754,15 @@ final class RegExpScanner extends Scanner {
         return true;
     }
 
-    /*
+    /**
      * NonemptyClassRanges ::
      *      ClassAtom
      *      ClassAtom NonemptyClassRangesNoDash
      *      ClassAtom - ClassAtom ClassRanges
      */
     private boolean nonemptyClassRanges() {
-        final int startIn  = position;
-        final int startOut = sb.length();
+        var startIn  = position;
+        var startOut = sb.length();
 
         if (classAtom()) {
 
@@ -829,15 +783,15 @@ final class RegExpScanner extends Scanner {
         return false;
     }
 
-    /*
+    /**
      * NonemptyClassRangesNoDash ::
      *      ClassAtom
      *      ClassAtomNoDash NonemptyClassRangesNoDash
      *      ClassAtomNoDash - ClassAtom ClassRanges
      */
     private boolean nonemptyClassRangesNoDash() {
-        final int startIn  = position;
-        final int startOut = sb.length();
+        var startIn  = position;
+        var startOut = sb.length();
 
         if (classAtomNoDash()) {
 
@@ -863,19 +817,17 @@ final class RegExpScanner extends Scanner {
         return false;
     }
 
-    /*
+    /**
      * ClassAtom : - ClassAtomNoDash
      */
     private boolean classAtom() {
-
         if (ch0 == '-') {
             return commit(1);
         }
-
         return classAtomNoDash();
     }
 
-    /*
+    /**
      * ClassAtomNoDash ::
      *      SourceCharacter but not one of \ or ] or -
      *      \ ClassEscape
@@ -884,34 +836,34 @@ final class RegExpScanner extends Scanner {
         if (atEOF()) {
             return false;
         }
-        final int startIn  = position;
-        final int startOut = sb.length();
+        var startIn  = position;
+        var startOut = sb.length();
 
         switch (ch0) {
-        case ']':
-        case '-':
-            return false;
-
-        case '[':
-            // unescaped left square bracket - add escape
-            sb.append('\\');
-            return commit(1);
-
-        case '\\':
-            commit(1);
-            if (classEscape()) {
-                return true;
+            case ']', '-' -> {
+                return false;
             }
+            case '[' -> {
+                // unescaped left square bracket - add escape
+                sb.append('\\');
+                return commit(1);
+            }
+            case '\\' -> {
+                commit(1);
+                if (classEscape()) {
+                    return true;
+                }
 
-            restart(startIn, startOut);
-            return false;
-
-        default:
-            return commit(1);
+                restart(startIn, startOut);
+                return false;
+            }
+            default ->  {
+                return commit(1);
+            }
         }
     }
 
-    /*
+    /**
      * ClassEscape ::
      *      DecimalEscape
      *      b
@@ -919,54 +871,49 @@ final class RegExpScanner extends Scanner {
      *      CharacterClassEscape
      */
     private boolean classEscape() {
-
         if (decimalEscape()) {
             return true;
         }
-
         if (ch0 == 'b') {
             sb.setLength(sb.length() - 1);
             sb.append('\b');
             skip(1);
             return true;
         }
-
         // Note that contrary to ES 5.1 spec we put identityEscape() last because it acts as a catch-all
         return characterEscape() || characterClassEscape() || identityEscape();
     }
 
-    /*
+    /**
      * DecimalDigits
      */
     private boolean decimalDigits() {
         if (!isDecimalDigit(ch0)) {
             return false;
         }
-
         while (isDecimalDigit(ch0)) {
             commit(1);
         }
-
         return true;
     }
 
-    private static void unicode(final int value, final StringBuilder buffer) {
-        final String hex = Integer.toHexString(value);
+    private static void unicode(int value, StringBuilder buffer) {
+        var hex = Integer.toHexString(value);
         buffer.append('u');
-        for (int i = 0; i < 4 - hex.length(); i++) {
+        for (var i = 0; i < 4 - hex.length(); i++) {
             buffer.append('0');
         }
         buffer.append(hex);
     }
 
     // Convert what would have been a backreference into a unicode escape, or a number literal, or both.
-    private static void octalOrLiteral(final String numberLiteral, final StringBuilder buffer) {
-        final int length = numberLiteral.length();
-        int octalValue = 0;
-        int pos = 0;
+    private static void octalOrLiteral(String numberLiteral, StringBuilder buffer) {
+        var length = numberLiteral.length();
+        var octalValue = 0;
+        var pos = 0;
         // Maximum value for octal escape is 0377 (255) so we stop the loop at 32
         while (pos < length && octalValue < 0x20) {
-            final char ch = numberLiteral.charAt(pos);
+            var ch = numberLiteral.charAt(pos);
             if (isOctalDigit(ch)) {
                 octalValue = octalValue * 8 + ch - '0';
             } else {
@@ -983,11 +930,12 @@ final class RegExpScanner extends Scanner {
         }
     }
 
-    private static boolean isOctalDigit(final char ch) {
+    private static boolean isOctalDigit(char ch) {
         return ch >= '0' && ch <= '7';
     }
 
-    private static boolean isDecimalDigit(final char ch) {
+    private static boolean isDecimalDigit(char ch) {
         return ch >= '0' && ch <= '9';
     }
+
 }

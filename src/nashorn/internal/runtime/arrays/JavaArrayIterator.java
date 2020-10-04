@@ -40,10 +40,8 @@ class JavaArrayIterator extends ArrayLikeIterator<Object> {
 
     /**
      * Constructor
-     * @param array array to iterate over
-     * @param includeUndefined should undefined elements be included in iteration
      */
-    protected JavaArrayIterator(final Object array, final boolean includeUndefined) {
+    protected JavaArrayIterator(Object array, boolean includeUndefined) {
         super(includeUndefined);
         assert array.getClass().isArray() : "expecting Java array object";
         this.array = array;
@@ -52,7 +50,6 @@ class JavaArrayIterator extends ArrayLikeIterator<Object> {
 
     /**
      * Is the current index still inside the array
-     * @return true if inside the array
      */
     protected boolean indexInArray() {
         return index < length;
@@ -77,4 +74,5 @@ class JavaArrayIterator extends ArrayLikeIterator<Object> {
     public void remove() {
         throw new UnsupportedOperationException("remove");
     }
+
 }

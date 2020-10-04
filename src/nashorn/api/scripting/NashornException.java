@@ -26,26 +26,24 @@
 package nashorn.api.scripting;
 
 import java.util.ArrayList;
-import java.util.List;
+
 import nashorn.internal.codegen.CompilerConstants;
 import nashorn.internal.runtime.ECMAErrors;
 import nashorn.internal.runtime.ScriptObject;
 
 /**
- * This is base exception for all Nashorn exceptions. These originate from
- * user's ECMAScript code. Example: script parse errors, exceptions thrown from
- * scripts. Note that ScriptEngine methods like "eval", "invokeMethod",
- * "invokeFunction" will wrap this as ScriptException and throw it. But, there
- * are cases where user may need to access this exception (or implementation
- * defined subtype of this). For example, if java interface is implemented by a
- * script object or Java access to script object properties via java.util.Map
- * interface. In these cases, user code will get an instance of this or
- * implementation defined subclass.
+ * This is base exception for all Nashorn exceptions.
+ *
+ * These originate from user's ECMAScript code.
+ * Example: script parse errors, exceptions thrown from scripts.
+ * Note that ScriptEngine methods like "eval", "invokeMethod", "invokeFunction" will wrap this as ScriptException and throw it.
+ * But, there are cases where user may need to access this exception (or implementation defined subtype of this).
+ * For example, if java interface is implemented by a script object or Java access to script object properties via java.util.Map interface.
+ * In these cases, user code will get an instance of this or implementation defined subclass.
  *
  * @since 1.8u40
  */
 public abstract class NashornException extends RuntimeException {
-    private static final long serialVersionUID = 1L;
 
     // script file name
     private String fileName;
@@ -60,26 +58,15 @@ public abstract class NashornException extends RuntimeException {
 
     /**
      * Constructor to initialize error message, file name, line and column numbers.
-     *
-     * @param msg       exception message
-     * @param fileName  file name
-     * @param line      line number
-     * @param column    column number
      */
-    protected NashornException(final String msg, final String fileName, final int line, final int column) {
+    protected NashornException(String msg, String fileName, int line, int column) {
         this(msg, null, fileName, line, column);
     }
 
     /**
      * Constructor to initialize error message, cause exception, file name, line and column numbers.
-     *
-     * @param msg       exception message
-     * @param cause     exception cause
-     * @param fileName  file name
-     * @param line      line number
-     * @param column    column number
      */
-    protected NashornException(final String msg, final Throwable cause, final String fileName, final int line, final int column) {
+    protected NashornException(String msg, Throwable cause, String fileName, int line, int column) {
         super(msg, cause == null ? null : cause);
         this.fileName = fileName;
         this.line = line;
@@ -88,11 +75,8 @@ public abstract class NashornException extends RuntimeException {
 
     /**
      * Constructor to initialize error message and cause exception.
-     *
-     * @param msg       exception message
-     * @param cause     exception cause
      */
-    protected NashornException(final String msg, final Throwable cause) {
+    protected NashornException(String msg, Throwable cause) {
         super(msg, cause == null ? null : cause);
         // Hard luck - no column number info
         this.column = -1;
@@ -102,8 +86,6 @@ public abstract class NashornException extends RuntimeException {
 
     /**
      * Get the source file name for this {@code NashornException}
-     *
-     * @return the file name
      */
     public final String getFileName() {
         ensureLineAndFileName();
@@ -112,18 +94,14 @@ public abstract class NashornException extends RuntimeException {
 
     /**
      * Set the source file name for this {@code NashornException}
-     *
-     * @param fileName the file name
      */
-    public final void setFileName(final String fileName) {
+    public final void setFileName(String fileName) {
         this.fileName = fileName;
         lineAndFileNameUnknown = false;
     }
 
     /**
      * Get the line number for this {@code NashornException}
-     *
-     * @return the line number
      */
     public final int getLineNumber() {
         ensureLineAndFileName();
@@ -132,18 +110,14 @@ public abstract class NashornException extends RuntimeException {
 
     /**
      * Set the line number for this {@code NashornException}
-     *
-     * @param line the line number
      */
-    public final void setLineNumber(final int line) {
+    public final void setLineNumber(int line) {
         lineAndFileNameUnknown = false;
         this.line = line;
     }
 
     /**
      * Get the column for this {@code NashornException}
-     *
-     * @return the column number
      */
     public final int getColumnNumber() {
         return column;
@@ -151,48 +125,41 @@ public abstract class NashornException extends RuntimeException {
 
     /**
      * Set the column for this {@code NashornException}
-     *
-     * @param column the column number
      */
-    public final void setColumnNumber(final int column) {
+    public final void setColumnNumber(int column) {
         this.column = column;
     }
 
     /**
      * Returns array javascript stack frames from the given exception object.
-     *
-     * @param exception exception from which stack frames are retrieved and filtered
-     * @return array of javascript stack frames
      */
-    public static StackTraceElement[] getScriptFrames(final Throwable exception) {
-        final StackTraceElement[] frames = exception.getStackTrace();
-        final List<StackTraceElement> filtered = new ArrayList<>();
-        for (final StackTraceElement st : frames) {
+    public static StackTraceElement[] getScriptFrames(Throwable exception) {
+        var frames = exception.getStackTrace();
+        var filtered = new ArrayList<StackTraceElement>();
+        for (var st : frames) {
             if (ECMAErrors.isScriptFrame(st)) {
-                final String className = "<" + st.getFileName() + ">";
-                String methodName = st.getMethodName();
+                var className = "<" + st.getFileName() + ">";
+                var methodName = st.getMethodName();
                 if (methodName.equals(CompilerConstants.PROGRAM.symbolName())) {
                     methodName = "<program>";
                 } else {
                     methodName = stripMethodName(methodName);
                 }
-
-                filtered.add(new StackTraceElement(className, methodName,
-                        st.getFileName(), st.getLineNumber()));
+                filtered.add(new StackTraceElement(className, methodName, st.getFileName(), st.getLineNumber()));
             }
         }
         return filtered.toArray(new StackTraceElement[0]);
     }
 
-    private static String stripMethodName(final String methodName) {
-        String name = methodName;
+    private static String stripMethodName(String methodName) {
+        var name = methodName;
 
-        final int nestedSeparator = name.lastIndexOf(CompilerConstants.NESTED_FUNCTION_SEPARATOR.symbolName());
+        var nestedSeparator = name.lastIndexOf(CompilerConstants.NESTED_FUNCTION_SEPARATOR.symbolName());
         if (nestedSeparator >= 0) {
             name = name.substring(nestedSeparator + 1);
         }
 
-        final int idSeparator = name.indexOf(CompilerConstants.ID_FUNCTION_SEPARATOR.symbolName());
+        var idSeparator = name.indexOf(CompilerConstants.ID_FUNCTION_SEPARATOR.symbolName());
         if (idSeparator >= 0) {
             name = name.substring(0, idSeparator);
         }
@@ -202,23 +169,20 @@ public abstract class NashornException extends RuntimeException {
 
     /**
      * Return a formatted script stack trace string with frames information separated by '\n'
-     *
-     * @param exception exception for which script stack string is returned
-     * @return formatted stack trace string
      */
-    public static String getScriptStackString(final Throwable exception) {
-        final StringBuilder buf = new StringBuilder();
-        final StackTraceElement[] frames = getScriptFrames(exception);
-        for (final StackTraceElement st : frames) {
-            buf.append("\tat ");
-            buf.append(st.getMethodName());
-            buf.append(" (");
-            buf.append(st.getFileName());
-            buf.append(':');
-            buf.append(st.getLineNumber());
-            buf.append(")\n");
+    public static String getScriptStackString(Throwable exception) {
+        var buf = new StringBuilder();
+        var frames = getScriptFrames(exception);
+        for (var st : frames) {
+            buf.append("\tat ")
+               .append(st.getMethodName())
+               .append(" (")
+               .append(st.getFileName())
+               .append(':')
+               .append(st.getLineNumber())
+               .append(")\n");
         }
-        final int len = buf.length();
+        var len = buf.length();
         // remove trailing '\n'
         if (len > 0) {
             assert buf.charAt(len - 1) == '\n';
@@ -229,58 +193,46 @@ public abstract class NashornException extends RuntimeException {
 
     /**
      * Get the thrown object. Subclass responsibility
-     * @return thrown object
      */
     protected Object getThrown() {
         return null;
     }
 
     /**
-     * Initialization function for ECMA errors. Stores the error
-     * in the ecmaError field of this class. It is only initialized
-     * once, and then reused
-     *
-     * @param global the global
-     * @return initialized exception
+     * Initialization function for ECMA errors.
+     * Stores the error in the ecmaError field of this class.
+     * It is only initialized once, and then reused
      */
-    NashornException initEcmaError(final ScriptObject global) {
+    NashornException initEcmaError(ScriptObject global) {
         if (ecmaError != null) {
             return this; // initialized already!
         }
-
-        final Object thrown = getThrown();
+        var thrown = getThrown();
         if (thrown instanceof ScriptObject) {
             setEcmaError(ScriptObjectMirror.wrap(thrown, global));
         } else {
             setEcmaError(thrown);
         }
-
         return this;
     }
 
     /**
-     * Return the underlying ECMA error object, if available.
-     *
-     * @return underlying ECMA Error object's mirror or whatever was thrown
-     *         from script such as a String, Number or a Boolean.
+     * Return the lying ECMA Error object's mirror, if available, or whatever was thrown from script such as a String, Number or a Boolean.
      */
     public Object getEcmaError() {
         return ecmaError;
     }
 
     /**
-     * Return the underlying ECMA error object, if available.
-     *
-     * @param ecmaError underlying ECMA Error object's mirror or whatever was thrown
-     *         from script such as a String, Number or a Boolean.
+     * Set the underlying ECMA error object.
      */
-    public void setEcmaError(final Object ecmaError) {
+    public void setEcmaError(Object ecmaError) {
         this.ecmaError = ecmaError;
     }
 
     private void ensureLineAndFileName() {
         if (lineAndFileNameUnknown) {
-            for (final StackTraceElement ste : getStackTrace()) {
+            for (var ste : getStackTrace()) {
                 if (ECMAErrors.isScriptFrame(ste)) {
                     // Whatever here is compiled from JavaScript code
                     fileName = ste.getFileName();
@@ -288,8 +240,8 @@ public abstract class NashornException extends RuntimeException {
                     return;
                 }
             }
-
             lineAndFileNameUnknown = false;
         }
     }
+
 }

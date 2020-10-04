@@ -25,21 +25,21 @@
 package nashorn.internal.ir;
 
 import java.io.File;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+
 import nashorn.internal.Util;
-import nashorn.internal.runtime.Source;
 
 /**
- * A class that tracks the current lexical context of node visitation as a stack
- * of {@link Block} nodes. Has special methods to retrieve useful subsets of the
- * context.
+ * A class that tracks the current lexical context of node visitation as a stack of {@link Block} nodes.
  *
- * This is implemented with a primitive array and a stack pointer, because it
- * really makes a difference performance-wise. None of the collection classes
- * were optimal.
+ * Has special methods to retrieve useful subsets of the context.
+ *
+ * This is implemented with a primitive array and a stack pointer, because it really makes a difference performance-wise. None of the collection classes were optimal.
  */
 public class LexicalContext {
+
     private LexicalContextNode[] stack;
 
     private int[] flags;
@@ -54,60 +54,48 @@ public class LexicalContext {
     }
 
     /**
-     * Set the flags for a lexical context node on the stack. Does not
-     * replace the flags, but rather adds to them.
-     *
-     * @param node  node
-     * @param flag  new flag to set
+     * Set the flags for a lexical context node on the stack.
+     * Does not replace the flags, but rather adds to them.
      */
-    public void setFlag(final LexicalContextNode node, final int flag) {
+    public void setFlag(LexicalContextNode node, int flag) {
         if (flag != 0) {
             // Use setBlockNeedsScope() instead
             assert !(flag == Block.NEEDS_SCOPE && node instanceof Block);
 
-            for (int i = sp - 1; i >= 0; i--) {
+            for (var i = sp - 1; i >= 0; i--) {
                 if (stack[i] == node) {
                     flags[i] |= flag;
                     return;
                 }
             }
         }
-        assert false;
+        assert false; // should not be reached
     }
 
     /**
-     * Marks the block as one that creates a scope. Note that this method must
-     * be used instead of {@link #setFlag(LexicalContextNode, int)} with
-     * {@link Block#NEEDS_SCOPE} because it atomically also sets the
-     * {@link FunctionNode#HAS_SCOPE_BLOCK} flag on the block's containing
-     * function.
-     *
-     * @param block the block that needs to be marked as creating a scope.
+     * Marks the block as one that creates a scope.
+     * Note that this method must be used instead of {@link #setFlag(LexicalContextNode, int)} with {@link Block#NEEDS_SCOPE} because it atomically also sets the {@link FunctionNode#HAS_SCOPE_BLOCK} flag on the block's containing function.
      */
-    public void setBlockNeedsScope(final Block block) {
-        for (int i = sp - 1; i >= 0; i--) {
+    public void setBlockNeedsScope(Block block) {
+        for (var i = sp - 1; i >= 0; i--) {
             if (stack[i] == block) {
                 flags[i] |= Block.NEEDS_SCOPE;
-                for(int j = i - 1; j >=0; j --) {
-                    if(stack[j] instanceof FunctionNode) {
+                for (var j = i - 1; j >=0; j --) {
+                    if (stack[j] instanceof FunctionNode) {
                         flags[j] |= FunctionNode.HAS_SCOPE_BLOCK;
                         return;
                     }
                 }
             }
         }
-        assert false;
+        assert false; // should not be reached
     }
 
     /**
      * Get the flags for a lexical context node on the stack.
-     *
-     * @param node node
-     *
-     * @return the flags for the node
      */
-    public int getFlags(final LexicalContextNode node) {
-        for (int i = sp - 1; i >= 0; i--) {
+    public int getFlags(LexicalContextNode node) {
+        for (var i = sp - 1; i >= 0; i--) {
             if (stack[i] == node) {
                 return flags[i];
             }
@@ -116,15 +104,11 @@ public class LexicalContext {
     }
 
     /**
-     * Get the function body of a function node on the lexical context
-     * stack. This will trigger an assertion if node isn't present.
-     *
-     * @param functionNode function node
-     *
-     * @return body of function node
+     * Get the function body of a function node on the lexical context stack.
+     * This will trigger an assertion if node isn't present.
      */
-    public Block getFunctionBody(final FunctionNode functionNode) {
-        for (int i = sp - 1; i >= 0 ; i--) {
+    public Block getFunctionBody(FunctionNode functionNode) {
+        for (var i = sp - 1; i >= 0 ; i--) {
             if (stack[i] == functionNode) {
                 return (Block)stack[i + 1];
             }
@@ -133,39 +117,31 @@ public class LexicalContext {
     }
 
     /**
-     * @return all nodes in the LexicalContext.
+     * Returns all nodes in the LexicalContext.
      */
     public Iterator<LexicalContextNode> getAllNodes() {
         return new NodeIterator<>(LexicalContextNode.class);
     }
 
     /**
-     * Returns the outermost function in this context. It is either the program,
-     * or a lazily compiled function.
-     *
-     * @return the outermost function in this context.
+     * Returns the outermost function in this context.
+     * It is either the program, or a lazily compiled function.
      */
     public FunctionNode getOutermostFunction() {
         return (FunctionNode)stack[0];
     }
 
     /**
-     * Pushes a new block on top of the context, making it the innermost open
-     * block.
-     *
-     * @param <T> the type of the new node
-     * @param node the new node
-     *
-     * @return the node that was pushed
+     * Pushes a new block on top of the context, making it the innermost open block.
      */
-    public <T extends LexicalContextNode> T push(final T node) {
+    public <T extends LexicalContextNode> T push(T node) {
         assert !contains(node);
         if (sp == stack.length) {
-            final LexicalContextNode[] newStack = new LexicalContextNode[sp * 2];
+            var newStack = new LexicalContextNode[sp * 2];
             System.arraycopy(stack, 0, newStack, 0, sp);
             stack = newStack;
 
-            final int[] newFlags = new int[sp * 2];
+            var newFlags = new int[sp * 2];
             System.arraycopy(flags, 0, newFlags, 0, sp);
             flags = newFlags;
 
@@ -180,65 +156,48 @@ public class LexicalContext {
 
     /**
      * Is the context empty?
-     *
-     * @return {@code true} if empty
      */
     public boolean isEmpty() {
         return sp == 0;
     }
 
     /**
-     * @return the depth of the lexical context.
+     * Returns the depth of the lexical context.
      */
     public int size() {
         return sp;
     }
 
     /**
-     * Pops the innermost block off the context and all nodes that has been
-     * contributed since it was put there.
-     *
-     * @param <T> the type of the node to be popped
-     * @param node the node expected to be popped, used to detect unbalanced
-     *        pushes/pops
-     *
-     * @return the node that was popped
+     * Pops the innermost block off the context and all nodes that has been contributed since it was put there.
+     * <T> is the type of the node to be popped.
+     * 'node' is the node expected to be popped, used to detect unbalanced pushes/pops.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Node> T pop(final T node) {
+    public <T extends Node> T pop(T node) {
         --sp;
-        final LexicalContextNode popped = stack[sp];
+        var popped = stack[sp];
         stack[sp] = null;
         if (popped instanceof Flags) {
             return (T)((Flags<?>)popped).setFlag(this, flags[sp]);
         }
-
         return (T)popped;
     }
 
     /**
-     * Explicitly apply flags to the topmost element on the stack. This is only
-     * valid to use from a {@code NodeVisitor.leaveXxx()} method and only on the
-     * node being exited at the time. It is not mandatory to use, as
-     * {@link #pop(Node)} will apply the flags automatically, but this method
-     * can be used to apply them during the {@code leaveXxx()} method in case
-     * its logic depends on the value of the flags.
-     *
-     * @param <T> the type of the node to apply the flags to.
-     * @param node the node to apply the flags to. Must be the topmost node on
-     *        the stack.
-     *
-     * @return the passed in node, or a modified node (if any flags were modified)
+     * Explicitly apply flags to the topmost element on the stack.
+     * This is only valid to use from a {@code NodeVisitor.leaveXxx()} method and only on the node being exited at the time.
+     * It is not mandatory to use, as {@link #pop(Node)} will apply the flags automatically, but this method can be used to apply them during the {@code leaveXxx()} method in case its logic depends on the value of the flags.
+     * <T> is the type of the node to apply the flags to.
+     * 'node' is the node to apply the flags to. Must be the topmost node on the stack.
      */
-    public <T extends LexicalContextNode & Flags<T>> T applyTopFlags(final T node) {
+    public <T extends LexicalContextNode & Flags<T>> T applyTopFlags(T node) {
         assert node == peek();
         return node.setFlag(this, flags[sp - 1]);
     }
 
     /**
      * Return the top element in the context.
-     *
-     * @return the node that was pushed last
      */
     public LexicalContextNode peek() {
         return stack[sp - 1];
@@ -246,13 +205,9 @@ public class LexicalContext {
 
     /**
      * Check if a node is in the lexical context.
-     *
-     * @param node node to check for
-     *
-     * @return {@code true} if in the context
      */
-    public boolean contains(final LexicalContextNode node) {
-        for (int i = 0; i < sp; i++) {
+    public boolean contains(LexicalContextNode node) {
+        for (var i = 0; i < sp; i++) {
             if (stack[i] == node) {
                 return true;
             }
@@ -261,16 +216,11 @@ public class LexicalContext {
     }
 
     /**
-     * Replace a node on the lexical context with a new one. Normally
-     * you should try to engineer IR traversals so this isn't needed
-     *
-     * @param oldNode old node
-     * @param newNode new node
-     *
-     * @return the new node
+     * Replace a node on the lexical context with a new one.
+     * Normally you should try to engineer IR traversals so this isn't needed
      */
-    public LexicalContextNode replace(final LexicalContextNode oldNode, final LexicalContextNode newNode) {
-        for (int i = sp - 1; i >= 0; i--) {
+    public LexicalContextNode replace(LexicalContextNode oldNode, LexicalContextNode newNode) {
+        for (var i = sp - 1; i >= 0; i--) {
             if (stack[i] == oldNode) {
                 assert i == sp - 1 : "violation of contract - we always expect to find the replacement node on top of the lexical context stack: " + newNode + " has " + stack[i + 1].getClass() + " above it";
                 stack[i] = newNode;
@@ -281,20 +231,14 @@ public class LexicalContext {
     }
 
     /**
-     * Returns an iterator over all blocks in the context, with the top block
-     * (innermost lexical context) first.
-     *
-     * @return an iterator over all blocks in the context.
+     * Returns an iterator over all blocks in the context, with the top block (innermost lexical context) first.
      */
     public Iterator<Block> getBlocks() {
         return new NodeIterator<>(Block.class);
     }
 
     /**
-     * Returns an iterator over all functions in the context, with the top
-     * (innermost open) function first.
-     *
-     * @return an iterator over all functions in the context.
+     * Returns an iterator over all functions in the context, with the top (innermost open) function first.
      */
     public Iterator<FunctionNode> getFunctions() {
         return new NodeIterator<>(FunctionNode.class);
@@ -302,42 +246,33 @@ public class LexicalContext {
 
     /**
      * Get the parent block for the current lexical context block
-     *
-     * @return parent block
      */
     public Block getParentBlock() {
-        final Iterator<Block> iter = new NodeIterator<>(Block.class, getCurrentFunction());
+        var iter = new NodeIterator<>(Block.class, getCurrentFunction());
         iter.next();
         return iter.hasNext() ? iter.next() : null;
     }
 
     /**
      * Gets the label node of the current block.
-     *
-     * @return the label node of the current block, if it is labeled. Otherwise
-     *         returns {@code null}.
+     * Returns the label node of the current block, if it is labeled. Otherwise returns {@code null}.
      */
     public LabelNode getCurrentBlockLabelNode() {
         assert stack[sp - 1] instanceof Block;
-        if(sp < 2) {
+        if (sp < 2) {
             return null;
         }
-        final LexicalContextNode parent = stack[sp - 2];
+        var parent = stack[sp - 2];
         return parent instanceof LabelNode ? (LabelNode)parent : null;
     }
 
     /**
-     * Returns an iterator over all ancestors block of the given block, with its
-     * parent block first.
-     *
-     * @param block the block whose ancestors are returned
-     *
-     * @return an iterator over all ancestors block of the given block.
+     * Returns an iterator over all ancestors block of the given block, with its parent block first.
      */
-    public Iterator<Block> getAncestorBlocks(final Block block) {
-        final Iterator<Block> iter = getBlocks();
+    public Iterator<Block> getAncestorBlocks(Block block) {
+        var iter = getBlocks();
         while (iter.hasNext()) {
-            final Block b = iter.next();
+            var b = iter.next();
             if (block == b) {
                 return iter;
             }
@@ -346,15 +281,10 @@ public class LexicalContext {
     }
 
     /**
-     * Returns an iterator over a block and all its ancestors blocks, with the
-     * block first.
-     *
-     * @param block the block that is the starting point of the iteration.
-     *
-     * @return an iterator over a block and all its ancestors.
+     * Returns an iterator over a block and all its ancestors blocks, with the block first.
      */
-    public Iterator<Block> getBlocks(final Block block) {
-        final Iterator<Block> iter = getAncestorBlocks(block);
+    public Iterator<Block> getBlocks(Block block) {
+        var iter = getAncestorBlocks(block);
         return new Iterator<Block>() {
             boolean blockReturned = false;
             @Override
@@ -378,40 +308,36 @@ public class LexicalContext {
 
     /**
      * Get the function for this block.
-     *
-     * @param block block for which to get function
-     *
-     * @return function for block
      */
-    public FunctionNode getFunction(final Block block) {
-        final Iterator<LexicalContextNode> iter = new NodeIterator<>(LexicalContextNode.class);
+    public FunctionNode getFunction(Block block) {
+        var iter = new NodeIterator<>(LexicalContextNode.class);
         while (iter.hasNext()) {
-            final LexicalContextNode next = iter.next();
+            var next = iter.next();
             if (next == block) {
                 while (iter.hasNext()) {
-                    final LexicalContextNode next2 = iter.next();
+                    var next2 = iter.next();
                     if (next2 instanceof FunctionNode) {
                         return (FunctionNode)next2;
                     }
                 }
             }
         }
-        assert false;
+        assert false; // should not be reached
         return null;
     }
 
     /**
-     * @return the innermost block in the context.
+     * Returns the innermost block in the context.
      */
     public Block getCurrentBlock() {
         return getBlocks().next();
     }
 
     /**
-     * @return the innermost function in the context.
+     * Returns the innermost function in the context.
      */
     public FunctionNode getCurrentFunction() {
-        for (int i = sp - 1; i >= 0; i--) {
+        for (var i = sp - 1; i >= 0; i--) {
             if (stack[i] instanceof FunctionNode) {
                 return (FunctionNode) stack[i];
             }
@@ -421,16 +347,11 @@ public class LexicalContext {
 
     /**
      * Get the block in which a symbol is defined.
-     *
-     * @param symbol symbol
-     *
-     * @return block in which the symbol is defined, assert if no such block in
-     *         context.
      */
-    public Block getDefiningBlock(final Symbol symbol) {
-        final String name = symbol.getName();
-        for (final Iterator<Block> it = getBlocks(); it.hasNext();) {
-            final Block next = it.next();
+    public Block getDefiningBlock(Symbol symbol) {
+        var name = symbol.getName();
+        for (var it = getBlocks(); it.hasNext();) {
+            var next = it.next();
             if (next.getExistingSymbol(name) == symbol) {
                 return next;
             }
@@ -440,19 +361,14 @@ public class LexicalContext {
 
     /**
      * Get the function in which a symbol is defined.
-     *
-     * @param symbol symbol
-     *
-     * @return function node in which this symbol is defined, assert if no such
-     *         symbol exists in context.
      */
-    public FunctionNode getDefiningFunction(final Symbol symbol) {
-        final String name = symbol.getName();
-        for (final Iterator<LexicalContextNode> iter = new NodeIterator<>(LexicalContextNode.class); iter.hasNext();) {
-            final LexicalContextNode next = iter.next();
+    public FunctionNode getDefiningFunction(Symbol symbol) {
+        var name = symbol.getName();
+        for (var iter = new NodeIterator<>(LexicalContextNode.class); iter.hasNext();) {
+            var next = iter.next();
             if (next instanceof Block && ((Block)next).getExistingSymbol(name) == symbol) {
                 while (iter.hasNext()) {
-                    final LexicalContextNode next2 = iter.next();
+                    var next2 = iter.next();
                     if (next2 instanceof FunctionNode) {
                         return (FunctionNode)next2;
                     }
@@ -465,8 +381,6 @@ public class LexicalContext {
 
     /**
      * Is the topmost lexical context element a function body?
-     *
-     * @return {@code true} if function body.
      */
     public boolean isFunctionBody() {
         return getParentBlock() == null;
@@ -474,8 +388,6 @@ public class LexicalContext {
 
     /**
      * Is the topmost lexical context element body of a SplitNode?
-     *
-     * @return {@code true} if it's the body of a split node.
      */
     public boolean isSplitBody() {
         return sp >= 2 && stack[sp - 1] instanceof Block && stack[sp - 2] instanceof SplitNode;
@@ -483,16 +395,11 @@ public class LexicalContext {
 
     /**
      * Get the parent function for a function in the lexical context.
-     *
-     * @param functionNode function for which to get parent
-     *
-     * @return parent function of functionNode or {@code null} if none (e.g., if
-     *         functionNode is the program).
      */
-    public FunctionNode getParentFunction(final FunctionNode functionNode) {
-        final Iterator<FunctionNode> iter = new NodeIterator<>(FunctionNode.class);
+    public FunctionNode getParentFunction(FunctionNode functionNode) {
+        var iter = new NodeIterator<>(FunctionNode.class);
         while (iter.hasNext()) {
-            final FunctionNode next = iter.next();
+            var next = iter.next();
             if (next == functionNode) {
                 return iter.hasNext() ? iter.next() : null;
             }
@@ -502,23 +409,16 @@ public class LexicalContext {
     }
 
     /**
-     * Count the number of scopes until a given node. Note that this method is
-     * solely used to figure out the number of scopes that need to be explicitly
-     * popped in order to perform a break or continue jump within the current
-     * bytecode method. For this reason, the method returns 0 if it encounters a
-     * {@code SplitNode} between the current location and the break/continue
-     * target.
-     *
-     * @param until node to stop counting at. Must be within the current function.
-     *
-     * @return number of with scopes encountered in the context.
+     * Count the number of scopes until a given node.
+     * Note that this method is solely used to figure out the number of scopes that need to be explicitly popped in order to perform a break or continue jump within the current bytecode method.
+     * For this reason, the method returns 0 if it encounters a {@code SplitNode} between the current location and the break/continue target.
      */
-    public int getScopeNestingLevelTo(final LexicalContextNode until) {
+    public int getScopeNestingLevelTo(LexicalContextNode until) {
         assert until != null;
         //count the number of with nodes until "until" is hit
-        int n = 0;
-        for (final Iterator<LexicalContextNode> iter = getAllNodes(); iter.hasNext();) {
-            final LexicalContextNode node = iter.next();
+        var n = 0;
+        for (var iter = getAllNodes(); iter.hasNext();) {
+            var node = iter.next();
             if (node == until) {
                 break;
             }
@@ -531,8 +431,8 @@ public class LexicalContext {
     }
 
     private BreakableNode getBreakable() {
-        for (final NodeIterator<BreakableNode> iter = new NodeIterator<>(BreakableNode.class, getCurrentFunction()); iter.hasNext(); ) {
-            final BreakableNode next = iter.next();
+        for (var iter = new NodeIterator<>(BreakableNode.class, getCurrentFunction()); iter.hasNext(); ) {
+            var next = iter.next();
             if (next.isBreakableWithoutLabel()) {
                 return next;
             }
@@ -542,38 +442,31 @@ public class LexicalContext {
 
     /**
      * Check whether the lexical context is currently inside a loop.
-     *
-     * @return {@code true} if inside a loop
      */
     public boolean inLoop() {
         return getCurrentLoop() != null;
     }
 
     /**
-     * @return the loop header of the current loop, or {@code null} if not
-     *         inside a loop.
+     * Returns the loop header of the current loop, or {@code null} if not inside a loop.
      */
     public LoopNode getCurrentLoop() {
-        final Iterator<LoopNode> iter = new NodeIterator<>(LoopNode.class, getCurrentFunction());
+        var iter = new NodeIterator<>(LoopNode.class, getCurrentFunction());
         return iter.hasNext() ? iter.next() : null;
     }
 
     /**
      * Find the breakable node corresponding to this label.
-     *
-     * @param labelName name of the label to search for. If {@code null}, the
-     *        closest breakable node will be returned unconditionally, e.g., a
-     *        while loop with no label.
-     *
-     * @return closest breakable node.
+     * 'labelName' is the name of the label to search for.
+     * If {@code null}, the closest breakable node will be returned unconditionally, e.g., a while loop with no label.
      */
-    public BreakableNode getBreakable(final String labelName) {
+    public BreakableNode getBreakable(String labelName) {
         if (labelName != null) {
-            final LabelNode foundLabel = findLabel(labelName);
+            var foundLabel = findLabel(labelName);
             if (foundLabel != null) {
                 // iterate to the nearest breakable to the foundLabel
                 BreakableNode breakable = null;
-                for (final NodeIterator<BreakableNode> iter = new NodeIterator<>(BreakableNode.class, foundLabel); iter.hasNext(); ) {
+                for (var iter = new NodeIterator<>(BreakableNode.class, foundLabel); iter.hasNext(); ) {
                     breakable = iter.next();
                 }
                 return breakable;
@@ -589,20 +482,16 @@ public class LexicalContext {
 
     /**
      * Find the continue target node corresponding to this label.
-     *
-     * @param labelName label name to search for. If {@code null} the closest
-     *        loop node will be returned unconditionally, e.g., a while loop
-     *        with no label.
-     *
-     * @return closest continue target node.
+     * 'labelName' is the label name to search for.
+     * If {@code null} the closest loop node will be returned unconditionally, e.g., a while loop with no label.
      */
-    public LoopNode getContinueTo(final String labelName) {
+    public LoopNode getContinueTo(String labelName) {
         if (labelName != null) {
-            final LabelNode foundLabel = findLabel(labelName);
+            var foundLabel = findLabel(labelName);
             if (foundLabel != null) {
                 // iterate to the nearest loop to the foundLabel
                 LoopNode loop = null;
-                for (final NodeIterator<LoopNode> iter = new NodeIterator<>(LoopNode.class, foundLabel); iter.hasNext(); ) {
+                for (var iter = new NodeIterator<>(LoopNode.class, foundLabel); iter.hasNext(); ) {
                     loop = iter.next();
                 }
                 return loop;
@@ -614,14 +503,12 @@ public class LexicalContext {
 
     /**
      * Find the inlined finally block node corresponding to this label.
-     *
-     * @param labelName label name to search for. Must not be {@code null}.
-     *
-     * @return closest inlined finally block with the given label.
+     * 'labelName' is the label name to search for. Must not be {@code null}.
+     * Returns the closest inlined finally block with the given label.
      */
-    public Block getInlinedFinally(final String labelName) {
-        for (final NodeIterator<TryNode> iter = new NodeIterator<>(TryNode.class); iter.hasNext(); ) {
-            final Block inlinedFinally = iter.next().getInlinedFinally(labelName);
+    public Block getInlinedFinally(String labelName) {
+        for (var iter = new NodeIterator<>(TryNode.class); iter.hasNext(); ) {
+            var inlinedFinally = iter.next().getInlinedFinally(labelName);
             if (inlinedFinally != null) {
                 return inlinedFinally;
             }
@@ -631,14 +518,12 @@ public class LexicalContext {
 
     /**
      * Find the try node for an inlined finally block corresponding to this label.
-     *
-     * @param labelName label name to search for. Must not be {@code null}.
-     *
-     * @return the try node to which the labelled inlined finally block belongs.
+     * 'labelName' is the label name to search for. Must not be {@code null}.
+     * Returns the try node to which the labelled inlined finally block belongs.
      */
-    public TryNode getTryNodeForInlinedFinally(final String labelName) {
-        for (final NodeIterator<TryNode> iter = new NodeIterator<>(TryNode.class); iter.hasNext(); ) {
-            final TryNode tryNode = iter.next();
+    public TryNode getTryNodeForInlinedFinally(String labelName) {
+        for (var iter = new NodeIterator<>(TryNode.class); iter.hasNext(); ) {
+            var tryNode = iter.next();
             if (tryNode.getInlinedFinally(labelName) != null) {
                 return tryNode;
             }
@@ -648,14 +533,10 @@ public class LexicalContext {
 
     /**
      * Check the lexical context for a given label node by name.
-     *
-     * @param name name of the label.
-     *
-     * @return LabelNode if found, {@code null} otherwise.
      */
-    private LabelNode findLabel(final String name) {
-        for (final Iterator<LabelNode> iter = new NodeIterator<>(LabelNode.class, getCurrentFunction()); iter.hasNext(); ) {
-            final LabelNode next = iter.next();
+    private LabelNode findLabel(String name) {
+        for (var iter = new NodeIterator<>(LabelNode.class, getCurrentFunction()); iter.hasNext(); ) {
+            var next = iter.next();
             if (next.getLabelName().equals(name)) {
                 return next;
             }
@@ -664,23 +545,17 @@ public class LexicalContext {
     }
 
     /**
-     * Checks whether a given target is a jump destination that lies outside a
-     * given split node.
-     *
-     * @param splitNode the split node.
-     * @param target the target node.
-     *
-     * @return {@code true} if target resides outside the split node.
+     * Checks whether a given target is a jump destination that lies outside a given split node.
      */
-    public boolean isExternalTarget(final SplitNode splitNode, final BreakableNode target) {
-        for (int i = sp; i-- > 0;) {
-            final LexicalContextNode next = stack[i];
+    public boolean isExternalTarget(SplitNode splitNode, BreakableNode target) {
+        for (var i = sp; i-- > 0;) {
+            var next = stack[i];
             if (next == splitNode) {
                 return true;
             } else if (next == target) {
                 return false;
             } else if (next instanceof TryNode) {
-                for(final Block inlinedFinally: ((TryNode)next).getInlinedFinallies()) {
+                for (var inlinedFinally : ((TryNode)next).getInlinedFinallies()) {
                     if (TryNode.getLabelledInlinedFinallyBlock(inlinedFinally) == target) {
                         return false;
                     }
@@ -691,14 +566,11 @@ public class LexicalContext {
     }
 
     /**
-     * Checks whether the current context is inside a switch statement without
-     * explicit blocks (curly braces).
-     *
-     * @return {@code true} if in unprotected switch statement.
+     * Checks whether the current context is inside a switch statement without explicit blocks (curly braces).
      */
     public boolean inUnprotectedSwitchContext() {
-        for (int i = sp - 1; i > 0; i--) {
-            final LexicalContextNode next = stack[i];
+        for (var i = sp - 1; i > 0; i--) {
+            var next = stack[i];
             if (next instanceof Block) {
                 return stack[i - 1] instanceof SwitchNode;
             }
@@ -708,24 +580,24 @@ public class LexicalContext {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer();
+        var sb = new StringBuffer();
         sb.append("[ ");
-        for (int i = 0; i < sp; i++) {
-            final Object node = stack[i];
-            sb.append(node.getClass().getSimpleName());
-            sb.append('@');
-            sb.append(Util.id(node));
-            sb.append(':');
+        for (var i = 0; i < sp; i++) {
+            var node = stack[i];
+            sb.append(node.getClass().getSimpleName())
+              .append('@')
+              .append(Util.id(node))
+              .append(':');
             if (node instanceof FunctionNode) {
-                final FunctionNode fn = (FunctionNode)node;
-                final Source source = fn.getSource();
-                String src = source.toString();
+                var fn = (FunctionNode)node;
+                var source = fn.getSource();
+                var src = source.toString();
                 if (src.contains(File.pathSeparator)) {
                     src = src.substring(src.lastIndexOf(File.pathSeparator));
                 }
-                src += ' ';
-                src += fn.getLineNumber();
-                sb.append(src);
+                sb.append(src)
+                  .append(' '+fn.getLineNumber());
+
             }
             sb.append(' ');
         }
@@ -739,11 +611,11 @@ public class LexicalContext {
         private final Class<T> clazz;
         private LexicalContextNode until;
 
-        NodeIterator(final Class<T> clazz) {
+        NodeIterator(Class<T> clazz) {
             this(clazz, null);
         }
 
-        NodeIterator(final Class<T> clazz, final LexicalContextNode until) {
+        NodeIterator(Class<T> clazz, LexicalContextNode until) {
             this.index = sp - 1;
             this.clazz = clazz;
             this.until = until;
@@ -760,15 +632,15 @@ public class LexicalContext {
             if (next == null) {
                 throw new NoSuchElementException();
             }
-            final T lnext = next;
+            var lnext = next;
             next = findNext();
             return lnext;
         }
 
         @SuppressWarnings("unchecked")
         private T findNext() {
-            for (int i = index; i >= 0; i--) {
-                final Object node = stack[i];
+            for (var i = index; i >= 0; i--) {
+                var node = stack[i];
                 if (node == until) {
                     return null;
                 }
@@ -785,4 +657,5 @@ public class LexicalContext {
             throw new UnsupportedOperationException();
         }
     }
+
 }

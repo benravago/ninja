@@ -25,193 +25,177 @@
 
 package nashorn.internal.runtime.arrays;
 
-import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
 import java.lang.reflect.Array;
+
 import nashorn.internal.runtime.BitVector;
 import nashorn.internal.runtime.UnwarrantedOptimismException;
+import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
 
 /**
  * This filter handles the presence of undefined array elements.
  */
 final class UndefinedArrayFilter extends ArrayFilter {
+
     /** Bit vector tracking undefined slots. */
     private final BitVector undefined;
 
-    UndefinedArrayFilter(final ArrayData underlying) {
+    UndefinedArrayFilter(ArrayData underlying) {
         super(underlying);
         this.undefined = new BitVector(underlying.length());
     }
 
     @Override
     public ArrayData copy() {
-        final UndefinedArrayFilter copy = new UndefinedArrayFilter(underlying.copy());
+        var copy = new UndefinedArrayFilter(underlying.copy());
         copy.getUndefined().copy(undefined);
         return copy;
     }
 
     @Override
     public Object[] asObjectArray() {
-        final Object[] value = super.asObjectArray();
-
-        for (int i = 0; i < value.length; i++) {
+        var value = super.asObjectArray();
+        for (var i = 0; i < value.length; i++) {
             if (undefined.isSet(i)) {
                 value[i] = UNDEFINED;
             }
         }
-
         return value;
     }
 
     @Override
-    public Object asArrayOfType(final Class<?> componentType) {
-        final Object value = super.asArrayOfType(componentType);
-        final Object undefValue = convertUndefinedValue(componentType);
-        final int l = Array.getLength(value);
-        for (int i = 0; i < l; i++) {
+    public Object asArrayOfType(Class<?> componentType) {
+        var value = super.asArrayOfType(componentType);
+        var undefValue = convertUndefinedValue(componentType);
+        var l = Array.getLength(value);
+        for (var i = 0; i < l; i++) {
             if (undefined.isSet(i)) {
                 Array.set(value, i,undefValue);
             }
         }
-
         return value;
     }
 
     @Override
-    public ArrayData shiftLeft(final int by) {
+    public ArrayData shiftLeft(int by) {
         super.shiftLeft(by);
         undefined.shiftLeft(by, length());
         return this;
     }
 
     @Override
-    public ArrayData shiftRight(final int by) {
+    public ArrayData shiftRight(int by) {
         super.shiftRight(by);
         undefined.shiftRight(by, length());
         return this;
     }
 
     @Override
-    public ArrayData ensure(final long safeIndex) {
+    public ArrayData ensure(long safeIndex) {
         if (safeIndex >= SparseArrayData.MAX_DENSE_LENGTH && safeIndex >= length()) {
             return new SparseArrayData(this, safeIndex + 1);
         }
-
         super.ensure(safeIndex);
         undefined.resize(length());
-
         return this;
     }
 
     @Override
-    public ArrayData shrink(final long newLength) {
+    public ArrayData shrink(long newLength) {
         super.shrink(newLength);
         undefined.resize(length());
         return this;
     }
 
     @Override
-    public ArrayData set(final int index, final Object value) {
+    public ArrayData set(int index, Object value) {
         undefined.clear(index);
-
         if (value == UNDEFINED) {
             undefined.set(index);
             return this;
         }
-
         return super.set(index, value);
     }
 
     @Override
-    public ArrayData set(final int index, final int value) {
+    public ArrayData set(int index, int value) {
         undefined.clear(index);
-
         return super.set(index, value);
     }
 
     @Override
-    public ArrayData set(final int index, final double value) {
+    public ArrayData set(int index, double value) {
         undefined.clear(index);
-
         return super.set(index, value);
     }
 
     @Override
-    public int getInt(final int index) {
+    public int getInt(int index) {
         if (undefined.isSet(index)) {
             return 0;
         }
-
         return super.getInt(index);
     }
 
     @Override
-    public int getIntOptimistic(final int index, final int programPoint) {
+    public int getIntOptimistic(int index, int programPoint) {
         if (undefined.isSet(index)) {
             throw new UnwarrantedOptimismException(UNDEFINED, programPoint);
         }
-
         return super.getIntOptimistic(index, programPoint);
     }
 
     @Override
-    public double getDouble(final int index) {
+    public double getDouble(int index) {
         if (undefined.isSet(index)) {
             return Double.NaN;
         }
-
         return super.getDouble(index);
     }
 
     @Override
-    public double getDoubleOptimistic(final int index, final int programPoint) {
+    public double getDoubleOptimistic(int index, int programPoint) {
         if (undefined.isSet(index)) {
             throw new UnwarrantedOptimismException(UNDEFINED, programPoint);
         }
-
         return super.getDoubleOptimistic(index, programPoint);
     }
 
     @Override
-    public Object getObject(final int index) {
+    public Object getObject(int index) {
         if (undefined.isSet(index)) {
             return UNDEFINED;
         }
-
         return super.getObject(index);
     }
 
     @Override
-    public ArrayData delete(final int index) {
+    public ArrayData delete(int index) {
         undefined.clear(index);
-
         return super.delete(index);
     }
 
     @Override
     public Object pop() {
-        final long index = length() - 1;
-
+        var index = length() - 1;
         if (super.has((int)index)) {
-            final boolean isUndefined = undefined.isSet(index);
-            final Object value = super.pop();
-
+            var isUndefined = undefined.isSet(index);
+            var value = super.pop();
             return isUndefined ? UNDEFINED : value;
         }
-
         return super.pop();
     }
 
     @Override
-    public ArrayData slice(final long from, final long to) {
-        final ArrayData newArray = underlying.slice(from, to);
-        final UndefinedArrayFilter newFilter = new UndefinedArrayFilter(newArray);
+    public ArrayData slice(long from, long to) {
+        var newArray = underlying.slice(from, to);
+        var newFilter = new UndefinedArrayFilter(newArray);
         newFilter.getUndefined().copy(undefined);
         newFilter.getUndefined().shiftLeft(from, newFilter.length());
-
         return newFilter;
     }
 
     private BitVector getUndefined() {
         return undefined;
     }
+
 }

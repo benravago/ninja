@@ -33,23 +33,23 @@ import java.util.Set;
 
 /**
  * Responsible for loading script generated classes.
- *
  */
 final class ScriptLoader extends NashornLoader {
+
     private static final String NASHORN_PKG_PREFIX = "nashorn.internal.";
 
     private volatile boolean structureAccessAdded;
     private final Context context;
     private final Module scriptModule;
 
-    /*package-private*/ Context getContext() {
+    Context getContext() {
         return context;
     }
 
     /**
      * Constructor.
      */
-    ScriptLoader(final Context context) {
+    ScriptLoader(Context context) {
         super(context.getStructLoader());
         this.context = context;
 
@@ -67,28 +67,28 @@ final class ScriptLoader extends NashornLoader {
         NASHORN_MODULE.addReads(scriptModule);
     }
 
-    private Module createModule(final String moduleName) {
-        final Module structMod = context.getStructLoader().getModule();
-        final ModuleDescriptor.Builder builder =
-            ModuleDescriptor.newModule(moduleName, Set.of(Modifier.SYNTHETIC))
-                    .requires("java.logging")
-                    .requires(NASHORN_MODULE.getName())
-                    .requires(structMod.getName())
-                    .packages(Set.of(SCRIPTS_PKG));
+    private Module createModule(String moduleName) {
+        var structMod = context.getStructLoader().getModule();
+        var builder = ModuleDescriptor.newModule(moduleName,
+            Set.of(Modifier.SYNTHETIC))
+                .requires("java.logging") // TODO: replace with System.Logger
+                .requires(NASHORN_MODULE.getName())
+                .requires(structMod.getName())
+                .packages(Set.of(SCRIPTS_PKG));
 
-        final ModuleDescriptor descriptor = builder.build();
+        var descriptor = builder.build();
 
-        final Module mod = Context.createModuleTrusted(structMod.getLayer(), descriptor, this);
+        var mod = Context.createModuleTrusted(structMod.getLayer(), descriptor, this);
         loadModuleManipulator();
         return mod;
     }
 
     @Override
-    protected Class<?> loadClass(final String name, final boolean resolve) throws ClassNotFoundException {
+    protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
         checkPackageAccess(name);
-        final Class<?> cl = super.loadClass(name, resolve);
+        var cl = super.loadClass(name, resolve);
         if (!structureAccessAdded) {
-            final StructureLoader structLoader = context.getStructLoader();
+            var structLoader = context.getStructLoader();
             if (cl.getClassLoader() == structLoader) {
                 structureAccessAdded = true;
                 structLoader.addModuleExport(scriptModule);
@@ -98,28 +98,22 @@ final class ScriptLoader extends NashornLoader {
     }
 
     @Override
-    protected Class<?> findClass(final String name) throws ClassNotFoundException {
-        final ClassLoader appLoader = context.getAppLoader();
+    protected Class<?> findClass(String name) throws ClassNotFoundException {
+        var appLoader = context.getAppLoader();
 
         /*
          * If the appLoader is null, don't bother side-delegating to it!
-         * Bootloader has been already attempted via parent loader
-         * delegation from the "loadClass" method.
-         *
-         * Also, make sure that we don't delegate to the app loader
-         * for nashorn's own classes or nashorn generated classes!
+         * Bootloader has been already attempted via parent loader delegation from the "loadClass" method.
+         * Also, make sure that we don't delegate to the app loader for nashorn's own classes or nashorn generated classes!
          */
         if (appLoader == null || name.startsWith(NASHORN_PKG_PREFIX)) {
             throw new ClassNotFoundException(name);
         }
 
         /*
-         * This split-delegation is used so that caller loader
-         * based resolutions of classes would work. For example,
-         * java.sql.DriverManager uses caller's class loader to
-         * get Driver instances. Without this split-delegation
-         * a script class evaluating DriverManager.getDrivers()
-         * will not get back any JDBC driver!
+         * This split-delegation is used so that caller loader based resolutions of classes would work.
+         * For example, java.sql.DriverManager uses caller's class loader to get Driver instances.
+         * Without this split-delegation a script class evaluating DriverManager.getDrivers() will not get back any JDBC driver!
          */
         return appLoader.loadClass(name);
     }
@@ -128,14 +122,13 @@ final class ScriptLoader extends NashornLoader {
 
     /**
      * Install a class for use by the Nashorn runtime
-     *
      * @param name Binary name of class.
      * @param data Class data bytes.
      * @param cs CodeSource code source of the class bytes.
-     *
      * @return Installed class.
      */
-    synchronized Class<?> installClass(final String name, final byte[] data, final CodeSource cs) {
+    synchronized Class<?> installClass(String name, byte[] data, CodeSource cs) {
         return defineClass(name, data, 0, data.length, Objects.requireNonNull(cs));
     }
+
 }

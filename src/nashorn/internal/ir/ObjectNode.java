@@ -28,6 +28,7 @@ package nashorn.internal.ir;
 import java.util.Collections;
 import java.util.List;
 import java.util.RandomAccess;
+
 import nashorn.internal.codegen.types.Type;
 import nashorn.internal.ir.annotations.Ignore;
 import nashorn.internal.ir.annotations.Immutable;
@@ -38,7 +39,6 @@ import nashorn.internal.ir.visitor.NodeVisitor;
  */
 @Immutable
 public final class ObjectNode extends Expression implements LexicalContextNode, Splittable {
-    private static final long serialVersionUID = 1L;
 
     /** Literal elements. */
     private final List<PropertyNode> elements;
@@ -49,32 +49,27 @@ public final class ObjectNode extends Expression implements LexicalContextNode, 
 
     /**
      * Constructor
-     *
-     * @param token    token
-     * @param finish   finish
-     * @param elements the elements used to initialize this ObjectNode
      */
-    public ObjectNode(final long token, final int finish, final List<PropertyNode> elements) {
+    public ObjectNode(long token, int finish, List<PropertyNode> elements) {
         super(token, finish);
         this.elements = elements;
         this.splitRanges = null;
         assert elements instanceof RandomAccess : "Splitting requires random access lists";
     }
 
-    private ObjectNode(final ObjectNode objectNode, final List<PropertyNode> elements,
-                       final List<Splittable.SplitRange> splitRanges ) {
+    private ObjectNode(ObjectNode objectNode, List<PropertyNode> elements, List<Splittable.SplitRange> splitRanges ) {
         super(objectNode);
         this.elements = elements;
         this.splitRanges = splitRanges;
     }
 
     @Override
-    public Node accept(final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(NodeVisitor<? extends LexicalContext> visitor) {
         return Acceptor.accept(this, visitor);
     }
 
     @Override
-    public Node accept(final LexicalContext lc, final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(LexicalContext lc, NodeVisitor<? extends LexicalContext> visitor) {
         if (visitor.enterObjectNode(this)) {
             return visitor.leaveObjectNode(setElements(lc, Node.accept(visitor, elements)));
         }
@@ -87,14 +82,14 @@ public final class ObjectNode extends Expression implements LexicalContextNode, 
     }
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printType) {
+    public void toString(StringBuilder sb, boolean printType) {
         sb.append('{');
 
         if (!elements.isEmpty()) {
             sb.append(' ');
 
-            boolean first = true;
-            for (final Node element : elements) {
+            var first = true;
+            for (var element : elements) {
                 if (!first) {
                     sb.append(", ");
                 }
@@ -110,13 +105,12 @@ public final class ObjectNode extends Expression implements LexicalContextNode, 
 
     /**
      * Get the elements of this literal node
-     * @return a list of elements
      */
     public List<PropertyNode> getElements() {
         return Collections.unmodifiableList(elements);
     }
 
-    private ObjectNode setElements(final LexicalContext lc, final List<PropertyNode> elements) {
+    private ObjectNode setElements(LexicalContext lc, List<PropertyNode> elements) {
         if (this.elements == elements) {
             return this;
         }
@@ -126,11 +120,8 @@ public final class ObjectNode extends Expression implements LexicalContextNode, 
     /**
      * Set the split ranges for this ObjectNode
      * @see Splittable.SplitRange
-     * @param lc the lexical context
-     * @param splitRanges list of split ranges
-     * @return new or changed object node
      */
-    public ObjectNode setSplitRanges(final LexicalContext lc, final List<Splittable.SplitRange> splitRanges) {
+    public ObjectNode setSplitRanges(LexicalContext lc, List<Splittable.SplitRange> splitRanges) {
         if (this.splitRanges == splitRanges) {
             return this;
         }
@@ -140,7 +131,6 @@ public final class ObjectNode extends Expression implements LexicalContextNode, 
     /**
      * Get the split ranges for this ObjectNode, or null if the object is not split.
      * @see Splittable.SplitRange
-     * @return list of split ranges
      */
     @Override
     public List<Splittable.SplitRange> getSplitRanges() {

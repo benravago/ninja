@@ -109,33 +109,26 @@ import nashorn.internal.Util;
  * This class manages the global state of execution. Context is immutable.
  */
 public final class Context {
+
     // nashorn specific security runtime access permission names
-    /**
-     * Permission needed to pass arbitrary nashorn command line options when creating Context.
-     */
-    public static final String NASHORN_SET_CONFIG      = "nashorn.setConfig";
 
-    /**
-     * Permission needed to create Nashorn Context instance.
-     */
-    public static final String NASHORN_CREATE_CONTEXT  = "nashorn.createContext";
+    /** Permission needed to pass arbitrary nashorn command line options when creating Context. */
+    public static final String NASHORN_SET_CONFIG = "nashorn.setConfig";
 
-    /**
-     * Permission needed to create Nashorn Global instance.
-     */
-    public static final String NASHORN_CREATE_GLOBAL   = "nashorn.createGlobal";
+    /** Permission needed to create Nashorn Context instance. */
+    public static final String NASHORN_CREATE_CONTEXT = "nashorn.createContext";
 
-    /**
-     * Permission to get current Nashorn Context from thread local storage.
-     */
-    public static final String NASHORN_GET_CONTEXT     = "nashorn.getContext";
+    /** Permission needed to create Nashorn Global instance. */
+    public static final String NASHORN_CREATE_GLOBAL = "nashorn.createGlobal";
 
-    /**
-     * Permission to use Java reflection/jsr292 from script code.
-     */
+    /** Permission to get current Nashorn Context from thread local storage. */
+    public static final String NASHORN_GET_CONTEXT = "nashorn.getContext";
+
+    /** Permission to use Java reflection/jsr292 from script code. */
     public static final String NASHORN_JAVA_REFLECTION = "nashorn.JavaReflection";
 
     // nashorn load psuedo URL prefixes
+
     private static final String LOAD_CLASSPATH = "classpath:";
     private static final String LOAD_NASHORN = "nashorn:";
 
@@ -146,10 +139,9 @@ public final class Context {
     private static final LongAdder ANONYMOUS_INSTALLED_SCRIPT_COUNT = new LongAdder();
 
     /**
-     * Should scripts use only object slots for fields, or dual long/object slots? The default
-     * behaviour is to couple this to optimistic types, using dual representation if optimistic types are enabled
-     * and single field representation otherwise. This can be overridden by setting either the "nashorn.fields.objects"
-     * or "nashorn.fields.dual" system property.
+     * Should scripts use only object slots for fields, or dual long/object slots?
+     * The default behaviour is to couple this to optimistic types, using dual representation if optimistic types are enabled and single field representation otherwise.
+     * This can be overridden by setting either the "nashorn.fields.objects" or "nashorn.fields.dual" system property.
      */
     private final FieldMode fieldMode;
 
@@ -163,12 +155,9 @@ public final class Context {
     }
 
     /**
-     * Keeps track of which builtin prototypes and properties have been relinked
-     * Currently we are conservative and associate the name of a builtin class with all
-     * its properties, so it's enough to invalidate a property to break all assumptions
-     * about a prototype. This can be changed to a more fine grained approach, but no one
-     * ever needs this, given the very rare occurrence of swapping out only parts of
-     * a builtin v.s. the entire builtin object
+     * Keeps track of which builtin prototypes and properties have been relinked.
+     * Currently we are conservative and associate the name of a builtin class with all its properties, so it's enough to invalidate a property to break all assumptions about a prototype.
+     * This can be changed to a more fine grained approach, but no one ever needs this, given the very rare occurrence of swapping out only parts of a builtin v.s. the entire builtin object
      */
     private final Map<String, SwitchPoint> builtinSwitchPoints = new HashMap<>();
 
@@ -185,10 +174,11 @@ public final class Context {
      * Can only be instantiated from inside the context and is opaque to other classes
      */
     private abstract static class ContextCodeInstaller implements CodeInstaller {
+
         final Context context;
         final CodeSource codeSource;
 
-        ContextCodeInstaller(final Context context, final CodeSource codeSource) {
+        ContextCodeInstaller(Context context, CodeSource codeSource) {
             this.context = context;
             this.codeSource = codeSource;
         }
@@ -199,18 +189,18 @@ public final class Context {
         }
 
         @Override
-        public void initialize(final Collection<Class<?>> classes, final Source source, final Object[] constants) {
+        public void initialize(Collection<Class<?>> classes, Source source, Object[] constants) {
             try {
                 AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
                     @Override
                     public Void run() throws Exception {
-                        for (final Class<?> clazz : classes) {
+                        for (var clazz : classes) {
                             //use reflection to write source and constants table to installed classes
-                            final Field sourceField = clazz.getDeclaredField(SOURCE.symbolName());
+                            var sourceField = clazz.getDeclaredField(SOURCE.symbolName());
                             sourceField.setAccessible(true);
                             sourceField.set(null, source);
 
-                            final Field constantsField = clazz.getDeclaredField(CONSTANTS.symbolName());
+                            var constantsField = clazz.getDeclaredField(CONSTANTS.symbolName());
                             constantsField.setAccessible(true);
                             constantsField.set(null, constants);
                         }
@@ -228,16 +218,14 @@ public final class Context {
         }
 
         @Override
-        public void storeScript(final String cacheKey, final Source source, final String mainClassName,
-                                final Map<String,byte[]> classBytes, final Map<Integer, FunctionInitializer> initializers,
-                                final Object[] constants, final int compilationId) {
+        public void storeScript(String cacheKey, Source source, String mainClassName, Map<String,byte[]> classBytes, Map<Integer, FunctionInitializer> initializers, Object[] constants, int compilationId) {
             if (context.codeStore != null) {
                 context.codeStore.store(cacheKey, source, mainClassName, classBytes, initializers, constants, compilationId);
             }
         }
 
         @Override
-        public StoredScript loadScript(final Source source, final String functionKey) {
+        public StoredScript loadScript(Source source, String functionKey) {
             if (context.codeStore != null) {
                 return context.codeStore.load(source, functionKey);
             }
@@ -245,9 +233,9 @@ public final class Context {
         }
 
         @Override
-        public boolean isCompatibleWith(final CodeInstaller other) {
+        public boolean isCompatibleWith(CodeInstaller other) {
             if (other instanceof ContextCodeInstaller) {
-                final ContextCodeInstaller cci = (ContextCodeInstaller)other;
+                var cci = (ContextCodeInstaller)other;
                 return cci.context == context && cci.codeSource == codeSource;
             }
             return false;
@@ -255,22 +243,23 @@ public final class Context {
     }
 
     private static class NamedContextCodeInstaller extends ContextCodeInstaller {
+
         private final ScriptLoader loader;
         private int usageCount = 0;
         private int bytesDefined = 0;
 
-        // We reuse this installer for 10 compilations or 200000 defined bytes. Usually the first condition
-        // will occur much earlier, the second is a safety measure for very large scripts/functions.
+        // We reuse this installer for 10 compilations or 200000 defined bytes.
+        // Usually the first condition will occur much earlier, the second is a safety measure for very large scripts/functions.
         private final static int MAX_USAGES = 10;
         private final static int MAX_BYTES_DEFINED = 200_000;
 
-        private NamedContextCodeInstaller(final Context context, final CodeSource codeSource, final ScriptLoader loader) {
+        private NamedContextCodeInstaller(Context context, CodeSource codeSource, ScriptLoader loader) {
             super(context, codeSource);
             this.loader = loader;
         }
 
         @Override
-        public Class<?> install(final String className, final byte[] bytecode) {
+        public Class<?> install(String className, byte[] bytecode) {
             usageCount++;
             bytesDefined += bytecode.length;
             NAMED_INSTALLED_SCRIPT_COUNT.increment();
@@ -288,8 +277,7 @@ public final class Context {
 
         @Override
         public CodeInstaller getMultiClassCodeInstaller() {
-            // This installer is perfectly suitable for installing multiple classes that reference each other
-            // as it produces classes with resolvable names, all defined in a single class loader.
+            // This installer is perfectly suitable for installing multiple classes that reference each other as it produces classes with resolvable names, all defined in a single class loader.
             return this;
         }
     }
@@ -297,25 +285,27 @@ public final class Context {
     private final WeakValueCache<CodeSource, Class<?>> anonymousHostClasses = new WeakValueCache<>();
 
     private static final class AnonymousContextCodeInstaller extends ContextCodeInstaller {
-    	private static MethodHandles.Lookup LOOKUP_IN;
+
+        private static MethodHandles.Lookup LOOKUP_IN;
         private static final String ANONYMOUS_HOST_CLASS_NAME = Compiler.SCRIPTS_PACKAGE.replace('/', '.') + ".AnonymousHost";
         private static final byte[] ANONYMOUS_HOST_CLASS_BYTES = getAnonymousHostClassBytes();
 
         private final Class<?> hostClass;
 
-        private AnonymousContextCodeInstaller(final Context context, final CodeSource codeSource, final Class<?> hostClass) {
+        private AnonymousContextCodeInstaller(Context context, CodeSource codeSource, Class<?> hostClass) {
             super(context, codeSource);
             this.hostClass = hostClass;
         }
 
         @Override
-        public Class<?> install(final String className, final byte[] bytecode) {
+        public Class<?> install(String className, byte[] bytecode) {
             ANONYMOUS_INSTALLED_SCRIPT_COUNT.increment();
             try {
                 if (LOOKUP_IN == null) {
                     LOOKUP_IN = LOOKUP.in(JS.class);
                 }
-                return LOOKUP_IN.defineHiddenClass(bytecode,false).lookupClass();
+                // return LOOKUP_IN.defineHiddenClass(bytecode,false).lookupClass();
+                return null; // TODO: JDK-15 api
             } catch (Exception e) {
                 return Util.uncheck(e);
             }
@@ -329,14 +319,13 @@ public final class Context {
 
         @Override
         public CodeInstaller getMultiClassCodeInstaller() {
-            // This code loader can not be used to install multiple classes that reference each other, as they
-            // would have no resolvable names. Therefore, in such situation we must revert to an installer that
-            // produces named classes.
+            // This code loader can not be used to install multiple classes that reference each other, as they would have no resolvable names.
+            // Therefore, in such situation we must revert to an installer that produces named classes.
             return new NamedContextCodeInstaller(context, codeSource, context.createNewLoader());
         }
 
         private static byte[] getAnonymousHostClassBytes() {
-            final ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+            var cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
             cw.visit(V1_7, Opcodes.ACC_INTERFACE | Opcodes.ACC_ABSTRACT, ANONYMOUS_HOST_CLASS_NAME.replace('.', '/'), null, "java/lang/Object", null);
             cw.visitEnd();
             return cw.toByteArray();
@@ -351,13 +340,12 @@ public final class Context {
     // persistent code store
     private CodeStore codeStore;
 
-    // A factory for linking global properties as constant method handles. It is created when the first Global
-    // is created, and invalidated forever once the second global is created.
+    // A factory for linking global properties as constant method handles.
+    // It is created when the first Global is created, and invalidated forever once the second global is created.
     private final AtomicReference<GlobalConstants> globalConstantsRef = new AtomicReference<>();
 
     /**
      * Get the current global scope
-     * @return the current global scope
      */
     public static Global getGlobal() {
         // This class in a package.access protected package.
@@ -367,9 +355,8 @@ public final class Context {
 
     /**
      * Set the current global scope
-     * @param global the global scope
      */
-    public static void setGlobal(final ScriptObject global) {
+    public static void setGlobal(ScriptObject global) {
         if (global != null && !(global instanceof Global)) {
             throw new IllegalArgumentException("not a global!");
         }
@@ -378,15 +365,14 @@ public final class Context {
 
     /**
      * Set the current global scope
-     * @param global the global scope
      */
-    public static void setGlobal(final Global global) {
+    public static void setGlobal(Global global) {
         // This class in a package.access protected package.
         // Trusted code only can call this method.
         assert getGlobal() != global;
-        //same code can be cached between globals, then we need to invalidate method handle constants
+        // same code can be cached between globals, then we need to invalidate method handle constants
         if (global != null) {
-            final GlobalConstants globalConstants = getContext(global).getGlobalConstants();
+            var globalConstants = getContext(global).getGlobalConstants();
             if (globalConstants != null) {
                 globalConstants.invalidateAll();
             }
@@ -396,10 +382,9 @@ public final class Context {
 
     /**
      * Get context of the current global
-     * @return current global scope's context.
      */
     public static Context getContext() {
-        final SecurityManager sm = System.getSecurityManager();
+        var sm = System.getSecurityManager();
         if (sm != null) {
             sm.checkPermission(new RuntimePermission(NASHORN_GET_CONTEXT));
         }
@@ -408,8 +393,6 @@ public final class Context {
 
     /**
      * Get current context's error writer
-     *
-     * @return error writer of the current context
      */
     public static PrintWriter getCurrentErr() {
         final ScriptObject global = getGlobal();
@@ -418,21 +401,18 @@ public final class Context {
 
     /**
      * Output text to this Context's error stream
-     * @param str text to write
      */
-    public static void err(final String str) {
+    public static void err(String str) {
         err(str, true);
     }
 
     /**
-     * Output text to this Context's error stream, optionally with
-     * a newline afterwards
-     *
+     * Output text to this Context's error stream, optionally with a newline afterwards
      * @param str  text to write
      * @param crlf write a carriage return/new line after text
      */
-    public static void err(final String str, final boolean crlf) {
-        final PrintWriter err = Context.getCurrentErr();
+    public static void err(String str, boolean crlf) {
+        var err = Context.getCurrentErr();
         if (err != null) {
             if (crlf) {
                 err.println(str);
@@ -481,8 +461,8 @@ public final class Context {
         return new AccessControlContext(new ProtectionDomain[] { new ProtectionDomain(null, new Permissions()) });
     }
 
-    private static AccessControlContext createPermAccCtxt(final String permName) {
-        final Permissions perms = new Permissions();
+    private static AccessControlContext createPermAccCtxt(String permName) {
+        var perms = new Permissions();
         perms.add(new RuntimePermission(permName));
         return new AccessControlContext(new ProtectionDomain[] { new ProtectionDomain(null, perms) });
     }
@@ -493,13 +473,9 @@ public final class Context {
     private static final AccessControlContext GET_LOADER_ACC_CTXT     = createPermAccCtxt("getClassLoader");
 
     static {
-        final ClassLoader myLoader = Context.class.getClassLoader();
-        theStructLoader = AccessController.doPrivileged(new PrivilegedAction<StructureLoader>() {
-            @Override
-            public StructureLoader run() {
-                return new StructureLoader(myLoader);
-            }
-        }, CREATE_LOADER_ACC_CTXT);
+        var myLoader = Context.class.getClassLoader();
+        theStructLoader = AccessController.doPrivileged((PrivilegedAction<StructureLoader>)
+            () -> new StructureLoader(myLoader), CREATE_LOADER_ACC_CTXT);
     }
 
     /**
@@ -507,55 +483,50 @@ public final class Context {
      */
     public static class ThrowErrorManager extends ErrorManager {
         @Override
-        public void error(final String message) {
+        public void error(String message) {
             throw new ParserException(message);
         }
-
         @Override
-        public void error(final ParserException e) {
+        public void error(ParserException e) {
             throw e;
         }
     }
 
     /**
      * Constructor
-     *
      * @param options options from command line or Context creator
      * @param errors  error manger
      * @param appLoader application class loader
      */
-    public Context(final Options options, final ErrorManager errors, final ClassLoader appLoader) {
+    public Context(Options options, ErrorManager errors, ClassLoader appLoader) {
         this(options, errors, appLoader, null);
     }
 
     /**
      * Constructor
-     *
      * @param options options from command line or Context creator
      * @param errors  error manger
      * @param appLoader application class loader
      * @param classFilter class filter to use
      */
-    public Context(final Options options, final ErrorManager errors, final ClassLoader appLoader, final ClassFilter classFilter) {
+    public Context(Options options, ErrorManager errors, ClassLoader appLoader, ClassFilter classFilter) {
         this(options, errors, new PrintWriter(System.out, true), new PrintWriter(System.err, true), appLoader, classFilter);
     }
 
     /**
      * Constructor
-     *
      * @param options options from command line or Context creator
      * @param errors  error manger
      * @param out     output writer for this Context
      * @param err     error writer for this Context
      * @param appLoader application class loader
      */
-    public Context(final Options options, final ErrorManager errors, final PrintWriter out, final PrintWriter err, final ClassLoader appLoader) {
+    public Context(Options options, ErrorManager errors, PrintWriter out, PrintWriter err, ClassLoader appLoader) {
         this(options, errors, out, err, appLoader, (ClassFilter)null);
     }
 
     /**
      * Constructor
-     *
      * @param options options from command line or Context creator
      * @param errors  error manger
      * @param out     output writer for this Context
@@ -563,14 +534,14 @@ public final class Context {
      * @param appLoader application class loader
      * @param classFilter class filter to use
      */
-    public Context(final Options options, final ErrorManager errors, final PrintWriter out, final PrintWriter err, final ClassLoader appLoader, final ClassFilter classFilter) {
-        final SecurityManager sm = System.getSecurityManager();
+    public Context(Options options, ErrorManager errors, PrintWriter out, PrintWriter err, ClassLoader appLoader, ClassFilter classFilter) {
+        var sm = System.getSecurityManager();
         if (sm != null) {
             sm.checkPermission(new RuntimePermission(NASHORN_CREATE_CONTEXT));
         }
 
         this.classFilter = classFilter;
-        this.env       = new ScriptEnvironment(options, out, err);
+        this.env = new ScriptEnvironment(options, out, err);
         if (env._loader_per_compile) {
             this.scriptLoader = null;
             this.uniqueScriptId = null;
@@ -578,30 +549,24 @@ public final class Context {
             this.scriptLoader = createNewLoader();
             this.uniqueScriptId = new AtomicLong();
         }
-        this.errors    = errors;
+        this.errors = errors;
 
-        // if user passed --module-path, we create a module class loader with
-        // passed appLoader as the parent.
-        final String modulePath = env._module_path;
+        // if user passed --module-path, we create a module class loader with passed appLoader as the parent.
+        var modulePath = env._module_path;
         ClassLoader appCl = null;
         if (!env._compile_only && modulePath != null && !modulePath.isEmpty()) {
             // make sure that caller can create a class loader.
             if (sm != null) {
                 sm.checkCreateClassLoader();
             }
-            appCl = AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
-                @Override
-                public ClassLoader run() {
-                    return createModuleLoader(appLoader, modulePath, env._add_modules);
-                }
-            });
+            appCl = AccessController.doPrivileged((PrivilegedAction<ClassLoader>)
+                () -> createModuleLoader(appLoader, modulePath, env._add_modules));
         } else {
             appCl = appLoader;
         }
 
-        // if user passed -classpath option, make a URLClassLoader with that and
-        // the app loader or module app loader as the parent.
-        final String classPath = env._classpath;
+        // if user passed -classpath option, make a URLClassLoader with that and the app loader or module app loader as the parent.
+        var classPath = env._classpath;
         if (!env._compile_only && classPath != null && !classPath.isEmpty()) {
             // make sure that caller can create a class loader.
             if (sm != null) {
@@ -613,7 +578,7 @@ public final class Context {
         this.appLoader = appCl;
         this.dynamicLinker = Bootstrap.createDynamicLinker(this.appLoader, env._unstable_relink_threshold);
 
-        final int cacheSize = env._class_cache_size;
+        var cacheSize = env._class_cache_size;
         if (cacheSize > 0) {
             classCache = new ClassCache(this, cacheSize);
         }
@@ -645,15 +610,14 @@ public final class Context {
 
     /**
      * Get the class filter for this context
-     * @return class filter
      */
     public ClassFilter getClassFilter() {
         return classFilter;
     }
 
     /**
-     * Returns the factory for constant method handles for global properties. The returned factory can be
-     * invalidated if this Context has more than one Global.
+     * Returns the factory for constant method handles for global properties.
+     * The returned factory can be invalidated if this Context has more than one Global.
      * @return the factory for constant method handles for global properties.
      */
     GlobalConstants getGlobalConstants() {
@@ -662,7 +626,6 @@ public final class Context {
 
     /**
      * Get the error manager for this context
-     * @return error manger
      */
     public ErrorManager getErrorManager() {
         return errors;
@@ -670,7 +633,6 @@ public final class Context {
 
     /**
      * Get the script environment for this context
-     * @return script environment
      */
     public ScriptEnvironment getEnv() {
         return env;
@@ -678,7 +640,6 @@ public final class Context {
 
     /**
      * Get the output stream for this context
-     * @return output print writer
      */
     public PrintWriter getOut() {
         return env.getOut();
@@ -686,7 +647,6 @@ public final class Context {
 
     /**
      * Get the error stream for this context
-     * @return error print writer
      */
     public PrintWriter getErr() {
         return env.getErr();
@@ -702,7 +662,6 @@ public final class Context {
 
     /**
      * Get the PropertyMap of the current global scope
-     * @return the property map of the current global scope
      */
     public static PropertyMap getGlobalMap() {
         return Context.getGlobal().getMap();
@@ -710,84 +669,69 @@ public final class Context {
 
     /**
      * Compile a top level script.
-     *
      * @param source the source
      * @param scope  the scope
-     *
      * @return top level function for script
      */
-    public ScriptFunction compileScript(final Source source, final ScriptObject scope) {
+    public ScriptFunction compileScript(Source source, ScriptObject scope) {
         return compileScript(source, scope, this.errors);
     }
 
     /**
-     * Interface to represent compiled code that can be re-used across many
-     * global scope instances
+     * Interface to represent compiled code that can be re-used across many global scope instances
      */
     public static interface MultiGlobalCompiledScript {
         /**
          * Obtain script function object for a specific global scope object.
-         *
          * @param newGlobal global scope for which function object is obtained
          * @return script function for script level expressions
          */
-        public ScriptFunction getFunction(final Global newGlobal);
+        public ScriptFunction getFunction(Global newGlobal);
     }
 
     /**
      * Compile a top level script.
-     *
      * @param source the script source
      * @return reusable compiled script across many global scopes.
      */
-    public MultiGlobalCompiledScript compileScript(final Source source) {
-        final Class<?> clazz = compile(source, this.errors, false);
-        final MethodHandle createProgramFunctionHandle = getCreateProgramFunctionHandle(clazz);
+    public MultiGlobalCompiledScript compileScript(Source source) {
+        var clazz = compile(source, this.errors, false);
+        var createProgramFunctionHandle = getCreateProgramFunctionHandle(clazz);
 
-        return new MultiGlobalCompiledScript() {
-            @Override
-            public ScriptFunction getFunction(final Global newGlobal) {
-                return invokeCreateProgramFunctionHandle(createProgramFunctionHandle, newGlobal);
-            }
-        };
+        return (Global newGlobal) -> invokeCreateProgramFunctionHandle(createProgramFunctionHandle, newGlobal);
     }
 
     /**
      * Entry point for {@code eval}
-     *
      * @param initialScope The scope of this eval call
      * @param string       Evaluated code as a String
      * @param callThis     "this" to be passed to the evaluated code
      * @param location     location of the eval call
      * @return the return value of the {@code eval}
      */
-    public Object eval(final ScriptObject initialScope, final String string,
-            final Object callThis, final Object location) {
+    public Object eval(ScriptObject initialScope, String string, Object callThis, Object location) {
         return eval(initialScope, string, callThis, location, false);
     }
 
     /**
      * Entry point for {@code eval}
-     *
      * @param initialScope The scope of this eval call
      * @param string       Evaluated code as a String
      * @param callThis     "this" to be passed to the evaluated code
      * @param location     location of the eval call
      * @param evalCall     is this called from "eval" builtin?
-     *
      * @return the return value of the {@code eval}
      */
-    public Object eval(final ScriptObject initialScope, final String string,
-            final Object callThis, final Object location, final boolean evalCall) {
-        final String  file       = location == UNDEFINED || location == null ? "<eval>" : location.toString();
-        final Source  source     = sourceFor(file, string, evalCall);
-        final Global  global = Context.getGlobal();
-        ScriptObject scope = initialScope;
+    public Object eval(ScriptObject initialScope, String string, Object callThis, Object location, boolean evalCall) {
+        var file = location == UNDEFINED || location == null ? "<eval>" : location.toString();
+        var source = sourceFor(file, string, evalCall);
+        var global = Context.getGlobal();
+        var scope = initialScope;
 
         Class<?> clazz;
         try {
             clazz = compile(source, new ThrowErrorManager(), true);
-        } catch (final ParserException e) {
+        } catch (ParserException e) {
             e.throwAsEcmaException(global);
             return null;
         }
@@ -795,68 +739,60 @@ public final class Context {
         // Create a new scope object with given scope as its prototype
         scope = newScope(scope);
 
-        final ScriptFunction func = getProgramFunction(clazz, scope);
+        var func = getProgramFunction(clazz, scope);
 
         return ScriptRuntime.apply(func, callThis);
     }
 
-    private static ScriptObject newScope(final ScriptObject callerScope) {
+    private static ScriptObject newScope(ScriptObject callerScope) {
         return new Scope(callerScope, PropertyMap.newMap(Scope.class));
     }
 
-    private static Source loadInternal(final String srcStr, final String prefix, final String resourcePath) {
+    private static Source loadInternal(String srcStr, String prefix, String resourcePath) {
         if (srcStr.startsWith(prefix)) {
-            final String resource = resourcePath + srcStr.substring(prefix.length());
+            var resource = resourcePath + srcStr.substring(prefix.length());
             // NOTE: even sandbox scripts should be able to load scripts in nashorn: scheme
             // These scripts are always available and are loaded from nashorn.jar's resources.
-            return AccessController.doPrivileged(
-                    new PrivilegedAction<Source>() {
-                        @Override
-                        public Source run() {
-                            try {
-                                final InputStream resStream = Context.class.getResourceAsStream(resource);
-                                return resStream != null ? sourceFor(srcStr, Source.readFully(resStream)) : null;
-                            } catch (final IOException exp) {
-                                return null;
-                            }
-                        }
-                    });
+            return AccessController.doPrivileged((PrivilegedAction<Source>) () -> {
+                try {
+                    final InputStream resStream = Context.class.getResourceAsStream(resource);
+                    return resStream != null ? sourceFor(srcStr, Source.readFully(resStream)) : null;
+                } catch (IOException exp) {
+                    return null;
+                }
+            });
         }
 
         return null;
     }
 
     /**
-     * Implementation of {@code load} Nashorn extension. Load a script file from a source
-     * expression
-     *
+     * Implementation of {@code load} Nashorn extension.
+     * // Load a script file from a source expression
      * @param scope  the scope
      * @param from   source expression for script
-     *
      * @return return value for load call (undefined)
-     *
      * @throws IOException if source cannot be found or loaded
      */
-    public Object load(final Object scope, final Object from) throws IOException {
-        final Object src = from instanceof ConsString ? from.toString() : from;
+    public Object load(Object scope, Object from) throws IOException {
+        var src = from instanceof ConsString ? from.toString() : from;
         Source source = null;
 
-        // load accepts a String (which could be a URL or a file name), a File, a URL
-        // or a ScriptObject that has "name" and "source" (string valued) properties.
+        // load accepts a String (which could be a URL or a file name), a File, a URL or a ScriptObject that has "name" and "source" (string valued) properties.
         if (src instanceof String) {
-            final String srcStr = (String)src;
+            var srcStr = (String)src;
             if (srcStr.startsWith(LOAD_CLASSPATH)) {
-                final URL url = getResourceURL(srcStr.substring(LOAD_CLASSPATH.length()));
+                var url = getResourceURL(srcStr.substring(LOAD_CLASSPATH.length()));
                 source = url != null ? sourceFor(url.toString(), url) : null;
             } else {
-                final File file = new File(srcStr);
+                var file = new File(srcStr);
                 if (srcStr.indexOf(':') != -1) {
                     if ((source = loadInternal(srcStr, LOAD_NASHORN, "resources/")) == null) {
                         URL url;
                         try {
                             //check for malformed url. if malformed, it may still be a valid file
                             url = new URL(srcStr);
-                        } catch (final MalformedURLException e) {
+                        } catch (MalformedURLException e) {
                             url = file.toURI().toURL();
                         }
                         source = sourceFor(url.toString(), url);
@@ -866,37 +802,37 @@ public final class Context {
                 }
             }
         } else if (src instanceof File && ((File)src).isFile()) {
-            final File file = (File)src;
+            var file = (File)src;
             source = sourceFor(file.getName(), file);
         } else if (src instanceof URL) {
-            final URL url = (URL)src;
+            var url = (URL)src;
             source = sourceFor(url.toString(), url);
         } else if (src instanceof ScriptObject) {
-            final ScriptObject sobj = (ScriptObject)src;
+            var sobj = (ScriptObject)src;
             if (sobj.has("script") && sobj.has("name")) {
-                final String script = JSType.toString(sobj.get("script"));
-                final String name   = JSType.toString(sobj.get("name"));
+                var script = JSType.toString(sobj.get("script"));
+                var name   = JSType.toString(sobj.get("name"));
                 source = sourceFor(name, script);
             }
         } else if (src instanceof Map) {
-            final Map<?,?> map = (Map<?,?>)src;
+            var map = (Map<?,?>)src;
             if (map.containsKey("script") && map.containsKey("name")) {
-                final String script = JSType.toString(map.get("script"));
-                final String name   = JSType.toString(map.get("name"));
+                var script = JSType.toString(map.get("script"));
+                var name   = JSType.toString(map.get("name"));
                 source = sourceFor(name, script);
             }
         }
 
         if (source != null) {
             if (scope instanceof ScriptObject && ((ScriptObject)scope).isScope()) {
-                final ScriptObject sobj = (ScriptObject)scope;
+                var sobj = (ScriptObject)scope;
                 // passed object is a script object
                 // Global is the only user accessible scope ScriptObject
                 assert sobj.isGlobal() : "non-Global scope object!!";
                 return evaluateSource(source, sobj, sobj);
             } else if (scope == null || scope == UNDEFINED) {
                 // undefined or null scope. Use current global instance.
-                final Global global = getGlobal();
+                var global = getGlobal();
                 return evaluateSource(source, global, global);
             } else {
                 /*
@@ -909,19 +845,15 @@ public final class Context {
                  *        }
                  *    })(scope, source);
                  */
-                final Global global = getGlobal();
-                // Create a new object. This is where all declarations
-                // (var, function) from the evaluated code go.
-                // make global to be its __proto__ so that global
-                // definitions are accessible to the evaluated code.
-                final ScriptObject evalScope = newScope(global);
+                var global = getGlobal();
+                // Create a new object. This is where all declarations (var, function) from the evaluated code go.
+                // Make global to be its __proto__ so that global definitions are accessible to the evaluated code.
+                var evalScope = newScope(global);
 
-                // finally, make a WithObject around user supplied scope object
-                // so that it's properties are accessible as variables.
-                final ScriptObject withObj = ScriptRuntime.openWith(evalScope, scope);
+                // Finally, make a WithObject around user supplied scope object so that it's properties are accessible as variables.
+                var withObj = ScriptRuntime.openWith(evalScope, scope);
 
-                // evaluate given source with 'withObj' as scope
-                // but use global object as "this".
+                // Evaluate given source with 'withObj' as scope but use global object as "this".
                 return evaluateSource(source, withObj, global);
             }
         }
@@ -930,34 +862,26 @@ public final class Context {
     }
 
     /**
-     * Implementation of {@code loadWithNewGlobal} Nashorn extension. Load a script file from a source
-     * expression, after creating a new global scope.
-     *
+     * Implementation of {@code loadWithNewGlobal} Nashorn extension.
+     * Load a script file from a source expression, after creating a new global scope.
      * @param from source expression for script
      * @param args (optional) arguments to be passed to the loaded script
-     *
      * @return return value for load call (undefined)
-     *
      * @throws IOException if source cannot be found or loaded
      */
-    public Object loadWithNewGlobal(final Object from, final Object...args) throws IOException {
-        final Global oldGlobal = getGlobal();
-        final Global newGlobal = AccessController.doPrivileged(new PrivilegedAction<Global>() {
-           @Override
-           public Global run() {
-               return newGlobal();
-           }
-        }, CREATE_GLOBAL_ACC_CTXT);
+    public Object loadWithNewGlobal(Object from, Object...args) throws IOException {
+        var oldGlobal = getGlobal();
+        var newGlobal = AccessController.doPrivileged((PrivilegedAction<Global>)
+            () -> newGlobal(), CREATE_GLOBAL_ACC_CTXT);
         // initialize newly created Global instance
         initGlobal(newGlobal);
         setGlobal(newGlobal);
 
-        final Object[] wrapped = args == null? ScriptRuntime.EMPTY_ARRAY :  ScriptObjectMirror.wrapArray(args, oldGlobal);
+        var wrapped = args == null? ScriptRuntime.EMPTY_ARRAY :  ScriptObjectMirror.wrapArray(args, oldGlobal);
         newGlobal.put("arguments", newGlobal.wrapAsObject(wrapped));
 
         try {
-            // wrap objects from newGlobal's world as mirrors - but if result
-            // is from oldGlobal's world, unwrap it!
+            // wrap objects from newGlobal's world as mirrors - but if result is from oldGlobal's world, unwrap it!
             return ScriptObjectMirror.unwrap(ScriptObjectMirror.wrap(load(newGlobal, from), newGlobal), oldGlobal);
         } finally {
             setGlobal(oldGlobal);
@@ -965,28 +889,24 @@ public final class Context {
     }
 
     /**
-     * Load or get a structure class. Structure class names are based on the number of parameter fields
-     * and {@link AccessorProperty} fields in them. Structure classes are used to represent ScriptObjects
-     *
+     * Load or get a structure class.
+     * Structure class names are based on the number of parameter fields and {@link AccessorProperty} fields in them. Structure classes are used to represent ScriptObjects
      * @see ObjectClassGenerator
      * @see AccessorProperty
      * @see ScriptObject
-     *
      * @param fullName  full name of class, e.g. nashorn.internal.objects.JO2P1 contains 2 fields and 1 parameter.
-     *
      * @return the {@code Class<?>} for this structure
-     *
      * @throws ClassNotFoundException if structure class cannot be resolved
      */
     @SuppressWarnings("unchecked")
-    public static Class<? extends ScriptObject> forStructureClass(final String fullName) throws ClassNotFoundException {
+    public static Class<? extends ScriptObject> forStructureClass(String fullName) throws ClassNotFoundException {
         if (System.getSecurityManager() != null && !StructureLoader.isStructureClass(fullName)) {
             throw new ClassNotFoundException(fullName);
         }
         return (Class<? extends ScriptObject>)structureClasses.computeIfAbsent(fullName, (name) -> {
             try {
                 return Class.forName(name, true, theStructLoader);
-            } catch (final ClassNotFoundException e) {
+            } catch (ClassNotFoundException e) {
                 throw new AssertionError(e);
             }
         });
@@ -994,24 +914,22 @@ public final class Context {
 
     /**
      * Is {@code className} the name of a structure class?
-     *
      * @param className a class name
      * @return true if className is a structure class name
      */
-    public static boolean isStructureClass(final String className) {
+    public static boolean isStructureClass(String className) {
         return StructureLoader.isStructureClass(className);
     }
 
     /**
      * Checks that the given Class can be accessed from no permissions context.
-     *
      * @param clazz Class object
      * @throws SecurityException if not accessible
      */
-    public static void checkPackageAccess(final Class<?> clazz) {
-        final SecurityManager sm = System.getSecurityManager();
+    public static void checkPackageAccess(Class<?> clazz) {
+        var sm = System.getSecurityManager();
         if (sm != null) {
-            Class<?> bottomClazz = clazz;
+            var bottomClazz = clazz;
             while (bottomClazz.isArray()) {
                 bottomClazz = bottomClazz.getComponentType();
             }
@@ -1021,12 +939,11 @@ public final class Context {
 
     /**
      * Checks that the given package name can be accessed from no permissions context.
-     *
      * @param pkgName package name
      * @throws SecurityException if not accessible
      */
-    public static void checkPackageAccess(final String pkgName) {
-        final SecurityManager sm = System.getSecurityManager();
+    public static void checkPackageAccess(String pkgName) {
+        var sm = System.getSecurityManager();
         if (sm != null) {
             checkPackageAccess(sm, pkgName.endsWith(".") ? pkgName : pkgName + ".");
         }
@@ -1034,62 +951,52 @@ public final class Context {
 
     /**
      * Checks that the given package can be accessed from no permissions context.
-     *
      * @param sm current security manager instance
      * @param fullName fully qualified package name
      * @throw SecurityException if not accessible
      */
-    private static void checkPackageAccess(final SecurityManager sm, final String fullName) {
+    private static void checkPackageAccess(SecurityManager sm, String fullName) {
         Objects.requireNonNull(sm);
-        final int index = fullName.lastIndexOf('.');
+        var index = fullName.lastIndexOf('.');
         if (index != -1) {
-            final String pkgName = fullName.substring(0, index);
-            AccessController.doPrivileged(new PrivilegedAction<Void>() {
-                @Override
-                public Void run() {
-                    sm.checkPackageAccess(pkgName);
-                    return null;
-                }
+            var pkgName = fullName.substring(0, index);
+            AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+                sm.checkPackageAccess(pkgName);
+                return null;
             }, NO_PERMISSIONS_ACC_CTXT);
         }
     }
 
     /**
      * Checks that the given Class can be accessed from no permissions context.
-     *
      * @param clazz Class object
      * @return true if package is accessible, false otherwise
      */
-    private static boolean isAccessiblePackage(final Class<?> clazz) {
+    private static boolean isAccessiblePackage(Class<?> clazz) {
         try {
             checkPackageAccess(clazz);
             return true;
-        } catch (final SecurityException se) {
+        } catch (SecurityException se) {
             return false;
         }
     }
 
     /**
      * Checks that the given Class is public and it can be accessed from no permissions context.
-     *
      * @param clazz Class object to check
      * @return true if Class is accessible, false otherwise
      */
-    public static boolean isAccessibleClass(final Class<?> clazz) {
+    public static boolean isAccessibleClass(Class<?> clazz) {
         return Modifier.isPublic(clazz.getModifiers()) && Context.isAccessiblePackage(clazz);
     }
 
     /**
-     * Lookup a Java class. This is used for JSR-223 stuff linking in from
-     * {@code nashorn.internal.objects.NativeJava} and {@code nashorn.internal.runtime.NativeJavaPackage}
-     *
+     * Lookup a Java class. This is used for JSR-223 stuff linking in from {@code nashorn.internal.objects.NativeJava} and {@code nashorn.internal.runtime.NativeJavaPackage}
      * @param fullName full name of class to load
-     *
      * @return the {@code Class<?>} for the name
-     *
      * @throws ClassNotFoundException if class cannot be resolved
      */
-    public Class<?> findClass(final String fullName) throws ClassNotFoundException {
+    public Class<?> findClass(String fullName) throws ClassNotFoundException {
         if (fullName.indexOf('[') != -1 || fullName.indexOf('/') != -1) {
             // don't allow array class names or internal names.
             throw new ClassNotFoundException(fullName);
@@ -1101,7 +1008,7 @@ public final class Context {
         }
 
         // check package access as soon as possible!
-        final SecurityManager sm = System.getSecurityManager();
+        var sm = System.getSecurityManager();
         if (sm != null) {
             checkPackageAccess(sm, fullName);
         }
@@ -1110,7 +1017,7 @@ public final class Context {
         if (appLoader != null) {
             return Class.forName(fullName, true, appLoader);
         } else {
-            final Class<?> cl = Class.forName(fullName);
+            var cl = Class.forName(fullName);
             // return the Class only if it was loaded by boot loader
             if (cl.getClassLoader() == null) {
                 return cl;
@@ -1122,8 +1029,6 @@ public final class Context {
 
     /**
      * Create and initialize a new global scope object.
-     *
-     * @return the initialized global scope object.
      */
     public Global createGlobal() {
         return initGlobal(newGlobal());
@@ -1131,7 +1036,6 @@ public final class Context {
 
     /**
      * Create a new uninitialized global scope object
-     * @return the global script object
      */
     public Global newGlobal() {
         createOrInvalidateGlobalConstants();
@@ -1140,37 +1044,35 @@ public final class Context {
 
     private void createOrInvalidateGlobalConstants() {
         for (;;) {
-            final GlobalConstants currentGlobalConstants = getGlobalConstants();
+            var currentGlobalConstants = getGlobalConstants();
             if (currentGlobalConstants != null) {
-                // Subsequent invocation; we're creating our second or later Global. GlobalConstants is not safe to use
-                // with more than one Global, as the constant method handle linkages it creates create a coupling
-                // between the Global and the call sites in the compiled code.
+                // Subsequent invocation; we're creating our second or later Global.
+                // GlobalConstants is not safe to use with more than one Global, as the constant method handle linkages it creates create a coupling between the Global and the call sites in the compiled code.
                 currentGlobalConstants.invalidateForever();
                 return;
             }
-            final GlobalConstants newGlobalConstants = new GlobalConstants(getLogger(GlobalConstants.class));
+            var newGlobalConstants = new GlobalConstants(getLogger(GlobalConstants.class));
             if (globalConstantsRef.compareAndSet(null, newGlobalConstants)) {
-                // First invocation; we're creating the first Global in this Context. Create the GlobalConstants object
-                // for this Context.
+                // First invocation; we're creating the first Global in this Context.
+                // Create the GlobalConstants object for this Context.
                 return;
             }
 
-            // If we reach here, then we started out as the first invocation, but another concurrent invocation won the
-            // CAS race. We'll just let the loop repeat and invalidate the CAS race winner.
+            // If we reach here, then we started out as the first invocation, but another concurrent invocation won the CAS race.
+            // We'll just let the loop repeat and invalidate the CAS race winner.
         }
     }
 
     /**
      * Initialize given global scope object.
-     *
      * @param global the global
      * @param engine the associated ScriptEngine instance, can be null
      * @return the initialized global scope object.
      */
-    public Global initGlobal(final Global global, final ScriptEngine engine) {
+    public Global initGlobal(Global global, ScriptEngine engine) {
         // Need only minimal global object, if we are just compiling.
         if (!env._compile_only) {
-            final Global oldGlobal = Context.getGlobal();
+            var oldGlobal = Context.getGlobal();
             try {
                 Context.setGlobal(global);
                 // initialize global scope with builtin global objects
@@ -1185,76 +1087,68 @@ public final class Context {
 
     /**
      * Initialize given global scope object.
-     *
      * @param global the global
      * @return the initialized global scope object.
      */
-    public Global initGlobal(final Global global) {
+    public Global initGlobal(Global global) {
         return initGlobal(global, null);
     }
 
     /**
      * Return the current global's context
-     * @return current global's context
      */
     static Context getContextTrusted() {
         return getContext(getGlobal());
     }
 
     /**
-     * Gets the Nashorn dynamic linker for the specified class. If the class is
-     * a script class, the dynamic linker associated with its context is
-     * returned. Otherwise the dynamic linker associated with the current
-     * context is returned.
+     * Gets the Nashorn dynamic linker for the specified class.
+     * If the class is a script class, the dynamic linker associated with its context is returned.
+     * Otherwise the dynamic linker associated with the current context is returned.
      * @param clazz the class for which we want to retrieve a dynamic linker.
      * @return the Nashorn dynamic linker for the specified class.
      */
-    public static DynamicLinker getDynamicLinker(final Class<?> clazz) {
+    public static DynamicLinker getDynamicLinker(Class<?> clazz) {
         return fromClass(clazz).dynamicLinker;
     }
 
     /**
      * Gets the Nashorn dynamic linker associated with the current context.
-     * @return the Nashorn dynamic linker for the current context.
      */
     public static DynamicLinker getDynamicLinker() {
         return getContextTrusted().dynamicLinker;
     }
 
     /**
-     * Creates a module layer with one module that is defined to the given class
-     * loader.
-     *
+     * Creates a module layer with one module that is defined to the given class loader.
      * @param descriptor the module descriptor for the newly created module
      * @param loader the class loader of the module
      * @return the new Module
      */
-    static Module createModuleTrusted(final ModuleDescriptor descriptor, final ClassLoader loader) {
+    static Module createModuleTrusted(ModuleDescriptor descriptor, ClassLoader loader) {
         return createModuleTrusted(ModuleLayer.boot(), descriptor, loader);
     }
 
     /**
-     * Creates a module layer with one module that is defined to the given class
-     * loader.
-     *
+     * Creates a module layer with one module that is defined to the given class loader.
      * @param parent the parent layer of the new module
      * @param descriptor the module descriptor for the newly created module
      * @param loader the class loader of the module
      * @return the new Module
      */
-    static Module createModuleTrusted(final ModuleLayer parent, final ModuleDescriptor descriptor, final ClassLoader loader) {
-        final String mn = descriptor.name();
+    static Module createModuleTrusted(ModuleLayer parent, ModuleDescriptor descriptor, ClassLoader loader) {
+        var mn = descriptor.name();
 
-        final ModuleReference mref = new ModuleReference(descriptor, null) {
+        var mref = new ModuleReference(descriptor, null) {
             @Override
             public ModuleReader open() {
                 throw new UnsupportedOperationException();
             }
         };
 
-        final ModuleFinder finder = new ModuleFinder() {
+        var finder = new ModuleFinder() {
             @Override
-            public Optional<ModuleReference> find(final String name) {
+            public Optional<ModuleReference> find(String name) {
                 if (name.equals(mn)) {
                     return Optional.of(mref);
                 } else {
@@ -1267,47 +1161,43 @@ public final class Context {
             }
         };
 
-        final Configuration cf = parent.configuration()
-                .resolve(finder, ModuleFinder.of(), Set.of(mn));
+        var cf = parent.configuration().resolve(finder, ModuleFinder.of(), Set.of(mn));
 
-        final PrivilegedAction<ModuleLayer> pa = () -> parent.defineModules(cf, name -> loader);
-        final ModuleLayer layer = AccessController.doPrivileged(pa, GET_LOADER_ACC_CTXT);
+        PrivilegedAction<ModuleLayer> pa = () -> parent.defineModules(cf, name -> loader);
+        var layer = AccessController.doPrivileged(pa, GET_LOADER_ACC_CTXT);
 
-        final Module m = layer.findModule(mn).get();
+        var m = layer.findModule(mn).get();
         assert m.getLayer() == layer;
 
         return m;
     }
 
     static Context getContextTrustedOrNull() {
-        final Global global = Context.getGlobal();
+        var global = Context.getGlobal();
         return global == null ? null : getContext(global);
     }
 
-    private static Context getContext(final Global global) {
+    private static Context getContext(Global global) {
         // We can't invoke Global.getContext() directly, as it's a protected override, and Global isn't in our package.
-        // In order to access the method, we must cast it to ScriptObject first (which is in our package) and then let
-        // virtual invocation do its thing.
+        // In order to access the method, we must cast it to ScriptObject first (which is in our package) and then let virtual invocation do its thing.
         return ((ScriptObject)global).getContext();
     }
 
     /**
-     * Try to infer Context instance from the Class. If we cannot,
-     * then get it from the thread local variable.
-     *
+     * Try to infer Context instance from the Class.
+     * If we cannot, then get it from the thread local variable.
      * @param clazz the class
      * @return context
      */
-    static Context fromClass(final Class<?> clazz) {
+    static Context fromClass(Class<?> clazz) {
         ClassLoader loader = null;
         try {
             loader = clazz.getClassLoader();
-        } catch (final SecurityException ignored) {
+        } catch (SecurityException ignored) {
             // This could fail because of anonymous classes being used.
-            // Accessing loader of anonymous class fails (for extension
-            // loader class too?). In any case, for us fetching Context
-            // from class loader is just an optimization. We can always
-            // get Context from thread local storage (below).
+            // Accessing loader of anonymous class fails (for extension loader class too?).
+            // In any case, for us fetching Context from class loader is just an optimization.
+            // We can always get Context from thread local storage (below).
         }
 
         if (loader instanceof ScriptLoader) {
@@ -1317,33 +1207,33 @@ public final class Context {
         return Context.getContextTrusted();
     }
 
-    private URL getResourceURL(final String resName) {
+    private URL getResourceURL(String resName) {
         if (appLoader != null) {
             return appLoader.getResource(resName);
         }
         return ClassLoader.getSystemResource(resName);
     }
 
-    private Object evaluateSource(final Source source, final ScriptObject scope, final ScriptObject thiz) {
+    private Object evaluateSource(Source source, ScriptObject scope, ScriptObject thiz) {
         ScriptFunction script = null;
 
         try {
             script = compileScript(source, scope, new Context.ThrowErrorManager());
-        } catch (final ParserException e) {
+        } catch (ParserException e) {
             e.throwAsEcmaException();
         }
 
         return ScriptRuntime.apply(script, thiz);
     }
 
-    private static ScriptFunction getProgramFunction(final Class<?> script, final ScriptObject scope) {
+    private static ScriptFunction getProgramFunction(Class<?> script, ScriptObject scope) {
         if (script == null) {
             return null;
         }
         return invokeCreateProgramFunctionHandle(getCreateProgramFunctionHandle(script), scope);
     }
 
-    private static MethodHandle getCreateProgramFunctionHandle(final Class<?> script) {
+    private static MethodHandle getCreateProgramFunctionHandle(Class<?> script) {
         try {
             return LOOKUP.findStatic(script, CREATE_PROGRAM_FUNCTION.symbolName(), CREATE_PROGRAM_FUNCTION_TYPE);
         } catch (NoSuchMethodException | IllegalAccessException e) {
@@ -1351,27 +1241,27 @@ public final class Context {
         }
     }
 
-    private static ScriptFunction invokeCreateProgramFunctionHandle(final MethodHandle createProgramFunctionHandle, final ScriptObject scope) {
+    private static ScriptFunction invokeCreateProgramFunctionHandle(MethodHandle createProgramFunctionHandle, ScriptObject scope) {
         try {
             return (ScriptFunction)createProgramFunctionHandle.invokeExact(scope);
-        } catch (final RuntimeException|Error e) {
+        } catch (RuntimeException|Error e) {
             throw e;
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             throw new AssertionError("Failed to create a program function", t);
         }
     }
 
-    private ScriptFunction compileScript(final Source source, final ScriptObject scope, final ErrorManager errMan) {
+    private ScriptFunction compileScript(Source source, ScriptObject scope, ErrorManager errMan) {
         return getProgramFunction(compile(source, errMan, false), scope);
     }
 
-    private synchronized Class<?> compile(final Source source, final ErrorManager errMan, final boolean isEval) {
+    private synchronized Class<?> compile(Source source, ErrorManager errMan, boolean isEval) {
         // start with no errors, no warnings.
         errMan.reset();
 
-        Class<?> script = findCachedClass(source);
+        var script = findCachedClass(source);
         if (script != null) {
-            final DebugLogger log = getLogger(Compiler.class);
+            var log = getLogger(Compiler.class);
             if (log.isEnabled()) {
                 log.fine(new RuntimeEvent<>(Level.INFO, source), "Code cache hit for ", source, " avoiding recompile.");
             }
@@ -1381,10 +1271,9 @@ public final class Context {
         StoredScript storedScript = null;
         FunctionNode functionNode = null;
         // Don't use code store if optimistic types is enabled but lazy compilation is not.
-        // This would store a full script compilation with many wrong optimistic assumptions that would
-        // do more harm than good on later runs with both optimistic types and lazy compilation enabled.
-        final boolean useCodeStore = codeStore != null && !env._parse_only && (!env._optimistic_types || env._lazy_compilation);
-        final String cacheKey = useCodeStore ? CodeStore.getCacheKey("script", null) : null;
+        // This would store a full script compilation with many wrong optimistic assumptions that would do more harm than good on later runs with both optimistic types and lazy compilation enabled.
+        var useCodeStore = codeStore != null && !env._parse_only && (!env._optimistic_types || env._lazy_compilation);
+        var cacheKey = useCodeStore ? CodeStore.getCacheKey("script", null) : null;
 
         if (useCodeStore) {
             storedScript = codeStore.load(source, cacheKey);
@@ -1406,30 +1295,29 @@ public final class Context {
             return null;
         }
 
-        final URL          url    = source.getURL();
-        final CodeSource   cs     = new CodeSource(url, (CodeSigner[])null);
-        final CodeInstaller installer;
+        var url = source.getURL();
+        var cs = new CodeSource(url, (CodeSigner[])null);
+        CodeInstaller installer;
         if (!env.useAnonymousClasses(source.getLength()) || env._persistent_cache || !env._lazy_compilation) {
             // Persistent code cache and eager compilation preclude use of VM anonymous classes
-            final ScriptLoader loader = env._loader_per_compile ? createNewLoader() : scriptLoader;
+            var loader = env._loader_per_compile ? createNewLoader() : scriptLoader;
             installer = new NamedContextCodeInstaller(this, cs, loader);
         } else {
             installer = new AnonymousContextCodeInstaller(this, cs,
-                    anonymousHostClasses.getOrCreate(cs, (key) ->
-                            createNewLoader().installClass(
-                                    // NOTE: we're defining these constants in AnonymousContextCodeInstaller so they are not
-                                    // initialized if we don't use AnonymousContextCodeInstaller. As this method is only ever
-                                    // invoked from AnonymousContextCodeInstaller, this is okay.
-                                    AnonymousContextCodeInstaller.ANONYMOUS_HOST_CLASS_NAME,
-                                    AnonymousContextCodeInstaller.ANONYMOUS_HOST_CLASS_BYTES, cs)));
+                anonymousHostClasses.getOrCreate(cs, (key) -> createNewLoader().installClass(
+                    // NOTE: we're defining these constants in AnonymousContextCodeInstaller so they are not initialized if we don't use AnonymousContextCodeInstaller.
+                    // As this method is only ever invoked from AnonymousContextCodeInstaller, this is okay.
+                    AnonymousContextCodeInstaller.ANONYMOUS_HOST_CLASS_NAME,
+                    AnonymousContextCodeInstaller.ANONYMOUS_HOST_CLASS_BYTES, cs)
+                ));
         }
 
         if (storedScript == null) {
-            final CompilationPhases phases = Compiler.CompilationPhases.COMPILE_ALL;
+            var phases = Compiler.CompilationPhases.COMPILE_ALL;
 
-            final Compiler compiler = Compiler.forInitialCompilation(installer, source, errMan);
+            var compiler = Compiler.forInitialCompilation(installer, source, errMan);
 
-            final FunctionNode compiledFunction = compiler.compile(functionNode, phases);
+            var compiledFunction = compiler.compile(functionNode, phases);
             if (errMan.hasErrors()) {
                 return null;
             }
@@ -1445,13 +1333,8 @@ public final class Context {
     }
 
     private ScriptLoader createNewLoader() {
-        return AccessController.doPrivileged(
-             new PrivilegedAction<ScriptLoader>() {
-                @Override
-                public ScriptLoader run() {
-                    return new ScriptLoader(Context.this);
-                }
-             }, CREATE_LOADER_ACC_CTXT);
+        return AccessController.doPrivileged((PrivilegedAction<ScriptLoader>)
+            () -> new ScriptLoader(Context.this), CREATE_LOADER_ACC_CTXT);
     }
 
     private long getUniqueScriptId() {
@@ -1464,18 +1347,19 @@ public final class Context {
     @SuppressWarnings("serial")
     @Logger(name="classcache")
     private static class ClassCache extends LinkedHashMap<Source, ClassReference> implements Loggable {
+
         private final int size;
         private final ReferenceQueue<Class<?>> queue;
         private final DebugLogger log;
 
-        ClassCache(final Context context, final int size) {
+        ClassCache(Context context, int size) {
             super(size, 0.75f, true);
             this.size = size;
             this.queue = new ReferenceQueue<>();
             this.log   = initLogger(context);
         }
 
-        void cache(final Source source, final Class<?> clazz) {
+        void cache(Source source, Class<?> clazz) {
             if (log.isEnabled()) {
                 log.info("Caching ", source, " in class cache");
             }
@@ -1483,21 +1367,21 @@ public final class Context {
         }
 
         @Override
-        protected boolean removeEldestEntry(final Map.Entry<Source, ClassReference> eldest) {
+        protected boolean removeEldestEntry(Map.Entry<Source, ClassReference> eldest) {
             return size() > size;
         }
 
         @Override
-        public ClassReference get(final Object key) {
+        public ClassReference get(Object key) {
             for (ClassReference ref; (ref = (ClassReference)queue.poll()) != null; ) {
-                final Source source = ref.source;
+                var source = ref.source;
                 if (log.isEnabled()) {
                     log.info("Evicting ", source, " from class cache.");
                 }
                 remove(source);
             }
 
-            final ClassReference ref = super.get(key);
+            var ref = super.get(key);
             if (ref != null && log.isEnabled()) {
                 log.info("Retrieved class reference for ", ref.source, " from class cache");
             }
@@ -1505,7 +1389,7 @@ public final class Context {
         }
 
         @Override
-        public DebugLogger initLogger(final Context context) {
+        public DebugLogger initLogger(Context context) {
             return context.getLogger(getClass());
         }
 
@@ -1519,19 +1403,19 @@ public final class Context {
     private static class ClassReference extends SoftReference<Class<?>> {
         private final Source source;
 
-        ClassReference(final Class<?> clazz, final ReferenceQueue<Class<?>> queue, final Source source) {
+        ClassReference(Class<?> clazz, ReferenceQueue<Class<?>> queue, Source source) {
             super(clazz, queue);
             this.source = source;
         }
     }
 
     // Class cache management
-    private Class<?> findCachedClass(final Source source) {
-        final ClassReference ref = classCache == null ? null : classCache.get(source);
+    private Class<?> findCachedClass(Source source) {
+        var ref = classCache == null ? null : classCache.get(source);
         return ref != null ? ref.get() : null;
     }
 
-    private void cacheClass(final Source source, final Class<?> clazz) {
+    private void cacheClass(Source source, Class<?> clazz) {
         if (classCache != null) {
             classCache.cache(source, clazz);
         }
@@ -1549,7 +1433,7 @@ public final class Context {
      * @param clazz a Loggable class
      * @return debuglogger associated with that class
      */
-    public DebugLogger getLogger(final Class<? extends Loggable> clazz) {
+    public DebugLogger getLogger(Class<? extends Loggable> clazz) {
         return getLogger(clazz, null);
     }
 
@@ -1559,14 +1443,14 @@ public final class Context {
      * @param initHook an init hook - if this is the first time the logger is created in the context, run the init hook
      * @return debuglogger associated with that class
      */
-    public DebugLogger getLogger(final Class<? extends Loggable> clazz, final Consumer<DebugLogger> initHook) {
-        final String name = getLoggerName(clazz);
-        DebugLogger logger = loggers.get(name);
+    public DebugLogger getLogger(Class<? extends Loggable> clazz, Consumer<DebugLogger> initHook) {
+        var name = getLoggerName(clazz);
+        var logger = loggers.get(name);
         if (logger == null) {
             if (!env.hasLogger(name)) {
                 return DebugLogger.DISABLED_LOGGER;
             }
-            final LoggerInfo info = env._loggers.get(name);
+            var info = env._loggers.get(name);
             logger = new DebugLogger(name, info.getLevel(), info.isQuiet());
             if (initHook != null) {
                 initHook.accept(logger);
@@ -1579,41 +1463,37 @@ public final class Context {
     /**
      * Given a Loggable class, weave debug info info a method handle for that logger.
      * Level.INFO is used
-     *
      * @param clazz loggable
      * @param mh    method handle
      * @param text  debug printout to add
-     *
      * @return instrumented method handle, or null if logger not enabled
      */
-    public MethodHandle addLoggingToHandle(final Class<? extends Loggable> clazz, final MethodHandle mh, final Supplier<String> text) {
+    public MethodHandle addLoggingToHandle(Class<? extends Loggable> clazz, MethodHandle mh, Supplier<String> text) {
         return addLoggingToHandle(clazz, Level.INFO, mh, Integer.MAX_VALUE, false, text);
     }
 
     /**
      * Given a Loggable class, weave debug info info a method handle for that logger.
-     *
      * @param clazz            loggable
      * @param level            log level
      * @param mh               method handle
      * @param paramStart       first parameter to print
      * @param printReturnValue should we print the return value?
      * @param text             debug printout to add
-     *
      * @return instrumented method handle, or null if logger not enabled
      */
-    public MethodHandle addLoggingToHandle(final Class<? extends Loggable> clazz, final Level level, final MethodHandle mh, final int paramStart, final boolean printReturnValue, final Supplier<String> text) {
-        final DebugLogger log = getLogger(clazz);
+    public MethodHandle addLoggingToHandle(Class<? extends Loggable> clazz, Level level, MethodHandle mh, int paramStart, boolean printReturnValue, Supplier<String> text) {
+        var log = getLogger(clazz);
         if (log.isEnabled()) {
             return MethodHandleFactory.addDebugPrintout(log, level, mh, paramStart, printReturnValue, text.get());
         }
         return mh;
     }
 
-    private static String getLoggerName(final Class<?> clazz) {
-        Class<?> current = clazz;
+    private static String getLoggerName(Class<?> clazz) {
+        var current = clazz;
         while (current != null) {
-            final Logger log = current.getAnnotation(Logger.class);
+            var log = current.getAnnotation(Logger.class);
             if (log != null) {
                 assert !"".equals(log.name());
                 return log.name();
@@ -1625,9 +1505,8 @@ public final class Context {
     }
 
     /**
-     * This is a special kind of switchpoint used to guard builtin
-     * properties and prototypes. In the future it might contain
-     * logic to e.g. multiple switchpoint classes.
+     * This is a special kind of switchpoint used to guard builtin properties and prototypes.
+     * In the future it might contain logic to e.g. multiple switchpoint classes.
      */
     public static final class BuiltinSwitchPoint extends SwitchPoint {
         //empty
@@ -1638,9 +1517,9 @@ public final class Context {
      * @param name key name
      * @return new builtin switchpoint
      */
-    public SwitchPoint newBuiltinSwitchPoint(final String name) {
+    public SwitchPoint newBuiltinSwitchPoint(String name) {
         assert builtinSwitchPoints.get(name) == null;
-        final SwitchPoint sp = new BuiltinSwitchPoint();
+        var sp = new BuiltinSwitchPoint();
         builtinSwitchPoints.put(name, sp);
         return sp;
     }
@@ -1650,26 +1529,25 @@ public final class Context {
      * @param name key name
      * @return builtin switchpoint or null if none
      */
-    public SwitchPoint getBuiltinSwitchPoint(final String name) {
+    public SwitchPoint getBuiltinSwitchPoint(String name) {
         return builtinSwitchPoints.get(name);
     }
 
-    private static ClassLoader createModuleLoader(final ClassLoader cl,
-            final String modulePath, final String addModules) {
+    private static ClassLoader createModuleLoader(ClassLoader cl, String modulePath, String addModules) {
         if (addModules == null) {
             throw new IllegalArgumentException("--module-path specified with no --add-modules");
         }
 
-        final Path[] paths = Stream.of(modulePath.split(File.pathSeparator)).
+        var paths = Stream.of(modulePath.split(File.pathSeparator)).
             map(s -> Paths.get(s)).
             toArray(sz -> new Path[sz]);
-        final ModuleFinder mf = ModuleFinder.of(paths);
-        final Set<ModuleReference> mrefs = mf.findAll();
+        var mf = ModuleFinder.of(paths);
+        var mrefs = mf.findAll();
         if (mrefs.isEmpty()) {
             throw new IllegalArgumentException("No modules in script --module-path: " + modulePath);
         }
 
-        final Set<String> rootMods;
+        Set<String> rootMods;
         if (addModules.equals("ALL-MODULE-PATH")) {
             rootMods = mrefs.stream().
                 map(mr->mr.descriptor().name()).
@@ -1680,10 +1558,10 @@ public final class Context {
                 collect(Collectors.toSet());
         }
 
-        final ModuleLayer boot = ModuleLayer.boot();
-        final Configuration conf = boot.configuration().
-            resolve(mf, ModuleFinder.of(), rootMods);
-        final String firstMod = rootMods.iterator().next();
+        var boot = ModuleLayer.boot();
+        var conf = boot.configuration().resolve(mf, ModuleFinder.of(), rootMods);
+        var firstMod = rootMods.iterator().next();
         return boot.defineModulesWithOneLoader(conf, cl).findLoader(firstMod);
     }
+
 }

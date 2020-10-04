@@ -27,20 +27,22 @@ package nashorn.internal.ir;
 
 import java.util.Collections;
 import java.util.List;
+
 import nashorn.internal.codegen.types.Type;
 import nashorn.internal.ir.visitor.NodeVisitor;
 
 /**
- * Represents ES6 template string expression. Note that this Node class is used
- * only in "parse only" mode. In evaluation mode, Parser directly folds template
- * literal as string concatenation. Parser API uses this node to represent ES6
- * template literals "as is" rather than as a String concatenation.
+ * Represents ES6 template string expression.
+ *
+ * Note that this Node class is used only in "parse only" mode.
+ * In evaluation mode, Parser directly folds template literal as string concatenation.
+ * Parser API uses this node to represent ES6 template literals "as is" rather than as a String concatenation.
  */
 public final class TemplateLiteral extends Expression {
-    private static final long serialVersionUID = 1L;
+
     private final List<Expression> exprs;
 
-    public TemplateLiteral(final List<Expression> exprs) {
+    public TemplateLiteral(List<Expression> exprs) {
         super(exprs.get(0).getToken(), exprs.get(exprs.size() - 1).finish);
         this.exprs = exprs;
     }
@@ -51,7 +53,7 @@ public final class TemplateLiteral extends Expression {
     }
 
     @Override
-    public Node accept(final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(NodeVisitor<? extends LexicalContext> visitor) {
         if (visitor.enterTemplateLiteral(this)) {
             return visitor.leaveTemplateLiteral(this);
         }
@@ -60,18 +62,17 @@ public final class TemplateLiteral extends Expression {
     }
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printType) {
-        for (final Expression expr : exprs) {
+    public void toString(StringBuilder sb, boolean printType) {
+        for (var expr : exprs) {
             sb.append(expr);
         }
     }
 
     /**
      * The list of expressions that are part of this template literal.
-     *
-     * @return the list of expressions that are part of this template literal.
      */
     public List<Expression> getExpressions() {
         return Collections.unmodifiableList(exprs);
     }
+
 }

@@ -68,32 +68,32 @@ import nashorn.internal.ir.WhileNode;
 
 /**
  * Visitor used to navigate the IR.
+ *
  * @param <T> lexical context class used by this visitor
  */
 public abstract class NodeVisitor<T extends LexicalContext> {
+
     /** lexical context in use */
     protected final T lc;
 
     /**
-     * Constructor
-     *
-     * @param lc a custom lexical context
+     * Constructor.
+     * 'lc' is a custom lexical context
      */
-    public NodeVisitor(final T lc) {
+    public NodeVisitor(T lc) {
         this.lc = lc;
     }
 
     /**
-     * Get the lexical context of this node visitor
-     * @return lexical context
+     * Get the lexical context of this node visitor.
      */
     public T getLexicalContext() {
         return lc;
     }
 
     /**
-     * Override this method to do a double inheritance pattern, e.g. avoid
-     * using
+     * Override this method to do a double inheritance pattern, e.g. avoid using
+     *
      * <p>
      * if (x instanceof NodeTypeA) {
      *    ...
@@ -102,20 +102,21 @@ public abstract class NodeVisitor<T extends LexicalContext> {
      * } else {
      *    ...
      * }
+     *
      * <p>
      * Use a NodeVisitor instead, and this method contents forms the else case.
-     *
      * @see NodeVisitor#leaveDefault(Node)
-     * @param node the node to visit
-     * @return true if traversal should continue and node children be traversed, false otherwise
+     *
+     * 'node' is the node to visit.
+     * Returns true if traversal should continue and node children be traversed, false otherwise.
      */
-    protected boolean enterDefault(final Node node) {
+    protected boolean enterDefault(Node node) {
         return true;
     }
 
     /**
-     * Override this method to do a double inheritance pattern, e.g. avoid
-     * using
+     * Override this method to do a double inheritance pattern, e.g. avoid using
+     *
      * <p>
      * if (x instanceof NodeTypeA) {
      *    ...
@@ -124,776 +125,398 @@ public abstract class NodeVisitor<T extends LexicalContext> {
      * } else {
      *    ...
      * }
+     *
      * <p>
      * Use a NodeVisitor instead, and this method contents forms the else case.
-     *
      * @see NodeVisitor#enterDefault(Node)
-     * @param node the node to visit
-     * @return the node
+     *
+     * 'node' the node to visit.
+     * Returns the processed node, which will replace the original one, or the original node or null if traversal should end.
      */
-    protected Node leaveDefault(final Node node) {
+    protected Node leaveDefault(Node node) {
         return node;
     }
 
-    /**
-     * Callback for entering an AccessNode
-     *
-     * @param  accessNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterAccessNode(final AccessNode accessNode) {
+    /** Callback for entering an AccessNode */
+    public boolean enterAccessNode(AccessNode accessNode) {
         return enterDefault(accessNode);
     }
 
-    /**
-     * Callback for entering an AccessNode
-     *
-     * @param  accessNode the node
-     * @return processed node, null if traversal should end
-     */
-    public Node leaveAccessNode(final AccessNode accessNode) {
+    /** Callback for entering an AccessNode */
+    public Node leaveAccessNode(AccessNode accessNode) {
         return leaveDefault(accessNode);
     }
 
-    /**
-     * Callback for entering a Block
-     *
-     * @param  block     the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterBlock(final Block block) {
+    /** Callback for entering a Block */
+    public boolean enterBlock(Block block) {
         return enterDefault(block);
     }
 
     /**
-     * Callback for leaving a Block
-     *
-     * @param  block the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveBlock(final Block block) {
+     * Callback for leaving a Block */
+    public Node leaveBlock(Block block) {
         return leaveDefault(block);
     }
 
-    /**
-     * Callback for entering a BinaryNode
-     *
-     * @param  binaryNode  the node
-     * @return processed   node
-     */
-    public boolean enterBinaryNode(final BinaryNode binaryNode) {
+    /** Callback for entering a BinaryNode */
+    public boolean enterBinaryNode(BinaryNode binaryNode) {
         return enterDefault(binaryNode);
     }
 
-    /**
-     * Callback for leaving a BinaryNode
-     *
-     * @param  binaryNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveBinaryNode(final BinaryNode binaryNode) {
+    /** Callback for leaving a BinaryNode */
+    public Node leaveBinaryNode(BinaryNode binaryNode) {
         return leaveDefault(binaryNode);
     }
 
-    /**
-     * Callback for entering a BreakNode
-     *
-     * @param  breakNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterBreakNode(final BreakNode breakNode) {
+    /** Callback for entering a BreakNode */
+    public boolean enterBreakNode(BreakNode breakNode) {
         return enterDefault(breakNode);
     }
 
-    /**
-     * Callback for leaving a BreakNode
-     *
-     * @param  breakNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveBreakNode(final BreakNode breakNode) {
+    /** Callback for leaving a BreakNode */
+    public Node leaveBreakNode(BreakNode breakNode) {
         return leaveDefault(breakNode);
     }
 
-    /**
-     * Callback for entering a CallNode
-     *
-     * @param  callNode  the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterCallNode(final CallNode callNode) {
+    /** Callback for entering a CallNode */
+    public boolean enterCallNode(CallNode callNode) {
         return enterDefault(callNode);
     }
 
-    /**
-     * Callback for leaving a CallNode
-     *
-     * @param  callNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveCallNode(final CallNode callNode) {
+    /** Callback for leaving a CallNode */
+    public Node leaveCallNode(CallNode callNode) {
         return leaveDefault(callNode);
     }
 
-    /**
-     * Callback for entering a CaseNode
-     *
-     * @param  caseNode  the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterCaseNode(final CaseNode caseNode) {
+    /** Callback for entering a CaseNode */
+    public boolean enterCaseNode(CaseNode caseNode) {
         return enterDefault(caseNode);
     }
 
-    /**
-     * Callback for leaving a CaseNode
-     *
-     * @param  caseNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveCaseNode(final CaseNode caseNode) {
+    /** Callback for leaving a CaseNode */
+    public Node leaveCaseNode(CaseNode caseNode) {
         return leaveDefault(caseNode);
     }
 
-    /**
-     * Callback for entering a CatchNode
-     *
-     * @param  catchNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterCatchNode(final CatchNode catchNode) {
+    /** Callback for entering a CatchNode */
+    public boolean enterCatchNode(CatchNode catchNode) {
         return enterDefault(catchNode);
     }
 
-    /**
-     * Callback for leaving a CatchNode
-     *
-     * @param  catchNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveCatchNode(final CatchNode catchNode) {
+    /** Callback for leaving a CatchNode */
+    public Node leaveCatchNode(CatchNode catchNode) {
         return leaveDefault(catchNode);
     }
 
-    /**
-     * Callback for entering a ContinueNode
-     *
-     * @param  continueNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterContinueNode(final ContinueNode continueNode) {
+    /** Callback for entering a ContinueNode */
+    public boolean enterContinueNode(ContinueNode continueNode) {
         return enterDefault(continueNode);
     }
 
-    /**
-     * Callback for leaving a ContinueNode
-     *
-     * @param  continueNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveContinueNode(final ContinueNode continueNode) {
+    /** Callback for leaving a ContinueNode */
+    public Node leaveContinueNode(ContinueNode continueNode) {
         return leaveDefault(continueNode);
     }
 
 
-    /**
-     * Callback for entering a DebuggerNode
-     *
-     * @param  debuggerNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterDebuggerNode(final DebuggerNode debuggerNode) {
+    /** Callback for entering a DebuggerNode */
+    public boolean enterDebuggerNode(DebuggerNode debuggerNode) {
         return enterDefault(debuggerNode);
     }
 
-    /**
-     * Callback for leaving a DebuggerNode
-     *
-     * @param  debuggerNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveDebuggerNode(final DebuggerNode debuggerNode) {
+    /** Callback for leaving a DebuggerNode */
+    public Node leaveDebuggerNode(DebuggerNode debuggerNode) {
         return leaveDefault(debuggerNode);
     }
 
-    /**
-     * Callback for entering an EmptyNode
-     *
-     * @param  emptyNode   the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterEmptyNode(final EmptyNode emptyNode) {
+    /** Callback for entering an EmptyNode */
+    public boolean enterEmptyNode(EmptyNode emptyNode) {
         return enterDefault(emptyNode);
     }
 
-    /**
-     * Callback for leaving an EmptyNode
-     *
-     * @param  emptyNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveEmptyNode(final EmptyNode emptyNode) {
+    /** Callback for leaving an EmptyNode */
+    public Node leaveEmptyNode(EmptyNode emptyNode) {
         return leaveDefault(emptyNode);
     }
 
-    /**
-     * Callback for entering an ErrorNode
-     *
-     * @param  errorNode   the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterErrorNode(final ErrorNode errorNode) {
+    /** Callback for entering an ErrorNode */
+    public boolean enterErrorNode(ErrorNode errorNode) {
         return enterDefault(errorNode);
     }
 
-    /**
-     * Callback for leaving an ErrorNode
-     *
-     * @param  errorNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveErrorNode(final ErrorNode errorNode) {
+    /** Callback for leaving an ErrorNode */
+    public Node leaveErrorNode(ErrorNode errorNode) {
         return leaveDefault(errorNode);
     }
 
-    /**
-     * Callback for entering an ExpressionStatement
-     *
-     * @param  expressionStatement the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterExpressionStatement(final ExpressionStatement expressionStatement) {
+    /** Callback for entering an ExpressionStatement */
+    public boolean enterExpressionStatement(ExpressionStatement expressionStatement) {
         return enterDefault(expressionStatement);
     }
 
-    /**
-     * Callback for leaving an ExpressionStatement
-     *
-     * @param  expressionStatement the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveExpressionStatement(final ExpressionStatement expressionStatement) {
+    /** Callback for leaving an ExpressionStatement */
+    public Node leaveExpressionStatement(ExpressionStatement expressionStatement) {
         return leaveDefault(expressionStatement);
     }
 
-    /**
-     * Callback for entering a BlockStatement
-     *
-     * @param  blockStatement the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterBlockStatement(final BlockStatement blockStatement) {
+    /** Callback for entering a BlockStatement */
+    public boolean enterBlockStatement(BlockStatement blockStatement) {
         return enterDefault(blockStatement);
     }
 
-    /**
-     * Callback for leaving a BlockStatement
-     *
-     * @param  blockStatement the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveBlockStatement(final BlockStatement blockStatement) {
+    /** Callback for leaving a BlockStatement */
+    public Node leaveBlockStatement(BlockStatement blockStatement) {
         return leaveDefault(blockStatement);
     }
 
-    /**
-     * Callback for entering a ForNode
-     *
-     * @param  forNode   the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterForNode(final ForNode forNode) {
+    /** Callback for entering a ForNode */
+    public boolean enterForNode(ForNode forNode) {
         return enterDefault(forNode);
     }
 
-    /**
-     * Callback for leaving a ForNode
-     *
-     * @param  forNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveForNode(final ForNode forNode) {
+    /** Callback for leaving a ForNode */
+    public Node leaveForNode(ForNode forNode) {
         return leaveDefault(forNode);
     }
 
-    /**
-     * Callback for entering a FunctionNode
-     *
-     * @param  functionNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterFunctionNode(final FunctionNode functionNode) {
+    /** Callback for entering a FunctionNode */
+    public boolean enterFunctionNode(FunctionNode functionNode) {
         return enterDefault(functionNode);
     }
 
-    /**
-     * Callback for leaving a FunctionNode
-     *
-     * @param  functionNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveFunctionNode(final FunctionNode functionNode) {
+    /** Callback for leaving a FunctionNode */
+    public Node leaveFunctionNode(FunctionNode functionNode) {
         return leaveDefault(functionNode);
     }
 
-    /**
-     * Callback for entering a {@link GetSplitState}.
-     *
-     * @param  getSplitState the get split state expression
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterGetSplitState(final GetSplitState getSplitState) {
+    /** Callback for entering a {@link GetSplitState}. */
+    public boolean enterGetSplitState(GetSplitState getSplitState) {
         return enterDefault(getSplitState);
     }
 
-    /**
-     * Callback for leaving a {@link GetSplitState}.
-     *
-     * @param  getSplitState the get split state expression
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveGetSplitState(final GetSplitState getSplitState) {
+    /** Callback for leaving a {@link GetSplitState}. */
+    public Node leaveGetSplitState(GetSplitState getSplitState) {
         return leaveDefault(getSplitState);
     }
 
-    /**
-     * Callback for entering an IdentNode
-     *
-     * @param  identNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterIdentNode(final IdentNode identNode) {
+    /** Callback for entering an IdentNode */
+    public boolean enterIdentNode(IdentNode identNode) {
         return enterDefault(identNode);
     }
 
-    /**
-     * Callback for leaving an IdentNode
-     *
-     * @param  identNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveIdentNode(final IdentNode identNode) {
+    /** Callback for leaving an IdentNode */
+    public Node leaveIdentNode(IdentNode identNode) {
         return leaveDefault(identNode);
     }
 
-    /**
-     * Callback for entering an IfNode
-     *
-     * @param  ifNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterIfNode(final IfNode ifNode) {
+    /** Callback for entering an IfNode */
+    public boolean enterIfNode(IfNode ifNode) {
         return enterDefault(ifNode);
     }
 
-    /**
-     * Callback for leaving an IfNode
-     *
-     * @param  ifNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveIfNode(final IfNode ifNode) {
+    /** Callback for leaving an IfNode */
+    public Node leaveIfNode(IfNode ifNode) {
         return leaveDefault(ifNode);
     }
 
-    /**
-     * Callback for entering an IndexNode
-     *
-     * @param  indexNode  the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterIndexNode(final IndexNode indexNode) {
+    /** Callback for entering an IndexNode */
+    public boolean enterIndexNode(IndexNode indexNode) {
         return enterDefault(indexNode);
     }
 
-    /**
-     * Callback for leaving an IndexNode
-     *
-     * @param  indexNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveIndexNode(final IndexNode indexNode) {
+    /** Callback for leaving an IndexNode */
+    public Node leaveIndexNode(IndexNode indexNode) {
         return leaveDefault(indexNode);
     }
 
-    /**
-     * Callback for entering a JumpToInlinedFinally
-     *
-     * @param  jumpToInlinedFinally the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterJumpToInlinedFinally(final JumpToInlinedFinally jumpToInlinedFinally) {
+    /** Callback for entering a JumpToInlinedFinally */
+    public boolean enterJumpToInlinedFinally(JumpToInlinedFinally jumpToInlinedFinally) {
         return enterDefault(jumpToInlinedFinally);
     }
 
-    /**
-     * Callback for leaving a JumpToInlinedFinally
-     *
-     * @param  jumpToInlinedFinally the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveJumpToInlinedFinally(final JumpToInlinedFinally jumpToInlinedFinally) {
+    /** Callback for leaving a JumpToInlinedFinally */
+    public Node leaveJumpToInlinedFinally(JumpToInlinedFinally jumpToInlinedFinally) {
         return leaveDefault(jumpToInlinedFinally);
     }
 
-    /**
-     * Callback for entering a LabelNode
-     *
-     * @param  labelNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterLabelNode(final LabelNode labelNode) {
+    /** Callback for entering a LabelNode */
+    public boolean enterLabelNode(LabelNode labelNode) {
         return enterDefault(labelNode);
     }
 
-    /**
-     * Callback for leaving a LabelNode
-     *
-     * @param  labelNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveLabelNode(final LabelNode labelNode) {
+    /** Callback for leaving a LabelNode */
+    public Node leaveLabelNode(LabelNode labelNode) {
         return leaveDefault(labelNode);
     }
 
-    /**
-     * Callback for entering a LiteralNode
-     *
-     * @param  literalNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterLiteralNode(final LiteralNode<?> literalNode) {
+    /** Callback for entering a LiteralNode */
+    public boolean enterLiteralNode(LiteralNode<?> literalNode) {
         return enterDefault(literalNode);
     }
 
-    /**
-     * Callback for leaving a LiteralNode
-     *
-     * @param  literalNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveLiteralNode(final LiteralNode<?> literalNode) {
+    /** Callback for leaving a LiteralNode */
+    public Node leaveLiteralNode(LiteralNode<?> literalNode) {
         return leaveDefault(literalNode);
     }
 
-    /**
-     * Callback for entering an ObjectNode
-     *
-     * @param  objectNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterObjectNode(final ObjectNode objectNode) {
+    /** Callback for entering an ObjectNode */
+    public boolean enterObjectNode(ObjectNode objectNode) {
         return enterDefault(objectNode);
     }
 
-    /**
-     * Callback for leaving an ObjectNode
-     *
-     * @param  objectNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveObjectNode(final ObjectNode objectNode) {
+    /** Callback for leaving an ObjectNode */
+    public Node leaveObjectNode(ObjectNode objectNode) {
         return leaveDefault(objectNode);
     }
 
-    /**
-     * Callback for entering a PropertyNode
-     *
-     * @param  propertyNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterPropertyNode(final PropertyNode propertyNode) {
+    /** Callback for entering a PropertyNode */
+    public boolean enterPropertyNode(PropertyNode propertyNode) {
         return enterDefault(propertyNode);
     }
 
-    /**
-     * Callback for leaving a PropertyNode
-     *
-     * @param  propertyNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leavePropertyNode(final PropertyNode propertyNode) {
+    /** Callback for leaving a PropertyNode */
+    public Node leavePropertyNode(PropertyNode propertyNode) {
         return leaveDefault(propertyNode);
     }
 
-    /**
-     * Callback for entering a ReturnNode
-     *
-     * @param  returnNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterReturnNode(final ReturnNode returnNode) {
+    /** Callback for entering a ReturnNode */
+    public boolean enterReturnNode(ReturnNode returnNode) {
         return enterDefault(returnNode);
     }
 
-    /**
-     * Callback for leaving a ReturnNode
-     *
-     * @param  returnNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveReturnNode(final ReturnNode returnNode) {
+    /** Callback for leaving a ReturnNode */
+    public Node leaveReturnNode(ReturnNode returnNode) {
         return leaveDefault(returnNode);
     }
 
-    /**
-     * Callback for entering a RuntimeNode
-     *
-     * @param  runtimeNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterRuntimeNode(final RuntimeNode runtimeNode) {
+    /** Callback for entering a RuntimeNode */
+    public boolean enterRuntimeNode(RuntimeNode runtimeNode) {
         return enterDefault(runtimeNode);
     }
 
-    /**
-     * Callback for leaving a RuntimeNode
-     *
-     * @param  runtimeNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveRuntimeNode(final RuntimeNode runtimeNode) {
+    /** Callback for leaving a RuntimeNode */
+    public Node leaveRuntimeNode(RuntimeNode runtimeNode) {
         return leaveDefault(runtimeNode);
     }
 
-    /**
-     * Callback for entering a {@link SetSplitState}.
-     *
-     * @param  setSplitState the set split state statement
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterSetSplitState(final SetSplitState setSplitState) {
+    /** Callback for entering a {@link SetSplitState}. */
+    public boolean enterSetSplitState(SetSplitState setSplitState) {
         return enterDefault(setSplitState);
     }
 
-    /**
-     * Callback for leaving a {@link SetSplitState}.
-     *
-     * @param  setSplitState the set split state expression
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveSetSplitState(final SetSplitState setSplitState) {
+    /** Callback for leaving a {@link SetSplitState}. */
+    public Node leaveSetSplitState(SetSplitState setSplitState) {
         return leaveDefault(setSplitState);
     }
 
-    /**
-     * Callback for entering a SplitNode
-     *
-     * @param  splitNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterSplitNode(final SplitNode splitNode) {
+    /** Callback for entering a SplitNode */
+    public boolean enterSplitNode(SplitNode splitNode) {
         return enterDefault(splitNode);
     }
 
-    /**
-     * Callback for leaving a SplitNode
-     *
-     * @param  splitNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveSplitNode(final SplitNode splitNode) {
+    /** Callback for leaving a SplitNode */
+    public Node leaveSplitNode(SplitNode splitNode) {
         return leaveDefault(splitNode);
     }
 
-    /**
-     * Callback for entering a SplitReturn
-     *
-     * @param  splitReturn the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterSplitReturn(final SplitReturn splitReturn) {
+    /** Callback for entering a SplitReturn */
+    public boolean enterSplitReturn(SplitReturn splitReturn) {
         return enterDefault(splitReturn);
     }
 
-    /**
-     * Callback for leaving a SplitReturn
-     *
-     * @param  splitReturn the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveSplitReturn(final SplitReturn splitReturn) {
+    /** Callback for leaving a SplitReturn */
+    public Node leaveSplitReturn(SplitReturn splitReturn) {
         return leaveDefault(splitReturn);
     }
 
-    /**
-     * Callback for entering a SwitchNode
-     *
-     * @param  switchNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterSwitchNode(final SwitchNode switchNode) {
+    /** Callback for entering a SwitchNode */
+    public boolean enterSwitchNode(SwitchNode switchNode) {
         return enterDefault(switchNode);
     }
 
-    /**
-     * Callback for leaving a SwitchNode
-     *
-     * @param  switchNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveSwitchNode(final SwitchNode switchNode) {
+    /** Callback for leaving a SwitchNode */
+    public Node leaveSwitchNode(SwitchNode switchNode) {
         return leaveDefault(switchNode);
     }
 
-    /**
-     * Callback for entering a TemplateLiteral (used only in --parse-only mode)
-     *
-     * @param  templateLiteral the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterTemplateLiteral(final TemplateLiteral templateLiteral) {
+    /** Callback for entering a TemplateLiteral (used only in --parse-only mode) */
+    public boolean enterTemplateLiteral(TemplateLiteral templateLiteral) {
         return enterDefault(templateLiteral);
     }
 
-    /**
-     * Callback for leaving a TemplateLiteral (used only in --parse-only mode)
-     *
-     * @param  templateLiteral the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveTemplateLiteral(final TemplateLiteral templateLiteral) {
+    /** Callback for leaving a TemplateLiteral (used only in --parse-only mode) */
+    public Node leaveTemplateLiteral(TemplateLiteral templateLiteral) {
         return leaveDefault(templateLiteral);
     }
 
-    /**
-     * Callback for entering a TernaryNode
-     *
-     * @param  ternaryNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterTernaryNode(final TernaryNode ternaryNode) {
+    /** Callback for entering a TernaryNode */
+    public boolean enterTernaryNode(TernaryNode ternaryNode) {
         return enterDefault(ternaryNode);
     }
 
-    /**
-     * Callback for leaving a TernaryNode
-     *
-     * @param  ternaryNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveTernaryNode(final TernaryNode ternaryNode) {
+    /** Callback for leaving a TernaryNode */
+    public Node leaveTernaryNode(TernaryNode ternaryNode) {
         return leaveDefault(ternaryNode);
     }
 
-    /**
-     * Callback for entering a ThrowNode
-     *
-     * @param  throwNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterThrowNode(final ThrowNode throwNode) {
+    /** Callback for entering a ThrowNode */
+    public boolean enterThrowNode(ThrowNode throwNode) {
         return enterDefault(throwNode);
     }
 
-    /**
-     * Callback for leaving a ThrowNode
-     *
-     * @param  throwNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveThrowNode(final ThrowNode throwNode) {
+    /** Callback for leaving a ThrowNode */
+    public Node leaveThrowNode(ThrowNode throwNode) {
         return leaveDefault(throwNode);
     }
 
-    /**
-     * Callback for entering a TryNode
-     *
-     * @param  tryNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterTryNode(final TryNode tryNode) {
+    /** Callback for entering a TryNode */
+    public boolean enterTryNode(TryNode tryNode) {
         return enterDefault(tryNode);
     }
 
-    /**
-     * Callback for leaving a TryNode
-     *
-     * @param  tryNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveTryNode(final TryNode tryNode) {
+    /** Callback for leaving a TryNode */
+    public Node leaveTryNode(TryNode tryNode) {
         return leaveDefault(tryNode);
     }
 
-    /**
-     * Callback for entering a UnaryNode
-     *
-     * @param  unaryNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterUnaryNode(final UnaryNode unaryNode) {
+    /** Callback for entering a UnaryNode */
+    public boolean enterUnaryNode(UnaryNode unaryNode) {
         return enterDefault(unaryNode);
     }
 
-    /**
-     * Callback for leaving a UnaryNode
-     *
-     * @param  unaryNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveUnaryNode(final UnaryNode unaryNode) {
+    /** Callback for leaving a UnaryNode */
+    public Node leaveUnaryNode(UnaryNode unaryNode) {
         return leaveDefault(unaryNode);
     }
 
-    /**
-     * Callback for entering a {@link JoinPredecessorExpression}.
-     *
-     * @param  expr the join predecessor expression
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterJoinPredecessorExpression(final JoinPredecessorExpression expr) {
+    /** Callback for entering a {@link JoinPredecessorExpression}. */
+    public boolean enterJoinPredecessorExpression(JoinPredecessorExpression expr) {
         return enterDefault(expr);
     }
 
-    /**
-     * Callback for leaving a {@link JoinPredecessorExpression}.
-     *
-     * @param  expr the join predecessor expression
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveJoinPredecessorExpression(final JoinPredecessorExpression expr) {
+    /** Callback for leaving a {@link JoinPredecessorExpression}. */
+    public Node leaveJoinPredecessorExpression(JoinPredecessorExpression expr) {
         return leaveDefault(expr);
     }
 
 
-    /**
-     * Callback for entering a VarNode
-     *
-     * @param  varNode   the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterVarNode(final VarNode varNode) {
+    /** Callback for entering a VarNode */
+    public boolean enterVarNode(VarNode varNode) {
         return enterDefault(varNode);
     }
 
-    /**
-     * Callback for leaving a VarNode
-     *
-     * @param  varNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveVarNode(final VarNode varNode) {
+    /** Callback for leaving a VarNode */
+    public Node leaveVarNode(VarNode varNode) {
         return leaveDefault(varNode);
     }
 
-    /**
-     * Callback for entering a WhileNode
-     *
-     * @param  whileNode the node
-     * @return true if traversal should continue and node children be traversed, false otherwise
-     */
-    public boolean enterWhileNode(final WhileNode whileNode) {
+    /** Callback for entering a WhileNode */
+    public boolean enterWhileNode(WhileNode whileNode) {
         return enterDefault(whileNode);
     }
 
-    /**
-     * Callback for leaving a WhileNode
-     *
-     * @param  whileNode the node
-     * @return processed node, which will replace the original one, or the original node
-     */
-    public Node leaveWhileNode(final WhileNode whileNode) {
+    /** Callback for leaving a WhileNode */
+    public Node leaveWhileNode(WhileNode whileNode) {
         return leaveDefault(whileNode);
     }
 

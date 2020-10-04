@@ -33,7 +33,6 @@ import nashorn.internal.ir.visitor.NodeVisitor;
  */
 @Immutable
 public final class PropertyNode extends Node {
-    private static final long serialVersionUID = 1L;
 
     /** Property key. */
     private final Expression key;
@@ -55,30 +54,21 @@ public final class PropertyNode extends Node {
 
     /**
      * Constructor
-     *
-     * @param token   token
-     * @param finish  finish
-     * @param key     the key of this property
-     * @param value   the value of this property
-     * @param getter  getter function body
-     * @param setter  setter function body
-     * @param isStatic is this a static property?
-     * @param computed is this a computed property?
      */
-    public PropertyNode(final long token, final int finish, final Expression key, final Expression value, final FunctionNode getter, final FunctionNode setter, final boolean isStatic, final boolean computed) {
+    public PropertyNode(long token, int finish, Expression key, Expression value, FunctionNode getter, FunctionNode setter, boolean isStatic, boolean computed) {
         super(token, finish);
-        this.key    = key;
-        this.value  = value;
+        this.key = key;
+        this.value = value;
         this.getter = getter;
         this.setter = setter;
         this.isStatic = isStatic;
         this.computed = computed;
     }
 
-    private PropertyNode(final PropertyNode propertyNode, final Expression key, final Expression value, final FunctionNode getter, final FunctionNode setter, final boolean isStatic, final boolean computed) {
+    private PropertyNode(PropertyNode propertyNode, Expression key, Expression value, FunctionNode getter, FunctionNode setter, boolean isStatic, boolean computed) {
         super(propertyNode);
-        this.key    = key;
-        this.value  = value;
+        this.key = key;
+        this.value = value;
         this.getter = getter;
         this.setter = setter;
         this.isStatic = isStatic;
@@ -87,14 +77,13 @@ public final class PropertyNode extends Node {
 
     /**
      * Get the name of the property key, or {@code null} if key is a computed name.
-     * @return key name or null
      */
     public String getKeyName() {
         return !computed && key instanceof PropertyKey ? ((PropertyKey) key).getPropertyName() : null;
     }
 
     @Override
-    public Node accept(final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(NodeVisitor<? extends LexicalContext> visitor) {
         if (visitor.enterPropertyNode(this)) {
             return visitor.leavePropertyNode(
                 setKey((Expression) key.accept(visitor)).
@@ -107,7 +96,7 @@ public final class PropertyNode extends Node {
     }
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printType) {
+    public void toString(StringBuilder sb, boolean printType) {
         if (value instanceof FunctionNode && ((FunctionNode)value).getIdent() != null) {
             value.toString(sb);
         }
@@ -131,7 +120,6 @@ public final class PropertyNode extends Node {
 
     /**
      * Get the getter for this property
-     * @return getter or null if none exists
      */
     public FunctionNode getGetter() {
         return getter;
@@ -139,10 +127,8 @@ public final class PropertyNode extends Node {
 
     /**
      * Set the getter of this property, null if none
-     * @param getter getter
-     * @return same node or new node if state changed
      */
-    public PropertyNode setGetter(final FunctionNode getter) {
+    public PropertyNode setGetter(FunctionNode getter) {
         if (this.getter == getter) {
             return this;
         }
@@ -151,13 +137,12 @@ public final class PropertyNode extends Node {
 
     /**
      * Return the key for this property node
-     * @return the key
      */
     public Expression getKey() {
         return key;
     }
 
-    private PropertyNode setKey(final Expression key) {
+    private PropertyNode setKey(Expression key) {
         if (this.key == key) {
             return this;
         }
@@ -166,7 +151,6 @@ public final class PropertyNode extends Node {
 
     /**
      * Get the setter for this property
-     * @return setter or null if none exists
      */
     public FunctionNode getSetter() {
         return setter;
@@ -174,10 +158,8 @@ public final class PropertyNode extends Node {
 
     /**
      * Set the setter for this property, null if none
-     * @param setter setter
-     * @return same node or new node if state changed
      */
-    public PropertyNode setSetter(final FunctionNode setter) {
+    public PropertyNode setSetter(FunctionNode setter) {
         if (this.setter == setter) {
             return this;
         }
@@ -186,7 +168,6 @@ public final class PropertyNode extends Node {
 
     /**
      * Get the value of this property
-     * @return property value
      */
     public Expression getValue() {
         return value;
@@ -194,10 +175,8 @@ public final class PropertyNode extends Node {
 
     /**
      * Set the value of this property
-     * @param value new value
-     * @return same node or new node if state changed
      */
-    public PropertyNode setValue(final Expression value) {
+    public PropertyNode setValue(Expression value) {
         if (this.value == value) {
             return this;
         }
@@ -206,8 +185,6 @@ public final class PropertyNode extends Node {
 
     /**
      * Returns true if this is a static property.
-     *
-     * @return true if static flag is set
      */
     public boolean isStatic() {
         return isStatic;
@@ -215,10 +192,9 @@ public final class PropertyNode extends Node {
 
     /**
      * Returns true if this is a computed property.
-     *
-     * @return true if the computed flag is set
      */
     public boolean isComputed() {
         return computed;
     }
+
 }

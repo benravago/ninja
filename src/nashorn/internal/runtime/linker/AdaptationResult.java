@@ -29,17 +29,17 @@ import nashorn.internal.runtime.ECMAErrors;
 import nashorn.internal.runtime.ECMAException;
 
 /**
- * A result of generating an adapter for a class. A tuple of an outcome and - in case of an error outcome - a list of
- * classes that caused the error.
+ * A result of generating an adapter for a class.
+ *
+ * A tuple of an outcome and - in case of an error outcome - a list of classes that caused the error.
  */
 final class AdaptationResult {
+
     /**
-     * Contains various outcomes for attempting to generate an adapter class. These are stored in AdapterInfo instances.
-     * We have a successful outcome (adapter class was generated) and four possible error outcomes: superclass is final,
-     * superclass is not public, superclass has no public or protected constructor, more than one superclass was
-     * specified. We don't throw exceptions when we try to generate the adapter, but rather just record these error
-     * conditions as they are still useful as partial outcomes, as Nashorn's linker can still successfully check whether
-     * the class can be autoconverted from a script function even when it is not possible to generate an adapter for it.
+     * Contains various outcomes for attempting to generate an adapter class.
+     * These are stored in AdapterInfo instances.
+     * We have a successful outcome (adapter class was generated) and four possible error outcomes: superclass is final, superclass is not public, superclass has no public or protected constructor, more than one superclass was specified.
+     * We don't throw exceptions when we try to generate the adapter, but rather just record these error conditions as they are still useful as partial outcomes, as Nashorn's linker can still successfully check whether the class can be autoconverted from a script function even when it is not possible to generate an adapter for it.
      */
     enum Outcome {
         SUCCESS,
@@ -58,13 +58,13 @@ final class AdaptationResult {
     private final RuntimeException cause;
     private final String[] messageArgs;
 
-    AdaptationResult(final Outcome outcome, final RuntimeException cause, final String... messageArgs) {
+    AdaptationResult(Outcome outcome, RuntimeException cause, String... messageArgs) {
         this.outcome = outcome;
         this.cause = cause;
         this.messageArgs = messageArgs;
     }
 
-    AdaptationResult(final Outcome outcome, final String... messageArgs) {
+    AdaptationResult(Outcome outcome, String... messageArgs) {
         this(outcome, null, messageArgs);
     }
 
@@ -75,4 +75,5 @@ final class AdaptationResult {
     ECMAException typeError() {
         return ECMAErrors.typeError(cause, "extend." + outcome, messageArgs);
     }
+
 }

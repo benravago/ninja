@@ -31,17 +31,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * The Optimistic annotation is used for builtins that can throw UnwarrantedOptimism
- * exception if they are wrong, whose callsite is optimistic and contains a program
- * point. Every optimistic builtin callsite needs to bind its programPoint to an
- * argument of the implementation at compile time
+ * The Optimistic annotation is used for builtins that can throw UnwarrantedOptimism exception if they are wrong, whose callsite is optimistic and contains a program point.
  *
- * Typical use case would be something like: if you want to do an optimistic "push" function
- * in NativeArray that takes an int, write
+ * Every optimistic builtin callsite needs to bind its programPoint to an argument of the implementation at compile time
+ *
+ * Typical use case would be something like:
+ *
+ *  if you want to do an optimistic "push" function in NativeArray that takes an int, write
  *
  *  <pre>
  *  {@literal @}SpecializedFunction {@literal @}Optimistic
- *  public static int push(final Object self, final int x, final int programPoint) {
+ *  public static int push(Object self, int x, int programPoint) {
  *    try {
  *    //push code assuming that this is an int array
  *    //return new length of array, assuming it's an int

@@ -25,16 +25,10 @@
 
 package nashorn.internal.codegen;
 
-import static nashorn.internal.codegen.CompilerConstants.ARGUMENTS;
-import static nashorn.internal.codegen.CompilerConstants.CALLEE;
-import static nashorn.internal.codegen.CompilerConstants.RETURN;
-import static nashorn.internal.codegen.CompilerConstants.SCOPE;
-import static nashorn.internal.codegen.CompilerConstants.THIS;
-import static nashorn.internal.codegen.CompilerConstants.VARARGS;
-import static nashorn.internal.runtime.logging.DebugLogger.quote;
-
 import java.io.File;
+
 import java.lang.invoke.MethodType;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,6 +43,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+
 import nashorn.internal.codegen.types.Type;
 import nashorn.internal.ir.Expression;
 import nashorn.internal.ir.FunctionNode;
@@ -67,11 +62,19 @@ import nashorn.internal.runtime.linker.NameCodec;
 import nashorn.internal.runtime.logging.DebugLogger;
 import nashorn.internal.runtime.logging.Loggable;
 import nashorn.internal.runtime.logging.Logger;
+import static nashorn.internal.codegen.CompilerConstants.ARGUMENTS;
+import static nashorn.internal.codegen.CompilerConstants.CALLEE;
+import static nashorn.internal.codegen.CompilerConstants.RETURN;
+import static nashorn.internal.codegen.CompilerConstants.SCOPE;
+import static nashorn.internal.codegen.CompilerConstants.THIS;
+import static nashorn.internal.codegen.CompilerConstants.VARARGS;
+import static nashorn.internal.runtime.logging.DebugLogger.quote;
 
 /**
- * Responsible for converting JavaScripts to java byte code. Main entry
- * point for code generator. The compiler may also install classes given some
- * predefined Code installation policy, given to it at construction time.
+ * Responsible for converting JavaScripts to java byte code.
+ *
+ * Main entry point for code generator.
+ * The compiler may also install classes given some predefined Code installation policy, given to it at construction time.
  * @see CodeInstaller
  */
 @Logger(name="compiler")
@@ -101,23 +104,21 @@ public final class Compiler implements Loggable {
 
     private final CodeInstaller installer;
 
-    /** logger for compiler, trampolines and related code generation events
-     *  that affect classes */
+    /** logger for compiler, trampolines and related code generation events that affect classes */
     private final DebugLogger log;
 
     private final Context context;
 
     private final TypeMap types;
 
-    // Runtime scope in effect at the time of the compilation. Used to evaluate types of expressions and prevent overly
-    // optimistic assumptions (which will lead to unnecessary deoptimizing recompilations).
+    // Runtime scope in effect at the time of the compilation. Used to evaluate types of expressions and prevent overly optimistic assumptions (which will lead to unnecessary deoptimizing recompilations).
     private final TypeEvaluator typeEvaluator;
 
     private final boolean onDemand;
 
     /**
-     * If this is a recompilation, this is how we pass in the invalidations, e.g. programPoint=17, Type == int means
-     * that using whatever was at program point 17 as an int failed.
+     * If this is a recompilation, this is how we pass in the invalidations.
+     * E.g. programPoint=17, Type == int means that using whatever was at program point 17 as an int failed.
      */
     private final Map<Integer, Type> invalidatedProgramPoints;
 
@@ -127,19 +128,16 @@ public final class Compiler implements Loggable {
     private final Object typeInformationFile;
 
     /**
-     * Compile unit name of first compile unit - this prefix will be used for all
-     * classes that a compilation generates.
+     * Compile unit name of first compile unit - this prefix will be used for all classes that a compilation generates.
      */
     private final String firstCompileUnitName;
 
     /**
-     * Contains the program point that should be used as the continuation entry point, as well as all previous
-     * continuation entry points executed as part of a single logical invocation of the function. In practical terms, if
-     * we execute a rest-of method from the program point 17, but then we hit deoptimization again during it at program
-     * point 42, and execute a rest-of method from the program point 42, and then we hit deoptimization again at program
-     * point 57 and are compiling a rest-of method for it, the values in the array will be [57, 42, 17]. This is only
-     * set when compiling a rest-of method. If this method is a rest-of for a non-rest-of method, the array will have
-     * one element. If it is a rest-of for a rest-of, the array will have two elements, and so on.
+     * Contains the program point that should be used as the continuation entry point, as well as all previous continuation entry points executed as part of a single logical invocation of the function.
+     * In practical terms, if we execute a rest-of method from the program point 17, but then we hit deoptimization again during it at program point 42, and execute a rest-of method from the program point 42, and then we hit deoptimization again at program point 57 and are compiling a rest-of method for it, the values in the array will be [57, 42, 17].
+     * This is only set when compiling a rest-of method.
+     * If this method is a rest-of for a non-rest-of method, the array will have one element.
+     * If it is a rest-of for a rest-of, the array will have two elements, and so on.
      */
     private final int[] continuationEntryPoints;
 
@@ -150,9 +148,7 @@ public final class Compiler implements Loggable {
     private RecompilableScriptFunctionData compiledFunction;
 
     /**
-     * Most compile unit names are longer than the default StringBuilder buffer,
-     * worth startup performance when massive class generation is going on to increase
-     * this
+     * Most compile unit names are longer than the default StringBuilder buffer, worth startup performance when massive class generation is going on to increase this
      */
     private static final int COMPILE_UNIT_NAME_BUFFER_SIZE = 32;
 
@@ -165,129 +161,126 @@ public final class Compiler implements Loggable {
          * Singleton that describes compilation up to the phase where a function can be cached.
          */
         private final static CompilationPhases COMPILE_UPTO_CACHED = new CompilationPhases(
-                "Common initial phases",
-                CompilationPhase.CONSTANT_FOLDING_PHASE,
-                CompilationPhase.LOWERING_PHASE,
-                CompilationPhase.APPLY_SPECIALIZATION_PHASE,
-                CompilationPhase.SPLITTING_PHASE,
-                CompilationPhase.PROGRAM_POINT_PHASE,
-                CompilationPhase.SYMBOL_ASSIGNMENT_PHASE,
-                CompilationPhase.SCOPE_DEPTH_COMPUTATION_PHASE,
-                CompilationPhase.CACHE_AST_PHASE
-                );
+            "Common initial phases",
+            CompilationPhase.CONSTANT_FOLDING_PHASE,
+            CompilationPhase.LOWERING_PHASE,
+            CompilationPhase.APPLY_SPECIALIZATION_PHASE,
+            CompilationPhase.SPLITTING_PHASE,
+            CompilationPhase.PROGRAM_POINT_PHASE,
+            CompilationPhase.SYMBOL_ASSIGNMENT_PHASE,
+            CompilationPhase.SCOPE_DEPTH_COMPUTATION_PHASE,
+            CompilationPhase.CACHE_AST_PHASE
+            );
 
         private final static CompilationPhases COMPILE_CACHED_UPTO_BYTECODE = new CompilationPhases(
-                "After common phases, before bytecode generator",
-                CompilationPhase.DECLARE_LOCAL_SYMBOLS_PHASE,
-                CompilationPhase.OPTIMISTIC_TYPE_ASSIGNMENT_PHASE,
-                CompilationPhase.LOCAL_VARIABLE_TYPE_CALCULATION_PHASE
-                );
+            "After common phases, before bytecode generator",
+            CompilationPhase.DECLARE_LOCAL_SYMBOLS_PHASE,
+            CompilationPhase.OPTIMISTIC_TYPE_ASSIGNMENT_PHASE,
+            CompilationPhase.LOCAL_VARIABLE_TYPE_CALCULATION_PHASE
+            );
 
         /**
-         * Singleton that describes additional steps to be taken after retrieving a cached function, all the
-         * way up to (but not including) generating and installing code.
+         * Singleton that describes additional steps to be taken after retrieving a cached function, all the way up to (but not including) generating and installing code.
          */
         public final static CompilationPhases RECOMPILE_CACHED_UPTO_BYTECODE = new CompilationPhases(
-                "Recompile cached function up to bytecode",
-                CompilationPhase.REINITIALIZE_CACHED,
-                COMPILE_CACHED_UPTO_BYTECODE
-                );
+            "Recompile cached function up to bytecode",
+            CompilationPhase.REINITIALIZE_CACHED,
+            COMPILE_CACHED_UPTO_BYTECODE
+            );
 
         /**
-         * Singleton that describes back end of method generation, given that we have generated the normal
-         * method up to CodeGenerator as in {@link CompilationPhases#COMPILE_UPTO_BYTECODE}
+         * Singleton that describes back end of method generation, given that we have generated the normal method up to CodeGenerator as in {@link CompilationPhases#COMPILE_UPTO_BYTECODE}
          */
         public final static CompilationPhases GENERATE_BYTECODE_AND_INSTALL = new CompilationPhases(
-                "Generate bytecode and install",
-                CompilationPhase.BYTECODE_GENERATION_PHASE,
-                CompilationPhase.INSTALL_PHASE
-                );
+            "Generate bytecode and install",
+            CompilationPhase.BYTECODE_GENERATION_PHASE,
+            CompilationPhase.INSTALL_PHASE
+            );
 
         /** Singleton that describes compilation up to the CodeGenerator, but not actually generating code */
         public final static CompilationPhases COMPILE_UPTO_BYTECODE = new CompilationPhases(
-                "Compile upto bytecode",
-                COMPILE_UPTO_CACHED,
-                COMPILE_CACHED_UPTO_BYTECODE);
+            "Compile upto bytecode",
+            COMPILE_UPTO_CACHED,
+            COMPILE_CACHED_UPTO_BYTECODE);
 
         /** Singleton that describes a standard eager compilation, but no installation, for example used by --compile-only */
         public final static CompilationPhases COMPILE_ALL_NO_INSTALL = new CompilationPhases(
-                "Compile without install",
-                COMPILE_UPTO_BYTECODE,
-                CompilationPhase.BYTECODE_GENERATION_PHASE);
+            "Compile without install",
+            COMPILE_UPTO_BYTECODE,
+            CompilationPhase.BYTECODE_GENERATION_PHASE);
 
         /** Singleton that describes a standard eager compilation - this includes code installation */
         public final static CompilationPhases COMPILE_ALL = new CompilationPhases(
-                "Full eager compilation",
-                COMPILE_UPTO_BYTECODE,
-                GENERATE_BYTECODE_AND_INSTALL);
+            "Full eager compilation",
+            COMPILE_UPTO_BYTECODE,
+            GENERATE_BYTECODE_AND_INSTALL);
 
         /** Singleton that describes a full compilation - this includes code installation - from serialized state*/
         public final static CompilationPhases COMPILE_ALL_CACHED = new CompilationPhases(
-                "Eager compilation from serializaed state",
-                RECOMPILE_CACHED_UPTO_BYTECODE,
-                GENERATE_BYTECODE_AND_INSTALL);
+            "Eager compilation from serializaed state",
+            RECOMPILE_CACHED_UPTO_BYTECODE,
+            GENERATE_BYTECODE_AND_INSTALL);
 
         /**
-         * Singleton that describes restOf method generation, given that we have generated the normal
-         * method up to CodeGenerator as in {@link CompilationPhases#COMPILE_UPTO_BYTECODE}
+         * Singleton that describes restOf method generation, given that we have generated the normal method up to CodeGenerator as in {@link CompilationPhases#COMPILE_UPTO_BYTECODE}
          */
         public final static CompilationPhases GENERATE_BYTECODE_AND_INSTALL_RESTOF = new CompilationPhases(
-                "Generate bytecode and install - RestOf method",
-                CompilationPhase.REUSE_COMPILE_UNITS_PHASE,
-                GENERATE_BYTECODE_AND_INSTALL);
+            "Generate bytecode and install - RestOf method",
+            CompilationPhase.REUSE_COMPILE_UNITS_PHASE,
+            GENERATE_BYTECODE_AND_INSTALL);
 
         /** Compile all for a rest of method */
         public final static CompilationPhases COMPILE_ALL_RESTOF = new CompilationPhases(
-                "Compile all, rest of",
-                COMPILE_UPTO_BYTECODE,
-                GENERATE_BYTECODE_AND_INSTALL_RESTOF);
+            "Compile all, rest of",
+            COMPILE_UPTO_BYTECODE,
+            GENERATE_BYTECODE_AND_INSTALL_RESTOF);
 
         /** Compile from serialized for a rest of method */
         public final static CompilationPhases COMPILE_CACHED_RESTOF = new CompilationPhases(
-                "Compile serialized, rest of",
-                RECOMPILE_CACHED_UPTO_BYTECODE,
-                GENERATE_BYTECODE_AND_INSTALL_RESTOF);
+            "Compile serialized, rest of",
+            RECOMPILE_CACHED_UPTO_BYTECODE,
+            GENERATE_BYTECODE_AND_INSTALL_RESTOF);
 
         private final List<CompilationPhase> phases;
 
         private final String desc;
 
-        private CompilationPhases(final String desc, final CompilationPhase... phases) {
+        private CompilationPhases(String desc, CompilationPhase... phases) {
             this(desc, Arrays.asList(phases));
         }
 
-        private CompilationPhases(final String desc, final CompilationPhases base, final CompilationPhase... phases) {
+        private CompilationPhases(String desc, CompilationPhases base, CompilationPhase... phases) {
             this(desc, concat(base.phases, Arrays.asList(phases)));
         }
 
-        private CompilationPhases(final String desc, final CompilationPhase first, final CompilationPhases rest) {
+        private CompilationPhases(String desc, CompilationPhase first, CompilationPhases rest) {
             this(desc, concat(Collections.singletonList(first), rest.phases));
         }
 
-        private CompilationPhases(final String desc, final CompilationPhases base) {
+        private CompilationPhases(String desc, CompilationPhases base) {
             this(desc, base.phases);
         }
 
-        private CompilationPhases(final String desc, final CompilationPhases... bases) {
+        private CompilationPhases(String desc, CompilationPhases... bases) {
             this(desc, concatPhases(bases));
         }
 
-        private CompilationPhases(final String desc, final List<CompilationPhase> phases) {
+        private CompilationPhases(String desc, List<CompilationPhase> phases) {
             this.desc = desc;
             this.phases = phases;
         }
 
-        private static List<CompilationPhase> concatPhases(final CompilationPhases[] bases) {
-            final ArrayList<CompilationPhase> l = new ArrayList<>();
-            for(final CompilationPhases base: bases) {
+        private static List<CompilationPhase> concatPhases(CompilationPhases[] bases) {
+            var l = new ArrayList<CompilationPhase>();
+            for (var base: bases) {
                 l.addAll(base.phases);
             }
             l.trimToSize();
             return l;
         }
 
-        private static <T> List<T> concat(final List<T> l1, final List<T> l2) {
-            final ArrayList<T> l = new ArrayList<>(l1);
+        private static <T> List<T> concat(List<T> l1, List<T> l2) {
+            var l = new ArrayList<T>(l1);
             l.addAll(l2);
             l.trimToSize();
             return l;
@@ -298,7 +291,7 @@ public final class Compiler implements Loggable {
             return "'" + desc + "' " + phases.toString();
         }
 
-        boolean contains(final CompilationPhase phase) {
+        boolean contains(CompilationPhase phase) {
             return phases.contains(phase);
         }
 
@@ -315,9 +308,9 @@ public final class Compiler implements Loggable {
             return desc;
         }
 
-        String toString(final String prefix) {
-            final StringBuilder sb = new StringBuilder();
-            for (final CompilationPhase phase : phases) {
+        String toString(String prefix) {
+            var sb = new StringBuilder();
+            for (var phase : phases) {
                 sb.append(prefix).append(phase).append('\n');
             }
             return sb.toString();
@@ -325,10 +318,8 @@ public final class Compiler implements Loggable {
     }
 
     /**
-     * This array contains names that need to be reserved at the start
-     * of a compile, to avoid conflict with variable names later introduced.
-     * See {@link CompilerConstants} for special names used for structures
-     * during a compile.
+     * This array contains names that need to be reserved at the start of a compile, to avoid conflict with variable names later introduced.
+     * See {@link CompilerConstants} for special names used for structures during a compile.
      */
     private static String[] RESERVED_NAMES = {
         SCOPE.symbolName(),
@@ -349,36 +340,28 @@ public final class Compiler implements Loggable {
 
     /**
      * Creates a new compiler instance for initial compilation of a script.
-     *
      * @param installer code installer
      * @param source    source to compile
      * @param errors    error manager
      * @return a new compiler
      */
-    public static Compiler forInitialCompilation(
-            final CodeInstaller installer,
-            final Source source,
-            final ErrorManager errors) {
+    public static Compiler forInitialCompilation(CodeInstaller installer, Source source, ErrorManager errors) {
         return new Compiler(installer.getContext(), installer, source, errors);
     }
 
     /**
-     * Creates a compiler without a code installer. It can only be used to compile code, not install the
-     * generated classes and as such it is useful only for implementation of {@code --compile-only} command
-     * line option.
+     * Creates a compiler without a code installer.
+     * It can only be used to compile code, not install the generated classes and as such it is useful only for implementation of {@code --compile-only} command line option.
      * @param context  the current context
      * @param source   source to compile
      * @return a new compiler
      */
-    public static Compiler forNoInstallerCompilation(
-            final Context context,
-            final Source source) {
+    public static Compiler forNoInstallerCompilation(Context context, Source source) {
         return new Compiler(context, null, source, context.getErrorManager());
     }
 
     /**
      * Creates a compiler for an on-demand compilation job.
-     *
      * @param installer                code installer
      * @param source                   source to compile
      * @param compiledFunction         compiled function, if any
@@ -389,70 +372,45 @@ public final class Compiler implements Loggable {
      * @param runtimeScope             runtime scope for recompilation type lookup in {@code TypeEvaluator}
      * @return a new compiler
      */
-    public static Compiler forOnDemandCompilation(
-            final CodeInstaller installer,
-            final Source source,
-            final RecompilableScriptFunctionData compiledFunction,
-            final TypeMap types,
-            final Map<Integer, Type> invalidatedProgramPoints,
-            final Object typeInformationFile,
-            final int[] continuationEntryPoints,
-            final ScriptObject runtimeScope) {
-        final Context context = installer.getContext();
-        return new Compiler(context, installer, source, context.getErrorManager(), true,
-                compiledFunction, types, invalidatedProgramPoints, typeInformationFile,
-                continuationEntryPoints, runtimeScope);
+    public static Compiler forOnDemandCompilation(CodeInstaller installer, Source source, RecompilableScriptFunctionData compiledFunction, TypeMap types, Map<Integer, Type> invalidatedProgramPoints, Object typeInformationFile, int[] continuationEntryPoints, ScriptObject runtimeScope) {
+        var context = installer.getContext();
+        return new Compiler(context, installer, source, context.getErrorManager(), true, compiledFunction, types, invalidatedProgramPoints, typeInformationFile, continuationEntryPoints, runtimeScope);
     }
 
     /**
      * Convenience constructor for non on-demand compiler instances.
      */
-    private Compiler(
-            final Context context,
-            final CodeInstaller installer,
-            final Source source,
-            final ErrorManager errors) {
+    private Compiler( Context context, CodeInstaller installer, Source source, ErrorManager errors) {
         this(context, installer, source, errors, false, null, null, null, null, null, null);
     }
 
-    private Compiler(
-            final Context context,
-            final CodeInstaller installer,
-            final Source source,
-            final ErrorManager errors,
-            final boolean isOnDemand,
-            final RecompilableScriptFunctionData compiledFunction,
-            final TypeMap types,
-            final Map<Integer, Type> invalidatedProgramPoints,
-            final Object typeInformationFile,
-            final int[] continuationEntryPoints,
-            final ScriptObject runtimeScope) {
-        this.context                  = context;
-        this.env                      = context.getEnv();
-        this.installer                = installer;
-        this.constantData             = new ConstantData();
-        this.compileUnits             = CompileUnit.createCompileUnitSet();
-        this.bytecode                 = new LinkedHashMap<>();
-        this.log                      = initLogger(context);
-        this.source                   = source;
-        this.errors                   = errors;
-        this.sourceName               = FunctionNode.getSourceName(source);
-        this.onDemand                 = isOnDemand;
-        this.compiledFunction         = compiledFunction;
-        this.types                    = types;
+    private Compiler(Context context, CodeInstaller installer, Source source, ErrorManager errors, boolean isOnDemand, RecompilableScriptFunctionData compiledFunction, TypeMap types, Map<Integer, Type> invalidatedProgramPoints, Object typeInformationFile, int[] continuationEntryPoints, ScriptObject runtimeScope) {
+        this.context = context;
+        this.env = context.getEnv();
+        this.installer = installer;
+        this.constantData = new ConstantData();
+        this.compileUnits = CompileUnit.createCompileUnitSet();
+        this.bytecode = new LinkedHashMap<>();
+        this.log = initLogger(context);
+        this.source = source;
+        this.errors = errors;
+        this.sourceName = FunctionNode.getSourceName(source);
+        this.onDemand = isOnDemand;
+        this.compiledFunction = compiledFunction;
+        this.types = types;
         this.invalidatedProgramPoints = invalidatedProgramPoints == null ? new HashMap<>() : invalidatedProgramPoints;
-        this.typeInformationFile      = typeInformationFile;
-        this.continuationEntryPoints  = continuationEntryPoints == null ? null: continuationEntryPoints.clone();
-        this.typeEvaluator            = new TypeEvaluator(this, runtimeScope);
-        this.firstCompileUnitName     = firstCompileUnitName();
+        this.typeInformationFile = typeInformationFile;
+        this.continuationEntryPoints = continuationEntryPoints == null ? null: continuationEntryPoints.clone();
+        this.typeEvaluator = new TypeEvaluator(this, runtimeScope);
+        this.firstCompileUnitName = firstCompileUnitName();
 
         this.optimistic = env._optimistic_types;
     }
 
     private String safeSourceName() {
-        String baseName = new File(source.getName()).getName();
+        var baseName = new File(source.getName()).getName();
 
-        final int index = baseName.lastIndexOf(".js");
+        var index = baseName.lastIndexOf(".js");
         if (index != -1) {
             baseName = baseName.substring(0, index);
         }
@@ -463,18 +421,17 @@ public final class Compiler implements Loggable {
         }
 
         // ASM's bytecode verifier does not allow JVM allowed safe escapes using '\' as escape char.
-        // While ASM accepts such escapes for method names, field names, it enforces Java identifier
-        // for class names. Workaround that ASM bug here by replacing JVM 'dangerous' chars with '_'
-        // rather than safe encoding using '\'.
-        final String mangled = NameCodec.encode(baseName);
+        // While ASM accepts such escapes for method names, field names, it enforces Java identifier for class names.
+        // Workaround that ASM bug here by replacing JVM 'dangerous' chars with '_' rather than safe encoding using '\'.
+        var mangled = NameCodec.encode(baseName);
         return mangled != null ? mangled : baseName;
     }
 
     private String firstCompileUnitName() {
-        final StringBuilder sb = new StringBuilder(SCRIPTS_PACKAGE).
-                append('/').
-                append(CompilerConstants.DEFAULT_SCRIPT_NAME.symbolName()).
-                append('$');
+        var sb = new StringBuilder(SCRIPTS_PACKAGE).
+            append('/').
+            append(CompilerConstants.DEFAULT_SCRIPT_NAME.symbolName()).
+            append('$');
 
         if (isOnDemandCompilation()) {
             sb.append(RecompilableScriptFunctionData.RECOMPILATION_PREFIX);
@@ -486,8 +443,8 @@ public final class Compiler implements Loggable {
 
         if (types != null && compiledFunction.getFunctionNodeId() > 0) {
             sb.append(compiledFunction.getFunctionNodeId());
-            final Type[] paramTypes = types.getParameterTypes(compiledFunction.getFunctionNodeId());
-            for (final Type t : paramTypes) {
+            var paramTypes = types.getParameterTypes(compiledFunction.getFunctionNodeId());
+            for (var t : paramTypes) {
                 sb.append(Type.getShortSignatureDescriptor(t));
             }
             sb.append('$');
@@ -498,11 +455,11 @@ public final class Compiler implements Loggable {
         return sb.toString();
     }
 
-    void declareLocalSymbol(final String symbolName) {
+    void declareLocalSymbol(String symbolName) {
         typeEvaluator.declareLocalSymbol(symbolName);
     }
 
-    void setData(final RecompilableScriptFunctionData data) {
+    void setData(RecompilableScriptFunctionData data) {
         assert this.compiledFunction == null : data;
         this.compiledFunction = data;
     }
@@ -513,13 +470,13 @@ public final class Compiler implements Loggable {
     }
 
     @Override
-    public DebugLogger initLogger(final Context ctxt) {
-        final boolean optimisticTypes = env._optimistic_types;
-        final boolean lazyCompilation = env._lazy_compilation;
+    public DebugLogger initLogger(Context ctxt) {
+        var optimisticTypes = env._optimistic_types;
+        var lazyCompilation = env._lazy_compilation;
 
         return ctxt.getLogger(this.getClass(), new Consumer<DebugLogger>() {
             @Override
-            public void accept(final DebugLogger newLogger) {
+            public void accept(DebugLogger newLogger) {
                 if (!lazyCompilation) {
                     newLogger.warning("WARNING: Running with lazy compilation switched off. This is not a default setting.");
                 }
@@ -544,31 +501,27 @@ public final class Compiler implements Loggable {
         return context;
     }
 
-    Type getOptimisticType(final Optimistic node) {
+    Type getOptimisticType(Optimistic node) {
         return typeEvaluator.getOptimisticType(node);
     }
 
     /**
-     * Returns true if the expression can be safely evaluated, and its value is an object known to always use
-     * String as the type of its property names retrieved through
-     * {@link ScriptRuntime#toPropertyIterator(Object)}. It is used to avoid optimistic assumptions about its
-     * property name types.
+     * Returns true if the expression can be safely evaluated, and its value is an object known to always use String as the type of its property names retrieved through {@link ScriptRuntime#toPropertyIterator(Object)}.
+     * It is used to avoid optimistic assumptions about its property name types.
      * @param expr the expression to test
-     * @return true if the expression can be safely evaluated, and its value is an object known to always use
-     * String as the type of its property iterators.
+     * @return true if the expression can be safely evaluated, and its value is an object known to always use String as the type of its property iterators.
      */
-    boolean hasStringPropertyIterator(final Expression expr) {
+    boolean hasStringPropertyIterator(Expression expr) {
         return typeEvaluator.hasStringPropertyIterator(expr);
     }
 
-    void addInvalidatedProgramPoint(final int programPoint, final Type type) {
+    void addInvalidatedProgramPoint(int programPoint, Type type) {
         invalidatedProgramPoints.put(programPoint, type);
     }
 
-
     /**
-     * Returns a copy of this compiler's current mapping of invalidated optimistic program points to their types. The
-     * copy is not live with regard to changes in state in this compiler instance, and is mutable.
+     * Returns a copy of this compiler's current mapping of invalidated optimistic program points to their types.
+     * The copy is not live with regard to changes in state in this compiler instance, and is mutable.
      * @return a copy of this compiler's current mapping of invalidated optimistic program points to their types.
      */
     public Map<Integer, Type> getInvalidatedProgramPoints() {
@@ -579,14 +532,14 @@ public final class Compiler implements Loggable {
         return types;
     }
 
-    MethodType getCallSiteType(final FunctionNode fn) {
+    MethodType getCallSiteType(FunctionNode fn) {
         if (types == null || !isOnDemandCompilation()) {
             return null;
         }
         return types.getCallSiteType(fn);
     }
 
-    Type getParamType(final FunctionNode fn, final int pos) {
+    Type getParamType(FunctionNode fn, int pos) {
         return types == null ? null : types.get(fn, pos);
     }
 
@@ -596,40 +549,37 @@ public final class Compiler implements Loggable {
 
     /**
      * Do a compilation job
-     *
      * @param functionNode function node to compile
      * @param phases phases of compilation transforms to apply to function
-
      * @return transformed function
-     *
      * @throws CompilationException if error occurs during compilation
      */
-    public FunctionNode compile(final FunctionNode functionNode, final CompilationPhases phases) throws CompilationException {
+    public FunctionNode compile(FunctionNode functionNode, CompilationPhases phases) throws CompilationException {
         if (log.isEnabled()) {
             log.info(">> Starting compile job for ", DebugLogger.quote(functionNode.getName()), " phases=", quote(phases.getDesc()));
             log.indent();
         }
 
-        final String name = DebugLogger.quote(functionNode.getName());
+        var name = DebugLogger.quote(functionNode.getName());
 
-        FunctionNode newFunctionNode = functionNode;
+        var newFunctionNode = functionNode;
 
-        for (final String reservedName : RESERVED_NAMES) {
+        for (var reservedName : RESERVED_NAMES) {
             newFunctionNode.uniqueName(reservedName);
         }
 
-        final boolean info = log.isLoggable(Level.INFO);
+        var info = log.isLoggable(Level.INFO);
 
-        final DebugLogger timeLogger = env.isTimingEnabled() ? env._timing.getLogger() : null;
+        var timeLogger = env.isTimingEnabled() ? env._timing.getLogger() : null;
 
         long time = 0L;
 
-        for (final CompilationPhase phase : phases) {
+        for (var phase : phases) {
             log.fine(phase, " starting for ", name);
 
             try {
                 newFunctionNode = phase.apply(this, phases, newFunctionNode);
-            } catch (final ParserException error) {
+            } catch (ParserException error) {
                 errors.error(error);
                 if (env._dump_on_error) {
                     error.printStackTrace(env.getErr());
@@ -649,7 +599,7 @@ public final class Compiler implements Loggable {
         log.unindent();
 
         if (info) {
-            final StringBuilder sb = new StringBuilder("<< Finished compile job for ");
+            var sb = new StringBuilder("<< Finished compile job for ");
             sb.append(newFunctionNode.getSource()).
             append(':').
             append(quote(newFunctionNode.getName()));
@@ -696,14 +646,14 @@ public final class Compiler implements Loggable {
         return installer;
     }
 
-    void addClass(final String name, final byte[] code) {
+    void addClass(String name, byte[] code) {
         bytecode.put(name, code);
     }
 
     String nextCompileUnitName() {
-        final StringBuilder sb = new StringBuilder(COMPILE_UNIT_NAME_BUFFER_SIZE);
+        var sb = new StringBuilder(COMPILE_UNIT_NAME_BUFFER_SIZE);
         sb.append(firstCompileUnitName);
-        final int cuid = nextCompileUnitId.getAndIncrement();
+        var cuid = nextCompileUnitId.getAndIncrement();
         if (cuid > 0) {
             sb.append("$cu").append(cuid);
         }
@@ -716,21 +666,21 @@ public final class Compiler implements Loggable {
      * @param cacheKey cache key
      * @param functionNode function node
      */
-    public void persistClassInfo(final String cacheKey, final FunctionNode functionNode) {
+    public void persistClassInfo(String cacheKey, FunctionNode functionNode) {
         if (cacheKey != null && env._persistent_cache) {
             // If this is an on-demand compilation create a function initializer for the function being compiled.
             // Otherwise use function initializer map generated by codegen.
-            final Map<Integer, FunctionInitializer> initializers = new HashMap<>();
+            var initializers = new HashMap<Integer, FunctionInitializer>();
             if (isOnDemandCompilation()) {
                 initializers.put(functionNode.getId(), new FunctionInitializer(functionNode, getInvalidatedProgramPoints()));
             } else {
-                for (final CompileUnit compileUnit : getCompileUnits()) {
-                    for (final FunctionNode fn : compileUnit.getFunctionNodes()) {
+                for (var compileUnit : getCompileUnits()) {
+                    for (var fn : compileUnit.getFunctionNodes()) {
                         initializers.put(fn.getId(), new FunctionInitializer(fn));
                     }
                 }
             }
-            final String mainClassName = getFirstCompileUnit().getUnitClassName();
+            var mainClassName = getFirstCompileUnit().getUnitClassName();
             installer.storeScript(cacheKey, source, mainClassName, bytecode, initializers, constantData.toArray(), compilationId);
         }
     }
@@ -739,65 +689,61 @@ public final class Compiler implements Loggable {
      * Make sure the next compilation id is greater than {@code value}.
      * @param value compilation id value
      */
-    public static void updateCompilationId(final int value) {
+    public static void updateCompilationId(int value) {
         if (value >= COMPILATION_ID.get()) {
             COMPILATION_ID.set(value + 1);
         }
     }
 
-    CompileUnit addCompileUnit(final long initialWeight) {
-        final CompileUnit compileUnit = createCompileUnit(initialWeight);
+    CompileUnit addCompileUnit(long initialWeight) {
+        var compileUnit = createCompileUnit(initialWeight);
         compileUnits.add(compileUnit);
         log.fine("Added compile unit ", compileUnit);
         return compileUnit;
     }
 
-    CompileUnit createCompileUnit(final String unitClassName, final long initialWeight) {
-        final ClassEmitter classEmitter = new ClassEmitter(sourceName, unitClassName, context);
-        final CompileUnit  compileUnit  = new CompileUnit(unitClassName, classEmitter, initialWeight);
+    CompileUnit createCompileUnit(String unitClassName, long initialWeight) {
+        var classEmitter = new ClassEmitter(sourceName, unitClassName, context);
+        var compileUnit = new CompileUnit(unitClassName, classEmitter, initialWeight);
         classEmitter.begin();
 
         return compileUnit;
     }
 
-    private CompileUnit createCompileUnit(final long initialWeight) {
+    private CompileUnit createCompileUnit(long initialWeight) {
         return createCompileUnit(nextCompileUnitName(), initialWeight);
     }
 
-    void replaceCompileUnits(final Set<CompileUnit> newUnits) {
+    void replaceCompileUnits(Set<CompileUnit> newUnits) {
         compileUnits.clear();
         compileUnits.addAll(newUnits);
     }
 
-    CompileUnit findUnit(final long weight) {
-        for (final CompileUnit unit : compileUnits) {
+    CompileUnit findUnit(long weight) {
+        for (var unit : compileUnits) {
             if (unit.canHold(weight)) {
                 unit.addWeight(weight);
                 return unit;
             }
         }
-
         return addCompileUnit(weight);
     }
 
     /**
      * Convert a package/class name to a binary name.
-     *
-     * @param name Package/class name.
-     * @return Binary name.
      */
-    public static String binaryName(final String name) {
+    public static String binaryName(String name) {
         return name.replace('/', '.');
     }
 
-    RecompilableScriptFunctionData getScriptFunctionData(final int functionId) {
+    RecompilableScriptFunctionData getScriptFunctionData(int functionId) {
         assert compiledFunction != null;
-        final RecompilableScriptFunctionData fn = compiledFunction.getScriptFunctionData(functionId);
+        var fn = compiledFunction.getScriptFunctionData(functionId);
         assert fn != null : functionId;
         return fn;
     }
 
-    boolean isGlobalSymbol(final FunctionNode fn, final String name) {
+    boolean isGlobalSymbol(FunctionNode fn, String name) {
         return getScriptFunctionData(fn.getId()).isGlobalSymbol(fn, name);
     }
 
@@ -805,7 +751,7 @@ public final class Compiler implements Loggable {
         return continuationEntryPoints;
     }
 
-    Type getInvalidatedProgramPointType(final int programPoint) {
+    Type getInvalidatedProgramPointType(int programPoint) {
         return invalidatedProgramPoints.get(programPoint);
     }
 

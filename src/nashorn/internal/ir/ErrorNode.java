@@ -34,15 +34,11 @@ import nashorn.internal.ir.visitor.NodeVisitor;
  */
 @Immutable
 public final class ErrorNode extends Expression {
-    private static final long serialVersionUID = 1L;
 
     /**
      * Constructor
-     *
-     * @param token      token
-     * @param finish     finish
      */
-    public ErrorNode(final long token, final int finish) {
+    public ErrorNode(long token, int finish) {
         super(token, finish);
     }
 
@@ -52,17 +48,16 @@ public final class ErrorNode extends Expression {
     }
 
     @Override
-    public Node accept(final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(NodeVisitor<? extends LexicalContext> visitor) {
         if (visitor.enterErrorNode(this)) {
             return visitor.leaveErrorNode(this);
         }
-
         return this;
     }
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printType) {
+    public void toString(StringBuilder sb, boolean printType) {
         sb.append("<error>");
     }
-}
 
+}

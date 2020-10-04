@@ -34,6 +34,7 @@ import nashorn.internal.runtime.Source;
  * This class provides static methods to manipulate lexer tokens.
  */
 public class Token {
+    private Token() {}
 
     /**
      * We use 28 bits for the position and 28 bits for the length of the token.
@@ -45,9 +46,6 @@ public class Token {
     private final static int LENGTH_SHIFT = 8;
     private final static int POSITION_SHIFT  = 36;
 
-    private Token() {
-    }
-
     /**
      * Create a compact form of token information.
      * @param type     Type of token.
@@ -55,11 +53,9 @@ public class Token {
      * @param length   Length of the token.
      * @return Token descriptor.
      */
-    public static long toDesc(final TokenType type, final int position, final int length) {
+    public static long toDesc(TokenType type, int position, int length) {
         assert position <= LENGTH_MASK && length <= LENGTH_MASK;
-        return (long)position << POSITION_SHIFT |
-               (long)length   << LENGTH_SHIFT  |
-               type.ordinal();
+        return (long)position << POSITION_SHIFT | (long)length << LENGTH_SHIFT | type.ordinal();
     }
 
     /**
@@ -67,37 +63,27 @@ public class Token {
      * @param token Token descriptor.
      * @return Start position of the token in the source.
      */
-    public static int descPosition(final long token) {
+    public static int descPosition(long token) {
         return (int)(token >>> POSITION_SHIFT);
     }
 
     /**
-     * Normally returns the token itself, except in case of string tokens
-     * which report their position past their opening delimiter and thus
-     * need to have position and length adjusted.
-     *
-     * @param token Token descriptor.
-     * @return same or adjusted token.
+     * Normally returns the token itself, except in case of string tokens which report their position past their opening delimiter and thus need to have position and length adjusted.
      */
-    public static long withDelimiter(final long token) {
-        final TokenType tokenType = Token.descType(token);
-        switch(tokenType) {
-            case STRING:
-            case ESCSTRING:
-            case EXECSTRING:
-            case TEMPLATE:
-            case TEMPLATE_TAIL: {
-                final int start = Token.descPosition(token) - 1;
-                final int len = Token.descLength(token) + 2;
+    public static long withDelimiter(long token) {
+        var tokenType = Token.descType(token);
+        switch (tokenType) {
+            case STRING, ESCSTRING, EXECSTRING, TEMPLATE, TEMPLATE_TAIL -> {
+                var start = Token.descPosition(token) - 1;
+                var len = Token.descLength(token) + 2;
                 return toDesc(tokenType, start, len);
             }
-            case TEMPLATE_HEAD:
-            case TEMPLATE_MIDDLE: {
-                final int start = Token.descPosition(token) - 1;
-                final int len = Token.descLength(token) + 3;
+            case TEMPLATE_HEAD, TEMPLATE_MIDDLE -> {
+                var start = Token.descPosition(token) - 1;
+                var len = Token.descLength(token) + 3;
                 return toDesc(tokenType, start, len);
             }
-            default: {
+            default ->  {
                 return token;
             }
         }
@@ -105,30 +91,22 @@ public class Token {
 
     /**
      * Extract token length from a token descriptor.
-     * @param token Token descriptor.
-     * @return Length of the token.
      */
-    public static int descLength(final long token) {
+    public static int descLength(long token) {
         return (int)((token >>> LENGTH_SHIFT) & LENGTH_MASK);
     }
 
     /**
      * Extract token type from a token descriptor.
-     * @param token Token descriptor.
-     * @return Type of token.
      */
-    public static TokenType descType(final long token) {
+    public static TokenType descType(long token) {
         return TokenType.getValues()[(int)token & 0xff];
     }
 
     /**
      * Change the token to use a new type.
-     *
-     * @param token   The original token.
-     * @param newType The new token type.
-     * @return The recast token.
      */
-    public static long recast(final long token, final TokenType newType) {
+    public static long recast(long token, TokenType newType) {
         return token & ~0xFFL | newType.ordinal();
     }
 
@@ -139,8 +117,8 @@ public class Token {
      * @param verbose True to include details.
      * @return String representation.
      */
-    public static String toString(final Source source, final long token, final boolean verbose) {
-        final TokenType type = Token.descType(token);
+    public static String toString(Source source, long token, boolean verbose) {
+        var type = Token.descType(token);
         String result;
 
         if (source != null && type.getKind() == LITERAL) {
@@ -150,8 +128,8 @@ public class Token {
         }
 
         if (verbose) {
-            final int position = Token.descPosition(token);
-            final int length = Token.descLength(token);
+            var position = Token.descPosition(token);
+            var length = Token.descLength(token);
             result += " (" + position + ", " + length + ")";
         }
 
@@ -160,35 +138,22 @@ public class Token {
 
     /**
      * String conversion of token
-     *
-     * @param source the source
-     * @param token  the token
-     *
-     * @return token as string
      */
-    public static String toString(final Source source, final long token) {
+    public static String toString(Source source, long token) {
         return Token.toString(source, token, false);
     }
 
     /**
      * String conversion of token - version without source given
-     *
-     * @param token  the token
-     *
-     * @return token as string
      */
-    public static String toString(final long token) {
+    public static String toString(long token) {
         return Token.toString(null, token, false);
     }
 
     /**
      * Static hash code computation function token
-     *
-     * @param token a token
-     *
-     * @return hash code for token
      */
-    public static int hashCode(final long token) {
+    public static int hashCode(long token) {
         return (int)(token ^ token >>> 32);
     }
 

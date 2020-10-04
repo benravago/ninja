@@ -38,10 +38,12 @@ import nashorn.internal.runtime.ScriptObject;
 
 /**
  * ECMA 15.11.6.2 RangeError
- *
  */
 @ScriptClass("Error")
 public final class NativeRangeError extends ScriptObject {
+
+    // initialized by nasgen
+    private static PropertyMap $nasgenmap$;
 
     /** message property in instance */
     @Property(name = NativeError.MESSAGE, attributes = Attribute.NOT_ENUMERABLE)
@@ -59,11 +61,8 @@ public final class NativeRangeError extends ScriptObject {
     @Property(attributes = Attribute.NOT_ENUMERABLE)
     public Object nashornException;
 
-    // initialized by nasgen
-    private static PropertyMap $nasgenmap$;
-
     @SuppressWarnings("LeakingThisInConstructor")
-    private NativeRangeError(final Object msg, final ScriptObject proto, final PropertyMap map) {
+    private NativeRangeError(Object msg, ScriptObject proto, PropertyMap map) {
         super(proto, map);
         if (msg != UNDEFINED) {
             this.instMessage = JSType.toString(msg);
@@ -73,11 +72,11 @@ public final class NativeRangeError extends ScriptObject {
         NativeError.initException(this);
     }
 
-    NativeRangeError(final Object msg, final Global global) {
+    NativeRangeError(Object msg, Global global) {
         this(msg, global.getRangeErrorPrototype(), $nasgenmap$);
     }
 
-    private NativeRangeError(final Object msg) {
+    private NativeRangeError(Object msg) {
         this(msg, Global.instance());
     }
 
@@ -88,17 +87,10 @@ public final class NativeRangeError extends ScriptObject {
 
     /**
      * ECMA 15.11.6.2 RangeError
-     *
-     * Constructor
-     *
-     * @param newObj was this error instantiated with the new operator
-     * @param self   self reference
-     * @param msg    error message
-     *
-     * @return new RangeError
      */
     @Constructor(name = "RangeError")
-    public static NativeRangeError constructor(final boolean newObj, final Object self, final Object msg) {
+    public static NativeRangeError constructor(boolean newObj, Object self, Object msg) {
         return new NativeRangeError(msg);
     }
+
 }

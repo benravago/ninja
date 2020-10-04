@@ -38,18 +38,21 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Getter {
-    /**
-     * @return the name of the property. If empty, the name is inferred.
-     */
-    public String name() default "";
 
     /**
-     * @return the attribute flags for this setter.
+     * The name of the property.
+     * If empty, the name is inferred.
      */
-    public int attributes() default DEFAULT_ATTRIBUTES;
+    String name() default "";
 
     /**
-     * @return where this getter lives.
+     * The attribute flags for this setter.
      */
-    public Where where() default Where.INSTANCE;
+    int attributes() default DEFAULT_ATTRIBUTES;
+
+    /**
+     * Where this getter lives.
+     */
+    Where where() default Where.INSTANCE;
+
 }

@@ -41,7 +41,6 @@ import nashorn.internal.parser.TokenType;
  */
 @Immutable
 public final class IdentNode extends Expression implements PropertyKey, FunctionCall, Optimistic, JoinPredecessor {
-    private static final long serialVersionUID = 1L;
 
     private static final int PROPERTY_NAME     = 1 << 0;
     private static final int INITIALIZED_HERE  = 1 << 1;
@@ -66,15 +65,10 @@ public final class IdentNode extends Expression implements PropertyKey, Function
 
     private Symbol symbol;
 
-
     /**
      * Constructor
-     *
-     * @param token   token
-     * @param finish  finish position
-     * @param name    name of identifier
      */
-    public IdentNode(final long token, final int finish, final String name) {
+    public IdentNode(long token, int finish, String name) {
         super(token, finish);
         this.name = name;
         this.type = null;
@@ -83,7 +77,7 @@ public final class IdentNode extends Expression implements PropertyKey, Function
         this.conversion = null;
     }
 
-    private IdentNode(final IdentNode identNode, final String name, final Type type, final int flags, final int programPoint, final LocalVariableConversion conversion) {
+    private IdentNode(IdentNode identNode, String name, Type type, int flags, int programPoint, LocalVariableConversion conversion) {
         super(identNode);
         this.name = name;
         this.type = type;
@@ -95,10 +89,8 @@ public final class IdentNode extends Expression implements PropertyKey, Function
 
     /**
      * Copy constructor - create a new IdentNode for the same location
-     *
-     * @param identNode  identNode
      */
-    public IdentNode(final IdentNode identNode) {
+    public IdentNode(IdentNode identNode) {
         super(identNode);
         this.name = identNode.getName();
         this.type = identNode.type;
@@ -109,20 +101,18 @@ public final class IdentNode extends Expression implements PropertyKey, Function
     }
 
     /**
-     * Creates an identifier for the symbol. Normally used by code generator for creating temporary storage identifiers
-     * that must contain both a symbol and a type.
-     * @param symbol the symbol to create a temporary identifier for.
-     * @return a temporary identifier for the symbol.
+     * Creates an identifier for the symbol.
+     * Normally used by code generator for creating temporary storage identifiers that must contain both a symbol and a type.
      */
-    public static IdentNode createInternalIdentifier(final Symbol symbol) {
+    public static IdentNode createInternalIdentifier(Symbol symbol) {
         return new IdentNode(Token.toDesc(TokenType.IDENT, 0, 0), 0, symbol.getName()).setSymbol(symbol);
     }
 
     @Override
     public Type getType() {
-        if(type != null) {
+        if (type != null) {
             return type;
-        } else if(symbol != null && symbol.isScope()) {
+        } else if (symbol != null && symbol.isScope()) {
             return Type.OBJECT;
         }
         return Type.UNDEFINED;
@@ -130,20 +120,17 @@ public final class IdentNode extends Expression implements PropertyKey, Function
 
     /**
      * Assist in IR navigation.
-     *
-     * @param visitor IR navigating visitor.
      */
     @Override
-    public Node accept(final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(NodeVisitor<? extends LexicalContext> visitor) {
         if (visitor.enterIdentNode(this)) {
             return visitor.leaveIdentNode(this);
         }
-
         return this;
     }
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printType) {
+    public void toString(StringBuilder sb, boolean printType) {
         if (printType) {
             optimisticTypeToString(sb, symbol == null || !symbol.hasSlot());
         }
@@ -152,7 +139,6 @@ public final class IdentNode extends Expression implements PropertyKey, Function
 
     /**
      * Get the name of the identifier
-     * @return  IdentNode name
      */
     public String getName() {
         return name;
@@ -169,33 +155,28 @@ public final class IdentNode extends Expression implements PropertyKey, Function
     }
 
     /**
-     * Return the Symbol the compiler has assigned to this identifier. The symbol is a description of the storage
-     * location for the identifier.
-     *
-     * @return the symbol
+     * Return the Symbol the compiler has assigned to this identifier.
+     * The symbol is a description of the storage location for the identifier.
      */
     public Symbol getSymbol() {
         return symbol;
     }
 
     /**
-     * Assign a symbol to this identifier. See {@link IdentNode#getSymbol()} for explanation of what a symbol is.
-     *
-     * @param symbol the symbol
-     * @return new node
+     * Assign a symbol to this identifier.
+     * See {@link IdentNode#getSymbol()} for explanation of what a symbol is.
      */
-    public IdentNode setSymbol(final Symbol symbol) {
+    public IdentNode setSymbol(Symbol symbol) {
         if (this.symbol == symbol) {
             return this;
         }
-        final IdentNode newIdent = (IdentNode)clone();
+        var newIdent = (IdentNode)clone();
         newIdent.symbol = symbol;
         return newIdent;
     }
 
     /**
      * Check if this IdentNode is a property name
-     * @return true if this is a property name
      */
     public boolean isPropertyName() {
         return (flags & PROPERTY_NAME) == PROPERTY_NAME;
@@ -203,7 +184,6 @@ public final class IdentNode extends Expression implements PropertyKey, Function
 
     /**
      * Flag this IdentNode as a property name
-     * @return a node equivalent to this one except for the requested change.
      */
     public IdentNode setIsPropertyName() {
         if (isPropertyName()) {
@@ -214,7 +194,6 @@ public final class IdentNode extends Expression implements PropertyKey, Function
 
     /**
      * Check if this IdentNode is a future name
-     * @return true if this is a future name
      */
     public boolean isFutureName() {
         return (flags & FUTURE_NAME) == FUTURE_NAME;
@@ -222,7 +201,6 @@ public final class IdentNode extends Expression implements PropertyKey, Function
 
     /**
      * Flag this IdentNode as a future name
-     * @return a node equivalent to this one except for the requested change.
      */
     public IdentNode setIsFutureName() {
         if (isFutureName()) {
@@ -233,7 +211,6 @@ public final class IdentNode extends Expression implements PropertyKey, Function
 
     /**
      * Helper function for local def analysis.
-     * @return true if IdentNode is initialized on creation
      */
     public boolean isInitializedHere() {
         return (flags & INITIALIZED_HERE) == INITIALIZED_HERE;
@@ -241,7 +218,6 @@ public final class IdentNode extends Expression implements PropertyKey, Function
 
     /**
      * Flag IdentNode to be initialized on creation
-     * @return a node equivalent to this one except for the requested change.
      */
     public IdentNode setIsInitializedHere() {
         if (isInitializedHere()) {
@@ -252,8 +228,6 @@ public final class IdentNode extends Expression implements PropertyKey, Function
 
     /**
      * Is this a LET or CONST identifier used before its declaration?
-     *
-     * @return true if identifier is dead
      */
     public boolean isDead() {
         return (flags & IS_DEAD) != 0;
@@ -261,8 +235,6 @@ public final class IdentNode extends Expression implements PropertyKey, Function
 
     /**
      * Flag this IdentNode as a LET or CONST identifier used before its declaration.
-     *
-     * @return a new IdentNode equivalent to this but marked as dead.
      */
     public IdentNode markDead() {
         return new IdentNode(this, name, type, flags | IS_DEAD, programPoint, conversion);
@@ -270,8 +242,6 @@ public final class IdentNode extends Expression implements PropertyKey, Function
 
     /**
      * Is this IdentNode declared here?
-     *
-     * @return true if identifier is declared here
      */
     public boolean isDeclaredHere() {
         return (flags & IS_DECLARED_HERE) != 0;
@@ -279,8 +249,6 @@ public final class IdentNode extends Expression implements PropertyKey, Function
 
     /**
      * Flag this IdentNode as being declared here.
-     *
-     * @return a new IdentNode equivalent to this but marked as declared here.
      */
     public IdentNode setIsDeclaredHere() {
         if (isDeclaredHere()) {
@@ -290,10 +258,7 @@ public final class IdentNode extends Expression implements PropertyKey, Function
     }
 
     /**
-     * Check if the name of this IdentNode is same as that of a compile-time property (currently __DIR__, __FILE__, and
-     * __LINE__).
-     *
-     * @return true if this IdentNode's name is same as that of a compile-time property
+     * Check if the name of this IdentNode is same as that of a compile-time property (currently __DIR__, __FILE__, and __LINE__).
      */
     public boolean isCompileTimePropertyName() {
         return name.equals(__DIR__.symbolName()) || name.equals(__FILE__.symbolName()) || name.equals(__LINE__.symbolName());
@@ -305,7 +270,7 @@ public final class IdentNode extends Expression implements PropertyKey, Function
     }
 
     @Override
-    public IdentNode setType(final Type type) {
+    public IdentNode setType(Type type) {
         if (this.type == type) {
             return this;
         }
@@ -314,7 +279,6 @@ public final class IdentNode extends Expression implements PropertyKey, Function
 
     /**
      * Mark this node as being the callee operand of a {@link CallNode}.
-     * @return an ident node identical to this one in all aspects except with its function flag set.
      */
     public IdentNode setIsFunction() {
         if (isFunction()) {
@@ -325,7 +289,6 @@ public final class IdentNode extends Expression implements PropertyKey, Function
 
     /**
      * Mark this node as not being the callee operand of a {@link CallNode}.
-     * @return an ident node identical to this one in all aspects except with its function flag unset.
      */
     public IdentNode setIsNotFunction() {
         if (! isFunction()) {
@@ -340,7 +303,7 @@ public final class IdentNode extends Expression implements PropertyKey, Function
     }
 
     @Override
-    public Optimistic setProgramPoint(final int programPoint) {
+    public Optimistic setProgramPoint(int programPoint) {
         if (this.programPoint == programPoint) {
             return this;
         }
@@ -363,17 +326,16 @@ public final class IdentNode extends Expression implements PropertyKey, Function
     }
 
     @Override
-    public JoinPredecessor setLocalVariableConversion(final LexicalContext lc, final LocalVariableConversion conversion) {
-        if(this.conversion == conversion) {
+    public JoinPredecessor setLocalVariableConversion(LexicalContext lc, LocalVariableConversion conversion) {
+        if (this.conversion == conversion) {
             return this;
         }
         return new IdentNode(this, name, type, flags, programPoint, conversion);
     }
 
     /**
-     * Is this an internal symbol, i.e. one that starts with ':'. Those can
-     * never be optimistic.
-     * @return true if internal symbol
+     * Is this an internal symbol, i.e. one that starts with ':'.
+     * Those can never be optimistic.
      */
     public boolean isInternal() {
         assert name != null;
@@ -387,8 +349,6 @@ public final class IdentNode extends Expression implements PropertyKey, Function
 
     /**
      * Checks if this is a proto property name.
-     *
-     * @return true if this is the proto property name
      */
     public boolean isProtoPropertyName() {
         return (flags & PROTO_PROPERTY) != 0;
@@ -396,8 +356,6 @@ public final class IdentNode extends Expression implements PropertyKey, Function
 
     /**
      * Return a new identifier with the proto property name flag set.
-     *
-     * @return the new identifier
      */
     public IdentNode setIsProtoPropertyName() {
         return new IdentNode(this, name, type, flags | PROTO_PROPERTY, programPoint, conversion);
@@ -405,8 +363,6 @@ public final class IdentNode extends Expression implements PropertyKey, Function
 
     /**
      * Checks whether this is a default parameter.
-     *
-     * @return true if this is a default parameter
      */
     public boolean isDefaultParameter() {
         return (flags & DEFAULT_PARAMETER) != 0;
@@ -414,20 +370,16 @@ public final class IdentNode extends Expression implements PropertyKey, Function
 
     /**
      * Return a new identifier with the default parameter flag set.
-     *
-     * @return the new identifier
      */
     public IdentNode setIsDefaultParameter() {
         return new IdentNode(this, name, type, flags | DEFAULT_PARAMETER, programPoint, conversion);
     }
 
     /**
-     * Checks whether the source code for this ident contains a unicode escape sequence by comparing
-     * the length of its name with its length in source code.
-     *
-     * @return true if ident source contains a unicode escape sequence
+     * Checks whether the source code for this ident contains a unicode escape sequence by comparing the length of its name with its length in source code.
      */
     public boolean containsEscapes() {
         return Token.descLength(getToken()) != name.length();
     }
+
 }

@@ -25,39 +25,37 @@
 
 package nashorn.internal.codegen.types;
 
+import java.lang.invoke.MethodHandle;
+
 import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Opcodes.GETSTATIC;
-import static nashorn.internal.codegen.CompilerConstants.className;
-import static nashorn.internal.codegen.CompilerConstants.typeDescriptor;
-
-import java.lang.invoke.MethodHandle;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
+
 import nashorn.internal.codegen.CompilerConstants;
 import nashorn.internal.runtime.JSType;
 import nashorn.internal.runtime.ScriptRuntime;
 import nashorn.internal.runtime.Undefined;
+import static nashorn.internal.codegen.CompilerConstants.className;
+import static nashorn.internal.codegen.CompilerConstants.typeDescriptor;
 
 /**
- * Type class: OBJECT This is the object type, used for all object types. It can
- * contain a class that is a more specialized object
+ * Type class: OBJECT This is the object type, used for all object types.
+ *
+ * It can contain a class that is a more specialized object
  */
 class ObjectType extends Type {
-    private static final long serialVersionUID = 1L;
 
     protected ObjectType() {
         this(Object.class);
     }
 
-    protected ObjectType(final Class<?> clazz) {
-        super("object",
-                clazz,
-                clazz == Object.class ? Type.MAX_WEIGHT : 10,
-                1);
+    protected ObjectType(Class<?> clazz) {
+        super("object", clazz, clazz == Object.class ? Type.MAX_WEIGHT : 10, 1);
     }
 
     @Override
@@ -71,46 +69,46 @@ class ObjectType extends Type {
     }
 
     @Override
-    public Type add(final MethodVisitor method, final int programPoint) {
+    public Type add(MethodVisitor method, int programPoint) {
         invokestatic(method, ScriptRuntime.ADD);
         return Type.OBJECT;
     }
 
     @Override
-    public Type load(final MethodVisitor method, final int slot) {
+    public Type load(MethodVisitor method, int slot) {
         assert slot != -1;
         method.visitVarInsn(ALOAD, slot);
         return this;
     }
 
     @Override
-    public void store(final MethodVisitor method, final int slot) {
+    public void store(MethodVisitor method, int slot) {
         assert slot != -1;
         method.visitVarInsn(ASTORE, slot);
     }
 
     @Override
-    public Type loadUndefined(final MethodVisitor method) {
+    public Type loadUndefined(MethodVisitor method) {
         method.visitFieldInsn(GETSTATIC, className(ScriptRuntime.class), "UNDEFINED", typeDescriptor(Undefined.class));
         return UNDEFINED;
     }
 
     @Override
-    public Type loadForcedInitializer(final MethodVisitor method) {
+    public Type loadForcedInitializer(MethodVisitor method) {
         method.visitInsn(ACONST_NULL);
-        // TODO: do we need a special type for null, e.g. Type.NULL? It should be assignable to any other object type
-        // without a checkast in convert.
+        // TODO: do we need a special type for null, e.g. Type.NULL ?
+        // It should be assignable to any other object type without a checkast in convert.
         return OBJECT;
     }
 
     @Override
-    public Type loadEmpty(final MethodVisitor method) {
+    public Type loadEmpty(MethodVisitor method) {
         method.visitFieldInsn(GETSTATIC, className(ScriptRuntime.class), "EMPTY", typeDescriptor(Undefined.class));
         return UNDEFINED;
     }
 
     @Override
-    public Type ldc(final MethodVisitor method, final Object c) {
+    public Type ldc(MethodVisitor method, Object c) {
         if (c == null) {
             method.visitInsn(ACONST_NULL);
         } else if (c instanceof Undefined) {
@@ -129,15 +127,15 @@ class ObjectType extends Type {
     }
 
     @Override
-    public Type convert(final MethodVisitor method, final Type to) {
-        final boolean toString = to.isString();
+    public Type convert(MethodVisitor method, Type to) {
+        var toString = to.isString();
         if (!toString) {
             if (to.isArray()) {
-                final Type elemType = ((ArrayType)to).getElementType();
+                var elemType = ((ArrayType)to).getElementType();
 
-                //note that if this an array, things won't work. see {link @ArrayType} subclass.
-                //we also have the unpleasant case of NativeArray which looks like an Object, but is
-                //an array to the type system. This is treated specially at the known load points
+                // Note that if this an array, things won't work. see {link @ArrayType} subclass.
+                // We also have the unpleasant case of NativeArray which looks like an Object, but is an array to the type system.
+                // This is treated specially at the known load points
 
                 if (elemType.isString()) {
                     method.visitTypeInsn(CHECKCAST, CompilerConstants.className(String[].class));
@@ -152,8 +150,8 @@ class ObjectType extends Type {
                 }
                 return to;
             } else if (to.isObject()) {
-                final Class<?> toClass = to.getTypeClass();
-                if(!toClass.isAssignableFrom(getTypeClass())) {
+                var toClass = to.getTypeClass();
+                if (!toClass.isAssignableFrom(getTypeClass())) {
                     method.visitTypeInsn(CHECKCAST, CompilerConstants.className(toClass));
                 }
                 return to;
@@ -182,7 +180,7 @@ class ObjectType extends Type {
     }
 
     @Override
-    public void _return(final MethodVisitor method) {
+    public void doReturn(MethodVisitor method) {
         method.visitInsn(ARETURN);
     }
 
@@ -190,4 +188,5 @@ class ObjectType extends Type {
     public char getBytecodeStackType() {
         return 'A';
     }
+
 }

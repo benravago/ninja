@@ -42,6 +42,9 @@ import nashorn.internal.runtime.ScriptObject;
 @ScriptClass("Error")
 public final class NativeURIError extends ScriptObject {
 
+    // initialized by nasgen
+    private static PropertyMap $nasgenmap$;
+
     /** message property in instance */
     @Property(name = NativeError.MESSAGE, attributes = Attribute.NOT_ENUMERABLE)
     public Object instMessage;
@@ -58,11 +61,8 @@ public final class NativeURIError extends ScriptObject {
     @Property(attributes = Attribute.NOT_ENUMERABLE)
     public Object nashornException;
 
-    // initialized by nasgen
-    private static PropertyMap $nasgenmap$;
-
     @SuppressWarnings("LeakingThisInConstructor")
-    NativeURIError(final Object msg, final Global global) {
+    NativeURIError(Object msg, Global global) {
         super(global.getURIErrorPrototype(), $nasgenmap$);
         if (msg != UNDEFINED) {
             this.instMessage = JSType.toString(msg);
@@ -72,7 +72,7 @@ public final class NativeURIError extends ScriptObject {
         NativeError.initException(this);
     }
 
-    private NativeURIError(final Object msg) {
+    private NativeURIError(Object msg) {
         this(msg, Global.instance());
     }
 
@@ -83,17 +83,10 @@ public final class NativeURIError extends ScriptObject {
 
     /**
      * ECMA 15.11.6.6 URIError
-     *
-     * Constructor
-     *
-     * @param newObj was this error instantiated with the new operator
-     * @param self   self reference
-     * @param msg    error message
-     *
-     * @return new URIError
      */
     @Constructor(name = "URIError")
-    public static NativeURIError constructor(final boolean newObj, final Object self, final Object msg) {
+    public static NativeURIError constructor(boolean newObj, Object self, Object msg) {
         return new NativeURIError(msg);
     }
+
 }

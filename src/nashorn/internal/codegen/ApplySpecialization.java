@@ -25,17 +25,17 @@
 
 package nashorn.internal.codegen;
 
-import static nashorn.internal.codegen.CompilerConstants.ARGUMENTS_VAR;
-import static nashorn.internal.codegen.CompilerConstants.EXPLODED_ARGUMENT_PREFIX;
-
 import java.lang.invoke.MethodType;
+
 import java.net.URL;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import nashorn.internal.ir.AccessNode;
 import nashorn.internal.ir.CallNode;
 import nashorn.internal.ir.Expression;
@@ -49,11 +49,13 @@ import nashorn.internal.runtime.logging.DebugLogger;
 import nashorn.internal.runtime.logging.Loggable;
 import nashorn.internal.runtime.logging.Logger;
 import nashorn.internal.runtime.options.Options;
+import static nashorn.internal.codegen.CompilerConstants.ARGUMENTS_VAR;
+import static nashorn.internal.codegen.CompilerConstants.EXPLODED_ARGUMENT_PREFIX;
 
 /**
- * An optimization that attempts to turn applies into calls. This pattern
- * is very common for fake class instance creation, and apply
- * introduces expensive args collection and boxing
+ * An optimization that attempts to turn applies into calls.
+ *
+ * This pattern is very common for fake class instance creation, and apply introduces expensive args collection and boxing
  *
  * <pre>
  * var Class = {
@@ -78,7 +80,6 @@ import nashorn.internal.runtime.options.Options;
  * new Color(17, 47, 11);
  * </pre>
  */
-
 @Logger(name="apply2call")
 public final class ApplySpecialization extends SimpleNodeVisitor implements Loggable {
 
@@ -97,13 +98,10 @@ public final class ApplySpecialization extends SimpleNodeVisitor implements Logg
     private static final String ARGUMENTS = ARGUMENTS_VAR.symbolName();
 
     /**
-     * Apply specialization optimization. Try to explode arguments and call
-     * applies as calls if they just pass on the "arguments" array and
-     * "arguments" doesn't escape.
-     *
-     * @param compiler compiler
+     * Apply specialization optimization.
+     * Try to explode arguments and call applies as calls if they just pass on the "arguments" array and "arguments" doesn't escape.
      */
-    public ApplySpecialization(final Compiler compiler) {
+    public ApplySpecialization(Compiler compiler) {
         this.compiler = compiler;
         this.log = initLogger(compiler.getContext());
     }
@@ -114,13 +112,13 @@ public final class ApplySpecialization extends SimpleNodeVisitor implements Logg
     }
 
     @Override
-    public DebugLogger initLogger(final Context context) {
+    public DebugLogger initLogger(Context context) {
         return context.getLogger(this.getClass());
     }
 
     @SuppressWarnings("serial")
     private static class TransformFailedException extends RuntimeException {
-        TransformFailedException(final FunctionNode fn, final String message) {
+        TransformFailedException(FunctionNode fn, String message) {
             super(massageURL(fn.getSource().getURL()) + '.' + fn.getName() + " => " + message, null, false, false);
         }
     }
@@ -134,23 +132,23 @@ public final class ApplySpecialization extends SimpleNodeVisitor implements Logg
 
     private static final AppliesFoundException HAS_APPLIES = new AppliesFoundException();
 
-    private boolean hasApplies(final FunctionNode functionNode) {
+    private boolean hasApplies(FunctionNode functionNode) {
         try {
             functionNode.accept(new SimpleNodeVisitor() {
                 @Override
-                public boolean enterFunctionNode(final FunctionNode fn) {
+                public boolean enterFunctionNode(FunctionNode fn) {
                     return fn == functionNode;
                 }
 
                 @Override
-                public boolean enterCallNode(final CallNode callNode) {
+                public boolean enterCallNode(CallNode callNode) {
                     if (isApply(callNode)) {
                         throw HAS_APPLIES;
                     }
                     return true;
                 }
             });
-        } catch (final AppliesFoundException e) {
+        } catch (AppliesFoundException e) {
             return true;
         }
 
@@ -159,24 +157,23 @@ public final class ApplySpecialization extends SimpleNodeVisitor implements Logg
     }
 
     /**
-     * Arguments may only be used as args to the apply. Everything else is disqualified
-     * We cannot control arguments if they escape from the method and go into an unknown
-     * scope, thus we are conservative and treat any access to arguments outside the
-     * apply call as a case of "we cannot apply the optimization".
+     * Arguments may only be used as args to the apply.
+     * Everything else is disqualified.
+     * We cannot control arguments if they escape from the method and go into an unknown scope, thus we are conservative and treat any access to arguments outside the apply call as a case of "we cannot apply the optimization".
      */
-    private static void checkValidTransform(final FunctionNode functionNode) {
+    private static void checkValidTransform(FunctionNode functionNode) {
 
-        final Set<Expression> argumentsFound = new HashSet<>();
-        final Deque<Set<Expression>> stack = new ArrayDeque<>();
+        var argumentsFound = new HashSet<Expression>();
+        var stack = new ArrayDeque<Set<Expression>>();
 
-        //ensure that arguments is only passed as arg to apply
+        // ensure that arguments is only passed as arg to apply
         functionNode.accept(new SimpleNodeVisitor() {
 
-            private boolean isCurrentArg(final Expression expr) {
+            private boolean isCurrentArg(Expression expr) {
                 return !stack.isEmpty() && stack.peek().contains(expr); //args to current apply call
             }
 
-            private boolean isArguments(final Expression expr) {
+            private boolean isArguments(Expression expr) {
                 if (expr instanceof IdentNode && ARGUMENTS.equals(((IdentNode)expr).getName())) {
                     argumentsFound.add(expr);
                     return true;
@@ -184,8 +181,8 @@ public final class ApplySpecialization extends SimpleNodeVisitor implements Logg
                 return false;
             }
 
-            private boolean isParam(final String name) {
-                for (final IdentNode param : functionNode.getParameters()) {
+            private boolean isParam(String name) {
+                for (var param : functionNode.getParameters()) {
                     if (param.getName().equals(name)) {
                         return true;
                     }
@@ -194,7 +191,7 @@ public final class ApplySpecialization extends SimpleNodeVisitor implements Logg
             }
 
             @Override
-            public Node leaveIdentNode(final IdentNode identNode) {
+            public Node leaveIdentNode(IdentNode identNode) {
                 if (isParam(identNode.getName())) {
                     throw new TransformFailedException(lc.getCurrentFunction(), "parameter: " + identNode.getName());
                 }
@@ -206,10 +203,10 @@ public final class ApplySpecialization extends SimpleNodeVisitor implements Logg
             }
 
             @Override
-            public boolean enterCallNode(final CallNode callNode) {
-                final Set<Expression> callArgs = new HashSet<>();
+            public boolean enterCallNode(CallNode callNode) {
+                var callArgs = new HashSet<Expression>();
                 if (isApply(callNode)) {
-                    final List<Expression> argList = callNode.getArgs();
+                    var argList = callNode.getArgs();
                     if (argList.size() != 2 || !isArguments(argList.get(argList.size() - 1))) {
                         throw new TransformFailedException(lc.getCurrentFunction(), "argument pattern not matched: " + argList);
                     }
@@ -220,7 +217,7 @@ public final class ApplySpecialization extends SimpleNodeVisitor implements Logg
             }
 
             @Override
-            public Node leaveCallNode(final CallNode callNode) {
+            public Node leaveCallNode(CallNode callNode) {
                 stack.pop();
                 return callNode;
             }
@@ -228,18 +225,18 @@ public final class ApplySpecialization extends SimpleNodeVisitor implements Logg
     }
 
     @Override
-    public boolean enterCallNode(final CallNode callNode) {
+    public boolean enterCallNode(CallNode callNode) {
         return !explodedArguments.isEmpty();
     }
 
     @Override
-    public Node leaveCallNode(final CallNode callNode) {
-        //apply needs to be a global symbol or we don't allow it
+    public Node leaveCallNode(CallNode callNode) {
+        // apply needs to be a global symbol or we don't allow it
 
-        final List<IdentNode> newParams = explodedArguments.peek();
+        var newParams = explodedArguments.peek();
         if (isApply(callNode)) {
-            final List<Expression> newArgs = new ArrayList<>();
-            for (final Expression arg : callNode.getArgs()) {
+            var newArgs = new ArrayList<Expression>();
+            for (var arg : callNode.getArgs()) {
                 if (arg instanceof IdentNode && ARGUMENTS.equals(((IdentNode)arg).getName())) {
                     newArgs.addAll(newParams);
                 } else {
@@ -249,15 +246,10 @@ public final class ApplySpecialization extends SimpleNodeVisitor implements Logg
 
             changed.add(lc.getCurrentFunction().getId());
 
-            final CallNode newCallNode = callNode.setArgs(newArgs).setIsApplyToCall();
+            var newCallNode = callNode.setArgs(newArgs).setIsApplyToCall();
 
             if (log.isEnabled()) {
-                log.fine("Transformed ",
-                        callNode,
-                        " from apply to call => ",
-                        newCallNode,
-                        " in ",
-                        DebugLogger.quote(lc.getCurrentFunction().getName()));
+                log.fine("Transformed ", callNode, " from apply to call => ", newCallNode, " in ", DebugLogger.quote(lc.getCurrentFunction().getName()));
             }
 
             return newCallNode;
@@ -266,16 +258,16 @@ public final class ApplySpecialization extends SimpleNodeVisitor implements Logg
         return callNode;
     }
 
-    private void pushExplodedArgs(final FunctionNode functionNode) {
-        int start = 0;
+    private void pushExplodedArgs(FunctionNode functionNode) {
+        var start = 0;
 
-        final MethodType actualCallSiteType = compiler.getCallSiteType(functionNode);
+        var actualCallSiteType = compiler.getCallSiteType(functionNode);
         if (actualCallSiteType == null) {
             throw new TransformFailedException(lc.getCurrentFunction(), "No callsite type");
         }
         assert actualCallSiteType.parameterType(actualCallSiteType.parameterCount() - 1) != Object[].class : "error vararg callsite passed to apply2call " + functionNode.getName() + " " + actualCallSiteType;
 
-        final TypeMap ptm = compiler.getTypeMap();
+        var ptm = compiler.getTypeMap();
         if (ptm.needsCallee()) {
             start++;
         }
@@ -283,9 +275,9 @@ public final class ApplySpecialization extends SimpleNodeVisitor implements Logg
         start++; // we always use this
 
         assert functionNode.getNumOfParams() == 0 : "apply2call on function with named paramaters!";
-        final List<IdentNode> newParams = new ArrayList<>();
-        final long to = actualCallSiteType.parameterCount() - start;
-        for (int i = 0; i < to; i++) {
+        var newParams = new ArrayList<IdentNode>();
+        var to = actualCallSiteType.parameterCount() - start;
+        for (var i = 0; i < to; i++) {
             newParams.add(new IdentNode(functionNode.getToken(), functionNode.getFinish(), EXPLODED_ARGUMENT_PREFIX.symbolName() + (i)));
         }
 
@@ -294,29 +286,29 @@ public final class ApplySpecialization extends SimpleNodeVisitor implements Logg
     }
 
     @Override
-    public boolean enterFunctionNode(final FunctionNode functionNode) {
+    public boolean enterFunctionNode(FunctionNode functionNode) {
         // Cheap tests first
         if (!(
-                // is the transform globally enabled?
-                USE_APPLY2CALL
+            // is the transform globally enabled?
+            USE_APPLY2CALL
 
-                // Are we compiling lazily? We can't known the number and types of the actual parameters at
-                // the caller when compiling eagerly, so this only works with on-demand compilation.
-                && compiler.isOnDemandCompilation()
+            // Are we compiling lazily?
+            // We can't known the number and types of the actual parameters at the caller when compiling eagerly, so this only works with on-demand compilation.
+            && compiler.isOnDemandCompilation()
 
-                // Does the function even reference the "arguments" identifier (without redefining it)? If not,
-                // it trivially can't have an expression of form "f.apply(self, arguments)" that this transform
-                // is targeting.
-                && functionNode.needsArguments()
+            // Does the function even reference the "arguments" identifier (without redefining it)?
+            // If not, it trivially can't have an expression of form "f.apply(self, arguments)" that this transform is targeting.
+            && functionNode.needsArguments()
 
-                // Does the function have eval? If so, it can arbitrarily modify arguments so we can't touch it.
-                && !functionNode.hasEval()
+            // Does the function have eval?
+            // If so, it can arbitrarily modify arguments so we can't touch it.
+            && !functionNode.hasEval()
 
-                // Finally, does the function declare any parameters explicitly? We don't support that. It could
-                // be done, but has some complications. Therefore only a function with no explicit parameters
-                // is considered.
-                && functionNode.getNumOfParams() == 0))
-        {
+            // Finally, does the function declare any parameters explicitly?
+            // We don't support that.
+            // It could be done, but has some complications. Therefore only a function with no explicit parameters is considered.
+            && functionNode.getNumOfParams() == 0
+        )) {
             return false;
         }
 
@@ -344,7 +336,7 @@ public final class ApplySpecialization extends SimpleNodeVisitor implements Logg
         try {
             checkValidTransform(functionNode);
             pushExplodedArgs(functionNode);
-        } catch (final TransformFailedException e) {
+        } catch (TransformFailedException e) {
             log.info("Failure: ", e.getMessage());
             return false;
         }
@@ -357,7 +349,7 @@ public final class ApplySpecialization extends SimpleNodeVisitor implements Logg
      * @return true if successful, false otherwise
      */
     @Override
-    public Node leaveFunctionNode(final FunctionNode functionNode) {
+    public Node leaveFunctionNode(FunctionNode functionNode) {
         FunctionNode newFunctionNode = functionNode;
         final String functionName = newFunctionNode.getName();
 
@@ -367,14 +359,7 @@ public final class ApplySpecialization extends SimpleNodeVisitor implements Logg
                     setParameters(lc, explodedArguments.peek());
 
             if (log.isEnabled()) {
-                log.info("Success: ",
-                        massageURL(newFunctionNode.getSource().getURL()),
-                        '.',
-                        functionName,
-                        "' id=",
-                        newFunctionNode.getId(),
-                        " params=",
-                        callSiteTypes.peek());
+                log.info("Success: ", massageURL(newFunctionNode.getSource().getURL()), '.', functionName, "' id=", newFunctionNode.getId(), " params=", callSiteTypes.peek());
             }
         }
 
@@ -384,20 +369,21 @@ public final class ApplySpecialization extends SimpleNodeVisitor implements Logg
         return newFunctionNode;
     }
 
-    private static boolean isApply(final CallNode callNode) {
-        final Expression f = callNode.getFunction();
+    private static boolean isApply(CallNode callNode) {
+        var f = callNode.getFunction();
         return f instanceof AccessNode && "apply".equals(((AccessNode)f).getProperty());
     }
 
-    private static String massageURL(final URL url) {
+    private static String massageURL(URL url) {
         if (url == null) {
             return "<null>";
         }
-        final String str = url.toString();
-        final int slash = str.lastIndexOf('/');
+        var str = url.toString();
+        var slash = str.lastIndexOf('/');
         if (slash == -1) {
             return str;
         }
         return str.substring(slash + 1);
     }
+
 }

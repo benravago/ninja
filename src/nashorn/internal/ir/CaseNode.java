@@ -27,17 +27,18 @@ package nashorn.internal.ir;
 
 import java.util.Collections;
 import java.util.List;
+
 import nashorn.internal.codegen.Label;
 import nashorn.internal.ir.annotations.Immutable;
 import nashorn.internal.ir.visitor.NodeVisitor;
 
 /**
  * IR representation of CASE clause.
+ *
  * Case nodes are not BreakableNodes, but the SwitchNode is
  */
 @Immutable
 public final class CaseNode extends Node implements JoinPredecessor, Labels, Terminal {
-    private static final long serialVersionUID = 1L;
 
     /** Test expression. */
     private final Expression test;
@@ -55,34 +56,25 @@ public final class CaseNode extends Node implements JoinPredecessor, Labels, Ter
 
     /**
      * Constructors
-     *
-     * @param token    token
-     * @param finish   finish
-     * @param test     case test node, can be any node in JavaScript
-     * @param body     case body
      */
-    public CaseNode(final long token, final int finish, final Expression test, final Block body) {
+    public CaseNode(long token, int finish, Expression test, Block body) {
         super(token, finish);
-
-        this.test  = test;
-        this.body  = body;
+        this.test = test;
+        this.body = body;
         this.entry = new Label("entry");
         this.conversion = null;
     }
 
-    CaseNode(final CaseNode caseNode, final Expression test, final Block body, final LocalVariableConversion conversion) {
+    CaseNode(CaseNode caseNode, Expression test, Block body, LocalVariableConversion conversion) {
         super(caseNode);
-
-        this.test  = test;
-        this.body  = body;
+        this.test = test;
+        this.body = body;
         this.entry = new Label(caseNode.entry);
         this.conversion = conversion;
     }
 
     /**
      * Is this a terminal case node, i.e. does it end control flow like having a throw or return?
-     *
-     * @return true if this node statement is terminal
      */
     @Override
     public boolean isTerminal() {
@@ -91,22 +83,19 @@ public final class CaseNode extends Node implements JoinPredecessor, Labels, Ter
 
     /**
      * Assist in IR navigation.
-     * @param visitor IR navigating visitor.
      */
     @Override
-    public Node accept(final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(NodeVisitor<? extends LexicalContext> visitor) {
         if (visitor.enterCaseNode(this)) {
-            final Expression newTest = test == null ? null : (Expression)test.accept(visitor);
-            final Block newBody = body == null ? null : (Block)body.accept(visitor);
-
+            var newTest = test == null ? null : (Expression)test.accept(visitor);
+            var newBody = body == null ? null : (Block)body.accept(visitor);
             return visitor.leaveCaseNode(setTest(newTest).setBody(newBody));
         }
-
         return this;
     }
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printTypes) {
+    public void toString(StringBuilder sb, boolean printTypes) {
         if (test != null) {
             sb.append("case ");
             test.toString(sb, printTypes);
@@ -118,7 +107,6 @@ public final class CaseNode extends Node implements JoinPredecessor, Labels, Ter
 
     /**
      * Get the body for this case node
-     * @return the body
      */
     public Block getBody() {
         return body;
@@ -126,7 +114,6 @@ public final class CaseNode extends Node implements JoinPredecessor, Labels, Ter
 
     /**
      * Get the entry label for this case node
-     * @return the entry label
      */
     public Label getEntry() {
         return entry;
@@ -134,7 +121,6 @@ public final class CaseNode extends Node implements JoinPredecessor, Labels, Ter
 
     /**
      * Get the test expression for this case node
-     * @return the test
      */
     public Expression getTest() {
         return test;
@@ -142,10 +128,8 @@ public final class CaseNode extends Node implements JoinPredecessor, Labels, Ter
 
     /**
      * Reset the test expression for this case node
-     * @param test new test expression
-     * @return new or same CaseNode
      */
-    public CaseNode setTest(final Expression test) {
+    public CaseNode setTest(Expression test) {
         if (this.test == test) {
             return this;
         }
@@ -153,8 +137,8 @@ public final class CaseNode extends Node implements JoinPredecessor, Labels, Ter
     }
 
     @Override
-    public JoinPredecessor setLocalVariableConversion(final LexicalContext lc, final LocalVariableConversion conversion) {
-        if(this.conversion == conversion) {
+    public JoinPredecessor setLocalVariableConversion(LexicalContext lc, LocalVariableConversion conversion) {
+        if (this.conversion == conversion) {
             return this;
         }
         return new CaseNode(this, test, body, conversion);
@@ -165,7 +149,7 @@ public final class CaseNode extends Node implements JoinPredecessor, Labels, Ter
         return conversion;
     }
 
-    private CaseNode setBody(final Block body) {
+    private CaseNode setBody(Block body) {
         if (this.body == body) {
             return this;
         }
@@ -176,4 +160,5 @@ public final class CaseNode extends Node implements JoinPredecessor, Labels, Ter
     public List<Label> getLabels() {
         return Collections.unmodifiableList(Collections.singletonList(entry));
     }
+
 }

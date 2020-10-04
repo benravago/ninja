@@ -47,9 +47,8 @@ import nashorn.internal.scripts.JO;
 import static nashorn.internal.parser.TokenType.STRING;
 
 /**
- * Parses JSON text and returns the corresponding IR node. This is derived from
- * the objectLiteral production of the main parser.
- *
+ * Parses JSON text and returns the corresponding IR node.
+ * This is derived from the objectLiteral production of the main parser.
  * See: 15.12.1.2 The JSON Syntactic Grammar
  */
 public class JSONParser {
@@ -72,12 +71,11 @@ public class JSONParser {
 
     /**
      * Constructor.
-     *
      * @param source     the source
      * @param global     the global object
      * @param dualFields whether the parser should regard dual field representation
      */
-    public JSONParser(final String source, final Global global, final boolean dualFields) {
+    public JSONParser(String source, Global global, boolean dualFields) {
         this.source = source;
         this.global = global;
         this.length = source.length();
@@ -85,53 +83,29 @@ public class JSONParser {
     }
 
     /**
-     * Implementation of the Quote(value) operation as defined in the ECMAscript
-     * spec. It wraps a String value in double quotes and escapes characters
-     * within.
-     *
-     * @param value string to quote
-     *
-     * @return quoted and escaped string
+     * Implementation of the Quote(value) operation as defined in the ECMAscript spec.
+     * It wraps a String value in double quotes and escapes characters within.
      */
-    public static String quote(final String value) {
+    public static String quote(String value) {
 
-        final StringBuilder product = new StringBuilder();
+        var product = new StringBuilder();
 
         product.append("\"");
 
-        for (final char ch : value.toCharArray()) {
-            // TODO: should use a table?
-            switch (ch) {
-            case '\\':
-                product.append("\\\\");
-                break;
-            case '"':
-                product.append("\\\"");
-                break;
-            case '\b':
-                product.append("\\b");
-                break;
-            case '\f':
-                product.append("\\f");
-                break;
-            case '\n':
-                product.append("\\n");
-                break;
-            case '\r':
-                product.append("\\r");
-                break;
-            case '\t':
-                product.append("\\t");
-                break;
-            default:
-                if (ch < ' ') {
-                    product.append(Lexer.unicodeEscape(ch));
-                    break;
+        for (var ch : value.toCharArray()) {
+            product.append( ch < ' '
+                ? Lexer.unicodeEscape(ch)
+                : switch(ch) {
+                    case '\\' -> "\\\\";
+                    case '"'  -> "\\\"";
+                    case '\b' -> "\\b";
+                    case '\f' -> "\\f";
+                    case '\n' -> "\\n";
+                    case '\r' -> "\\r";
+                    case '\t' -> "\\t";
+                    default   -> ch;
                 }
-
-                product.append(ch);
-                break;
-            }
+            );
         }
 
         product.append("\"");
@@ -156,38 +130,33 @@ public class JSONParser {
     private Object parseLiteral() {
         skipWhiteSpace();
 
-        final int c = peek();
+        var c = peek();
         if (c == EOF) {
             throw expectedError(pos, "json literal", "eof");
         }
-        switch (c) {
-        case '{':
-            return parseObject();
-        case '[':
-            return parseArray();
-        case '"':
-            return parseString();
-        case 'f':
-            return parseKeyword(FALSE, Boolean.FALSE);
-        case 't':
-            return parseKeyword(TRUE, Boolean.TRUE);
-        case 'n':
-            return parseKeyword(NULL, null);
-        default:
-            if (isDigit(c) || c == '-') {
-                return parseNumber();
-            } else if (c == '.') {
-                throw numberError(pos);
-            } else {
-                throw expectedError(pos, "json literal", toString(c));
-            }
+        return switch(c) {
+            case '{' -> parseObject();
+            case '[' -> parseArray();
+            case '"' -> parseString();
+            case 'f' -> parseKeyword(FALSE, Boolean.FALSE);
+            case 't' -> parseKeyword(TRUE, Boolean.TRUE);
+            case 'n' -> parseKeyword(NULL, null);
+            default  -> isDigit(c) || c == '-' ? parseNumber() : badLiteral(c);
+        };
+    }
+
+    Object badLiteral(int c) {
+        if (c == '.') {
+            throw numberError(pos);
+        } else {
+            throw expectedError(pos, "json literal", toString(c));
         }
     }
 
     private Object parseObject() {
-        PropertyMap propertyMap = dualFields ? JD.getInitialMap() : JO.getInitialMap();
-        ArrayData arrayData = ArrayData.EMPTY_ARRAY;
-        final ArrayList<Object> values = new ArrayList<>();
+        var propertyMap = dualFields ? JD.getInitialMap() : JO.getInitialMap();
+        var arrayData = ArrayData.EMPTY_ARRAY;
+        var values = new ArrayList<Object>();
         int state = STATE_EMPTY;
 
         assert peek() == '{';
@@ -195,48 +164,50 @@ public class JSONParser {
 
         while (pos < length) {
             skipWhiteSpace();
-            final int c = peek();
+            var c = peek();
 
             switch (c) {
-            case '"':
-                if (state == STATE_ELEMENT_PARSED) {
-                    throw expectedError(pos - 1, ", or }", toString(c));
+                case '"' -> {
+                    if (state == STATE_ELEMENT_PARSED) {
+                        throw expectedError(pos - 1, ", or }", toString(c));
+                    }
+                    var id = parseString();
+                    expectColon();
+                    var value = parseLiteral();
+                    var index = ArrayIndex.getArrayIndex(id);
+                    if (ArrayIndex.isValidArrayIndex(index)) {
+                        arrayData = addArrayElement(arrayData, index, value);
+                    } else {
+                        propertyMap = addObjectProperty(propertyMap, values, id, value);
+                    }
+                    state = STATE_ELEMENT_PARSED;
                 }
-                final String id = parseString();
-                expectColon();
-                final Object value = parseLiteral();
-                final int index = ArrayIndex.getArrayIndex(id);
-                if (ArrayIndex.isValidArrayIndex(index)) {
-                    arrayData = addArrayElement(arrayData, index, value);
-                } else {
-                    propertyMap = addObjectProperty(propertyMap, values, id, value);
+                case ',' -> {
+                    if (state != STATE_ELEMENT_PARSED) {
+                        throw error(AbstractParser.message("trailing.comma.in.json"), pos);
+                    }
+                    state = STATE_COMMA_PARSED;
+                    pos++;
                 }
-                state = STATE_ELEMENT_PARSED;
-                break;
-            case ',':
-                if (state != STATE_ELEMENT_PARSED) {
-                    throw error(AbstractParser.message("trailing.comma.in.json"), pos);
+                case '}' -> {
+                    if (state == STATE_COMMA_PARSED) {
+                        throw error(AbstractParser.message("trailing.comma.in.json"), pos);
+                    }
+                    pos++;
+                    return createObject(propertyMap, values, arrayData);
                 }
-                state = STATE_COMMA_PARSED;
-                pos++;
-                break;
-            case '}':
-                if (state == STATE_COMMA_PARSED) {
-                    throw error(AbstractParser.message("trailing.comma.in.json"), pos);
+                default -> {
+                    throw expectedError(pos, ", or }", toString(c));
                 }
-                pos++;
-                return createObject(propertyMap, values, arrayData);
-            default:
-                throw expectedError(pos, ", or }", toString(c));
             }
         }
         throw expectedError(pos, ", or }", "eof");
     }
 
-    private static ArrayData addArrayElement(final ArrayData arrayData, final int index, final Object value) {
-        final long oldLength = arrayData.length();
-        final long longIndex = ArrayIndex.toLongIndex(index);
-        ArrayData newArrayData = arrayData;
+    private static ArrayData addArrayElement(ArrayData arrayData, int index, Object value) {
+        var oldLength = arrayData.length();
+        var longIndex = ArrayIndex.toLongIndex(index);
+        var newArrayData = arrayData;
         if (longIndex >= oldLength) {
             newArrayData = newArrayData.ensure(longIndex);
             if (longIndex > oldLength) {
@@ -246,12 +217,11 @@ public class JSONParser {
         return newArrayData.set(index, value); // false
     }
 
-    private PropertyMap addObjectProperty(final PropertyMap propertyMap, final List<Object> values,
-                                                 final String id, final Object value) {
-        final Property oldProperty = propertyMap.findProperty(id);
-        final PropertyMap newMap;
-        final Class<?> type;
-        final int flags;
+    private PropertyMap addObjectProperty(PropertyMap propertyMap, List<Object> values, String id, Object value) {
+        var oldProperty = propertyMap.findProperty(id);
+        PropertyMap newMap;
+        Class<?> type;
+        int flags;
         if (dualFields) {
             type = getType(value);
             flags = Property.DUAL_FIELDS;
@@ -262,7 +232,7 @@ public class JSONParser {
 
         if (oldProperty != null) {
             values.set(oldProperty.getSlot(), value);
-            newMap = propertyMap.replaceProperty(oldProperty, new SpillProperty(id, flags, oldProperty.getSlot(), type));;
+            newMap = propertyMap.replaceProperty(oldProperty, new SpillProperty(id, flags, oldProperty.getSlot(), type));
         } else {
             values.add(value);
             newMap = propertyMap.addProperty(new SpillProperty(id, flags, propertyMap.size(), type));
@@ -271,11 +241,11 @@ public class JSONParser {
         return newMap;
     }
 
-    private Object createObject(final PropertyMap propertyMap, final List<Object> values, final ArrayData arrayData) {
-        final long[] primitiveSpill = dualFields ? new long[values.size()] : null;
-        final Object[] objectSpill = new Object[values.size()];
+    private Object createObject(PropertyMap propertyMap, List<Object> values, ArrayData arrayData) {
+        var primitiveSpill = dualFields ? new long[values.size()] : null;
+        var objectSpill = new Object[values.size()];
 
-        for (final Property property : propertyMap.getProperties()) {
+        for (var property : propertyMap.getProperties()) {
             if (!dualFields || property.getType() == Object.class) {
                 objectSpill[property.getSlot()] = values.get(property.getSlot());
             } else {
@@ -283,14 +253,13 @@ public class JSONParser {
             }
         }
 
-        final ScriptObject object = dualFields ?
-                new JD(propertyMap, primitiveSpill, objectSpill) : new JO(propertyMap, null, objectSpill);
+        var object = dualFields ? new JD(propertyMap, primitiveSpill, objectSpill) : new JO(propertyMap, null, objectSpill);
         object.setInitialProto(global.getObjectPrototype());
         object.setArray(arrayData);
         return object;
     }
 
-    private static Class<?> getType(final Object value) {
+    private static Class<?> getType(Object value) {
         if (value instanceof Integer) {
             return int.class;
         } else if (value instanceof Double) {
@@ -302,45 +271,46 @@ public class JSONParser {
 
     private void expectColon() {
         skipWhiteSpace();
-        final int n = next();
+        var n = next();
         if (n != ':') {
             throw expectedError(pos - 1, ":", toString(n));
         }
     }
 
     private Object parseArray() {
-        ArrayData arrayData = ArrayData.EMPTY_ARRAY;
-        int state = STATE_EMPTY;
+        var arrayData = ArrayData.EMPTY_ARRAY;
+        var state = STATE_EMPTY;
 
         assert peek() == '[';
         pos++;
 
         while (pos < length) {
             skipWhiteSpace();
-            final int c = peek();
+            var c = peek();
 
             switch (c) {
-            case ',':
-                if (state != STATE_ELEMENT_PARSED) {
-                    throw error(AbstractParser.message("trailing.comma.in.json"), pos);
+                case ',' -> {
+                    if (state != STATE_ELEMENT_PARSED) {
+                        throw error(AbstractParser.message("trailing.comma.in.json"), pos);
+                    }
+                    state = STATE_COMMA_PARSED;
+                    pos++;
                 }
-                state = STATE_COMMA_PARSED;
-                pos++;
-                break;
-            case ']':
-                if (state == STATE_COMMA_PARSED) {
-                    throw error(AbstractParser.message("trailing.comma.in.json"), pos);
+                case ']' -> {
+                    if (state == STATE_COMMA_PARSED) {
+                        throw error(AbstractParser.message("trailing.comma.in.json"), pos);
+                    }
+                    pos++;
+                    return global.wrapAsObject(arrayData);
                 }
-                pos++;
-                return global.wrapAsObject(arrayData);
-            default:
-                if (state == STATE_ELEMENT_PARSED) {
-                    throw expectedError(pos, ", or ]", toString(c));
+                default -> {
+                    if (state == STATE_ELEMENT_PARSED) {
+                        throw expectedError(pos, ", or ]", toString(c));
+                    }
+                    var index = arrayData.length();
+                    arrayData = arrayData.ensure(index).set((int) index, parseLiteral()); // true
+                    state = STATE_ELEMENT_PARSED;
                 }
-                final long index = arrayData.length();
-                arrayData = arrayData.ensure(index).set((int) index, parseLiteral()); // true
-                state = STATE_ELEMENT_PARSED;
-                break;
             }
         }
 
@@ -349,11 +319,11 @@ public class JSONParser {
 
     private String parseString() {
         // String buffer is only instantiated if string contains escape sequences.
-        int start = ++pos;
+        var start = ++pos;
         StringBuilder sb = null;
 
         while (pos < length) {
-            final int c = next();
+            var c = next();
             if (c <= 0x1f) {
                 // Characters < 0x1f are not allowed in JSON strings.
                 throw syntaxError(pos, "String contains control character");
@@ -379,29 +349,19 @@ public class JSONParser {
     }
 
     private char parseEscapeSequence() {
-        final int c = next();
-        switch (c) {
-        case '"':
-            return '"';
-        case '\\':
-            return '\\';
-        case '/':
-            return '/';
-        case 'b':
-            return '\b';
-        case 'f':
-            return '\f';
-        case 'n':
-            return '\n';
-        case 'r':
-            return '\r';
-        case 't':
-            return '\t';
-        case 'u':
-            return parseUnicodeEscape();
-        default:
-            throw error(Lexer.message("invalid.escape.char"), pos - 1, length);
-        }
+        var c = next();
+        return switch (c) {
+            case '"'  -> '"';
+            case '\\' -> '\\';
+            case '/'  -> '/';
+            case 'b'  -> '\b';
+            case 'f'  -> '\f';
+            case 'n'  -> '\n';
+            case 'r'  -> '\r';
+            case 't'  -> '\t';
+            case 'u'  -> parseUnicodeEscape();
+            default   -> throw error(Lexer.message("invalid.escape.char"), pos - 1, length);
+        };
     }
 
     private char parseUnicodeEscape() {
@@ -409,7 +369,7 @@ public class JSONParser {
     }
 
     private int parseHexDigit() {
-        final int c = next();
+        var c = next();
         if (c >= '0' && c <= '9') {
             return c - '0';
         } else if (c >= 'A' && c <= 'F') {
@@ -420,13 +380,13 @@ public class JSONParser {
         throw error(Lexer.message("invalid.hex"), pos - 1, length);
     }
 
-    private boolean isDigit(final int c) {
+    private boolean isDigit(int c) {
         return c >= '0' && c <= '9';
     }
 
     private void skipDigits() {
         while (pos < length) {
-            final int c = peek();
+            var c = peek();
             if (!isDigit(c)) {
                 break;
             }
@@ -435,8 +395,8 @@ public class JSONParser {
     }
 
     private Number parseNumber() {
-        final int start = pos;
-        int c = next();
+        var start = pos;
+        var c = next();
 
         if (c == '-') {
             c = next();
@@ -472,14 +432,14 @@ public class JSONParser {
             skipDigits();
         }
 
-        final double d = Double.parseDouble(source.substring(start, pos));
+        var d = Double.parseDouble(source.substring(start, pos));
         if (JSType.isRepresentableAsInt(d)) {
             return (int) d;
         }
         return d;
     }
 
-    private Object parseKeyword(final String keyword, final Object value) {
+    private Object parseKeyword(String keyword, Object value) {
         if (!source.regionMatches(pos, keyword, 0, keyword.length())) {
             throw expectedError(pos, "json literal", "ident");
         }
@@ -495,7 +455,7 @@ public class JSONParser {
     }
 
     private int next() {
-        final int next = peek();
+        var next = peek();
         pos++;
         return next;
     }
@@ -503,46 +463,41 @@ public class JSONParser {
     private void skipWhiteSpace() {
         while (pos < length) {
             switch (peek()) {
-            case '\t':
-            case '\r':
-            case '\n':
-            case ' ':
-                pos++;
-                break;
-            default:
-                return;
+                case '\t', '\r', '\n', ' ' -> pos++;
+                default -> { return; }
             }
         }
     }
 
-    private static String toString(final int c) {
+    private static String toString(int c) {
         return c == EOF ? "eof" : String.valueOf((char) c);
     }
 
-    ParserException error(final String message, final int start, final int length) throws ParserException {
-        final long token     = Token.toDesc(STRING, start, length);
-        final int  pos       = Token.descPosition(token);
-        final Source src     = Source.sourceFor("<json>", source);
-        final int  lineNum   = src.getLine(pos);
-        final int  columnNum = src.getColumn(pos);
-        final String formatted = ErrorManager.format(message, src, lineNum, columnNum, token);
+    ParserException error(String message, int start, int length) throws ParserException {
+        var token = Token.toDesc(STRING, start, length);
+        var pos = Token.descPosition(token);
+        var src = Source.sourceFor("<json>", source);
+        var lineNum = src.getLine(pos);
+        var columnNum = src.getColumn(pos);
+        var formatted = ErrorManager.format(message, src, lineNum, columnNum, token);
         return new ParserException(JSErrorType.SYNTAX_ERROR, formatted, src, lineNum, columnNum, token);
     }
 
-    private ParserException error(final String message, final int start) {
+    private ParserException error(String message, int start) {
         return error(message, start, length);
     }
 
-    private ParserException numberError(final int start) {
+    private ParserException numberError(int start) {
         return error(Lexer.message("json.invalid.number"), start);
     }
 
-    private ParserException expectedError(final int start, final String expected, final String found) {
+    private ParserException expectedError(int start, String expected, String found) {
         return error(AbstractParser.message("expected", expected, found), start);
     }
 
-    private ParserException syntaxError(final int start, final String reason) {
-        final String message = ECMAErrors.getMessage("syntax.error.invalid.json", reason);
+    private ParserException syntaxError(int start, String reason) {
+        var message = ECMAErrors.getMessage("syntax.error.invalid.json", reason);
         return error(message, start);
     }
+
 }

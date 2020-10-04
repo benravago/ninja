@@ -28,6 +28,7 @@ package nashorn.internal.ir;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import nashorn.internal.codegen.Label;
 import nashorn.internal.ir.annotations.Immutable;
 import nashorn.internal.ir.visitor.NodeVisitor;
@@ -37,7 +38,6 @@ import nashorn.internal.ir.visitor.NodeVisitor;
  */
 @Immutable
 public final class SwitchNode extends BreakableStatement {
-    private static final long serialVersionUID = 1L;
 
     /** Switch expression. */
     private final Expression expression;
@@ -48,8 +48,10 @@ public final class SwitchNode extends BreakableStatement {
     /** Switch default index. */
     private final int defaultCaseIndex;
 
-    /** True if all cases are 32-bit signed integer constants, without repetitions. It's a prerequisite for
-     * using a tableswitch/lookupswitch when generating code. */
+    /**
+     * True if all cases are 32-bit signed integer constants, without repetitions.
+     * It's a prerequisite for using a tableswitch/lookupswitch when generating code.
+     */
     private final boolean uniqueInteger;
 
     /** Tag symbol. */
@@ -57,37 +59,29 @@ public final class SwitchNode extends BreakableStatement {
 
     /**
      * Constructor
-     *
-     * @param lineNumber  lineNumber
-     * @param token       token
-     * @param finish      finish
-     * @param expression  switch expression
-     * @param cases       cases
-     * @param defaultCase the default case node - null if none, otherwise has to be present in cases list
      */
-    public SwitchNode(final int lineNumber, final long token, final int finish, final Expression expression, final List<CaseNode> cases, final CaseNode defaultCase) {
+    public SwitchNode(int lineNumber, long token, int finish, Expression expression, List<CaseNode> cases, CaseNode defaultCase) {
         super(lineNumber, token, finish, new Label("switch_break"));
-        this.expression       = expression;
-        this.cases            = cases;
+        this.expression = expression;
+        this.cases = cases;
         this.defaultCaseIndex = defaultCase == null ? -1 : cases.indexOf(defaultCase);
-        this.uniqueInteger    = false;
+        this.uniqueInteger = false;
         this.tag = null;
     }
 
-    private SwitchNode(final SwitchNode switchNode, final Expression expression, final List<CaseNode> cases,
-            final int defaultCaseIndex, final LocalVariableConversion conversion, final boolean uniqueInteger, final Symbol tag) {
+    private SwitchNode(SwitchNode switchNode, Expression expression, List<CaseNode> cases, int defaultCaseIndex, LocalVariableConversion conversion, boolean uniqueInteger, Symbol tag) {
         super(switchNode, conversion);
-        this.expression       = expression;
-        this.cases            = cases;
+        this.expression = expression;
+        this.cases = cases;
         this.defaultCaseIndex = defaultCaseIndex;
-        this.tag              = tag;
-        this.uniqueInteger    = uniqueInteger;
+        this.tag = tag;
+        this.uniqueInteger = uniqueInteger;
     }
 
     @Override
-    public Node ensureUniqueLabels(final LexicalContext lc) {
-        final List<CaseNode> newCases = new ArrayList<>();
-        for (final CaseNode caseNode : cases) {
+    public Node ensureUniqueLabels(LexicalContext lc) {
+        var newCases = new ArrayList<CaseNode>();
+        for (var caseNode : cases) {
             newCases.add(new CaseNode(caseNode, caseNode.getTest(), caseNode.getBody(), caseNode.getLocalVariableConversion()));
         }
         return Node.replaceInLexicalContext(lc, this, new SwitchNode(this, expression, newCases, defaultCaseIndex, conversion, uniqueInteger, tag));
@@ -95,9 +89,9 @@ public final class SwitchNode extends BreakableStatement {
 
     @Override
     public boolean isTerminal() {
-        //there must be a default case, and that including all other cases must terminate
+        // there must be a default case, and that including all other cases must terminate
         if (!cases.isEmpty() && defaultCaseIndex != -1) {
-            for (final CaseNode caseNode : cases) {
+            for (var caseNode : cases) {
                 if (!caseNode.isTerminal()) {
                     return false;
                 }
@@ -109,18 +103,19 @@ public final class SwitchNode extends BreakableStatement {
     }
 
     @Override
-    public Node accept(final LexicalContext lc, final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(LexicalContext lc, NodeVisitor<? extends LexicalContext> visitor) {
         if (visitor.enterSwitchNode(this)) {
             return visitor.leaveSwitchNode(
                 setExpression(lc, (Expression)expression.accept(visitor)).
-                setCases(lc, Node.accept(visitor, cases), defaultCaseIndex));
+                setCases(lc, Node.accept(visitor, cases),
+                defaultCaseIndex));
         }
 
         return this;
     }
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printType) {
+    public void toString(StringBuilder sb, boolean printType) {
         sb.append("switch (");
         expression.toString(sb, printType);
         sb.append(')');
@@ -128,7 +123,6 @@ public final class SwitchNode extends BreakableStatement {
 
     /**
      * Return the case node that is default case
-     * @return default case or null if none
      */
     public CaseNode getDefaultCase() {
         return defaultCaseIndex == -1 ? null : cases.get(defaultCaseIndex);
@@ -136,25 +130,21 @@ public final class SwitchNode extends BreakableStatement {
 
     /**
      * Get the cases in this switch
-     * @return a list of case nodes
      */
     public List<CaseNode> getCases() {
         return Collections.unmodifiableList(cases);
     }
 
     /**
-     * Replace case nodes with new list. the cases have to be the same
-     * and the default case index the same. This is typically used
-     * by NodeVisitors who perform operations on every case node
-     * @param lc    lexical context
-     * @param cases list of cases
-     * @return new switch node or same if no state was changed
+     * Replace case nodes with new list.
+     * The cases have to be the same and the default case index the same.
+     * This is typically used by NodeVisitors who perform operations on every case node.
      */
-    public SwitchNode setCases(final LexicalContext lc, final List<CaseNode> cases) {
+    public SwitchNode setCases(LexicalContext lc, List<CaseNode> cases) {
         return setCases(lc, cases, defaultCaseIndex);
     }
 
-    private SwitchNode setCases(final LexicalContext lc, final List<CaseNode> cases, final int defaultCaseIndex) {
+    private SwitchNode setCases(LexicalContext lc, List<CaseNode> cases, int defaultCaseIndex) {
         if (this.cases == cases) {
             return this;
         }
@@ -163,18 +153,13 @@ public final class SwitchNode extends BreakableStatement {
 
     /**
      * Set or reset the list of cases in this switch
-     * @param lc lexical context
-     * @param cases a list of cases, case nodes
-     * @param defaultCase a case in the list that is the default - must be in the list or class will assert
-     * @return new switch node or same if no state was changed
      */
-    public SwitchNode setCases(final LexicalContext lc, final List<CaseNode> cases, final CaseNode defaultCase) {
+    public SwitchNode setCases(LexicalContext lc, List<CaseNode> cases, CaseNode defaultCase) {
         return setCases(lc, cases, defaultCase == null ? -1 : cases.indexOf(defaultCase));
     }
 
     /**
      * Return the expression to switch on
-     * @return switch expression
      */
     public Expression getExpression() {
         return expression;
@@ -182,11 +167,8 @@ public final class SwitchNode extends BreakableStatement {
 
     /**
      * Set or reset the expression to switch on
-     * @param lc lexical context
-     * @param expression switch expression
-     * @return new switch node or same if no state was changed
      */
-    public SwitchNode setExpression(final LexicalContext lc, final Expression expression) {
+    public SwitchNode setExpression(LexicalContext lc, Expression expression) {
         if (this.expression == expression) {
             return this;
         }
@@ -194,22 +176,18 @@ public final class SwitchNode extends BreakableStatement {
     }
 
     /**
-     * Get the tag symbol for this switch. The tag symbol is where
-     * the switch expression result is stored
-     * @return tag symbol
+     * Get the tag symbol for this switch.
+     * The tag symbol is where the switch expression result is stored
      */
     public Symbol getTag() {
         return tag;
     }
 
     /**
-     * Set the tag symbol for this switch. The tag symbol is where
-     * the switch expression result is stored
-     * @param lc lexical context
-     * @param tag a symbol
-     * @return a switch node with the symbol set
+     * Set the tag symbol for this switch.
+     * The tag symbol is where the switch expression result is stored
      */
-    public SwitchNode setTag(final LexicalContext lc, final Symbol tag) {
+    public SwitchNode setTag(LexicalContext lc, Symbol tag) {
         if (this.tag == tag) {
             return this;
         }
@@ -218,7 +196,6 @@ public final class SwitchNode extends BreakableStatement {
 
     /**
      * Returns true if all cases of this switch statement are 32-bit signed integer constants, without repetitions.
-     * @return true if all cases of this switch statement are 32-bit signed integer constants, without repetitions.
      */
     public boolean isUniqueInteger() {
         return uniqueInteger;
@@ -226,20 +203,17 @@ public final class SwitchNode extends BreakableStatement {
 
     /**
      * Sets whether all cases of this switch statement are 32-bit signed integer constants, without repetitions.
-     * @param lc lexical context
-     * @param uniqueInteger if true, all cases of this switch statement have been determined to be 32-bit signed
-     * integer constants, without repetitions.
-     * @return this switch node, if the value didn't change, or a new switch node with the changed value
+     * 'uniqueInteger', if true, all cases of this switch statement have been determined to be 32-bit signed integer constants, without repetitions.
      */
-    public SwitchNode setUniqueInteger(final LexicalContext lc, final boolean uniqueInteger) {
-        if(this.uniqueInteger == uniqueInteger) {
+    public SwitchNode setUniqueInteger(LexicalContext lc, boolean uniqueInteger) {
+        if (this.uniqueInteger == uniqueInteger) {
             return this;
         }
         return Node.replaceInLexicalContext(lc, this, new SwitchNode(this, expression, cases, defaultCaseIndex, conversion, uniqueInteger, tag));
     }
 
     @Override
-    JoinPredecessor setLocalVariableConversionChanged(final LexicalContext lc, final LocalVariableConversion conversion) {
+    JoinPredecessor setLocalVariableConversionChanged(LexicalContext lc, LocalVariableConversion conversion) {
         return Node.replaceInLexicalContext(lc, this, new SwitchNode(this, expression, cases, defaultCaseIndex, conversion, uniqueInteger, tag));
     }
 

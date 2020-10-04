@@ -26,7 +26,6 @@
 package nashorn.internal.ir;
 
 import static nashorn.internal.parser.TokenType.RETURN;
-import static nashorn.internal.parser.TokenType.YIELD;
 
 import nashorn.internal.ir.annotations.Immutable;
 import nashorn.internal.ir.visitor.NodeVisitor;
@@ -36,25 +35,19 @@ import nashorn.internal.ir.visitor.NodeVisitor;
  */
 @Immutable
 public class ReturnNode extends Statement {
-    private static final long serialVersionUID = 1L;
 
     /** Optional expression. */
     private final Expression expression;
 
     /**
      * Constructor
-     *
-     * @param lineNumber line number
-     * @param token      token
-     * @param finish     finish
-     * @param expression expression to return
      */
-    public ReturnNode(final int lineNumber, final long token, final int finish, final Expression expression) {
+    public ReturnNode(int lineNumber, long token, int finish, Expression expression) {
         super(lineNumber, token, finish);
         this.expression = expression;
     }
 
-    private ReturnNode(final ReturnNode returnNode, final Expression expression) {
+    private ReturnNode(ReturnNode returnNode, Expression expression) {
         super(returnNode);
         this.expression = expression;
     }
@@ -66,7 +59,6 @@ public class ReturnNode extends Statement {
 
     /**
      * Return true if is a RETURN node.
-     * @return true if is RETURN node.
      */
     public boolean isReturn() {
         return isTokenType(RETURN);
@@ -74,14 +66,13 @@ public class ReturnNode extends Statement {
 
     /**
      * Check if this return node has an expression
-     * @return true if not a void return
      */
     public boolean hasExpression() {
         return expression != null;
     }
 
     @Override
-    public Node accept(final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(NodeVisitor<? extends LexicalContext> visitor) {
         if (visitor.enterReturnNode(this)) {
             if (expression != null) {
                 return visitor.leaveReturnNode(setExpression((Expression)expression.accept(visitor)));
@@ -94,7 +85,7 @@ public class ReturnNode extends Statement {
 
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printType) {
+    public void toString(StringBuilder sb, boolean printType) {
         sb.append("return");
         if (expression != null) {
             sb.append(' ');
@@ -104,7 +95,6 @@ public class ReturnNode extends Statement {
 
     /**
      * Get the expression this node returns
-     * @return return expression, or null if void return
      */
     public Expression getExpression() {
         return expression;
@@ -112,10 +102,8 @@ public class ReturnNode extends Statement {
 
     /**
      * Reset the expression this node returns
-     * @param expression new expression, or null if void return
-     * @return new or same return node
      */
-    public ReturnNode setExpression(final Expression expression) {
+    public ReturnNode setExpression(Expression expression) {
         if (this.expression == expression) {
             return this;
         }

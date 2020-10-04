@@ -25,27 +25,23 @@
 
 package nashorn.internal.ir;
 
-import static nashorn.internal.runtime.UnwarrantedOptimismException.INVALID_PROGRAM_POINT;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
+
 import nashorn.internal.codegen.types.Type;
 import nashorn.internal.ir.annotations.Ignore;
 import nashorn.internal.ir.annotations.Immutable;
 import nashorn.internal.ir.visitor.NodeVisitor;
 import nashorn.internal.parser.TokenType;
+import static nashorn.internal.runtime.UnwarrantedOptimismException.INVALID_PROGRAM_POINT;
 
 /**
  * BinaryNode nodes represent two operand operations.
  */
 @Immutable
 public final class BinaryNode extends Expression implements Assignment<Expression>, Optimistic {
-    private static final long serialVersionUID = 1L;
 
-    // Placeholder for "undecided optimistic ADD type". Unfortunately, we can't decide the type of ADD during optimistic
-    // type calculation as it can have local variables as its operands that will decide its ultimate type.
+    // Placeholder for "undecided optimistic ADD type".
+    // Unfortunately, we can't decide the type of ADD during optimistic type calculation as it can have local variables as its operands that will decide its ultimate type.
     private static final Type OPTIMISTIC_UNDECIDED_TYPE = Type.typeFor(new Object(){/*empty*/}.getClass());
 
     /** Left hand side argument. */
@@ -59,39 +55,34 @@ public final class BinaryNode extends Expression implements Assignment<Expressio
     private transient Type cachedType;
 
     @Ignore
-    private static final Set<TokenType> CAN_OVERFLOW =
-        Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new TokenType[] {
-                TokenType.ADD,
-                TokenType.DIV,
-                TokenType.MOD,
-                TokenType.MUL,
-                TokenType.SUB,
-                TokenType.ASSIGN_ADD,
-                TokenType.ASSIGN_DIV,
-                TokenType.ASSIGN_MOD,
-                TokenType.ASSIGN_MUL,
-                TokenType.ASSIGN_SUB,
-                TokenType.SHR,
-                TokenType.ASSIGN_SHR
-            })));
+    private static final Set<TokenType> CAN_OVERFLOW = Set.of(
+        TokenType.ADD,
+        TokenType.DIV,
+        TokenType.MOD,
+        TokenType.MUL,
+        TokenType.SUB,
+        TokenType.ASSIGN_ADD,
+        TokenType.ASSIGN_DIV,
+        TokenType.ASSIGN_MOD,
+        TokenType.ASSIGN_MUL,
+        TokenType.ASSIGN_SUB,
+        TokenType.SHR,
+        TokenType.ASSIGN_SHR
+    );
 
     /**
      * Constructor
-     *
-     * @param token  token
-     * @param lhs    left hand side
-     * @param rhs    right hand side
      */
-    public BinaryNode(final long token, final Expression lhs, final Expression rhs) {
+    public BinaryNode(long token, Expression lhs, Expression rhs) {
         super(token, lhs.getStart(), rhs.getFinish());
         assert !(isTokenType(TokenType.AND) || isTokenType(TokenType.OR)) || lhs instanceof JoinPredecessorExpression;
-        this.lhs   = lhs;
-        this.rhs   = rhs;
+        this.lhs = lhs;
+        this.rhs = rhs;
         this.programPoint = INVALID_PROGRAM_POINT;
         this.type = null;
     }
 
-    private BinaryNode(final BinaryNode binaryNode, final Expression lhs, final Expression rhs, final Type type, final int programPoint) {
+    private BinaryNode(BinaryNode binaryNode, Expression lhs, Expression rhs, Type type, int programPoint) {
         super(binaryNode);
         this.lhs = lhs;
         this.rhs = rhs;
@@ -101,43 +92,26 @@ public final class BinaryNode extends Expression implements Assignment<Expressio
 
     /**
      * Returns true if the node is a comparison operation (either equality, inequality, or relational).
-     * @return true if the node is a comparison operation.
      */
     public boolean isComparison() {
-        switch (tokenType()) {
-        case EQ:
-        case EQ_STRICT:
-        case NE:
-        case NE_STRICT:
-        case LE:
-        case LT:
-        case GE:
-        case GT:
-            return true;
-        default:
-            return false;
-        }
+        return switch (tokenType()) {
+            case EQ, EQ_STRICT, NE, NE_STRICT, LE, LT, GE, GT -> true;
+            default -> false;
+        };
     }
 
     /**
      * Returns true if the node is a relational operation (less than (or equals), greater than (or equals)).
-     * @return true if the node is a relational operation.
      */
     public boolean isRelational() {
-        switch (tokenType()) {
-        case LT:
-        case GT:
-        case LE:
-        case GE:
-            return true;
-        default:
-            return false;
-        }
+        return switch (tokenType()) {
+            case LT, GT, LE, GE -> true;
+            default -> false;
+        };
     }
 
     /**
      * Returns true if the node is a logical operation.
-     * @return true if the node is a logical operation.
      */
     public boolean isLogical() {
         return isLogical(tokenType());
@@ -145,162 +119,124 @@ public final class BinaryNode extends Expression implements Assignment<Expressio
 
     /**
      * Returns true if the token type represents a logical operation.
-     * @param tokenType the token type
-     * @return true if the token type represents a logical operation.
      */
-    public static boolean isLogical(final TokenType tokenType) {
-        switch (tokenType) {
-        case AND:
-        case OR:
-            return true;
-        default:
-            return false;
-        }
+    public static boolean isLogical(TokenType tokenType) {
+        return switch (tokenType) {
+            case AND, OR -> true;
+            default -> false;
+        };
     }
 
     /**
      * Return the widest possible operand type for this operation.
-     *
-     * @return Type
      */
     public Type getWidestOperandType() {
         switch (tokenType()) {
-        case SHR:
-        case ASSIGN_SHR:
-            return Type.INT;
-        case INSTANCEOF:
-            return Type.OBJECT;
-        default:
-            if (isComparison()) {
+            case SHR, ASSIGN_SHR -> {
+                return Type.INT;
+            }
+            case INSTANCEOF -> {
                 return Type.OBJECT;
             }
-            return getWidestOperationType();
+            default ->  {
+                if (isComparison()) {
+                    return Type.OBJECT;
+                }
+                return getWidestOperationType();
+            }
         }
     }
 
     @Override
     public Type getWidestOperationType() {
         switch (tokenType()) {
-        case ADD:
-        case ASSIGN_ADD: {
-            // Compare this logic to decideType(Type, Type); it's similar, but it handles the optimistic type
-            // calculation case while this handles the conservative case.
-            final Type lhsType = lhs.getType();
-            final Type rhsType = rhs.getType();
-            if(lhsType == Type.BOOLEAN && rhsType == Type.BOOLEAN) {
-                // Will always fit in an int, as the value range is [0, 1, 2]. If we didn't treat them specially here,
-                // they'd end up being treated as generic INT operands and their sum would be conservatively considered
-                // to be a LONG in the generic case below; we can do better here.
-                return Type.INT;
-            } else if(isString(lhsType) || isString(rhsType)) {
-                // We can statically figure out that this is a string if either operand is a string. In this case, use
-                // CHARSEQUENCE to prevent it from being proactively flattened.
-                return Type.CHARSEQUENCE;
+            case ADD, ASSIGN_ADD -> {
+                // Compare this logic to decideType(Type, Type); it's similar, but it handles the optimistic type
+                // calculation case while this handles the conservative case.
+                var lhsType = lhs.getType();
+                var rhsType = rhs.getType();
+                if (lhsType == Type.BOOLEAN && rhsType == Type.BOOLEAN) {
+                    // Will always fit in an int, as the value range is [0, 1, 2].
+                    // If we didn't treat them specially here, they'd end up being treated as generic INT operands and their sum would be conservatively considered to be a LONG in the generic case below; we can do better here.
+                    return Type.INT;
+                } else if (isString(lhsType) || isString(rhsType)) {
+                    // We can statically figure out that this is a string if either operand is a string.
+                    // In this case, use CHARSEQUENCE to prevent it from being proactively flattened.
+                    return Type.CHARSEQUENCE;
+                }
+                var widestOperandType = Type.widest(undefinedToNumber(booleanToInt(lhsType)), undefinedToNumber(booleanToInt(rhsType)));
+                if (widestOperandType.isNumeric()) {
+                    return Type.NUMBER;
+                }
+                // We pretty much can't know what it will be statically.
+                // Must presume OBJECT conservatively, as we can end up getting either a string or an object when adding something + object,
+                // e.g.: 1 + {} == "1[object Object]", but 1 + {valueOf: function() { return 2 }} == 3.
+                // Also: 1 + { valueOf: function() { return "2" } } == "12".
+                return Type.OBJECT;
             }
-            final Type widestOperandType = Type.widest(undefinedToNumber(booleanToInt(lhsType)), undefinedToNumber(booleanToInt(rhsType)));
-            if (widestOperandType.isNumeric()) {
+            case SHR, ASSIGN_SHR ->  {
                 return Type.NUMBER;
             }
-            // We pretty much can't know what it will be statically. Must presume OBJECT conservatively, as we can end
-            // up getting either a string or an object when adding something + object, e.g.:
-            // 1 + {} == "1[object Object]", but
-            // 1 + {valueOf: function() { return 2 }} == 3. Also:
-            // 1 + {valueOf: function() { return "2" }} == "12".
-            return Type.OBJECT;
-        }
-        case SHR:
-        case ASSIGN_SHR:
-            return Type.NUMBER;
-        case ASSIGN_SAR:
-        case ASSIGN_SHL:
-        case BIT_AND:
-        case BIT_OR:
-        case BIT_XOR:
-        case ASSIGN_BIT_AND:
-        case ASSIGN_BIT_OR:
-        case ASSIGN_BIT_XOR:
-        case SAR:
-        case SHL:
-            return Type.INT;
-        case DIV:
-        case MOD:
-        case ASSIGN_DIV:
-        case ASSIGN_MOD: {
-            // Naively, one might think MOD has the same type as the widest of its operands, this is unfortunately not
-            // true when denominator is zero, so even type(int % int) == double.
-            return Type.NUMBER;
-        }
-        case MUL:
-        case SUB:
-        case ASSIGN_MUL:
-        case ASSIGN_SUB: {
-            final Type lhsType = lhs.getType();
-            final Type rhsType = rhs.getType();
-            if(lhsType == Type.BOOLEAN && rhsType == Type.BOOLEAN) {
+            case ASSIGN_SAR, ASSIGN_SHL, BIT_AND, BIT_OR, BIT_XOR, ASSIGN_BIT_AND, ASSIGN_BIT_OR, ASSIGN_BIT_XOR, SAR, SHL -> {
                 return Type.INT;
             }
-            return Type.NUMBER;
-        }
-        case VOID: {
-            return Type.UNDEFINED;
-        }
-        case ASSIGN: {
-            return rhs.getType();
-        }
-        case INSTANCEOF: {
-            return Type.BOOLEAN;
-        }
-        case COMMARIGHT: {
-            return rhs.getType();
-        }
-        case AND:
-        case OR:{
-            return Type.widestReturnType(lhs.getType(), rhs.getType());
-        }
-        default:
-            if (isComparison()) {
+            case DIV, MOD, ASSIGN_DIV, ASSIGN_MOD -> {
+                // Naively, one might think MOD has the same type as the widest of its operands, this is unfortunately not true when denominator is zero, so even type(int % int) == double.
+                return Type.NUMBER;
+            }
+            case MUL, SUB, ASSIGN_MUL, ASSIGN_SUB -> {
+                var lhsType = lhs.getType();
+                var rhsType = rhs.getType();
+                if (lhsType == Type.BOOLEAN && rhsType == Type.BOOLEAN) {
+                    return Type.INT;
+                }
+                return Type.NUMBER;
+            }
+            case VOID -> {
+                return Type.UNDEFINED;
+            }
+            case ASSIGN -> {
+                return rhs.getType();
+            }
+            case INSTANCEOF -> {
                 return Type.BOOLEAN;
             }
-            return Type.OBJECT;
+            case COMMARIGHT -> {
+                return rhs.getType();
+            }
+            case AND, OR -> {
+                return Type.widestReturnType(lhs.getType(), rhs.getType());
+            }
+            default ->  {
+                if (isComparison()) {
+                    return Type.BOOLEAN;
+                }
+                return Type.OBJECT;
+            }
         }
     }
 
-    private static boolean isString(final Type type) {
+    private static boolean isString(Type type) {
         return type == Type.STRING || type == Type.CHARSEQUENCE;
     }
 
-    private static Type booleanToInt(final Type type) {
+    private static Type booleanToInt(Type type) {
         return type == Type.BOOLEAN ? Type.INT : type;
     }
 
-    private static Type undefinedToNumber(final Type type) {
+    private static Type undefinedToNumber(Type type) {
         return type == Type.UNDEFINED ? Type.NUMBER : type;
     }
 
     /**
      * Check if this node is an assignment
-     *
-     * @return true if this node assigns a value
      */
     @Override
     public boolean isAssignment() {
-        switch (tokenType()) {
-        case ASSIGN:
-        case ASSIGN_ADD:
-        case ASSIGN_BIT_AND:
-        case ASSIGN_BIT_OR:
-        case ASSIGN_BIT_XOR:
-        case ASSIGN_DIV:
-        case ASSIGN_MOD:
-        case ASSIGN_MUL:
-        case ASSIGN_SAR:
-        case ASSIGN_SHL:
-        case ASSIGN_SHR:
-        case ASSIGN_SUB:
-           return true;
-        default:
-           return false;
-        }
+        return switch (tokenType()) {
+            case ASSIGN, ASSIGN_ADD, ASSIGN_BIT_AND, ASSIGN_BIT_OR, ASSIGN_BIT_XOR, ASSIGN_DIV, ASSIGN_MOD, ASSIGN_MUL, ASSIGN_SAR, ASSIGN_SHL, ASSIGN_SHR, ASSIGN_SUB -> true;
+            default -> false;
+        };
     }
 
     @Override
@@ -314,7 +250,7 @@ public final class BinaryNode extends Expression implements Assignment<Expressio
     }
 
     @Override
-    public BinaryNode setAssignmentDest(final Expression n) {
+    public BinaryNode setAssignmentDest(Expression n) {
         return setLHS(n);
     }
 
@@ -325,79 +261,51 @@ public final class BinaryNode extends Expression implements Assignment<Expressio
 
     /**
      * Assist in IR navigation.
-     * @param visitor IR navigating visitor.
      */
     @Override
-    public Node accept(final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(NodeVisitor<? extends LexicalContext> visitor) {
         if (visitor.enterBinaryNode(this)) {
             return visitor.leaveBinaryNode(setLHS((Expression)lhs.accept(visitor)).setRHS((Expression)rhs.accept(visitor)));
         }
-
         return this;
     }
 
     @Override
     public boolean isLocal() {
-        switch (tokenType()) {
-        case SAR:
-        case SHL:
-        case SHR:
-        case BIT_AND:
-        case BIT_OR:
-        case BIT_XOR:
-        case ADD:
-        case DIV:
-        case MOD:
-        case MUL:
-        case SUB:
-            return lhs.isLocal() && lhs.getType().isJSPrimitive()
-                && rhs.isLocal() && rhs.getType().isJSPrimitive();
-        case ASSIGN_ADD:
-        case ASSIGN_BIT_AND:
-        case ASSIGN_BIT_OR:
-        case ASSIGN_BIT_XOR:
-        case ASSIGN_DIV:
-        case ASSIGN_MOD:
-        case ASSIGN_MUL:
-        case ASSIGN_SAR:
-        case ASSIGN_SHL:
-        case ASSIGN_SHR:
-        case ASSIGN_SUB:
-            return lhs instanceof IdentNode && lhs.isLocal() && lhs.getType().isJSPrimitive()
-                    && rhs.isLocal() && rhs.getType().isJSPrimitive();
-        case ASSIGN:
-            return lhs instanceof IdentNode && lhs.isLocal() && rhs.isLocal();
-        default:
-            return false;
-        }
+        return switch (tokenType()) {
+            case SAR, SHL, SHR, BIT_AND, BIT_OR, BIT_XOR, ADD, DIV, MOD, MUL, SUB ->
+                lhs.isLocal() && lhs.getType().isJSPrimitive() && rhs.isLocal() && rhs.getType().isJSPrimitive();
+            case ASSIGN_ADD, ASSIGN_BIT_AND, ASSIGN_BIT_OR, ASSIGN_BIT_XOR, ASSIGN_DIV, ASSIGN_MOD, ASSIGN_MUL, ASSIGN_SAR, ASSIGN_SHL, ASSIGN_SHR, ASSIGN_SUB ->
+                lhs instanceof IdentNode && lhs.isLocal() && lhs.getType().isJSPrimitive() && rhs.isLocal() && rhs.getType().isJSPrimitive();
+            case ASSIGN ->
+                lhs instanceof IdentNode && lhs.isLocal() && rhs.isLocal();
+            default ->
+                false;
+        };
     }
 
     @Override
     public boolean isAlwaysFalse() {
-        switch (tokenType()) {
-        case COMMARIGHT:
-            return rhs.isAlwaysFalse();
-        default:
-            return false;
-        }
+        return switch (tokenType()) {
+            case COMMARIGHT -> rhs.isAlwaysFalse();
+            default -> false;
+        };
     }
 
     @Override
     public boolean isAlwaysTrue() {
-        switch (tokenType()) {
-        case COMMARIGHT:
-            return rhs.isAlwaysTrue();
-        default:
-            return false;
-        }
+        return switch (tokenType()) {
+            case COMMARIGHT -> rhs.isAlwaysTrue();
+            default -> false;
+        };
     }
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printType) {
-        final TokenType tokenType = tokenType();
+    public void toString(StringBuilder sb, boolean printType) {
+        var tokenType = tokenType();
 
-        final boolean lhsParen = tokenType.needsParens(lhs().tokenType(), true);
-        final boolean rhsParen = tokenType.needsParens(rhs().tokenType(), false);
+        var lhsParen = tokenType.needsParens(lhs().tokenType(), true);
+        var rhsParen = tokenType.needsParens(rhs().tokenType(), false);
 
         if (lhsParen) {
             sb.append('(');
@@ -412,16 +320,9 @@ public final class BinaryNode extends Expression implements Assignment<Expressio
         sb.append(' ');
 
         switch (tokenType) {
-        case COMMARIGHT:
-            sb.append(",>");
-            break;
-        case INCPREFIX:
-        case DECPREFIX:
-            sb.append("++");
-            break;
-        default:
-            sb.append(tokenType.getName());
-            break;
+            case COMMARIGHT -> sb.append(",>");
+            case INCPREFIX, DECPREFIX -> sb.append("++");
+            default ->  sb.append(tokenType.getName());
         }
 
         if (isOptimistic()) {
@@ -441,7 +342,6 @@ public final class BinaryNode extends Expression implements Assignment<Expressio
 
     /**
      * Get the left hand side expression for this node
-     * @return the left hand side expression
      */
     public Expression lhs() {
         return lhs;
@@ -449,7 +349,6 @@ public final class BinaryNode extends Expression implements Assignment<Expressio
 
     /**
      * Get the right hand side expression for this node
-     * @return the left hand side expression
      */
     public Expression rhs() {
         return rhs;
@@ -457,10 +356,8 @@ public final class BinaryNode extends Expression implements Assignment<Expressio
 
     /**
      * Set the left hand side expression for this node
-     * @param lhs new left hand side expression
-     * @return a node equivalent to this one except for the requested change.
      */
-    public BinaryNode setLHS(final Expression lhs) {
+    public BinaryNode setLHS(Expression lhs) {
         if (this.lhs == lhs) {
             return this;
         }
@@ -469,10 +366,8 @@ public final class BinaryNode extends Expression implements Assignment<Expressio
 
     /**
      * Set the right hand side expression for this node
-     * @param rhs new right hand side expression
-     * @return a node equivalent to this one except for the requested change.
      */
-    public BinaryNode setRHS(final Expression rhs) {
+    public BinaryNode setRHS(Expression rhs) {
         if (this.rhs == rhs) {
             return this;
         }
@@ -481,11 +376,8 @@ public final class BinaryNode extends Expression implements Assignment<Expressio
 
     /**
      * Set both the left and the right hand side expression for this node
-     * @param lhs new left hand side expression
-     * @param rhs new left hand side expression
-     * @return a node equivalent to this one except for the requested change.
      */
-    public BinaryNode setOperands(final Expression lhs, final Expression rhs) {
+    public BinaryNode setOperands(Expression lhs, Expression rhs) {
         if (this.lhs == lhs && this.rhs == rhs) {
             return this;
         }
@@ -503,7 +395,7 @@ public final class BinaryNode extends Expression implements Assignment<Expressio
     }
 
     @Override
-    public BinaryNode setProgramPoint(final int programPoint) {
+    public BinaryNode setProgramPoint(int programPoint) {
         if (this.programPoint == programPoint) {
             return this;
         }
@@ -512,8 +404,8 @@ public final class BinaryNode extends Expression implements Assignment<Expressio
 
     @Override
     public Type getMostOptimisticType() {
-        final TokenType tokenType = tokenType();
-        if(tokenType == TokenType.ADD || tokenType == TokenType.ASSIGN_ADD) {
+        var tokenType = tokenType();
+        if (tokenType == TokenType.ADD || tokenType == TokenType.ASSIGN_ADD) {
             return OPTIMISTIC_UNDECIDED_TYPE;
         } else if (CAN_OVERFLOW.contains(tokenType)) {
             return Type.INT;
@@ -527,9 +419,8 @@ public final class BinaryNode extends Expression implements Assignment<Expressio
     }
 
     /**
-     * Returns true if the node has the optimistic type of the node is not yet decided. Optimistic ADD nodes start out
-     * as undecided until we can figure out if they're numeric or not.
-     * @return true if the node has the optimistic type of the node is not yet decided.
+     * Returns true if the node has the optimistic type of the node is not yet decided.
+     * Optimistic ADD nodes start out as undecided until we can figure out if they're numeric or not.
      */
     public boolean isOptimisticUndecidedType() {
         return type == OPTIMISTIC_UNDECIDED_TYPE;
@@ -544,11 +435,11 @@ public final class BinaryNode extends Expression implements Assignment<Expressio
     }
 
     private Type getTypeUncached() {
-        if(type == OPTIMISTIC_UNDECIDED_TYPE) {
+        if (type == OPTIMISTIC_UNDECIDED_TYPE) {
             return decideType(lhs.getType(), rhs.getType());
         }
-        final Type widest = getWidestOperationType();
-        if(type == null) {
+        var widest = getWidestOperationType();
+        if (type == null) {
             return widest;
         }
         if (tokenType() == TokenType.ASSIGN_SHR || tokenType() == TokenType.SHR) {
@@ -557,26 +448,22 @@ public final class BinaryNode extends Expression implements Assignment<Expressio
         return Type.narrowest(widest, Type.widest(type, Type.widest(lhs.getType(), rhs.getType())));
     }
 
-    private static Type decideType(final Type lhsType, final Type rhsType) {
-        // Compare this to getWidestOperationType() for ADD and ASSIGN_ADD cases. There's some similar logic, but these
-        // are optimistic decisions, meaning that we don't have to treat boolean addition separately (as it'll become
-        // int addition in the general case anyway), and that we also don't conservatively widen sums of ints to
-        // longs, or sums of longs to doubles.
-        if(isString(lhsType) || isString(rhsType)) {
+    private static Type decideType(Type lhsType, Type rhsType) {
+        // Compare this to getWidestOperationType() for ADD and ASSIGN_ADD cases.
+        // There's some similar logic, but these are optimistic decisions, meaning that we don't have to treat boolean addition separately (as it'll become int addition in the general case anyway), and that we also don't conservatively widen sums of ints to longs, or sums of longs to doubles.
+        if (isString(lhsType) || isString(rhsType)) {
             return Type.CHARSEQUENCE;
         }
-        // NOTE: We don't have optimistic object-to-(int, long) conversions. Therefore, if any operand is an Object, we
-        // bail out of optimism here and presume a conservative Object return value, as the object's ToPrimitive() can
-        // end up returning either a number or a string, and their common supertype is Object, for better or worse.
-        final Type widest = Type.widest(undefinedToNumber(booleanToInt(lhsType)), undefinedToNumber(booleanToInt(rhsType)));
+        // NOTE: We don't have optimistic object-to-(int, long) conversions.
+        // Therefore, if any operand is an Object, we bail out of optimism here and presume a conservative Object return value, as the object's ToPrimitive() can end up returning either a number or a string, and their common supertype is Object, for better or worse.
+        var widest = Type.widest(undefinedToNumber(booleanToInt(lhsType)), undefinedToNumber(booleanToInt(rhsType)));
         return widest.isObject() ? Type.OBJECT : widest;
     }
 
     /**
-     * If the node is a node representing an add operation and has {@link #isOptimisticUndecidedType() optimistic
-     * undecided type}, decides its type. Should be invoked after its operands types have been finalized.
-     * @return returns a new node similar to this node, but with its type set to the type decided from the type of its
-     * operands.
+     * If the node is a node representing an add operation and has {@link #isOptimisticUndecidedType() optimistic undecided type}, decides its type.
+     * Should be invoked after its operands types have been finalized.
+     * Returns a new node similar to this node, but with its type set to the type decided from the type of its operands.
      */
     public BinaryNode decideType() {
         assert type == OPTIMISTIC_UNDECIDED_TYPE;
@@ -584,10 +471,12 @@ public final class BinaryNode extends Expression implements Assignment<Expressio
     }
 
     @Override
-    public BinaryNode setType(final Type type) {
+    public BinaryNode setType(Type type) {
         if (this.type == type) {
             return this;
         }
         return new BinaryNode(this, lhs, rhs, type, programPoint);
     }
+
 }
+

@@ -38,15 +38,14 @@ import static org.objectweb.asm.Opcodes.DREM;
 import static org.objectweb.asm.Opcodes.DRETURN;
 import static org.objectweb.asm.Opcodes.DSTORE;
 import static org.objectweb.asm.Opcodes.DSUB;
+import org.objectweb.asm.MethodVisitor;
+
 import static nashorn.internal.codegen.CompilerConstants.staticCallNoLookup;
 import static nashorn.internal.runtime.JSType.UNDEFINED_DOUBLE;
-
-import org.objectweb.asm.MethodVisitor;
 import nashorn.internal.codegen.CompilerConstants;
 import nashorn.internal.runtime.JSType;
 
 class NumberType extends NumericType {
-    private static final long serialVersionUID = 1L;
 
     private static final CompilerConstants.Call VALUE_OF = staticCallNoLookup(Double.class, "valueOf", Double.class, double.class);
 
@@ -70,41 +69,41 @@ class NumberType extends NumericType {
     }
 
     @Override
-    public Type cmp(final MethodVisitor method, final boolean isCmpG) {
+    public Type cmp(MethodVisitor method, boolean isCmpG) {
         method.visitInsn(isCmpG ? DCMPG : DCMPL);
         return INT;
     }
 
     @Override
-    public Type load(final MethodVisitor method, final int slot) {
+    public Type load(MethodVisitor method, int slot) {
         assert slot != -1;
         method.visitVarInsn(DLOAD, slot);
         return NUMBER;
     }
 
     @Override
-    public void store(final MethodVisitor method, final int slot) {
+    public void store(MethodVisitor method, int slot) {
         assert slot != -1;
         method.visitVarInsn(DSTORE, slot);
     }
 
     @Override
-    public Type loadUndefined(final MethodVisitor method) {
+    public Type loadUndefined(MethodVisitor method) {
         method.visitLdcInsn(UNDEFINED_DOUBLE);
         return NUMBER;
     }
 
     @Override
-    public Type loadForcedInitializer(final MethodVisitor method) {
+    public Type loadForcedInitializer(MethodVisitor method) {
         method.visitInsn(DCONST_0);
         return NUMBER;
     }
 
     @Override
-    public Type ldc(final MethodVisitor method, final Object c) {
+    public Type ldc(MethodVisitor method, Object c) {
         assert c instanceof Double;
 
-        final double value = (Double) c;
+        double value = (Double) c;
 
         if (Double.doubleToLongBits(value) == 0L) { // guard against -0.0
             method.visitInsn(DCONST_0);
@@ -118,7 +117,7 @@ class NumberType extends NumericType {
     }
 
     @Override
-    public Type convert(final MethodVisitor method, final Type to) {
+    public Type convert(MethodVisitor method, Type to) {
         if (isEquivalentTo(to)) {
             return null;
         }
@@ -141,43 +140,44 @@ class NumberType extends NumericType {
     }
 
     @Override
-    public Type add(final MethodVisitor method, final int programPoint) {
+    public Type add(MethodVisitor method, int programPoint) {
         method.visitInsn(DADD);
         return NUMBER;
     }
 
     @Override
-    public Type sub(final MethodVisitor method, final int programPoint) {
+    public Type sub(MethodVisitor method, int programPoint) {
         method.visitInsn(DSUB);
         return NUMBER;
     }
 
     @Override
-    public Type mul(final MethodVisitor method, final int programPoint) {
+    public Type mul(MethodVisitor method, int programPoint) {
         method.visitInsn(DMUL);
         return NUMBER;
     }
 
     @Override
-    public Type div(final MethodVisitor method, final int programPoint) {
+    public Type div(MethodVisitor method, int programPoint) {
         method.visitInsn(DDIV);
         return NUMBER;
     }
 
     @Override
-    public Type rem(final MethodVisitor method, final int programPoint) {
+    public Type rem(MethodVisitor method, int programPoint) {
         method.visitInsn(DREM);
         return NUMBER;
     }
 
     @Override
-    public Type neg(final MethodVisitor method, final int programPoint) {
+    public Type neg(MethodVisitor method, int programPoint) {
         method.visitInsn(DNEG);
         return NUMBER;
     }
 
     @Override
-    public void _return(final MethodVisitor method) {
+    public void doReturn(MethodVisitor method) {
         method.visitInsn(DRETURN);
     }
+
 }

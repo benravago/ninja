@@ -25,12 +25,11 @@
 
 package nashorn.internal.codegen;
 
-import static nashorn.internal.codegen.CompilerConstants.SPLIT_PREFIX;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import nashorn.internal.ir.Block;
 import nashorn.internal.ir.FunctionNode;
 import nashorn.internal.ir.LiteralNode;
@@ -48,12 +47,14 @@ import nashorn.internal.runtime.logging.DebugLogger;
 import nashorn.internal.runtime.logging.Loggable;
 import nashorn.internal.runtime.logging.Logger;
 import nashorn.internal.runtime.options.Options;
+import static nashorn.internal.codegen.CompilerConstants.SPLIT_PREFIX;
 
 /**
  * Split the IR into smaller compile units.
  */
 @Logger(name="splitter")
 final class Splitter extends SimpleNodeVisitor implements Loggable {
+
     /** Current compiler. */
     private final Compiler compiler;
 
@@ -73,20 +74,19 @@ final class Splitter extends SimpleNodeVisitor implements Loggable {
 
     /**
      * Constructor.
-     *
      * @param compiler              the compiler
      * @param functionNode          function node to split
      * @param outermostCompileUnit  compile unit for outermost function, if non-lazy this is the script's compile unit
      */
-    public Splitter(final Compiler compiler, final FunctionNode functionNode, final CompileUnit outermostCompileUnit) {
-        this.compiler             = compiler;
-        this.outermost            = functionNode;
+    public Splitter(Compiler compiler, FunctionNode functionNode, CompileUnit outermostCompileUnit) {
+        this.compiler = compiler;
+        this.outermost = functionNode;
         this.outermostCompileUnit = outermostCompileUnit;
-        this.log                  = initLogger(compiler.getContext());
+        this.log = initLogger(compiler.getContext());
     }
 
     @Override
-    public DebugLogger initLogger(final Context context) {
+    public DebugLogger initLogger(Context context) {
         return context.getLogger(this.getClass());
     }
 
@@ -100,15 +100,14 @@ final class Splitter extends SimpleNodeVisitor implements Loggable {
      * @param fn the function to split
      * @param top whether this is the topmost compiled function (it's either a program, or we're doing a recompilation).
      */
-    FunctionNode split(final FunctionNode fn, final boolean top) {
-        FunctionNode functionNode = fn;
+    FunctionNode split(FunctionNode fn, boolean top) {
+        var functionNode = fn;
 
         log.fine("Initiating split of '", functionNode.getName(), "'");
 
-        long weight = WeighNodes.weigh(functionNode);
+        var weight = WeighNodes.weigh(functionNode);
 
-        // We know that our LexicalContext is empty outside the call to functionNode.accept(this) below,
-        // so we can pass null to all methods expecting a LexicalContext parameter.
+        // We know that our LexicalContext is empty outside the call to functionNode.accept(this) below, so we can pass null to all methods expecting a LexicalContext parameter.
         assert lc.isEmpty() : "LexicalContext not empty";
 
         if (weight >= SPLIT_THRESHOLD) {
@@ -138,18 +137,17 @@ final class Splitter extends SimpleNodeVisitor implements Loggable {
             functionNode = functionNode.setCompileUnit(null, findUnit(weight));
         }
 
-        final Block body = functionNode.getBody();
-        final List<FunctionNode> dc = directChildren(functionNode);
+        var body = functionNode.getBody();
+        var dc = directChildren(functionNode);
 
-        final Block newBody = (Block)body.accept(new SimpleNodeVisitor() {
+        var newBody = (Block)body.accept(new SimpleNodeVisitor() {
             @Override
-            public boolean enterFunctionNode(final FunctionNode nestedFunction) {
+            public boolean enterFunctionNode(FunctionNode nestedFunction) {
                 return dc.contains(nestedFunction);
             }
-
             @Override
-            public Node leaveFunctionNode(final FunctionNode nestedFunction) {
-                final FunctionNode split = new Splitter(compiler, nestedFunction, outermostCompileUnit).split(nestedFunction, false);
+            public Node leaveFunctionNode(FunctionNode nestedFunction) {
+                var split = new Splitter(compiler, nestedFunction, outermostCompileUnit).split(nestedFunction, false);
                 lc.replace(nestedFunction, split);
                 return split;
             }
@@ -161,11 +159,11 @@ final class Splitter extends SimpleNodeVisitor implements Loggable {
         return functionNode;
     }
 
-    private static List<FunctionNode> directChildren(final FunctionNode functionNode) {
-        final List<FunctionNode> dc = new ArrayList<>();
+    private static List<FunctionNode> directChildren(FunctionNode functionNode) {
+        var dc = new ArrayList<FunctionNode>();
         functionNode.accept(new SimpleNodeVisitor() {
             @Override
-            public boolean enterFunctionNode(final FunctionNode child) {
+            public boolean enterFunctionNode(FunctionNode child) {
                 if (child == functionNode) {
                     return true;
                 }
@@ -180,29 +178,23 @@ final class Splitter extends SimpleNodeVisitor implements Loggable {
 
     /**
      * Override this logic to look up compile units in a different way
-     * @param weight weight needed
-     * @return compile unit
      */
-    protected CompileUnit findUnit(final long weight) {
+    protected CompileUnit findUnit(long weight) {
         return compiler.findUnit(weight);
     }
 
     /**
      * Split a block into sub methods.
-     *
-     * @param block Block or function to split.
-     *
-     * @return new weight for the resulting block.
      */
-    private Block splitBlock(final Block block, final FunctionNode function) {
+    private Block splitBlock(Block block, FunctionNode function) {
 
-        final List<Statement> splits = new ArrayList<>();
-        List<Statement> statements = new ArrayList<>();
+        var splits = new ArrayList<Statement>();
+        var statements = new ArrayList<Statement>();
         long statementsWeight = 0;
 
-        for (final Statement statement : block.getStatements()) {
-            final long weight = WeighNodes.weigh(statement, weightCache);
-            final boolean isBlockScopedVarNode = isBlockScopedVarNode(statement);
+        for (var statement : block.getStatements()) {
+            var weight = WeighNodes.weigh(statement, weightCache);
+            var isBlockScopedVarNode = isBlockScopedVarNode(statement);
 
             if (statementsWeight + weight >= SPLIT_THRESHOLD || statement.isTerminal() || isBlockScopedVarNode) {
                 if (!statements.isEmpty()) {
@@ -229,33 +221,28 @@ final class Splitter extends SimpleNodeVisitor implements Loggable {
 
     /**
      * Create a new split node from statements contained in a parent block.
-     *
-     * @param parent     Parent block.
-     * @param statements Statements to include.
-     *
-     * @return New split node.
      */
-    private SplitNode createBlockSplitNode(final Block parent, final FunctionNode function, final List<Statement> statements, final long weight) {
-        final long   token      = parent.getToken();
-        final int    finish     = parent.getFinish();
-        final String name       = function.uniqueName(SPLIT_PREFIX.symbolName());
+    private SplitNode createBlockSplitNode(Block parent, FunctionNode function, List<Statement> statements, long weight) {
+        var token = parent.getToken();
+        var finish = parent.getFinish();
+        var name = function.uniqueName(SPLIT_PREFIX.symbolName());
 
-        final Block newBlock = new Block(token, finish, statements);
+        var newBlock = new Block(token, finish, statements);
 
         return new SplitNode(name, newBlock, compiler.findUnit(weight + WeighNodes.FUNCTION_WEIGHT));
     }
 
-    private boolean isBlockScopedVarNode(final Statement statement) {
+    private boolean isBlockScopedVarNode(Statement statement) {
         return statement instanceof VarNode && ((VarNode) statement).isBlockScoped();
     }
 
     @Override
-    public boolean enterBlock(final Block block) {
+    public boolean enterBlock(Block block) {
         if (block.isCatchBlock()) {
             return false;
         }
 
-        final long weight = WeighNodes.weigh(block, weightCache);
+        var weight = WeighNodes.weigh(block, weightCache);
 
         if (weight < SPLIT_THRESHOLD) {
             weightCache.put(block, weight);
@@ -266,16 +253,15 @@ final class Splitter extends SimpleNodeVisitor implements Loggable {
     }
 
     @Override
-    public Node leaveBlock(final Block block) {
+    public Node leaveBlock(Block block) {
         assert !block.isCatchBlock();
 
-        Block newBlock = block;
+        var newBlock = block;
 
-        // Block was heavier than SLIT_THRESHOLD in enter, but a sub-block may have
-        // been split already, so weigh again before splitting.
-        long weight = WeighNodes.weigh(block, weightCache);
+        // Block was heavier than SLIT_THRESHOLD in enter, but a sub-block may have been split already, so weigh again before splitting.
+        var weight = WeighNodes.weigh(block, weightCache);
         if (weight >= SPLIT_THRESHOLD) {
-            final FunctionNode currentFunction = lc.getCurrentFunction();
+            var currentFunction = lc.getCurrentFunction();
             newBlock = splitBlock(block, currentFunction);
             weight   = WeighNodes.weigh(newBlock, weightCache);
             lc.setFlag(currentFunction, FunctionNode.IS_SPLIT);
@@ -286,35 +272,35 @@ final class Splitter extends SimpleNodeVisitor implements Loggable {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public Node leaveLiteralNode(final LiteralNode literal) {
-        final long weight = WeighNodes.weigh(literal);
+    public Node leaveLiteralNode(LiteralNode literal) {
+        var weight = WeighNodes.weigh(literal);
 
         if (weight < SPLIT_THRESHOLD) {
             return literal;
         }
 
-        final FunctionNode functionNode = lc.getCurrentFunction();
+        var functionNode = lc.getCurrentFunction();
 
         lc.setFlag(functionNode, FunctionNode.IS_SPLIT);
 
         if (literal instanceof ArrayLiteralNode) {
-            final ArrayLiteralNode arrayLiteralNode = (ArrayLiteralNode) literal;
-            final Node[]           value            = arrayLiteralNode.getValue();
-            final int[]            postsets         = arrayLiteralNode.getPostsets();
-            final List<Splittable.SplitRange> ranges = new ArrayList<>();
+            var arrayLiteralNode = (ArrayLiteralNode) literal;
+            var value = arrayLiteralNode.getValue();
+            var postsets = arrayLiteralNode.getPostsets();
+            var ranges = new ArrayList<Splittable.SplitRange>();
 
             long totalWeight = 0;
-            int  lo          = 0;
+            int  lo = 0;
 
-            for (int i = 0; i < postsets.length; i++) {
-                final int  postset = postsets[i];
-                final Node element = value[postset];
+            for (var i = 0; i < postsets.length; i++) {
+                var postset = postsets[i];
+                var element = value[postset];
 
-                final long elementWeight = WeighNodes.weigh(element);
+                var elementWeight = WeighNodes.weigh(element);
                 totalWeight += WeighNodes.AASTORE_WEIGHT + elementWeight;
 
                 if (totalWeight >= SPLIT_THRESHOLD) {
-                    final CompileUnit unit = compiler.findUnit(totalWeight - elementWeight);
+                    var unit = compiler.findUnit(totalWeight - elementWeight);
                     ranges.add(new Splittable.SplitRange(unit, lo, i));
                     lo = i;
                     totalWeight = elementWeight;
@@ -322,7 +308,7 @@ final class Splitter extends SimpleNodeVisitor implements Loggable {
             }
 
             if (lo != postsets.length) {
-                final CompileUnit unit = compiler.findUnit(totalWeight);
+                var unit = compiler.findUnit(totalWeight);
                 ranges.add(new Splittable.SplitRange(unit, lo, postsets.length));
             }
 
@@ -335,33 +321,34 @@ final class Splitter extends SimpleNodeVisitor implements Loggable {
     }
 
     @Override
-    public Node leaveObjectNode(final ObjectNode objectNode) {
-        final long weight = WeighNodes.weigh(objectNode);
+    public Node leaveObjectNode(ObjectNode objectNode) {
+        var weight = WeighNodes.weigh(objectNode);
 
         if (weight < SPLIT_THRESHOLD) {
             return objectNode;
         }
 
-        final FunctionNode functionNode = lc.getCurrentFunction();
+        var functionNode = lc.getCurrentFunction();
         lc.setFlag(functionNode, FunctionNode.IS_SPLIT);
 
-        final List<Splittable.SplitRange> ranges        = new ArrayList<>();
-        final List<PropertyNode>          properties    = objectNode.getElements();
-        final boolean                     isSpillObject = properties.size() > CodeGenerator.OBJECT_SPILL_THRESHOLD;
+        var ranges = new ArrayList<Splittable.SplitRange>();
+        var properties = objectNode.getElements();
+        var isSpillObject = properties.size() > CodeGenerator.OBJECT_SPILL_THRESHOLD;
+
         long totalWeight = 0;
-        int  lo          = 0;
+        int  lo = 0;
 
-        for (int i = 0; i < properties.size(); i++) {
+        for (var i = 0; i < properties.size(); i++) {
 
-            final PropertyNode property = properties.get(i);
-            final boolean isConstant = LiteralNode.isConstant(property.getValue());
+            var property = properties.get(i);
+            var isConstant = LiteralNode.isConstant(property.getValue());
 
             if (!isConstant || !isSpillObject) {
-                final long propertyWeight = isConstant ? 0 : WeighNodes.weigh(property.getValue());
+                var propertyWeight = isConstant ? 0 : WeighNodes.weigh(property.getValue());
                 totalWeight += WeighNodes.AASTORE_WEIGHT + propertyWeight;
 
                 if (totalWeight >= SPLIT_THRESHOLD) {
-                    final CompileUnit unit = compiler.findUnit(totalWeight - propertyWeight);
+                    var unit = compiler.findUnit(totalWeight - propertyWeight);
                     ranges.add(new Splittable.SplitRange(unit, lo, i));
                     lo = i;
                     totalWeight = propertyWeight;
@@ -370,7 +357,7 @@ final class Splitter extends SimpleNodeVisitor implements Loggable {
         }
 
         if (lo != properties.size()) {
-            final CompileUnit unit = compiler.findUnit(totalWeight);
+            var unit = compiler.findUnit(totalWeight);
             ranges.add(new Splittable.SplitRange(unit, lo, properties.size()));
         }
 
@@ -380,9 +367,9 @@ final class Splitter extends SimpleNodeVisitor implements Loggable {
     }
 
     @Override
-    public boolean enterFunctionNode(final FunctionNode node) {
-        //only go into the function node for this splitter. any subfunctions are rejected
+    public boolean enterFunctionNode(FunctionNode node) {
+        // only go into the function node for this splitter. any subfunctions are rejected
         return node == outermost;
     }
-}
 
+}

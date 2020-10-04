@@ -38,10 +38,12 @@ import nashorn.internal.runtime.ScriptObject;
 
 /**
  * ECMA 15.11.6.3 ReferenceError
- *
  */
 @ScriptClass("Error")
 public final class NativeReferenceError extends ScriptObject {
+
+    // initialized by nasgen
+    private static PropertyMap $nasgenmap$;
 
     /** message property in instance */
     @Property(name = NativeError.MESSAGE, attributes = Attribute.NOT_ENUMERABLE)
@@ -59,11 +61,8 @@ public final class NativeReferenceError extends ScriptObject {
     @Property(attributes = Attribute.NOT_ENUMERABLE)
     public Object nashornException;
 
-    // initialized by nasgen
-    private static PropertyMap $nasgenmap$;
-
     @SuppressWarnings("LeakingThisInConstructor")
-    private NativeReferenceError(final Object msg, final ScriptObject proto, final PropertyMap map) {
+    private NativeReferenceError(Object msg, ScriptObject proto, PropertyMap map) {
         super(proto, map);
         if (msg != UNDEFINED) {
             this.instMessage = JSType.toString(msg);
@@ -73,11 +72,11 @@ public final class NativeReferenceError extends ScriptObject {
         NativeError.initException(this);
     }
 
-    NativeReferenceError(final Object msg, final Global global) {
+    NativeReferenceError(Object msg, Global global) {
         this(msg, global.getReferenceErrorPrototype(), $nasgenmap$);
     }
 
-    private NativeReferenceError(final Object msg) {
+    private NativeReferenceError(Object msg) {
         this(msg, Global.instance());
     }
 
@@ -88,17 +87,10 @@ public final class NativeReferenceError extends ScriptObject {
 
     /**
      * ECMA 15.11.6.3 ReferenceError
-     *
-     * Constructor
-     *
-     * @param newObj was this error instantiated with the new operator
-     * @param self   self reference
-     * @param msg    error message
-     *
-     * @return new ReferenceError
      */
     @Constructor(name = "ReferenceError")
-    public static NativeReferenceError constructor(final boolean newObj, final Object self, final Object msg) {
+    public static NativeReferenceError constructor(boolean newObj, Object self, Object msg) {
         return new NativeReferenceError(msg);
     }
+
 }

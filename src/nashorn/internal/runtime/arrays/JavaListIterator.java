@@ -43,7 +43,7 @@ class JavaListIterator extends ArrayLikeIterator<Object> {
      * @param list list to iterate over
      * @param includeUndefined should undefined elements be included in iteration
      */
-    protected JavaListIterator(final List<?> list, final boolean includeUndefined) {
+    protected JavaListIterator(List<?> list, boolean includeUndefined) {
         super(includeUndefined);
         this.list = list;
         this.length = list.size();

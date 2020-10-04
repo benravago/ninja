@@ -26,7 +26,9 @@
 package nashorn.internal.ir;
 
 import java.io.Serializable;
+
 import java.util.List;
+
 import nashorn.internal.codegen.CompileUnit;
 
 /**
@@ -35,19 +37,15 @@ import nashorn.internal.codegen.CompileUnit;
 public interface Splittable {
 
     /**
-     * Get a list of split ranges for this splittable expression, or null
-     * if the expression should not be split.
-     *
-     * @return a list of split ranges
+     * Get a list of split ranges for this splittable expression, or null if the expression should not be split.
      */
     List<SplitRange> getSplitRanges();
 
     /**
-     * A SplitRange is a range in a splittable expression. It defines the
-     * boundaries of the split range and provides a compile unit for code generation.
+     * A SplitRange is a range in a splittable expression.
+     * It defines the boundaries of the split range and provides a compile unit for code generation.
      */
     final class SplitRange implements CompileUnitHolder, Serializable {
-        private static final long serialVersionUID = 1L;
 
         /** Compile unit associated with the postsets range. */
         private final CompileUnit compileUnit;
@@ -57,11 +55,8 @@ public interface Splittable {
 
         /**
          * Constructor
-         * @param compileUnit compile unit
-         * @param low lowest array index in unit
-         * @param high highest array index in unit + 1
          */
-        public SplitRange(final CompileUnit compileUnit, final int low, final int high) {
+        public SplitRange(CompileUnit compileUnit, int low, int high) {
             this.compileUnit = compileUnit;
             this.low   = low;
             this.high   = high;
@@ -69,7 +64,6 @@ public interface Splittable {
 
         /**
          * Get the high index position of the ArrayUnit (exclusive)
-         * @return high index position
          */
         public int getHigh() {
             return high;
@@ -77,7 +71,6 @@ public interface Splittable {
 
         /**
          * Get the low index position of the ArrayUnit (inclusive)
-         * @return low index position
          */
         public int getLow() {
             return low;
@@ -85,11 +78,11 @@ public interface Splittable {
 
         /**
          * The array compile unit
-         * @return array compile unit
          */
         @Override
         public CompileUnit getCompileUnit() {
             return compileUnit;
         }
     }
+
 }

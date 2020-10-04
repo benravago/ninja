@@ -34,8 +34,10 @@ import nashorn.internal.parser.Token;
  * Handles JavaScript error reporting.
  */
 public class ErrorManager {
+
     // TODO - collect and sort/collapse error messages.
     // TODO - property based error messages.
+
     /** Reporting writer. */
     private final PrintWriter writer;
 
@@ -62,9 +64,9 @@ public class ErrorManager {
      * Constructor.
      * @param writer I/O writer to report on.
      */
-    public ErrorManager(final PrintWriter writer) {
-        this.writer           = writer;
-        this.limit            = 100;
+    public ErrorManager(PrintWriter writer) {
+        this.writer = writer;
+        this.limit = 100;
         this.warningsAsErrors = false;
     }
 
@@ -72,7 +74,7 @@ public class ErrorManager {
      * Check to see if number of errors exceed limit.
      */
     private void checkLimit() {
-        int count = errors;
+        var count = errors;
 
         if (warningsAsErrors) {
             count += warnings;
@@ -92,27 +94,24 @@ public class ErrorManager {
      * @param token   Offending token descriptor.
      * @return formatted string
      */
-    public static String format(final String message, final Source source, final int line, final int column, final long token) {
-        final String        eoln     = System.lineSeparator();
-        final int           position = Token.descPosition(token);
-        final StringBuilder sb       = new StringBuilder();
+    public static String format(String message, Source source, int line, int column, long token) {
+        var eoln = System.lineSeparator();
+        var position = Token.descPosition(token);
+        var sb = new StringBuilder();
 
         // Source description and message.
-        sb.append(source.getName()).
-            append(':').
-            append(line).
-            append(':').
-            append(column).
-            append(' ').
-            append(message).
-            append(eoln);
+        sb.append(source.getName())
+          .append(':').append(line)
+          .append(':').append(column)
+          .append(' ').append(message)
+          .append(eoln);
 
         // Source content.
-        final String sourceLine = source.getSourceLine(position);
+        var sourceLine = source.getSourceLine(position);
         sb.append(sourceLine).append(eoln);
 
         // Pointer to column.
-        for (int i = 0; i < column; i++) {
+        for (var i = 0; i < column; i++) {
             if (i < sourceLine.length() && sourceLine.charAt(i) == '\t') {
                 sb.append('\t');
             } else {
@@ -122,27 +121,21 @@ public class ErrorManager {
 
         sb.append('^');
         // Use will append eoln.
-        // buffer.append(eoln);
 
         return sb.toString();
     }
 
     /**
      * Report an error using information provided by the ParserException
-     *
-     * @param e ParserException object
      */
-
-    public void error(final ParserException e) {
+    public void error(ParserException e) {
         error(e.getMessage());
     }
 
     /**
      * Report an error message provided
-     *
-     * @param message Error message string.
      */
-    public void error(final String message) {
+    public void error(String message) {
         writer.println(message);
         writer.flush();
         errors++;
@@ -151,19 +144,15 @@ public class ErrorManager {
 
     /**
      * Report a warning using information provided by the ParserException
-     *
-     * @param e ParserException object
      */
-    public void warning(final ParserException e) {
+    public void warning(ParserException e) {
         warning(e.getMessage());
     }
 
     /**
      * Report a warning message provided
-     *
-     * @param message Error message string.
      */
-    public void warning(final String message) {
+    public void warning(String message) {
         writer.println(message);
         writer.flush();
         warnings++;
@@ -172,7 +161,6 @@ public class ErrorManager {
 
     /**
      * Test to see if errors have occurred.
-     * @return True if errors.
      */
     public boolean hasErrors() {
         return errors != 0;
@@ -180,7 +168,6 @@ public class ErrorManager {
 
     /**
      * Get the message limit
-     * @return max number of messages
      */
     public int getLimit() {
         return limit;
@@ -188,15 +175,13 @@ public class ErrorManager {
 
     /**
      * Set the message limit
-     * @param limit max number of messages
      */
-    public void setLimit(final int limit) {
+    public void setLimit(int limit) {
         this.limit = limit;
     }
 
     /**
      * Check whether warnings should be treated like errors
-     * @return true if warnings should be treated like errors
      */
     public boolean isWarningsAsErrors() {
         return warningsAsErrors;
@@ -204,15 +189,13 @@ public class ErrorManager {
 
     /**
      * Set warnings to be treated as errors
-     * @param warningsAsErrors true if warnings should be treated as errors, false otherwise
      */
-    public void setWarningsAsErrors(final boolean warningsAsErrors) {
+    public void setWarningsAsErrors(boolean warningsAsErrors) {
         this.warningsAsErrors = warningsAsErrors;
     }
 
     /**
      * Get the number of errors
-     * @return number of errors
      */
     public int getNumberOfErrors() {
         return errors;
@@ -220,7 +203,6 @@ public class ErrorManager {
 
     /**
      * Get number of warnings
-     * @return number of warnings
      */
     public int getNumberOfWarnings() {
         return warnings;
@@ -233,4 +215,5 @@ public class ErrorManager {
         warnings = 0;
         errors = 0;
     }
+
 }

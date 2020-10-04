@@ -53,18 +53,16 @@ public final class StoredScript implements Serializable {
     @SuppressWarnings("serial") // Not statically typed as Serializable
     private final Map<Integer, FunctionInitializer> initializers;
 
-    private static final long serialVersionUID = 2958227232195298340L;
 
     /**
      * Constructor.
-     *
      * @param compilationId compilation id
      * @param mainClassName main class name
      * @param classBytes map of class names to class bytes
      * @param initializers initializer map, id -&gt; FunctionInitializer
      * @param constants constants array
      */
-    public StoredScript(final int compilationId, final String mainClassName, final Map<String, byte[]> classBytes, final Map<Integer, FunctionInitializer> initializers, final Object[] constants) {
+    public StoredScript(int compilationId, String mainClassName, Map<String, byte[]> classBytes, Map<Integer, FunctionInitializer> initializers, Object[] constants) {
         this.compilationId = compilationId;
         this.mainClassName = mainClassName;
         this.classBytes = classBytes;
@@ -80,15 +78,15 @@ public final class StoredScript implements Serializable {
         return compilationId;
     }
 
-    private Map<String, Class<?>> installClasses(final Source source, final CodeInstaller installer) {
-        final Map<String, Class<?>> installedClasses = new HashMap<>();
-        final byte[]   mainClassBytes = classBytes.get(mainClassName);
-        final Class<?> mainClass      = installer.install(mainClassName, mainClassBytes);
+    private Map<String, Class<?>> installClasses(Source source, CodeInstaller installer) {
+        var installedClasses = new HashMap<String, Class<?>>();
+        var mainClassBytes = classBytes.get(mainClassName);
+        var mainClass = installer.install(mainClassName, mainClassBytes);
 
         installedClasses.put(mainClassName, mainClass);
 
-        for (final Map.Entry<String, byte[]> entry : classBytes.entrySet()) {
-            final String className = entry.getKey();
+        for (var entry : classBytes.entrySet()) {
+            var className = entry.getKey();
 
             if (!className.equals(mainClassName)) {
                 installedClasses.put(className, installer.install(className, entry.getValue()));
@@ -99,17 +97,17 @@ public final class StoredScript implements Serializable {
         return installedClasses;
     }
 
-    FunctionInitializer installFunction(final RecompilableScriptFunctionData data, final CodeInstaller installer) {
-        final Map<String, Class<?>> installedClasses = installClasses(data.getSource(), installer);
+    FunctionInitializer installFunction(RecompilableScriptFunctionData data, CodeInstaller installer) {
+        var installedClasses = installClasses(data.getSource(), installer);
 
         assert initializers != null;
         assert initializers.size() == 1;
-        final FunctionInitializer initializer = initializers.values().iterator().next();
+        var initializer = initializers.values().iterator().next();
 
-        for (int i = 0; i < constants.length; i++) {
+        for (var i = 0; i < constants.length; i++) {
             if (constants[i] instanceof RecompilableScriptFunctionData) {
                 // replace deserialized function data with the ones we already have
-                final RecompilableScriptFunctionData newData = data.getScriptFunctionData(((RecompilableScriptFunctionData) constants[i]).getFunctionNodeId());
+                var newData = data.getScriptFunctionData(((RecompilableScriptFunctionData) constants[i]).getFunctionNodeId());
                 assert newData != null;
                 newData.initTransients(data.getSource(), installer);
                 constants[i] = newData;
@@ -122,20 +120,19 @@ public final class StoredScript implements Serializable {
 
     /**
      * Install as script.
-     *
      * @param source the source
      * @param installer the installer
      * @return main script class
      */
-    Class<?> installScript(final Source source, final CodeInstaller installer) {
+    Class<?> installScript(Source source, CodeInstaller installer) {
 
-        final Map<String, Class<?>> installedClasses = installClasses(source, installer);
+        var installedClasses = installClasses(source, installer);
 
-        for (final Object constant : constants) {
+        for (var constant : constants) {
             if (constant instanceof RecompilableScriptFunctionData) {
-                final RecompilableScriptFunctionData data = (RecompilableScriptFunctionData) constant;
+                var data = (RecompilableScriptFunctionData) constant;
                 data.initTransients(source, installer);
-                final FunctionInitializer initializer = initializers.get(data.getFunctionNodeId());
+                var initializer = initializers.get(data.getFunctionNodeId());
                 if (initializer != null) {
                     initializer.setCode(installedClasses.get(initializer.getClassName()));
                     data.initializeCode(initializer);
@@ -148,14 +145,14 @@ public final class StoredScript implements Serializable {
 
     @Override
     public int hashCode() {
-        int hash = mainClassName.hashCode();
+        var hash = mainClassName.hashCode();
         hash = 31 * hash + classBytes.hashCode();
         hash = 31 * hash + Arrays.hashCode(constants);
         return hash;
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (obj == this) {
             return true;
         }
@@ -163,9 +160,8 @@ public final class StoredScript implements Serializable {
             return false;
         }
 
-        final StoredScript cs = (StoredScript) obj;
-        return mainClassName.equals(cs.mainClassName)
-                && classBytes.equals(cs.classBytes)
-                && Arrays.equals(constants, cs.constants);
+        var cs = (StoredScript) obj;
+        return mainClassName.equals(cs.mainClassName) && classBytes.equals(cs.classBytes) && Arrays.equals(constants, cs.constants);
     }
+
 }

@@ -42,6 +42,7 @@ import nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
  * Optimistic return value filters
  */
 public final class OptimisticReturnFilters {
+
     private static final MethodHandle[] ENSURE_INT;
     private static final MethodHandle[] ENSURE_NUMBER;
 
@@ -53,16 +54,16 @@ public final class OptimisticReturnFilters {
     private static final int FLOAT_TYPE_INDEX;
 
     static {
-        final MethodHandle INT_DOUBLE = findOwnMH("ensureInt", int.class, double.class, int.class);
+        var INT_DOUBLE = findOwnMH("ensureInt", int.class, double.class, int.class);
         ENSURE_INT = new MethodHandle[] {
-                null,
-                INT_DOUBLE,
-                findOwnMH("ensureInt", int.class, Object.class, int.class),
-                findOwnMH("ensureInt", int.class, int.class),
-                findOwnMH("ensureInt", int.class, boolean.class, int.class),
-                findOwnMH("ensureInt", int.class, char.class, int.class),
-                findOwnMH("ensureInt", int.class, long.class, int.class),
-                INT_DOUBLE.asType(INT_DOUBLE.type().changeParameterType(0, float.class)),
+            null,
+            INT_DOUBLE,
+            findOwnMH("ensureInt", int.class, Object.class, int.class),
+            findOwnMH("ensureInt", int.class, int.class),
+            findOwnMH("ensureInt", int.class, boolean.class, int.class),
+            findOwnMH("ensureInt", int.class, char.class, int.class),
+            findOwnMH("ensureInt", int.class, long.class, int.class),
+            INT_DOUBLE.asType(INT_DOUBLE.type().changeParameterType(0, float.class)),
         };
 
         VOID_TYPE_INDEX = ENSURE_INT.length - 5;
@@ -72,58 +73,55 @@ public final class OptimisticReturnFilters {
         FLOAT_TYPE_INDEX = ENSURE_INT.length - 1;
 
         ENSURE_NUMBER = new MethodHandle[] {
-                null,
-                null,
-                findOwnMH("ensureNumber", double.class, Object.class, int.class),
-                ENSURE_INT[VOID_TYPE_INDEX].asType(ENSURE_INT[VOID_TYPE_INDEX].type().changeReturnType(double.class)),
-                ENSURE_INT[BOOLEAN_TYPE_INDEX].asType(ENSURE_INT[BOOLEAN_TYPE_INDEX].type().changeReturnType(double.class)),
-                ENSURE_INT[CHAR_TYPE_INDEX].asType(ENSURE_INT[CHAR_TYPE_INDEX].type().changeReturnType(double.class)),
-                findOwnMH("ensureNumber", double.class, long.class, int.class),
-                null
+            null,
+            null,
+            findOwnMH("ensureNumber", double.class, Object.class, int.class),
+            ENSURE_INT[VOID_TYPE_INDEX].asType(ENSURE_INT[VOID_TYPE_INDEX].type().changeReturnType(double.class)),
+            ENSURE_INT[BOOLEAN_TYPE_INDEX].asType(ENSURE_INT[BOOLEAN_TYPE_INDEX].type().changeReturnType(double.class)),
+            ENSURE_INT[CHAR_TYPE_INDEX].asType(ENSURE_INT[CHAR_TYPE_INDEX].type().changeReturnType(double.class)),
+            findOwnMH("ensureNumber", double.class, long.class, int.class),
+            null
         };
     }
 
     /**
-     * Given a method handle and an expected return type, perform return value filtering
-     * according to the optimistic type coercion rules
+     * Given a method handle and an expected return type, perform return value filtering according to the optimistic type coercion rules
      * @param mh method handle
      * @param expectedReturnType expected return type
      * @param programPoint program point
      * @return filtered method
      */
-    public static MethodHandle filterOptimisticReturnValue(final MethodHandle mh, final Class<?> expectedReturnType, final int programPoint) {
-        if(!isValid(programPoint)) {
+    public static MethodHandle filterOptimisticReturnValue(MethodHandle mh, Class<?> expectedReturnType, int programPoint) {
+        if (!isValid(programPoint)) {
             return mh;
         }
 
-        final MethodType type = mh.type();
-        final Class<?> actualReturnType = type.returnType();
-        if(TypeUtilities.isConvertibleWithoutLoss(actualReturnType, expectedReturnType)) {
+        var type = mh.type();
+        var actualReturnType = type.returnType();
+        if (TypeUtilities.isConvertibleWithoutLoss(actualReturnType, expectedReturnType)) {
             return mh;
         }
 
-        final MethodHandle guard = getOptimisticTypeGuard(expectedReturnType, actualReturnType);
+        var guard = getOptimisticTypeGuard(expectedReturnType, actualReturnType);
         return guard == null ? mh : MH.filterReturnValue(mh, MH.insertArguments(guard, guard.type().parameterCount() - 1, programPoint));
     }
 
     /**
-     * Given a guarded invocation and a callsite descriptor, perform return value filtering
-     * according to the optimistic type coercion rules, using the return value from the descriptor
+     * Given a guarded invocation and a callsite descriptor, perform return value filtering according to the optimistic type coercion rules, using the return value from the descriptor
      * @param inv the invocation
      * @param desc the descriptor
      * @return filtered invocation
      */
-    public static GuardedInvocation filterOptimisticReturnValue(final GuardedInvocation inv, final CallSiteDescriptor desc) {
-        if(!NashornCallSiteDescriptor.isOptimistic(desc)) {
+    public static GuardedInvocation filterOptimisticReturnValue(GuardedInvocation inv, CallSiteDescriptor desc) {
+        if (!NashornCallSiteDescriptor.isOptimistic(desc)) {
             return inv;
         }
-        return inv.replaceMethods(filterOptimisticReturnValue(inv.getInvocation(), desc.getMethodType().returnType(),
-                NashornCallSiteDescriptor.getProgramPoint(desc)), inv.getGuard());
+        return inv.replaceMethods(filterOptimisticReturnValue(inv.getInvocation(), desc.getMethodType().returnType(), NashornCallSiteDescriptor.getProgramPoint(desc)), inv.getGuard());
     }
 
-    private static MethodHandle getOptimisticTypeGuard(final Class<?> actual, final Class<?> provable) {
-        final MethodHandle guard;
-        final int provableTypeIndex = getProvableTypeIndex(provable);
+    private static MethodHandle getOptimisticTypeGuard(Class<?> actual, Class<?> provable) {
+        MethodHandle guard;
+        var provableTypeIndex = getProvableTypeIndex(provable);
         if (actual == int.class) {
             guard = ENSURE_INT[provableTypeIndex];
         } else if (actual == double.class) {
@@ -132,32 +130,29 @@ public final class OptimisticReturnFilters {
             guard = null;
             assert !actual.isPrimitive() : actual + ", " + provable;
         }
-        if(guard != null && !(provable.isPrimitive())) {
-            // Make sure filtering a MethodHandle(...)String works with a filter MethodHandle(Object, int)... Note that
-            // if the return type of the method is incompatible with Number, then the guard will always throw an
-            // UnwarrantedOperationException when invoked, but we must link it anyway as we need the guarded function to
-            // successfully execute and return the non-convertible return value that it'll put into the thrown
-            // UnwarrantedOptimismException.
+        if (guard != null && !(provable.isPrimitive())) {
+            // Make sure filtering a MethodHandle(...)String works with a filter MethodHandle(Object, int)...
+            // Note that if the return type of the method is incompatible with Number, then the guard will always throw an UnwarrantedOperationException when invoked, but we must link it anyway as we need the guarded function to successfully execute and return the non-convertible return value that it'll put into the thrown UnwarrantedOptimismException.
             return guard.asType(guard.type().changeParameterType(0, provable));
         }
         return guard;
     }
 
-    private static int getProvableTypeIndex(final Class<?> provable) {
-        final int accTypeIndex = getAccessorTypeIndex(provable);
-        if(accTypeIndex != -1) {
+    private static int getProvableTypeIndex(Class<?> provable) {
+        var accTypeIndex = getAccessorTypeIndex(provable);
+        if (accTypeIndex != -1) {
             return accTypeIndex;
-        } else if(provable == boolean.class) {
+        } else if (provable == boolean.class) {
             return BOOLEAN_TYPE_INDEX;
-        } else if(provable == void.class) {
+        } else if (provable == void.class) {
             return VOID_TYPE_INDEX;
-        } else if(provable == byte.class || provable == short.class) {
+        } else if (provable == byte.class || provable == short.class) {
             return 0; // never needs a guard, as it's assignable to int
-        } else if(provable == char.class) {
+        } else if (provable == char.class) {
             return CHAR_TYPE_INDEX;
-        } else if(provable == long.class) {
+        } else if (provable == long.class) {
             return LONG_TYPE_INDEX;
-        } else if(provable == float.class) {
+        } else if (provable == float.class) {
             return FLOAT_TYPE_INDEX;
         }
         throw new AssertionError(provable.getName());
@@ -165,7 +160,7 @@ public final class OptimisticReturnFilters {
 
     //maps staticallyProvableCallSiteType to actualCallSiteType, throws exception if impossible
     @SuppressWarnings("unused")
-    private static int ensureInt(final long arg, final int programPoint) {
+    private static int ensureInt(long arg, int programPoint) {
         if (JSType.isRepresentableAsInt(arg)) {
             return (int)arg;
         }
@@ -173,7 +168,7 @@ public final class OptimisticReturnFilters {
     }
 
     @SuppressWarnings("unused")
-    private static int ensureInt(final double arg, final int programPoint) {
+    private static int ensureInt(double arg, int programPoint) {
         if (JSType.isStrictlyRepresentableAsInt(arg)) {
             return (int)arg;
         }
@@ -181,21 +176,19 @@ public final class OptimisticReturnFilters {
     }
 
     /**
-     * Returns the argument value as an int. If the argument is not a wrapper for a primitive numeric type
-     * with a value that can be exactly represented as an int, throw an {@link UnwarrantedOptimismException}.
+     * Returns the argument value as an int.
+     * If the argument is not a wrapper for a primitive numeric type with a value that can be exactly represented as an int, throw an {@link UnwarrantedOptimismException}.
      * This method is only public so that generated script code can use it. See {code CodeGenerator.ENSURE_INT}.
      * @param arg the original argument.
      * @param programPoint the program point used in the exception
      * @return the value of the argument as an int.
-     * @throws UnwarrantedOptimismException if the argument is not a wrapper for a primitive numeric type with
-     * a value that can be exactly represented as an int.
+     * @throws UnwarrantedOptimismException if the argument is not a wrapper for a primitive numeric type with a value that can be exactly represented as an int.
      */
-    public static int ensureInt(final Object arg, final int programPoint) {
-        // NOTE: this doesn't delegate to ensureInt(double, int) as in that case if arg were a Long, it would throw a
-        // (potentially imprecise) Double in the UnwarrantedOptimismException. This way, it will put the correct valued
-        // Long into the exception.
+    public static int ensureInt(Object arg, int programPoint) {
+        // NOTE: this doesn't delegate to ensureInt(double, int) as in that case if arg were a Long, it would throw a (potentially imprecise) Double in the UnwarrantedOptimismException.
+        // This way, it will put the correct valued Long into the exception.
         if (isPrimitiveNumberWrapper(arg)) {
-            final double d = ((Number)arg).doubleValue();
+            var d = ((Number)arg).doubleValue();
             if (JSType.isStrictlyRepresentableAsInt(d)) {
                 return (int)d;
             }
@@ -203,34 +196,33 @@ public final class OptimisticReturnFilters {
         throw UnwarrantedOptimismException.createNarrowest(arg, programPoint);
     }
 
-    private static boolean isPrimitiveNumberWrapper(final Object obj) {
+    private static boolean isPrimitiveNumberWrapper(Object obj) {
         if (obj == null) {
             return false;
         }
-        final Class<?> c = obj.getClass();
-        return c == Integer.class || c == Double.class || c == Long.class ||
-               c ==   Float.class || c ==  Short.class || c == Byte.class;
+        var c = obj.getClass();
+        return c == Integer.class || c == Double.class || c == Long.class || c == Float.class || c == Short.class || c == Byte.class;
     }
 
     @SuppressWarnings("unused")
-    private static int ensureInt(final boolean arg, final int programPoint) {
+    private static int ensureInt(boolean arg, int programPoint) {
         throw new UnwarrantedOptimismException(arg, programPoint, Type.OBJECT);
     }
 
     @SuppressWarnings("unused")
-    private static int ensureInt(final char arg, final int programPoint) {
+    private static int ensureInt(char arg, int programPoint) {
         throw new UnwarrantedOptimismException(arg, programPoint, Type.OBJECT);
     }
 
     @SuppressWarnings("unused")
-    private static int ensureInt(final int programPoint) {
+    private static int ensureInt(int programPoint) {
         // Turns a void into UNDEFINED
         throw new UnwarrantedOptimismException(ScriptRuntime.UNDEFINED, programPoint, Type.OBJECT);
     }
 
 
     @SuppressWarnings("unused")
-    private static double ensureNumber(final long arg, final int programPoint) {
+    private static double ensureNumber(long arg, int programPoint) {
         if (JSType.isRepresentableAsDouble(arg)) {
             return (double) arg;
         }
@@ -238,23 +230,24 @@ public final class OptimisticReturnFilters {
     }
 
     /**
-     * Returns the argument value as a double. If the argument is not a wrapper for a primitive numeric type
-     * that can be represented as double throw an {@link UnwarrantedOptimismException}.
-     * This method is only public so that generated script code can use it. See {code CodeGenerator.ENSURE_NUMBER}.
+     * Returns the argument value as a double.
+     * If the argument is not a wrapper for a primitive numeric type that can be represented as double throw an {@link UnwarrantedOptimismException}.
+     * This method is only public so that generated script code can use it.
+     * See {code CodeGenerator.ENSURE_NUMBER}.
      * @param arg the original argument.
      * @param programPoint the program point used in the exception
      * @return the value of the argument as a double.
      * @throws UnwarrantedOptimismException if the argument is not a wrapper for a primitive numeric type.
      */
-    public static double ensureNumber(final Object arg, final int programPoint) {
-        if (isPrimitiveNumberWrapper(arg)
-                && (arg.getClass() != Long.class || JSType.isRepresentableAsDouble((Long) arg))) {
+    public static double ensureNumber(Object arg, int programPoint) {
+        if (isPrimitiveNumberWrapper(arg) && (arg.getClass() != Long.class || JSType.isRepresentableAsDouble((Long) arg))) {
             return ((Number) arg).doubleValue();
         }
         throw new UnwarrantedOptimismException(arg, programPoint, Type.OBJECT);
     }
 
-    private static MethodHandle findOwnMH(final String name, final Class<?> rtype, final Class<?>... types) {
+    private static MethodHandle findOwnMH(String name, Class<?> rtype, Class<?>... types) {
         return MH.findStatic(MethodHandles.lookup(), OptimisticReturnFilters.class, name, MH.type(rtype, types));
     }
+
 }

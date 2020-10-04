@@ -38,10 +38,12 @@ import nashorn.internal.runtime.ScriptObject;
 
 /**
  * ECMA 15.11.6.1 EvalError
- *
  */
 @ScriptClass("Error")
 public final class NativeEvalError extends ScriptObject {
+
+    // initialized by nasgen
+    private static PropertyMap $nasgenmap$;
 
     /** message property in instance */
     @Property(name = NativeError.MESSAGE, attributes = Attribute.NOT_ENUMERABLE)
@@ -59,11 +61,8 @@ public final class NativeEvalError extends ScriptObject {
     @Property(attributes = Attribute.NOT_ENUMERABLE)
     public Object nashornException;
 
-    // initialized by nasgen
-    private static PropertyMap $nasgenmap$;
-
     @SuppressWarnings("LeakingThisInConstructor")
-    private NativeEvalError(final Object msg, final ScriptObject proto, final PropertyMap map) {
+    private NativeEvalError(Object msg, ScriptObject proto, PropertyMap map) {
         super(proto, map);
         if (msg != UNDEFINED) {
             this.instMessage = JSType.toString(msg);
@@ -73,11 +72,11 @@ public final class NativeEvalError extends ScriptObject {
         NativeError.initException(this);
     }
 
-    NativeEvalError(final Object msg, final Global global) {
+    NativeEvalError(Object msg, Global global) {
         this(msg, global.getEvalErrorPrototype(), $nasgenmap$);
     }
 
-    private NativeEvalError(final Object msg) {
+    private NativeEvalError(Object msg) {
         this(msg, Global.instance());
     }
 
@@ -88,17 +87,10 @@ public final class NativeEvalError extends ScriptObject {
 
     /**
      * ECMA 15.11.6.1 EvalError
-     *
-     * Constructor
-     *
-     * @param newObj was this error instantiated with the new operator
-     * @param self   self reference
-     * @param msg    error message
-     *
-     * @return new EvalError
      */
     @Constructor(name = "EvalError")
-    public static NativeEvalError constructor(final boolean newObj, final Object self, final Object msg) {
+    public static NativeEvalError constructor(boolean newObj, Object self, Object msg) {
         return new NativeEvalError(msg);
     }
+
 }

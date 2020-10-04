@@ -32,12 +32,11 @@ import nashorn.internal.ir.visitor.NodeVisitor;
 import nashorn.internal.runtime.Scope;
 
 /**
- * Synthetic AST node that represents loading of the scope object and invocation of the {@link Scope#getSplitState()}
- * method on it. It has no JavaScript source representation and only occurs in synthetic functions created by
- * the split-into-functions transformation.
+ * Synthetic AST node that represents loading of the scope object and invocation of the {@link Scope#getSplitState()} method on it.
+ *
+ * It has no JavaScript source representation and only occurs in synthetic functions created by the split-into-functions transformation.
  */
 public final class GetSplitState extends Expression {
-    private static final long serialVersionUID = 1L;
 
     /** The sole instance of this AST node. */
     @Ignore
@@ -53,12 +52,12 @@ public final class GetSplitState extends Expression {
     }
 
     @Override
-    public Node accept(final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(NodeVisitor<? extends LexicalContext> visitor) {
         return visitor.enterGetSplitState(this) ? visitor.leaveGetSplitState(this) : this;
     }
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printType) {
+    public void toString(StringBuilder sb, boolean printType) {
         if (printType) {
             sb.append("{I}");
         }
@@ -68,4 +67,5 @@ public final class GetSplitState extends Expression {
     private Object readResolve() {
         return INSTANCE;
     }
+
 }

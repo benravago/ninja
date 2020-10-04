@@ -38,10 +38,12 @@ import nashorn.internal.runtime.ScriptObject;
 
 /**
  * ECMA 15.11.6.4 SyntaxError
- *
  */
 @ScriptClass("Error")
 public final class NativeSyntaxError extends ScriptObject {
+
+    // initialized by nasgen
+    private static PropertyMap $nasgenmap$;
 
     /** message property in instance */
     @Property(name = NativeError.MESSAGE, attributes = Attribute.NOT_ENUMERABLE)
@@ -59,11 +61,8 @@ public final class NativeSyntaxError extends ScriptObject {
     @Property(attributes = Attribute.NOT_ENUMERABLE)
     public Object nashornException;
 
-    // initialized by nasgen
-    private static PropertyMap $nasgenmap$;
-
     @SuppressWarnings("LeakingThisInConstructor")
-    NativeSyntaxError(final Object msg, final Global global) {
+    NativeSyntaxError(Object msg, Global global) {
         super(global.getSyntaxErrorPrototype(), $nasgenmap$);
         if (msg != UNDEFINED) {
             this.instMessage = JSType.toString(msg);
@@ -73,7 +72,7 @@ public final class NativeSyntaxError extends ScriptObject {
         NativeError.initException(this);
     }
 
-    private NativeSyntaxError(final Object msg) {
+    private NativeSyntaxError(Object msg) {
         this(msg, Global.instance());
     }
 
@@ -84,19 +83,12 @@ public final class NativeSyntaxError extends ScriptObject {
 
     /**
      * ECMA 15.11.6.4 SyntaxError
-     *
-     * Constructor
-     *
-     * @param newObj was this error instantiated with the new operator
-     * @param self   self reference
-     * @param msg    error message
-     *
-     * @return new SyntaxError
      */
     @Constructor(name = "SyntaxError")
-    public static NativeSyntaxError constructor(final boolean newObj, final Object self, final Object msg) {
+    public static NativeSyntaxError constructor(boolean newObj, Object self, Object msg) {
         return new NativeSyntaxError(msg);
     }
+
 }
 
 

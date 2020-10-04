@@ -51,6 +51,7 @@ import nashorn.internal.runtime.linker.Bootstrap;
  * Representation for ECMAScript types - this maps directly to the ECMA script standard
  */
 public enum JSType {
+
     /** The undefined type */
     UNDEFINED("undefined"),
 
@@ -147,25 +148,25 @@ public enum JSType {
     public static final Call THROW_UNWARRANTED = staticCall(JSTYPE_LOOKUP, JSType.class, "throwUnwarrantedOptimismException", Object.class, Object.class, int.class);
 
     /** Add exact wrapper for potentially overflowing integer operations */
-    public static final Call ADD_EXACT       = staticCall(JSTYPE_LOOKUP, JSType.class, "addExact", int.class, int.class, int.class, int.class);
+    public static final Call ADD_EXACT = staticCall(JSTYPE_LOOKUP, JSType.class, "addExact", int.class, int.class, int.class, int.class);
 
     /** Sub exact wrapper for potentially overflowing integer operations */
-    public static final Call SUB_EXACT       = staticCall(JSTYPE_LOOKUP, JSType.class, "subExact", int.class, int.class, int.class, int.class);
+    public static final Call SUB_EXACT = staticCall(JSTYPE_LOOKUP, JSType.class, "subExact", int.class, int.class, int.class, int.class);
 
     /** Multiply exact wrapper for potentially overflowing integer operations */
-    public static final Call MUL_EXACT       = staticCall(JSTYPE_LOOKUP, JSType.class, "mulExact", int.class, int.class, int.class, int.class);
+    public static final Call MUL_EXACT = staticCall(JSTYPE_LOOKUP, JSType.class, "mulExact", int.class, int.class, int.class, int.class);
 
     /** Div exact wrapper for potentially integer division that turns into float point */
-    public static final Call DIV_EXACT       = staticCall(JSTYPE_LOOKUP, JSType.class, "divExact", int.class, int.class, int.class, int.class);
+    public static final Call DIV_EXACT = staticCall(JSTYPE_LOOKUP, JSType.class, "divExact", int.class, int.class, int.class, int.class);
 
     /** Div zero wrapper for integer division that handles (0/0)|0 == 0 */
-    public static final Call DIV_ZERO        = staticCall(JSTYPE_LOOKUP, JSType.class, "divZero", int.class, int.class, int.class);
+    public static final Call DIV_ZERO = staticCall(JSTYPE_LOOKUP, JSType.class, "divZero", int.class, int.class, int.class);
 
     /** Mod zero wrapper for integer division that handles (0%0)|0 == 0 */
-    public static final Call REM_ZERO        = staticCall(JSTYPE_LOOKUP, JSType.class, "remZero", int.class, int.class, int.class);
+    public static final Call REM_ZERO = staticCall(JSTYPE_LOOKUP, JSType.class, "remZero", int.class, int.class, int.class);
 
     /** Mod exact wrapper for potentially integer remainders that turns into float point */
-    public static final Call REM_EXACT       = staticCall(JSTYPE_LOOKUP, JSType.class, "remExact", int.class, int.class, int.class, int.class);
+    public static final Call REM_EXACT = staticCall(JSTYPE_LOOKUP, JSType.class, "remExact", int.class, int.class, int.class, int.class);
 
     /** Decrement exact wrapper for potentially overflowing integer operations */
     public static final Call DECREMENT_EXACT = staticCall(JSTYPE_LOOKUP, JSType.class, "decrementExact",   int.class, int.class, int.class);
@@ -174,7 +175,7 @@ public enum JSType {
     public static final Call INCREMENT_EXACT = staticCall(JSTYPE_LOOKUP, JSType.class, "incrementExact",   int.class, int.class, int.class);
 
     /** Negate exact exact wrapper for potentially overflowing integer operations */
-    public static final Call NEGATE_EXACT         = staticCall(JSTYPE_LOOKUP, JSType.class, "negateExact", int.class, int.class, int.class);
+    public static final Call NEGATE_EXACT = staticCall(JSTYPE_LOOKUP, JSType.class, "negateExact", int.class, int.class, int.class);
 
     /** Method handle to convert a JS Object to a Java array. */
     public static final Call TO_JAVA_ARRAY = staticCall(JSTYPE_LOOKUP, JSType.class, "toJavaArray", Object.class, Object.class, Class.class);
@@ -192,21 +193,23 @@ public enum JSType {
     public static final Call IS_NUMBER = staticCall(JSTYPE_LOOKUP, JSType.class, "isNumber", boolean.class, Object.class);
 
     /**
-     * The list of available accessor types in width order. This order is used for type guesses narrow{@literal ->} wide
-     *  in the dual--fields world
+     * The list of available accessor types in width order. This order is used for type guesses narrow{@literal ->} wide in the dual--fields world
      */
-    private static final List<Type> ACCESSOR_TYPES = Collections.unmodifiableList(
-            Arrays.asList(
-                Type.INT,
-                Type.NUMBER,
-                Type.OBJECT));
+    private static final List<Type> ACCESSOR_TYPES = toUnmodifiableList(
+        Type.INT,
+        Type.NUMBER,
+        Type.OBJECT
+    );
 
     /** table index for undefined type - hard coded so it can be used in switches at compile time */
     public static final int TYPE_UNDEFINED_INDEX = -1;
+
     /** table index for integer type - hard coded so it can be used in switches at compile time */
-    public static final int TYPE_INT_INDEX    = 0; //getAccessorTypeIndex(int.class);
+    public static final int TYPE_INT_INDEX = 0; //getAccessorTypeIndex(int.class);
+
     /** table index for double type - hard coded so it can be used in switches at compile time */
     public static final int TYPE_DOUBLE_INDEX = 1; //getAccessorTypeIndex(double.class);
+
     /** table index for object type - hard coded so it can be used in switches at compile time */
     public static final int TYPE_OBJECT_INDEX = 2; //getAccessorTypeIndex(Object.class);
 
@@ -218,8 +221,8 @@ public enum JSType {
     );
 
     /**
-     * object conversion quickies with JS semantics - used for return value and parameter filter, optimistic
-     * throws exception upon incompatible type (asking for a narrower one than the storage)
+     * Object conversion quickies with JS semantics - used for return value and parameter filter, optimistic.
+     * Throws exception upon incompatible type (asking for a narrower one than the storage)
      */
     public static final List<MethodHandle> CONVERT_OBJECT_OPTIMISTIC = toUnmodifiableList(
         JSType.TO_INT32_OPTIMISTIC.methodHandle(),
@@ -229,8 +232,10 @@ public enum JSType {
 
     /** The value of Undefined cast to an int32 */
     public static final int    UNDEFINED_INT    = 0;
+
     /** The value of Undefined cast to a long */
     public static final long   UNDEFINED_LONG   = 0L;
+
     /** The value of Undefined cast to a double */
     public static final double UNDEFINED_DOUBLE = Double.NaN;
 
@@ -238,11 +243,8 @@ public enum JSType {
     private static final long MAX_PRECISE_DOUBLE = 1L << 53;
     private static final long MIN_PRECISE_DOUBLE = -MAX_PRECISE_DOUBLE;
 
-    /**
-     * Method handles for getters that return undefined coerced
-     * to the appropriate type
-     */
-    public static final List<MethodHandle> GET_UNDEFINED = toUnmodifiableList(
+    /** Method handles for getters that return undefined coerced to the appropriate type */
+    public static final List<MethodHandle> GET_UNDEFINED = List.of(
         MH.constant(int.class, UNDEFINED_INT),
         MH.constant(double.class, UNDEFINED_DOUBLE),
         MH.constant(Object.class, Undefined.getUndefined())
@@ -252,16 +254,14 @@ public enum JSType {
 
     /**
      * Constructor
-     *
      * @param typeName the type name
      */
-    private JSType(final String typeName) {
+    private JSType(String typeName) {
         this.typeName = typeName;
     }
 
     /**
      * The external type name as returned by ECMAScript "typeof" operator
-     *
      * @return type name for this type
      */
     public final String typeName() {
@@ -270,83 +270,62 @@ public enum JSType {
 
     /**
      * Return the JSType for a given object
-     *
-     * @param obj an object
-     *
-     * @return the JSType for the object
      */
-    public static JSType of(final Object obj) {
+    public static JSType of(Object obj) {
         // Order of these statements is tuned for performance (see JDK-8024476)
         if (obj == null) {
             return JSType.NULL;
         }
-
         if (obj instanceof ScriptObject) {
             return obj instanceof ScriptFunction ? JSType.FUNCTION : JSType.OBJECT;
         }
-
         if (obj instanceof Boolean) {
             return JSType.BOOLEAN;
         }
-
         if (isString(obj)) {
             return JSType.STRING;
         }
-
         if (isNumber(obj)) {
             return JSType.NUMBER;
         }
-
         if (obj instanceof Symbol) {
             return JSType.SYMBOL;
         }
-
         if (obj == ScriptRuntime.UNDEFINED) {
             return JSType.UNDEFINED;
         }
-
         return Bootstrap.isCallable(obj) ? JSType.FUNCTION : JSType.OBJECT;
     }
 
     /**
-     * Similar to {@link #of(Object)}, but does not distinguish between {@link #FUNCTION} and {@link #OBJECT}, returning
-     * {@link #OBJECT} in both cases. The distinction is costly, and the EQ and STRICT_EQ predicates don't care about it
-     * so we maintain this version for their use.
-     *
+     * Similar to {@link #of(Object)}, but does not distinguish between {@link #FUNCTION} and {@link #OBJECT}, returning {@link #OBJECT} in both cases.
+     * The distinction is costly, and the EQ and STRICT_EQ predicates don't care about it so we maintain this version for their use.
      * @param obj an object
-     *
      * @return the JSType for the object; returns {@link #OBJECT} instead of {@link #FUNCTION} for functions.
      */
-    public static JSType ofNoFunction(final Object obj) {
+    public static JSType ofNoFunction(Object obj) {
         // Order of these statements is tuned for performance (see JDK-8024476)
         if (obj == null) {
             return JSType.NULL;
         }
-
         if (obj instanceof ScriptObject) {
             return JSType.OBJECT;
         }
-
         if (obj instanceof Boolean) {
             return JSType.BOOLEAN;
         }
-
         if (isString(obj)) {
             return JSType.STRING;
         }
-
         if (isNumber(obj)) {
             return JSType.NUMBER;
         }
-
         if (obj == ScriptRuntime.UNDEFINED) {
             return JSType.UNDEFINED;
         }
-
         if (obj instanceof Symbol) {
             return JSType.SYMBOL;
         }
-
         return JSType.OBJECT;
     }
 
@@ -354,53 +333,47 @@ public enum JSType {
      * Void return method handle glue
      */
     public static void voidReturn() {
-        //empty
-        //TODO: fix up SetMethodCreator better so we don't need this stupid thing
+        // empty
+        // TODO: fix up SetMethodCreator better so we don't need this stupid thing
     }
 
     /**
      * Returns true if double number can be represented as an int
-     *
      * @param number a long to inspect
-     *
      * @return true for int representable longs
      */
-    public static boolean isRepresentableAsInt(final long number) {
+    public static boolean isRepresentableAsInt(long number) {
         return (int)number == number;
     }
 
     /**
-     * Returns true if double number can be represented as an int. Note that it returns true for negative
-     * zero. If you need to exclude negative zero, use {@link #isStrictlyRepresentableAsInt(double)}.
-     *
+     * Returns true if double number can be represented as an int.
+     * Note that it returns true for negative zero.
+     * If you need to exclude negative zero, use {@link #isStrictlyRepresentableAsInt(double)}.
      * @param number a double to inspect
-     *
      * @return true for int representable doubles
      */
-    public static boolean isRepresentableAsInt(final double number) {
+    public static boolean isRepresentableAsInt(double number) {
         return (int)number == number;
     }
 
     /**
-     * Returns true if double number can be represented as an int. Note that it returns false for negative
-     * zero. If you don't need to distinguish negative zero, use {@link #isRepresentableAsInt(double)}.
-     *
+     * Returns true if double number can be represented as an int.
+     * Note that it returns false for negative zero.
+     * If you don't need to distinguish negative zero, use {@link #isRepresentableAsInt(double)}.
      * @param number a double to inspect
-     *
      * @return true for int representable doubles
      */
-    public static boolean isStrictlyRepresentableAsInt(final double number) {
+    public static boolean isStrictlyRepresentableAsInt(double number) {
         return isRepresentableAsInt(number) && isNotNegativeZero(number);
     }
 
     /**
      * Returns true if Object can be represented as an int
-     *
      * @param obj an object to inspect
-     *
      * @return true for int representable objects
      */
-    public static boolean isRepresentableAsInt(final Object obj) {
+    public static boolean isRepresentableAsInt(Object obj) {
         if (obj instanceof Number) {
             return isRepresentableAsInt(((Number)obj).doubleValue());
         }
@@ -408,13 +381,12 @@ public enum JSType {
     }
 
     /**
-     * Returns true if double number can be represented as a long. Note that it returns true for negative
-     * zero.
-     *
+     * Returns true if double number can be represented as a long.
+     * Note that it returns true for negative zero.
      * @param number a double to inspect
      * @return true for long representable doubles
      */
-    public static boolean isRepresentableAsLong(final double number) {
+    public static boolean isRepresentableAsLong(double number) {
         return (long)number == number;
     }
 
@@ -423,7 +395,7 @@ public enum JSType {
      * @param number a long number
      * @return true if the double representation does not lose precision
      */
-    public static boolean isRepresentableAsDouble(final long number) {
+    public static boolean isRepresentableAsDouble(long number) {
         return MAX_PRECISE_DOUBLE >= number && number >= MIN_PRECISE_DOUBLE;
     }
 
@@ -432,47 +404,36 @@ public enum JSType {
      * @param number the number to test
      * @return true if it is not the negative zero, false otherwise.
      */
-    private static boolean isNotNegativeZero(final double number) {
+    private static boolean isNotNegativeZero(double number) {
         return Double.doubleToRawLongBits(number) != 0x8000000000000000L;
     }
 
     /**
      * Check whether an object is primitive
-     *
      * @param obj an object
-     *
      * @return true if object is primitive (includes null and undefined)
      */
-    public static boolean isPrimitive(final Object obj) {
-        return obj == null ||
-               obj == ScriptRuntime.UNDEFINED ||
-               isString(obj) ||
-               isNumber(obj) ||
-               obj instanceof Boolean ||
-               obj instanceof Symbol;
+    public static boolean isPrimitive(Object obj) {
+        return obj == null || obj == ScriptRuntime.UNDEFINED || isString(obj) || isNumber(obj) || obj instanceof Boolean || obj instanceof Symbol;
     }
 
    /**
     * Primitive converter for an object
-    *
     * @param obj an object
-    *
     * @return primitive form of the object
     */
-    public static Object toPrimitive(final Object obj) {
+    public static Object toPrimitive(Object obj) {
         return toPrimitive(obj, null);
     }
 
     /**
      * Primitive converter for an object including type hint
      * See ECMA 9.1 ToPrimitive
-     *
      * @param obj  an object
      * @param hint a type hint
-     *
      * @return the primitive form of the object
      */
-    public static Object toPrimitive(final Object obj, final Class<?> hint) {
+    public static Object toPrimitive(Object obj, Class<?> hint) {
         if (obj instanceof ScriptObject) {
             return toPrimitive((ScriptObject)obj, hint);
         } else if (isPrimitive(obj)) {
@@ -482,17 +443,17 @@ public enum JSType {
         } else if (obj instanceof JSObject) {
             return toPrimitive((JSObject)obj, hint);
         } else if (obj instanceof StaticClass) {
-            final String name = ((StaticClass)obj).getRepresentedClass().getName();
+            var name = ((StaticClass)obj).getRepresentedClass().getName();
             return new StringBuilder(12 + name.length()).append("[JavaClass ").append(name).append(']').toString();
         }
         return obj.toString();
     }
 
-    private static Object toPrimitive(final ScriptObject sobj, final Class<?> hint) {
+    private static Object toPrimitive(ScriptObject sobj, Class<?> hint) {
         return requirePrimitive(sobj.getDefaultValue(hint));
     }
 
-    private static Object requirePrimitive(final Object result) {
+    private static Object requirePrimitive(Object result) {
         if (!isPrimitive(result)) {
             throw typeError("bad.default.value", result.toString());
         }
@@ -500,76 +461,58 @@ public enum JSType {
     }
 
     /**
-     * Primitive converter for a {@link JSObject} including type hint. Invokes
-     * {@link JSObject#getDefaultValue(Class)} and translates any thrown {@link UnsupportedOperationException}
-     * to a ECMAScript {@code TypeError}.
+     * Primitive converter for a {@link JSObject} including type hint.
+     * Invokes {@link JSObject#getDefaultValue(Class)} and translates any thrown {@link UnsupportedOperationException} to a ECMAScript {@code TypeError}.
      * See ECMA 9.1 ToPrimitive
-     *
      * @param jsobj  a JSObject
      * @param hint a type hint
-     *
      * @return the primitive form of the JSObject
      */
-    public static Object toPrimitive(final JSObject jsobj, final Class<?> hint) {
+    public static Object toPrimitive(JSObject jsobj, Class<?> hint) {
         try {
             return requirePrimitive(jsobj.getDefaultValue(hint));
-        } catch (final UnsupportedOperationException e) {
+        } catch (UnsupportedOperationException e) {
             throw new ECMAException(Context.getGlobal().newTypeError(e.getMessage()), e);
         }
     }
 
     /**
      * Combines a hintless toPrimitive and a toString call.
-     *
      * @param obj  an object
-     *
      * @return the string form of the primitive form of the object
      */
-    public static String toPrimitiveToString(final Object obj) {
+    public static String toPrimitiveToString(Object obj) {
         return toString(toPrimitive(obj));
     }
 
     /**
      * Like {@link #toPrimitiveToString(Object)}, but avoids conversion of ConsString to String.
-     *
      * @param obj  an object
      * @return the CharSequence form of the primitive form of the object
      */
-    public static CharSequence toPrimitiveToCharSequence(final Object obj) {
+    public static CharSequence toPrimitiveToCharSequence(Object obj) {
         return toCharSequence(toPrimitive(obj));
     }
 
     /**
      * JavaScript compliant conversion of number to boolean
-     *
-     * @param num a number
-     *
-     * @return a boolean
      */
-    public static boolean toBoolean(final double num) {
+    public static boolean toBoolean(double num) {
         return num != 0 && !Double.isNaN(num);
     }
 
     /**
      * JavaScript compliant conversion of int to boolean
-     *
-     * @param num an int
-     *
-     * @return a boolean
      */
-    public static boolean toBoolean(final int num) {
+    public static boolean toBoolean(int num) {
         return num != 0;
     }
 
     /**
      * JavaScript compliant conversion of Object to boolean
      * See ECMA 9.2 ToBoolean
-     *
-     * @param obj an object
-     *
-     * @return a boolean
      */
-    public static boolean toBoolean(final Object obj) {
+    public static boolean toBoolean(Object obj) {
         if (obj instanceof Boolean) {
             return (Boolean)obj;
         }
@@ -579,7 +522,7 @@ public enum JSType {
         }
 
         if (obj instanceof Number) {
-            final double num = ((Number)obj).doubleValue();
+            var num = ((Number)obj).doubleValue();
             return num != 0 && !Double.isNaN(num);
         }
 
@@ -594,12 +537,8 @@ public enum JSType {
     /**
      * JavaScript compliant converter of Object to String
      * See ECMA 9.8 ToString
-     *
-     * @param obj an object
-     *
-     * @return a string
      */
-    public static String toString(final Object obj) {
+    public static String toString(Object obj) {
         return toStringImpl(obj, false);
     }
 
@@ -608,18 +547,16 @@ public enum JSType {
      * @param obj key object
      * @return property key
      */
-    public static Object toPropertyKey(final Object obj) {
+    public static Object toPropertyKey(Object obj) {
         return obj instanceof Symbol ? obj : toStringImpl(obj, false);
     }
 
     /**
-     * If obj is an instance of {@link ConsString} cast to CharSequence, else return
-     * result of {@link #toString(Object)}.
-     *
+     * If obj is an instance of {@link ConsString} cast to CharSequence, else return result of {@link #toString(Object)}.
      * @param obj an object
      * @return an instance of String or ConsString
      */
-    public static CharSequence toCharSequence(final Object obj) {
+    public static CharSequence toCharSequence(Object obj) {
         if (obj instanceof ConsString) {
             return (CharSequence) obj;
         }
@@ -631,23 +568,19 @@ public enum JSType {
      * @param obj the object
      * @return true if the object represents a primitive JavaScript string value.
      */
-    public static boolean isString(final Object obj) {
+    public static boolean isString(Object obj) {
         return obj instanceof String || obj instanceof ConsString;
     }
 
     /**
-     * Returns true if object represents a primitive JavaScript number value. Note that we only
-     * treat wrapper objects of Java primitive number types as objects that can be fully represented
-     * as JavaScript numbers (doubles). This means we exclude {@code long} and special purpose Number
-     * instances such as {@link java.util.concurrent.atomic.AtomicInteger}, as well as arbitrary precision
-     * numbers such as {@link java.math.BigInteger}.
-     *
+     * Returns true if object represents a primitive JavaScript number value.
+     * Note that we only treat wrapper objects of Java primitive number types as objects that can be fully represented as JavaScript numbers (doubles). This means we exclude {@code long} and special purpose Number instances such as {@link java.util.concurrent.atomic.AtomicInteger}, as well as arbitrary precision numbers such as {@link java.math.BigInteger}.
      * @param obj the object
      * @return true if the object represents a primitive JavaScript number value.
      */
-    public static boolean isNumber(final Object obj) {
+    public static boolean isNumber(Object obj) {
         if (obj != null) {
-            final Class<?> c = obj.getClass();
+            var c = obj.getClass();
             return c == Integer.class || c == Double.class || c == Float.class || c == Short.class || c == Byte.class;
         }
         return false;
@@ -655,86 +588,68 @@ public enum JSType {
 
     /**
      * JavaScript compliant conversion of integer to String
-     *
-     * @param num an integer
-     *
-     * @return a string
      */
-    public static String toString(final int num) {
+    public static String toString(int num) {
         return Integer.toString(num);
     }
 
     /**
      * JavaScript compliant conversion of number to String
      * See ECMA 9.8.1
-     *
-     * @param num a number
-     *
-     * @return a string
      */
-    public static String toString(final double num) {
+    public static String toString(double num) {
         if (isRepresentableAsInt(num)) {
             return Integer.toString((int)num);
         }
-
         if (num == Double.POSITIVE_INFINITY) {
             return "Infinity";
         }
-
         if (num == Double.NEGATIVE_INFINITY) {
             return "-Infinity";
         }
-
         if (Double.isNaN(num)) {
             return "NaN";
         }
-
         return Double.toString(num); // DoubleConversion.toShortestString(num);
     }
 
     /**
      * JavaScript compliant conversion of number to String
-     *
      * @param num   a number
      * @param radix a radix for the conversion
-     *
      * @return a string
      */
-    public static String toString(final double num, final int radix) {
+    public static String toString(double num, int radix) {
         assert radix >= 2 && radix <= 36 : "invalid radix";
 
         if (isRepresentableAsInt(num)) {
             return Integer.toString((int)num, radix);
         }
-
         if (num == Double.POSITIVE_INFINITY) {
             return "Infinity";
         }
-
         if (num == Double.NEGATIVE_INFINITY) {
             return "-Infinity";
         }
-
         if (Double.isNaN(num)) {
             return "NaN";
         }
-
         if (num == 0.0) {
             return "0";
         }
 
-        final String chars     = "0123456789abcdefghijklmnopqrstuvwxyz";
-        final StringBuilder sb = new StringBuilder();
+        var chars = "0123456789abcdefghijklmnopqrstuvwxyz";
+        var sb = new StringBuilder();
 
-        final boolean negative  = num < 0.0;
-        final double  signedNum = negative ? -num : num;
+        var negative  = num < 0.0;
+        var signedNum = negative ? -num : num;
 
-        double intPart = Math.floor(signedNum);
-        double decPart = signedNum - intPart;
+        var intPart = Math.floor(signedNum);
+        var decPart = signedNum - intPart;
 
         // encode integer part from least significant digit, then reverse
         do {
-            final double remainder = intPart % radix;
+            var remainder = intPart % radix;
             sb.append(chars.charAt((int) remainder));
             intPart -= remainder;
             intPart /= radix;
@@ -747,11 +662,11 @@ public enum JSType {
 
         // encode decimal part
         if (decPart > 0.0) {
-            final int dot = sb.length();
+            var dot = sb.length();
             sb.append('.');
             do {
                 decPart *= radix;
-                final double d = Math.floor(decPart);
+                var d = Math.floor(decPart);
                 sb.append(chars.charAt((int)d));
                 decPart -= d;
             } while (decPart > 0.0 && sb.length() - dot < 1100);
@@ -764,12 +679,9 @@ public enum JSType {
     /**
      * JavaScript compliant conversion of Object to number
      * See ECMA 9.3 ToNumber
-     *
-     * @param obj  an object
-     *
-     * @return a number
-     */
-    public static double toNumber(final Object obj) {
+
+*/
+    public static double toNumber(Object obj) {
         if (obj instanceof Double) {
             return (Double)obj;
         }
@@ -780,28 +692,19 @@ public enum JSType {
     }
 
     /**
-     * Converts an object for a comparison with a number. Almost identical to {@link #toNumber(Object)} but
-     * converts {@code null} to {@code NaN} instead of zero, so it won't compare equal to zero.
-     *
-     * @param obj  an object
-     *
-     * @return a number
+     * Converts an object for a comparison with a number.
+     * Almost identical to {@link #toNumber(Object)} but converts {@code null} to {@code NaN} instead of zero, so it won't compare equal to zero.
      */
-    public static double toNumberForEq(final Object obj) {
-        // we are not able to detect Symbol objects from codegen, so we need to
-        // handle them here to avoid throwing an error in toNumber conversion.
+    public static double toNumberForEq(Object obj) {
+        // we are not able to detect Symbol objects from codegen, so we need to handle them here to avoid throwing an error in toNumber conversion.
         return obj == null || obj instanceof Symbol || obj instanceof NativeSymbol ? Double.NaN : toNumber(obj);
     }
 
     /**
-     * Converts an object for strict comparison with a number. Returns {@code NaN} for any object that is not
-     * a {@link Number}, so only boxed numerics can compare strictly equal to numbers.
-     *
-     * @param obj  an object
-     *
-     * @return a number
+     * Converts an object for strict comparison with a number.
+     * Returns {@code NaN} for any object that is not a {@link Number}, so only boxed numerics can compare strictly equal to numbers.
      */
-    public static double toNumberForStrictEq(final Object obj) {
+    public static double toNumberForStrictEq(Object obj) {
         if (obj instanceof Double) {
             return (Double)obj;
         }
@@ -812,12 +715,12 @@ public enum JSType {
     }
 
     /**
-     * Convert a long to the narrowest JavaScript Number type. This returns either a
-     * {@link Integer} or {@link Double} depending on the magnitude of {@code l}.
+     * Convert a long to the narrowest JavaScript Number type.
+     * This returns either a {@link Integer} or {@link Double} depending on the magnitude of {@code l}.
      * @param l a long value
      * @return the value converted to Integer or Double
      */
-    public static Number toNarrowestNumber(final long l) {
+    public static Number toNarrowestNumber(long l) {
         if (isRepresentableAsInt(l)) {
             return Integer.valueOf((int) l);
         } else {
@@ -828,37 +731,32 @@ public enum JSType {
     /**
      * JavaScript compliant conversion of Boolean to number
      * See ECMA 9.3 ToNumber
-     *
      * @param b a boolean
-     *
      * @return JS numeric value of the boolean: 1.0 or 0.0
      */
-    public static double toNumber(final Boolean b) {
+    public static double toNumber(Boolean b) {
         return b ? 1d : +0d;
     }
 
     /**
      * JavaScript compliant conversion of Object to number
      * See ECMA 9.3 ToNumber
-     *
      * @param obj  an object
-     *
      * @return a number
      */
-    public static double toNumber(final ScriptObject obj) {
+    public static double toNumber(ScriptObject obj) {
         return toNumber(toPrimitive(obj, Number.class));
     }
 
     /**
      * Optimistic number conversion - throws UnwarrantedOptimismException if Object
-     *
      * @param obj           object to convert
      * @param programPoint  program point
      * @return double
      */
-    public static double toNumberOptimistic(final Object obj, final int programPoint) {
+    public static double toNumberOptimistic(Object obj, int programPoint) {
         if (obj != null) {
-            final Class<?> clz = obj.getClass();
+            var clz = obj.getClass();
             if (clz == Double.class || clz == Integer.class || clz == Long.class) {
                 return ((Number)obj).doubleValue();
             }
@@ -867,70 +765,59 @@ public enum JSType {
     }
 
     /**
-     * Object to number conversion that delegates to either {@link #toNumber(Object)} or to
-     * {@link #toNumberOptimistic(Object, int)} depending on whether the program point is valid or not.
+     * Object to number conversion that delegates to either {@link #toNumber(Object)} or to {@link #toNumberOptimistic(Object, int)} depending on whether the program point is valid or not.
      * @param obj the object to convert
      * @param programPoint the program point; can be invalid.
      * @return the value converted to a number
      * @throws UnwarrantedOptimismException if the value can't be represented as a number and the program point is valid.
      */
-    public static double toNumberMaybeOptimistic(final Object obj, final int programPoint) {
+    public static double toNumberMaybeOptimistic(Object obj, int programPoint) {
         return UnwarrantedOptimismException.isValid(programPoint) ? toNumberOptimistic(obj, programPoint) : toNumber(obj);
     }
 
     /**
      * Digit representation for a character
-     *
      * @param ch     a character
      * @param radix  radix
-     *
      * @return the digit for this character
      */
-    public static int digit(final char ch, final int radix) {
+    public static int digit(char ch, int radix) {
         return digit(ch, radix, false);
     }
 
     /**
      * Digit representation for a character
-     *
      * @param ch             a character
      * @param radix          radix
      * @param onlyIsoLatin1  iso latin conversion only
-     *
      * @return the digit for this character
      */
-    public static int digit(final char ch, final int radix, final boolean onlyIsoLatin1) {
-        final char maxInRadix = (char)('a' + (radix - 1) - 10);
-        final char c          = Character.toLowerCase(ch);
+    public static int digit(char ch, int radix, boolean onlyIsoLatin1) {
+        var maxInRadix = (char)('a' + (radix - 1) - 10);
+        var c = Character.toLowerCase(ch);
 
         if (c >= 'a' && c <= maxInRadix) {
             return Character.digit(ch, radix);
         }
-
         if (Character.isDigit(ch)) {
             if (!onlyIsoLatin1 || ch >= '0' && ch <= '9') {
                 return Character.digit(ch, radix);
             }
         }
-
         return -1;
     }
 
     /**
      * JavaScript compliant String to number conversion
-     *
-     * @param str  a string
-     *
-     * @return a number
      */
-    public static double toNumber(final String str) {
-        int end = str.length();
+    public static double toNumber(String str) {
+        var end = str.length();
         if (end == 0) {
             return 0.0; // Empty string
         }
 
-        int  start = 0;
-        char f     = str.charAt(0);
+        var start = 0;
+        var f = str.charAt(0);
 
         while (Lexer.isJSWhitespace(f)) {
             if (++start == end) {
@@ -939,13 +826,12 @@ public enum JSType {
             f = str.charAt(start);
         }
 
-        // Guaranteed to terminate even without start >= end check, as the previous loop found at least one
-        // non-whitespace character.
+        // Guaranteed to terminate even without start >= end check, as the previous loop found at least one non-whitespace character.
         while (Lexer.isJSWhitespace(str.charAt(end - 1))) {
             end--;
         }
 
-        final boolean negative;
+        boolean negative;
         if (f == '-') {
             if(++start == end) {
                 return Double.NaN; // Single-char "-" string
@@ -962,7 +848,7 @@ public enum JSType {
             negative = false;
         }
 
-        final double value;
+        double value;
         if (start + 1 < end && f == '0' && Character.toLowerCase(str.charAt(start + 1)) == 'x') {
             //decode hex string
             value = parseRadix(str.toCharArray(), start + 2, end, 16);
@@ -970,7 +856,7 @@ public enum JSType {
             return negative ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
         } else {
             // Fast (no NumberFormatException) path to NaN for non-numeric strings.
-            for (int i = start; i < end; i++) {
+            for (var i = start; i < end; i++) {
                 f = str.charAt(i);
                 if ((f < '0' || f > '9') && f != '.' && f != 'e' && f != 'E' && f != '+' && f != '-') {
                     return Double.NaN;
@@ -978,7 +864,7 @@ public enum JSType {
             }
             try {
                 value = Double.parseDouble(str.substring(start, end));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 return Double.NaN;
             }
         }
@@ -987,62 +873,56 @@ public enum JSType {
     }
 
     /**
-     * JavaScript compliant Object to integer conversion. See ECMA 9.4 ToInteger
-     *
-     * <p>Note that this returns {@link java.lang.Integer#MAX_VALUE} or {@link java.lang.Integer#MIN_VALUE}
-     * for double values that exceed the int range, including positive and negative Infinity. It is the
-     * caller's responsibility to handle such values correctly.</p>
-     *
+     * JavaScript compliant Object to integer conversion.
+     * See ECMA 9.4 ToInteger
+     * <p>
+     * Note that this returns {@link java.lang.Integer#MAX_VALUE} or {@link java.lang.Integer#MIN_VALUE} for double values that exceed the int range, including positive and negative Infinity.
+     * It is the caller's responsibility to handle such values correctly.
      * @param obj  an object
      * @return an integer
      */
-    public static int toInteger(final Object obj) {
+    public static int toInteger(Object obj) {
         return (int)toNumber(obj);
     }
 
     /**
      * Converts an Object to long.
-     *
-     * <p>Note that this returns {@link java.lang.Long#MAX_VALUE} or {@link java.lang.Long#MIN_VALUE}
-     * for double values that exceed the long range, including positive and negative Infinity. It is the
-     * caller's responsibility to handle such values correctly.</p>
-     *
+     * <p>
+     * Note that this returns {@link java.lang.Long#MAX_VALUE} or {@link java.lang.Long#MIN_VALUE} for double values that exceed the long range, including positive and negative Infinity.
+     * It is the caller's responsibility to handle such values correctly.
      * @param obj  an object
      * @return a long
      */
-    public static long toLong(final Object obj) {
+    public static long toLong(Object obj) {
         return obj instanceof Long ? ((Long)obj) : toLong(toNumber(obj));
     }
 
     /**
      * Converts a double to long.
-     *
      * @param num the double to convert
      * @return the converted long value
      */
-    public static long toLong(final double num) {
+    public static long toLong(double num) {
         return (long)num;
     }
 
     /**
      * JavaScript compliant Object to int32 conversion
      * See ECMA 9.5 ToInt32
-     *
      * @param obj an object
      * @return an int32
      */
-    public static int toInt32(final Object obj) {
+    public static int toInt32(Object obj) {
         return toInt32(toNumber(obj));
     }
 
     /**
      * Optimistic int conversion - throws UnwarrantedOptimismException if double, long or Object
-     *
      * @param obj           object to convert
      * @param programPoint  program point
      * @return double
      */
-    public static int toInt32Optimistic(final Object obj, final int programPoint) {
+    public static int toInt32Optimistic(Object obj, int programPoint) {
         if (obj != null && obj.getClass() == Integer.class) {
             return ((Integer)obj);
         }
@@ -1050,65 +930,50 @@ public enum JSType {
     }
 
     /**
-     * Object to int conversion that delegates to either {@link #toInt32(Object)} or to
-     * {@link #toInt32Optimistic(Object, int)} depending on whether the program point is valid or not.
+     * Object to int conversion that delegates to either {@link #toInt32(Object)} or to {@link #toInt32Optimistic(Object, int)} depending on whether the program point is valid or not.
      * @param obj the object to convert
      * @param programPoint the program point; can be invalid.
      * @return the value converted to int
      * @throws UnwarrantedOptimismException if the value can't be represented as int and the program point is valid.
      */
-    public static int toInt32MaybeOptimistic(final Object obj, final int programPoint) {
+    public static int toInt32MaybeOptimistic(Object obj, int programPoint) {
         return UnwarrantedOptimismException.isValid(programPoint) ? toInt32Optimistic(obj, programPoint) : toInt32(obj);
     }
 
     /**
      * JavaScript compliant long to int32 conversion
-     *
      * @param num a long
      * @return an int32
      */
-    public static int toInt32(final long num) {
+    public static int toInt32(long num) {
         return (int)(num >= MIN_PRECISE_DOUBLE && num <= MAX_PRECISE_DOUBLE ? num : (long)(num % INT32_LIMIT));
     }
 
-
     /**
      * JavaScript compliant number to int32 conversion
-     *
-     * @param num a number
-     * @return an int32
      */
-    public static int toInt32(final double num) {
+    public static int toInt32(double num) {
         return (int)doubleToInt32(num);
     }
 
     /**
      * JavaScript compliant Object to uint32 conversion
-     *
-     * @param obj an object
-     * @return a uint32
      */
-    public static long toUint32(final Object obj) {
+    public static long toUint32(Object obj) {
         return toUint32(toNumber(obj));
     }
 
     /**
      * JavaScript compliant number to uint32 conversion
-     *
-     * @param num a number
-     * @return a uint32
      */
-    public static long toUint32(final double num) {
+    public static long toUint32(double num) {
         return doubleToInt32(num) & MAX_UINT;
     }
 
     /**
      * JavaScript compliant int to uint32 conversion
-     *
-     * @param num an int
-     * @return a uint32
      */
-    public static long toUint32(final int num) {
+    public static long toUint32(int num) {
         return num & MAX_UINT;
     }
 
@@ -1119,7 +984,7 @@ public enum JSType {
      * @return the uint32 value if it can be represented by an int
      * @throws UnwarrantedOptimismException if uint32 value cannot be represented by an int
      */
-    public static int toUint32Optimistic(final int num, final int pp) {
+    public static int toUint32Optimistic(int num, int pp) {
         if (num >= 0) {
             return num;
         }
@@ -1128,183 +993,151 @@ public enum JSType {
 
     /**
      * JavaScript compliant int to uint32 conversion with double return type
-     * @param num an int
-     * @return the uint32 value as double
      */
-    public static double toUint32Double(final int num) {
+    public static double toUint32Double(int num) {
         return toUint32(num);
     }
 
     /**
      * JavaScript compliant Object to uint16 conversion
      * ECMA 9.7 ToUint16: (Unsigned 16 Bit Integer)
-     *
-     * @param obj an object
-     * @return a uint16
      */
-    public static int toUint16(final Object obj) {
+    public static int toUint16(Object obj) {
         return toUint16(toNumber(obj));
     }
 
     /**
      * JavaScript compliant number to uint16 conversion
-     *
-     * @param num a number
-     * @return a uint16
      */
-    public static int toUint16(final int num) {
+    public static int toUint16(int num) {
         return num & 0xffff;
     }
 
     /**
      * JavaScript compliant number to uint16 conversion
-     *
-     * @param num a number
-     * @return a uint16
      */
-    public static int toUint16(final long num) {
+    public static int toUint16(long num) {
         return (int)num & 0xffff;
     }
 
     /**
      * JavaScript compliant number to uint16 conversion
-     *
-     * @param num a number
-     * @return a uint16
      */
-    public static int toUint16(final double num) {
+    public static int toUint16(double num) {
         return (int)doubleToInt32(num) & 0xffff;
     }
 
-    private static long doubleToInt32(final double num) {
-        final int exponent = Math.getExponent(num);
+    private static long doubleToInt32(double num) {
+        var exponent = Math.getExponent(num);
         if (exponent < 31) {
             return (long) num;  // Fits into 32 bits
         }
         if (exponent >= 84) {
-            // Either infinite or NaN or so large that shift / modulo will produce 0
-            // (52 bit mantissa + 32 bit target width).
+            // Either infinite or NaN or so large that shift / modulo will produce 0 (52 bit mantissa + 32 bit target width).
             return 0;
         }
         // This is rather slow and could probably be sped up using bit-fiddling.
-        final double d = num >= 0 ? Math.floor(num) : Math.ceil(num);
+        var d = num >= 0 ? Math.floor(num) : Math.ceil(num);
         return (long)(d % INT32_LIMIT);
     }
 
     /**
      * Check whether a number is finite
-     *
-     * @param num a number
-     * @return true if finite
      */
-    public static boolean isFinite(final double num) {
+    public static boolean isFinite(double num) {
         return !Double.isInfinite(num) && !Double.isNaN(num);
     }
 
     /**
      * Convert a primitive to a double
-     *
      * @param num a double
      * @return a boxed double
      */
-    public static Double toDouble(final double num) {
+    public static Double toDouble(double num) {
         return num;
     }
 
     /**
      * Convert a primitive to a double
-     *
      * @param num a long
      * @return a boxed double
      */
-    public static Double toDouble(final long num) {
+    public static Double toDouble(long num) {
         return (double)num;
     }
 
     /**
      * Convert a primitive to a double
-     *
      * @param num an int
      * @return a boxed double
      */
-    public static Double toDouble(final int num) {
+    public static Double toDouble(int num) {
         return (double)num;
     }
 
     /**
      * Convert a boolean to an Object
-     *
      * @param bool a boolean
      * @return a boxed boolean, its Object representation
      */
-    public static Object toObject(final boolean bool) {
+    public static Object toObject(boolean bool) {
         return bool;
     }
 
     /**
      * Convert a number to an Object
-     *
      * @param num an integer
      * @return the boxed number
      */
-    public static Object toObject(final int num) {
+    public static Object toObject(int num) {
         return num;
     }
 
     /**
      * Convert a number to an Object
-     *
      * @param num a long
      * @return the boxed number
      */
-    public static Object toObject(final long num) {
+    public static Object toObject(long num) {
         return num;
     }
 
     /**
      * Convert a number to an Object
-     *
      * @param num a double
      * @return the boxed number
      */
-    public static Object toObject(final double num) {
+    public static Object toObject(double num) {
         return num;
     }
 
     /**
      * Identity converter for objects.
-     *
      * @param obj an object
      * @return the boxed number
      */
-    public static Object toObject(final Object obj) {
+    public static Object toObject(Object obj) {
         return obj;
     }
 
     /**
-     * Object conversion. This is used to convert objects and numbers to their corresponding
-     * NativeObject type
+     * Object conversion. This is used to convert objects and numbers to their corresponding NativeObject type
      * See ECMA 9.9 ToObject
-     *
      * @param obj     the object to convert
-     *
      * @return the wrapped object
      */
-    public static Object toScriptObject(final Object obj) {
+    public static Object toScriptObject(Object obj) {
         return toScriptObject(Context.getGlobal(), obj);
     }
 
     /**
-     * Object conversion. This is used to convert objects and numbers to their corresponding
-     * NativeObject type
+     * Object conversion. This is used to convert objects and numbers to their corresponding NativeObject type
      * See ECMA 9.9 ToObject
-     *
      * @param global  the global object
      * @param obj     the object to convert
-     *
      * @return the wrapped object
      */
-    public static Object toScriptObject(final Global global, final Object obj) {
+    public static Object toScriptObject(Global global, Object obj) {
         if (nullOrUndefined(obj)) {
             throw typeError(global, "not.an.object", ScriptRuntime.safeToString(obj));
         }
@@ -1318,19 +1151,18 @@ public enum JSType {
 
     /**
      * Script object to Java array conversion.
-     *
      * @param obj script object to be converted to Java array
      * @param componentType component type of the destination array required
      * @return converted Java array
      */
-    public static Object toJavaArray(final Object obj, final Class<?> componentType) {
+    public static Object toJavaArray(Object obj, Class<?> componentType) {
         if (obj instanceof ScriptObject) {
             return ((ScriptObject)obj).getArray().asArrayOfType(componentType);
         } else if (obj instanceof JSObject) {
-            final ArrayLikeIterator<?> itr = ArrayLikeIterator.arrayLikeIterator(obj);
-            final int len = (int) itr.getLength();
-            final Object[] res = new Object[len];
-            int idx = 0;
+            var itr = ArrayLikeIterator.arrayLikeIterator(obj);
+            var len = (int) itr.getLength();
+            var res = new Object[len];
+            var idx = 0;
             while (itr.hasNext()) {
                 res[idx++] = itr.next();
             }
@@ -1344,40 +1176,36 @@ public enum JSType {
 
     /**
      * Script object to Java array conversion.
-     *
      * @param obj script object to be converted to Java array
      * @param componentType component type of the destination array required
-     * @param lookupSupplier supplier for the lookup of the class invoking the
-     * conversion. Can be used to use protection-domain specific converters
-     * if the target type is a SAM.
+     * @param lookupSupplier supplier for the lookup of the class invoking the conversion. Can be used to use protection-domain specific converters if the target type is a SAM.
      * @return converted Java array
      */
-    public static Object toJavaArrayWithLookup(final Object obj, final Class<?> componentType, final SecureLookupSupplier lookupSupplier) {
+    public static Object toJavaArrayWithLookup(Object obj, Class<?> componentType, SecureLookupSupplier lookupSupplier) {
         return Bootstrap.getLinkerServices().getWithLookup(()->toJavaArray(obj, componentType), lookupSupplier);
     }
 
     /**
      * Java array to java array conversion - but using type conversions implemented by linker.
-     *
      * @param src source array
      * @param componentType component type of the destination array required
      * @return converted Java array
      */
-    public static Object convertArray(final Object[] src, final Class<?> componentType) {
-        if(componentType == Object.class) {
-            for(int i = 0; i < src.length; ++i) {
-                final Object e = src[i];
-                if(e instanceof ConsString) {
+    public static Object convertArray(Object[] src, Class<?> componentType) {
+        if (componentType == Object.class) {
+            for (var i = 0; i < src.length; ++i) {
+                var e = src[i];
+                if (e instanceof ConsString) {
                     src[i] = e.toString();
                 }
             }
         }
 
-        final int l = src.length;
-        final Object dst = Array.newInstance(componentType, l);
-        final MethodHandle converter = Bootstrap.getLinkerServices().getTypeConverter(Object.class, componentType);
+        var l = src.length;
+        var dst = Array.newInstance(componentType, l);
+        var converter = Bootstrap.getLinkerServices().getTypeConverter(Object.class, componentType);
         try {
-            for (int i = 0; i < src.length; i++) {
+            for (var i = 0; i < src.length; i++) {
                 Array.set(dst, i, invoke(converter, src[i]));
             }
         } catch (Throwable t) {
@@ -1388,61 +1216,50 @@ public enum JSType {
 
     /**
      * Check if an object is null or undefined
-     *
      * @param obj object to check
-     *
      * @return true if null or undefined
      */
-    public static boolean nullOrUndefined(final Object obj) {
+    public static boolean nullOrUndefined(Object obj) {
         return obj == null || obj == ScriptRuntime.UNDEFINED;
     }
 
-    static String toStringImpl(final Object obj, final boolean safe) {
+    static String toStringImpl(Object obj, boolean safe) {
         if (obj instanceof String) {
             return (String)obj;
         }
-
         if (obj instanceof ConsString) {
             return obj.toString();
         }
-
         if (isNumber(obj)) {
             return toString(((Number)obj).doubleValue());
         }
-
         if (obj == ScriptRuntime.UNDEFINED) {
             return "undefined";
         }
-
         if (obj == null) {
             return "null";
         }
-
         if (obj instanceof Boolean) {
             return obj.toString();
         }
-
         if (obj instanceof Symbol) {
             if (safe) {
                 return obj.toString();
             }
             throw typeError("symbol.to.string");
         }
-
         if (safe && obj instanceof ScriptObject) {
-            final ScriptObject sobj = (ScriptObject)obj;
-            final Global gobj = Context.getGlobal();
-            return gobj.isError(sobj) ?
-                ECMAException.safeToString(sobj) :
-                sobj.safeToString();
+            var sobj = (ScriptObject)obj;
+            var gobj = Context.getGlobal();
+            return gobj.isError(sobj) ? ECMAException.safeToString(sobj) : sobj.safeToString();
         }
 
         return toString(toPrimitive(obj, String.class));
     }
 
     // trim from left for JS whitespaces.
-    static String trimLeft(final String str) {
-        int start = 0;
+    static String trimLeft(String str) {
+        var start = 0;
 
         while (start < str.length() && Lexer.isJSWhitespace(str.charAt(start))) {
             start++;
@@ -1458,89 +1275,79 @@ public enum JSType {
      * @return
      */
     @SuppressWarnings("unused")
-    private static Object throwUnwarrantedOptimismException(final Object value, final int programPoint) {
+    private static Object throwUnwarrantedOptimismException(Object value, int programPoint) {
         throw new UnwarrantedOptimismException(value, programPoint);
     }
 
     /**
      * Wrapper for addExact
-     *
-     * Catches ArithmeticException and rethrows as UnwarrantedOptimismException
-     * containing the result and the program point of the failure
-     *
+     * Catches ArithmeticException and rethrows as UnwarrantedOptimismException containing the result and the program point of the failure
      * @param x first term
      * @param y second term
      * @param programPoint program point id
      * @return the result
      * @throws UnwarrantedOptimismException if overflow occurs
      */
-    public static int addExact(final int x, final int y, final int programPoint) throws UnwarrantedOptimismException {
+    public static int addExact(int x, int y, int programPoint) throws UnwarrantedOptimismException {
         try {
             return Math.addExact(x, y);
-        } catch (final ArithmeticException e) {
+        } catch (ArithmeticException e) {
             throw new UnwarrantedOptimismException((double)x + (double)y, programPoint);
         }
     }
 
     /**
-     * Wrapper for subExact
-     *
-     * Catches ArithmeticException and rethrows as UnwarrantedOptimismException
-     * containing the result and the program point of the failure
-     *
+     * Wrapper for subExact.
+     * Catches ArithmeticException and rethrows as UnwarrantedOptimismException containing the result and the program point of the failure.
      * @param x first term
      * @param y second term
      * @param programPoint program point id
      * @return the result
      * @throws UnwarrantedOptimismException if overflow occurs
      */
-    public static int subExact(final int x, final int y, final int programPoint) throws UnwarrantedOptimismException {
+    public static int subExact(int x, int y, int programPoint) throws UnwarrantedOptimismException {
         try {
             return Math.subtractExact(x, y);
-        } catch (final ArithmeticException e) {
+        } catch (ArithmeticException e) {
             throw new UnwarrantedOptimismException((double)x - (double)y, programPoint);
         }
     }
 
     /**
-     * Wrapper for mulExact
-     *
-     * Catches ArithmeticException and rethrows as UnwarrantedOptimismException
-     * containing the result and the program point of the failure
-     *
+     * Wrapper for mulExact.
+     * Catches ArithmeticException and rethrows as UnwarrantedOptimismException containing the result and the program point of the failure.
      * @param x first term
      * @param y second term
      * @param programPoint program point id
      * @return the result
      * @throws UnwarrantedOptimismException if overflow occurs
      */
-    public static int mulExact(final int x, final int y, final int programPoint) throws UnwarrantedOptimismException {
+    public static int mulExact(int x, int y, int programPoint) throws UnwarrantedOptimismException {
         try {
             return Math.multiplyExact(x, y);
-        } catch (final ArithmeticException e) {
+        } catch (ArithmeticException e) {
             throw new UnwarrantedOptimismException((double)x * (double)y, programPoint);
         }
     }
 
     /**
-     * Wrapper for divExact. Throws UnwarrantedOptimismException if the result of the division can't be represented as
-     * int.
-     *
+     * Wrapper for divExact.
+     * Throws UnwarrantedOptimismException if the result of the division can't be represented as int.
      * @param x first term
      * @param y second term
      * @param programPoint program point id
      * @return the result
      * @throws UnwarrantedOptimismException if the result of the division can't be represented as int.
      */
-    public static int divExact(final int x, final int y, final int programPoint) throws UnwarrantedOptimismException {
-        final int res;
+    public static int divExact(int x, int y, int programPoint) throws UnwarrantedOptimismException {
+        int res;
         try {
             res = x / y;
-        } catch (final ArithmeticException e) {
+        } catch (ArithmeticException e) {
             assert y == 0; // Only div by zero anticipated
             throw new UnwarrantedOptimismException(x > 0 ? Double.POSITIVE_INFINITY : x < 0 ? Double.NEGATIVE_INFINITY : Double.NaN, programPoint);
         }
-        final int rem = x % y;
+        var rem = x % y;
         if (rem == 0) {
             return res;
         }
@@ -1549,128 +1356,113 @@ public enum JSType {
     }
 
     /**
-     * Implements int division but allows {@code x / 0} to be represented as 0. Basically equivalent to
-     * {@code (x / y)|0} JavaScript expression (division of two ints coerced to int).
+     * Implements int division but allows {@code x / 0} to be represented as 0.
+     * Basically equivalent to {@code (x / y)|0} JavaScript expression (division of two ints coerced to int).
      * @param x the dividend
      * @param y the divisor
      * @return the result
      */
-    public static int divZero(final int x, final int y) {
+    public static int divZero(int x, int y) {
         return y == 0 ? 0 : x / y;
     }
 
     /**
-     * Implements int remainder but allows {@code x % 0} to be represented as 0. Basically equivalent to
-     * {@code (x % y)|0} JavaScript expression (remainder of two ints coerced to int).
+     * Implements int remainder but allows {@code x % 0} to be represented as 0.
+     * Basically equivalent to {@code (x % y)|0} JavaScript expression (remainder of two ints coerced to int).
      * @param x the dividend
      * @param y the divisor
      * @return the remainder
      */
-    public static int remZero(final int x, final int y) {
+    public static int remZero(int x, int y) {
         return y == 0 ? 0 : x % y;
     }
 
     /**
-     * Wrapper for modExact. Throws UnwarrantedOptimismException if the modulo can't be represented as int.
-     *
+     * Wrapper for modExact.
+     * Throws UnwarrantedOptimismException if the modulo can't be represented as int.
      * @param x first term
      * @param y second term
      * @param programPoint program point id
      * @return the result
      * @throws UnwarrantedOptimismException if the modulo can't be represented as int.
      */
-    public static int remExact(final int x, final int y, final int programPoint) throws UnwarrantedOptimismException {
+    public static int remExact(int x, int y, int programPoint) throws UnwarrantedOptimismException {
         try {
             return x % y;
-        } catch (final ArithmeticException e) {
+        } catch (ArithmeticException e) {
             assert y == 0; // Only mod by zero anticipated
             throw new UnwarrantedOptimismException(Double.NaN, programPoint);
         }
     }
 
     /**
-     * Wrapper for decrementExact
-     *
-     * Catches ArithmeticException and rethrows as UnwarrantedOptimismException
-     * containing the result and the program point of the failure
-     *
+     * Wrapper for decrementExact.
+     * Catches ArithmeticException and rethrows as UnwarrantedOptimismException containing the result and the program point of the failure
      * @param x number to negate
      * @param programPoint program point id
      * @return the result
      * @throws UnwarrantedOptimismException if overflow occurs
      */
-    public static int decrementExact(final int x, final int programPoint) throws UnwarrantedOptimismException {
+    public static int decrementExact(int x, int programPoint) throws UnwarrantedOptimismException {
         try {
             return Math.decrementExact(x);
-        } catch (final ArithmeticException e) {
+        } catch (ArithmeticException e) {
             throw new UnwarrantedOptimismException((double)x - 1, programPoint);
         }
     }
 
     /**
-     * Wrapper for incrementExact
-     *
-     * Catches ArithmeticException and rethrows as UnwarrantedOptimismException
-     * containing the result and the program point of the failure
-     *
+     * Wrapper for incrementExact.
+     * Catches ArithmeticException and rethrows as UnwarrantedOptimismException containing the result and the program point of the failure
      * @param x the number to increment
      * @param programPoint program point id
      * @return the result
      * @throws UnwarrantedOptimismException if overflow occurs
      */
-    public static int incrementExact(final int x, final int programPoint) throws UnwarrantedOptimismException {
+    public static int incrementExact(int x, int programPoint) throws UnwarrantedOptimismException {
         try {
             return Math.incrementExact(x);
-        } catch (final ArithmeticException e) {
+        } catch (ArithmeticException e) {
             throw new UnwarrantedOptimismException((double)x + 1, programPoint);
         }
     }
 
     /**
-     * Wrapper for negateExact
-     *
-     * Catches ArithmeticException and rethrows as UnwarrantedOptimismException
-     * containing the result and the program point of the failure
-     *
+     * Wrapper for negateExact.
+     * Catches ArithmeticException and rethrows as UnwarrantedOptimismException containing the result and the program point of the failure
      * @param x the number to negate
      * @param programPoint program point id
      * @return the result
      * @throws UnwarrantedOptimismException if overflow occurs
      */
-    public static int negateExact(final int x, final int programPoint) throws UnwarrantedOptimismException {
+    public static int negateExact(int x, int programPoint) throws UnwarrantedOptimismException {
         try {
             if (x == 0) {
                 throw new UnwarrantedOptimismException(-0.0, programPoint);
             }
             return Math.negateExact(x);
-        } catch (final ArithmeticException e) {
+        } catch (ArithmeticException e) {
             throw new UnwarrantedOptimismException(-(double)x, programPoint);
         }
     }
 
     /**
      * Given a type of an accessor, return its index in [0..getNumberOfAccessorTypes())
-     *
      * @param type the type
-     *
      * @return the accessor index, or -1 if no accessor of this type exists
      */
-    public static int getAccessorTypeIndex(final Type type) {
+    public static int getAccessorTypeIndex(Type type) {
         return getAccessorTypeIndex(type.getTypeClass());
     }
 
     /**
-     * Given a class of an accessor, return its index in [0..getNumberOfAccessorTypes())
-     *
-     * Note that this is hardcoded with respect to the dynamic contents of the accessor
-     * types array for speed. Hotspot got stuck with this as 5% of the runtime in
-     * a benchmark when it looped over values and increased an index counter. :-(
-     *
+     * Given a class of an accessor, return its index in [0..getNumberOfAccessorTypes()).
+     * Note that this is hardcoded with respect to the dynamic contents of the accessor types array for speed.
+     * Hotspot got stuck with this as 5% of the runtime in a benchmark when it looped over values and increased an index counter. :-(
      * @param type the type
-     *
      * @return the accessor index, or -1 if no accessor of this type exists
      */
-    public static int getAccessorTypeIndex(final Class<?> type) {
+    public static int getAccessorTypeIndex(Class<?> type) {
         if (type == null) {
             return TYPE_UNDEFINED_INDEX;
         } else if (type == int.class) {
@@ -1684,32 +1476,28 @@ public enum JSType {
     }
 
     /**
-     * Return the accessor type based on its index in [0..getNumberOfAccessorTypes())
-     * Indexes are ordered narrower{@literal ->}wider / optimistic{@literal ->}pessimistic. Invalidations always
-     * go to a type of higher index
-     *
+     * Return the accessor type based on its index in [0..getNumberOfAccessorTypes()).
+     * Indexes are ordered narrower{@literal ->}wider / optimistic{@literal ->}pessimistic.
+     * Invalidations always go to a type of higher index
      * @param index accessor type index
-     *
      * @return a type corresponding to the index.
      */
 
-    public static Type getAccessorType(final int index) {
+    public static Type getAccessorType(int index) {
         return ACCESSOR_TYPES.get(index);
     }
 
     /**
      * Return the number of accessor types available.
-     *
-     * @return number of accessor types in system
      */
     public static int getNumberOfAccessorTypes() {
         return ACCESSOR_TYPES.size();
     }
 
-    private static double parseRadix(final char chars[], final int start, final int length, final int radix) {
-        int pos = 0;
+    private static double parseRadix(char chars[], int start, int length, int radix) {
+        var pos = 0;
 
-        for (int i = start; i < length ; i++) {
+        for (var i = start; i < length ; i++) {
             if (digit(chars[i], radix) == -1) {
                 return Double.NaN;
             }
@@ -1720,8 +1508,8 @@ public enum JSType {
             return Double.NaN;
         }
 
-        double value = 0.0;
-        for (int i = start; i < start + pos; i++) {
+        var value = 0.0;
+        for (var i = start; i < start + pos; i++) {
             value *= radix;
             value += digit(chars[i], radix);
         }
@@ -1729,31 +1517,25 @@ public enum JSType {
         return value;
     }
 
-    private static double toNumberGeneric(final Object obj) {
+    private static double toNumberGeneric(Object obj) {
         if (obj == null) {
             return +0.0;
         }
-
         if (obj instanceof String) {
             return toNumber((String)obj);
         }
-
         if (obj instanceof ConsString) {
             return toNumber(obj.toString());
         }
-
         if (obj instanceof Boolean) {
             return toNumber((Boolean)obj);
         }
-
         if (obj instanceof ScriptObject) {
             return toNumber((ScriptObject)obj);
         }
-
         if (obj instanceof Undefined) {
             return Double.NaN;
         }
-
         if (obj instanceof Symbol) {
             throw typeError("symbol.to.number");
         }
@@ -1761,7 +1543,7 @@ public enum JSType {
         return toNumber(toPrimitive(obj, Number.class));
     }
 
-    private static Object invoke(final MethodHandle mh, final Object arg) {
+    private static Object invoke(MethodHandle mh, Object arg) {
         try {
             return mh.invoke(arg);
         } catch (Throwable t) {
@@ -1770,12 +1552,11 @@ public enum JSType {
     }
 
     /**
-     * Create a method handle constant of the correct primitive type
-     * for a constant object
+     * Create a method handle constant of the correct primitive type for a constant object.
      * @param o object
      * @return constant function that returns object
      */
-    public static MethodHandle unboxConstant(final Object o) {
+    public static MethodHandle unboxConstant(Object o) {
         if (o != null) {
             if (o.getClass() == Integer.class) {
                 return MH.constant(int.class, o);
@@ -1787,11 +1568,11 @@ public enum JSType {
     }
 
     /**
-     * Get the unboxed (primitive) type for an object
+     * Get the unboxed (primitive) type for an object.
      * @param o object
      * @return primitive type or Object.class if not primitive
      */
-    public static Class<?> unboxedFieldType(final Object o) {
+    public static Class<?> unboxedFieldType(Object o) {
         if (o == null) {
             return Object.class;
         } else if (o.getClass() == Integer.class) {
@@ -1803,7 +1584,9 @@ public enum JSType {
         }
     }
 
-    private static List<MethodHandle> toUnmodifiableList(final MethodHandle... methodHandles) {
-        return Collections.unmodifiableList(Arrays.asList(methodHandles));
+    // allows null elements
+    private static <T> List<T> toUnmodifiableList(T... items) {
+        return Collections.unmodifiableList(Arrays.asList(items));
     }
+
 }

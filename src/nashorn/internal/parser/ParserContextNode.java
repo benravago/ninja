@@ -31,6 +31,7 @@ import nashorn.internal.ir.Statement;
  * Used for keeping state when needed in the parser.
  */
 interface ParserContextNode {
+
     /**
      * @return The flags for this node
      */
@@ -40,7 +41,7 @@ interface ParserContextNode {
      * @param flag The flag to set
      * @return All current flags after update
      */
-    public int setFlag(final int flag);
+    public int setFlag(int flag);
 
     /**
      * @return The list of statements that belongs to this node
@@ -50,18 +51,16 @@ interface ParserContextNode {
     /**
      * @param statements The statement list
      */
-    public void setStatements(final List<Statement> statements);
+    public void setStatements(List<Statement> statements);
 
     /**
      * Adds a statement at the end of the statement list
-     * @param statement The statement to add
      */
-    public void appendStatement(final Statement statement);
+    public void appendStatement(Statement statement);
 
     /**
      * Adds a statement at the beginning of the statement list
-     * @param statement The statement to add
      */
-    public void prependStatement(final Statement statement);
+    public void prependStatement(Statement statement);
 
 }

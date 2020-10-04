@@ -49,7 +49,7 @@ public class SetIterator extends AbstractIterator {
     // Cached global needed for every iteration result
     private final Global global;
 
-    SetIterator(final NativeSet set, final IterationKind iterationKind, final Global global) {
+    SetIterator(NativeSet set, IterationKind iterationKind, Global global) {
         super(global.getSetIteratorPrototype(), $nasgenmap$);
         this.iterator = set.getJavaMap().getIterator();
         this.iterationKind = iterationKind;
@@ -58,13 +58,9 @@ public class SetIterator extends AbstractIterator {
 
     /**
      * ES6 23.2.5.2.1 %SetIteratorPrototype%.next()
-     *
-     * @param self the self reference
-     * @param arg the argument
-     * @return the next result
      */
     @Function
-    public static Object next(final Object self, final Object arg) {
+    public static Object next(Object self, Object arg) {
         if (!(self instanceof SetIterator)) {
             throw typeError("not.a.set.iterator", ScriptRuntime.safeToString(self));
         }
@@ -77,12 +73,12 @@ public class SetIterator extends AbstractIterator {
     }
 
     @Override
-    protected  IteratorResult next(final Object arg) {
+    protected  IteratorResult next(Object arg) {
         if (iterator == null) {
             return makeResult(Undefined.getUndefined(), Boolean.TRUE, global);
         }
 
-        final LinkedMap.Node node = iterator.next();
+        var node = iterator.next();
 
         if (node == null) {
             iterator = null;
@@ -90,10 +86,11 @@ public class SetIterator extends AbstractIterator {
         }
 
         if (iterationKind == IterationKind.KEY_VALUE) {
-            final NativeArray array = new NativeArray(new Object[] {node.getKey(), node.getKey()});
+            var array = new NativeArray(new Object[] {node.getKey(), node.getKey()});
             return makeResult(array, Boolean.FALSE, global);
         }
 
         return makeResult(node.getKey(), Boolean.FALSE, global);
     }
+
 }

@@ -33,6 +33,7 @@ import nashorn.internal.objects.annotations.SpecializedFunction.LinkLogic;
  * Specialization info for a {@link SpecializedFunction}
  */
 public final class Specialization {
+
     private final MethodHandle mh;
     private final Class<? extends LinkLogic> linkLogicClass;
     private final boolean isOptimistic;
@@ -40,44 +41,36 @@ public final class Specialization {
 
     /**
      * Constructor
-     *
      * @param mh  invoker method handler
      */
-    public Specialization(final MethodHandle mh) {
+    public Specialization(MethodHandle mh) {
         this(mh, false, true);
     }
 
     /**
      * Constructor
-     *
      * @param mh  invoker method handler
-     * @param isOptimistic is this an optimistic native method, i.e. can it throw {@link UnwarrantedOptimismException}
-     *   which would have to lead to a relink and return value processing
+     * @param isOptimistic is this an optimistic native method, i.e. can it throw {@link UnwarrantedOptimismException} which would have to lead to a relink and return value processing
      * @param convertsNumericArgs true if it is safe to convert arguments to numbers
      */
-    public Specialization(final MethodHandle mh, final boolean isOptimistic, final boolean convertsNumericArgs) {
+    public Specialization(MethodHandle mh, boolean isOptimistic, boolean convertsNumericArgs) {
         this(mh, null, isOptimistic, convertsNumericArgs);
     }
 
     /**
      * Constructor
-     *
      * @param mh  invoker method handler
-     * @param linkLogicClass extra link logic needed for this function. Instances of this class also contains logic for checking
-     *  if this can be linked on its first encounter, which is needed as per our standard linker semantics
-     * @param isOptimistic is this an optimistic native method, i.e. can it throw {@link UnwarrantedOptimismException}
-     *   which would have to lead to a relink and return value processing
+     * @param linkLogicClass extra link logic needed for this function. Instances of this class also contains logic for checking if this can be linked on its first encounter, which is needed as per our standard linker semantics
+     * @param isOptimistic is this an optimistic native method, i.e. can it throw {@link UnwarrantedOptimismException} which would have to lead to a relink and return value processing
      * @param convertsNumericArgs true if it is safe to convert arguments to numbers
      */
-    public Specialization(final MethodHandle mh, final Class<? extends LinkLogic> linkLogicClass,
-                          final boolean isOptimistic, final boolean convertsNumericArgs) {
-        this.mh             = mh;
-        this.isOptimistic   = isOptimistic;
+    public Specialization(MethodHandle mh, Class<? extends LinkLogic> linkLogicClass, boolean isOptimistic, boolean convertsNumericArgs) {
+        this.mh = mh;
+        this.isOptimistic = isOptimistic;
         this.convertsNumericArgs = convertsNumericArgs;
         if (linkLogicClass != null) {
-            //null out the "empty" link logic class for optimization purposes
-            //we only use the empty instance because we can't default class annotations
-            //to null
+            // null out the "empty" link logic class for optimization purposes
+            // we only use the empty instance because we can't default class annotations to null
             this.linkLogicClass = LinkLogic.isEmpty(linkLogicClass) ? null : linkLogicClass;
         } else {
             this.linkLogicClass = null;
@@ -86,7 +79,6 @@ public final class Specialization {
 
     /**
      * Get the method handle for the invoker of this ScriptFunction
-     * @return the method handle
      */
     public MethodHandle getMethodHandle() {
         return mh;
@@ -94,8 +86,7 @@ public final class Specialization {
 
     /**
      * Get the link logic class for this ScriptFunction
-     * @return link logic class info, i.e. one whose instance contains stuff like
-     *  "do we need exception check for every call", and logic to check if we may link
+     * @return link logic class info, i.e. one whose instance contains stuff like "do we need exception check for every call", and logic to check if we may link
      */
     public Class<? extends LinkLogic> getLinkLogicClass() {
         return linkLogicClass;
@@ -103,27 +94,19 @@ public final class Specialization {
 
     /**
      * An optimistic specialization is one that can throw UnwarrantedOptimismException.
-     * This is allowed for native methods, as long as they are functional, i.e. don't change
-     * any state between entering and throwing the UOE. Then we can re-execute a wider version
-     * of the method in the continuation. Rest-of method generation for optimistic builtins is
-     * of course not possible, but this approach works and fits into the same relinking
-     * framework
-     *
-     * @return true if optimistic
+     * This is allowed for native methods, as long as they are functional, i.e. don't change any state between entering and throwing the UOE.
+     * Then we can re-execute a wider version of the method in the continuation.
+     * Rest-of method generation for optimistic builtins is of course not possible, but this approach works and fits into the same relinking framework
      */
     public boolean isOptimistic() {
         return isOptimistic;
     }
 
     /**
-     * Check if this function converts arguments for numeric parameters to numbers
-     * so it's safe to pass booleans as 0 and 1
-     *
-     * @return true if it is safe to convert arguments to numbers
+     * Check if this function converts arguments for numeric parameters to numbers so it's safe to pass booleans as 0 and 1
      */
     public boolean convertsNumericArgs() {
         return convertsNumericArgs;
     }
 
 }
-

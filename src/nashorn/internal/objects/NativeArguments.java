@@ -25,19 +25,20 @@
 
 package nashorn.internal.objects;
 
-import static nashorn.internal.lookup.Lookup.MH;
-import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
-
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import nashorn.internal.runtime.AccessorProperty;
 import nashorn.internal.runtime.Property;
 import nashorn.internal.runtime.PropertyMap;
 import nashorn.internal.runtime.ScriptFunction;
 import nashorn.internal.runtime.ScriptObject;
 import nashorn.internal.runtime.arrays.ArrayData;
+import static nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
 
 /**
  * ECMA 10.6 Arguments Object.
@@ -53,12 +54,14 @@ public final class NativeArguments extends ScriptObject {
     private static final PropertyMap map$;
 
     static {
-        final ArrayList<Property> properties = new ArrayList<>(1);
+        var properties = new ArrayList<Property>(1);
         properties.add(AccessorProperty.create("length", Property.NOT_ENUMERABLE, G$LENGTH, S$LENGTH));
-        PropertyMap map = PropertyMap.newMap(properties);
-        // The caller and callee properties should throw TypeError
+
+        var map = PropertyMap.newMap(properties);
+        // The caller and callee properties should throw TypeError.
         // Need to add properties directly to map since slots are assigned speculatively by newUserAccessors.
-        final int flags = Property.NOT_ENUMERABLE | Property.NOT_CONFIGURABLE;
+        var flags = Property.NOT_ENUMERABLE | Property.NOT_CONFIGURABLE;
+
         map = map.addPropertyNoHistory(map.newUserAccessors("caller", flags));
         map = map.addPropertyNoHistory(map.newUserAccessors("callee", flags));
         map$ = map;
@@ -71,13 +74,12 @@ public final class NativeArguments extends ScriptObject {
     private Object   length;
     private final Object[] namedArgs;
 
-    NativeArguments(final Object[] values, final int numParams,final ScriptObject proto, final PropertyMap map) {
+    NativeArguments(Object[] values, int numParams,final ScriptObject proto, PropertyMap map) {
         super(proto, map);
         setIsArguments();
 
-        final ScriptFunction func = Global.instance().getTypeErrorThrower();
-        // We have to fill user accessor functions late as these are stored
-        // in this object rather than in the PropertyMap of this object.
+        var func = Global.instance().getTypeErrorThrower();
+        // We have to fill user accessor functions late as these are stored in this object rather than in the PropertyMap of this object.
         initUserAccessors("caller", func, func);
         initUserAccessors("callee", func, func);
 
@@ -101,7 +103,7 @@ public final class NativeArguments extends ScriptObject {
      * getArgument is used for named argument access.
      */
     @Override
-    public Object getArgument(final int key) {
+    public Object getArgument(int key) {
         return (key >=0 && key < namedArgs.length) ? namedArgs[key] : UNDEFINED;
     }
 
@@ -109,7 +111,7 @@ public final class NativeArguments extends ScriptObject {
      * setArgument is used for named argument set.
      */
     @Override
-    public void setArgument(final int key, final Object value) {
+    public void setArgument(int key, Object value) {
         if (key >= 0 && key < namedArgs.length) {
             namedArgs[key] = value;
         }
@@ -117,10 +119,8 @@ public final class NativeArguments extends ScriptObject {
 
     /**
      * Length getter
-     * @param self self reference
-     * @return length property value
      */
-    public static Object G$length(final Object self) {
+    public static Object G$length(Object self) {
         if (self instanceof NativeArguments) {
             return ((NativeArguments)self).getArgumentsLength();
         }
@@ -129,10 +129,8 @@ public final class NativeArguments extends ScriptObject {
 
     /**
      * Length setter
-     * @param self self reference
-     * @param value value for length property
      */
-    public static void S$length(final Object self, final Object value) {
+    public static void S$length(Object self, Object value) {
         if (self instanceof NativeArguments) {
             ((NativeArguments)self).setArgumentsLength(value);
         }
@@ -142,26 +140,21 @@ public final class NativeArguments extends ScriptObject {
         return length;
     }
 
-    private void setArgumentsLength(final Object length) {
+    private void setArgumentsLength(Object length) {
         this.length = length;
     }
 
-    private static MethodHandle findOwnMH(final String name, final Class<?> rtype, final Class<?>... types) {
+    private static MethodHandle findOwnMH(String name, Class<?> rtype, Class<?>... types) {
         return MH.findStatic(MethodHandles.lookup(), NativeArguments.class, name, MH.type(rtype, types));
     }
 
     /**
      * Factory to create correct Arguments object.
-     *
-     * @param arguments the actual arguments array passed
-     * @param callee the callee function that uses arguments object
-     * @param numParams the number of declared (named) function parameters
-     * @return Arguments Object
      */
-    public static ScriptObject allocate(final Object[] arguments, final ScriptFunction callee, final int numParams) {
+    public static ScriptObject allocate(Object[] arguments, ScriptFunction callee, int numParams) {
         // Functions won't always have a callee for arguments, and may pass null instead.
-        final Global global = Global.instance();
-        final ScriptObject proto = global.getObjectPrototype();
+        var global = Global.instance();
+        var proto = global.getObjectPrototype();
         return new NativeArguments(arguments, numParams, proto, getInitialMap());
     }
 

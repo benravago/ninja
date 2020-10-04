@@ -34,26 +34,20 @@ import nashorn.internal.ir.visitor.NodeVisitor;
  */
 @Immutable
 public final class BreakNode extends JumpStatement {
-    private static final long serialVersionUID = 1L;
 
     /**
      * Constructor
-     *
-     * @param lineNumber line number
-     * @param token      token
-     * @param finish     finish
-     * @param labelName  label name for break or null if none
      */
-    public BreakNode(final int lineNumber, final long token, final int finish, final String labelName) {
+    public BreakNode(int lineNumber, long token, int finish, String labelName) {
         super(lineNumber, token, finish, labelName);
     }
 
-    private BreakNode(final BreakNode breakNode, final LocalVariableConversion conversion) {
+    private BreakNode(BreakNode breakNode, LocalVariableConversion conversion) {
         super(breakNode, conversion);
     }
 
     @Override
-    public Node accept(final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(NodeVisitor<? extends LexicalContext> visitor) {
         if (visitor.enterBreakNode(this)) {
             return visitor.leaveBreakNode(this);
         }
@@ -62,7 +56,7 @@ public final class BreakNode extends JumpStatement {
     }
 
     @Override
-    JumpStatement createNewJumpStatement(final LocalVariableConversion conversion) {
+    JumpStatement createNewJumpStatement(LocalVariableConversion conversion) {
         return new BreakNode(this, conversion);
     }
 
@@ -72,12 +66,13 @@ public final class BreakNode extends JumpStatement {
     }
 
     @Override
-    public BreakableNode getTarget(final LexicalContext lc) {
+    public BreakableNode getTarget(LexicalContext lc) {
         return lc.getBreakable(getLabelName());
     }
 
     @Override
-    Label getTargetLabel(final BreakableNode target) {
+    Label getTargetLabel(BreakableNode target) {
         return target.getBreakLabel();
     }
+
 }

@@ -27,12 +27,13 @@ package nashorn.internal.runtime.arrays;
 
 import java.util.Iterator;
 import java.util.List;
+
 import nashorn.api.scripting.JSObject;
 import nashorn.internal.runtime.JSType;
 import nashorn.internal.runtime.ScriptObject;
 
 /**
- * Superclass for array iterators
+ * Superclass for array iterators.
  * TODO: rewrite these
  *
  * @param <T> element type
@@ -46,18 +47,15 @@ abstract public class ArrayLikeIterator<T> implements Iterator<T> {
     protected final boolean includeUndefined;
 
     /**
-     * Constructor
-     *
-     * @param includeUndefined should undefined elements be included in the iteration?
+     * Constructor.
      */
-    ArrayLikeIterator(final boolean includeUndefined) {
+    ArrayLikeIterator(boolean includeUndefined) {
         this.includeUndefined = includeUndefined;
         this.index = 0;
     }
 
     /**
      * Is this a reverse order iteration?
-     * @return true if reverse
      */
     public boolean isReverse() {
         return false;
@@ -65,7 +63,6 @@ abstract public class ArrayLikeIterator<T> implements Iterator<T> {
 
     /**
      * Go the the next valid element index of the iterator
-     * @return next index
      */
     protected long bumpIndex() {
         return index++;
@@ -73,7 +70,6 @@ abstract public class ArrayLikeIterator<T> implements Iterator<T> {
 
     /**
      * Return the next valid element index of the iterator
-     * @return next index
      */
     public long nextIndex() {
         return index;
@@ -86,37 +82,28 @@ abstract public class ArrayLikeIterator<T> implements Iterator<T> {
 
     /**
      * Get the length of the iteration
-     * @return length
      */
     public abstract long getLength();
 
     /**
-     * ArrayLikeIterator factory
-     *
-     * @param object object over which to do element iteration
-     * @return iterator
+     * ArrayLikeIterator factory.
      */
-    public static ArrayLikeIterator<Object> arrayLikeIterator(final Object object) {
+    public static ArrayLikeIterator<Object> arrayLikeIterator(Object object) {
         return arrayLikeIterator(object, false);
     }
 
     /**
-     * ArrayLikeIterator factory (reverse order)
-     * @param object object over which to do reverse element iteration
-     * @return iterator
+     * ArrayLikeIterator factory (reverse order).
      */
-    public static ArrayLikeIterator<Object> reverseArrayLikeIterator(final Object object) {
+    public static ArrayLikeIterator<Object> reverseArrayLikeIterator(Object object) {
         return reverseArrayLikeIterator(object, false);
     }
 
     /**
-     * ArrayLikeIterator factory
-     * @param object object over which to do reverse element iteration
-     * @param includeUndefined should undefined elements be included in the iteration
-     * @return iterator
+     * ArrayLikeIterator factory.
      */
-    public static ArrayLikeIterator<Object> arrayLikeIterator(final Object object, final boolean includeUndefined) {
-        Object obj = object;
+    public static ArrayLikeIterator<Object> arrayLikeIterator(Object object, boolean includeUndefined) {
+        var obj = object;
 
         if (ScriptObject.isArray(obj)) {
             return new ScriptArrayIterator((ScriptObject) obj, includeUndefined);
@@ -143,13 +130,10 @@ abstract public class ArrayLikeIterator<T> implements Iterator<T> {
     }
 
     /**
-     * ArrayLikeIterator factory (reverse order)
-     * @param object object over which to do reverse element iteration
-     * @param includeUndefined should undefined elements be included in the iteration
-     * @return iterator
+     * ArrayLikeIterator factory (reverse order).
      */
-    public static ArrayLikeIterator<Object> reverseArrayLikeIterator(final Object object, final boolean includeUndefined) {
-        Object obj = object;
+    public static ArrayLikeIterator<Object> reverseArrayLikeIterator(Object object, boolean includeUndefined) {
+        var obj = object;
 
         if (ScriptObject.isArray(obj)) {
             return new ReverseScriptArrayIterator((ScriptObject) obj, includeUndefined);

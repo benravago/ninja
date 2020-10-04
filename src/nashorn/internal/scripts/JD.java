@@ -37,7 +37,6 @@ public class JD extends ScriptObject {
 
     /**
      * Returns the initial property map to be used.
-     * @return the initial property map.
      */
     public static PropertyMap getInitialMap() {
         return map$;
@@ -45,44 +44,31 @@ public class JD extends ScriptObject {
 
     /**
      * Constructor given an initial property map
-     *
-     * @param map the property map
      */
-    public JD(final PropertyMap map) {
+    public JD(PropertyMap map) {
         super(map);
     }
 
     /**
      * Constructor given an initial prototype and the default initial property map.
-     *
-     * @param proto the prototype object
      */
-    public JD(final ScriptObject proto) {
+    public JD(ScriptObject proto) {
         super(proto, getInitialMap());
     }
 
     /**
-     * Constructor that takes a pre-initialized spill pool. Used by
-     * {@link nashorn.internal.codegen.SpillObjectCreator} and
-     * {@link nashorn.internal.parser.JSONParser} for initializing object literals
-     *
-     * @param map            property map
-     * @param primitiveSpill primitive spill pool
-     * @param objectSpill    reference spill pool
+     * Constructor that takes a pre-initialized spill pool.
+     * Used by {@link nashorn.internal.codegen.SpillObjectCreator} and {@link nashorn.internal.parser.JSONParser} for initializing object literals
      */
-    public JD(final PropertyMap map, final long[] primitiveSpill, final Object[] objectSpill) {
+    public JD(PropertyMap map, long[] primitiveSpill, Object[] objectSpill) {
         super(map, primitiveSpill, objectSpill);
     }
 
     /**
      * A method handle of this method is passed to the ScriptFunction constructor.
-     *
-     * @param map  the property map to use for allocatorMap
-     *
-     * @return newly allocated ScriptObject
      */
     public static ScriptObject allocate(final PropertyMap map) {
         return new JD(map);
     }
-}
 
+}

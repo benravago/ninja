@@ -29,11 +29,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
+
 import nashorn.internal.codegen.types.Type;
 
 /**
- * Lexical context that keeps track of optimistic assumptions (if any)
- * made during code generation. Used from Attr and FinalizeTypes
+ * Lexical context that keeps track of optimistic assumptions (if any) made during code generation.
+ *
+ * Used from Attr and FinalizeTypes
  */
 public class OptimisticLexicalContext extends LexicalContext {
 
@@ -43,7 +45,7 @@ public class OptimisticLexicalContext extends LexicalContext {
         Symbol symbol;
         Type   type;
 
-        Assumption(final Symbol symbol, final Type type) {
+        Assumption(Symbol symbol, Type type) {
             this.symbol = symbol;
             this.type   = type;
         }
@@ -57,68 +59,60 @@ public class OptimisticLexicalContext extends LexicalContext {
     private final Deque<List<Assumption>> optimisticAssumptions = new ArrayDeque<>();
 
     /**
-     * Constructor
-     * @param isEnabled are optimistic types enabled?
+     * Constructor.
      */
-    public OptimisticLexicalContext(final boolean isEnabled) {
+    public OptimisticLexicalContext(boolean isEnabled) {
         super();
         this.isEnabled = isEnabled;
     }
 
     /**
-     * Are optimistic types enabled
-     * @return true if optimistic types
+     * Are optimistic types enabled?
      */
     public boolean isEnabled() {
         return isEnabled;
     }
 
     /**
-     * Log an optimistic assumption during codegen
-     * TODO : different parameters and more info about the assumption for future profiling
-     * needs
-     * @param symbol symbol
-     * @param type   type
+     * Log an optimistic assumption during codegen.
+     * TODO : different parameters and more info about the assumption for future profiling needs
      */
-    public void logOptimisticAssumption(final Symbol symbol, final Type type) {
+    public void logOptimisticAssumption(Symbol symbol, Type type) {
         if (isEnabled) {
-            final List<Assumption> peek = optimisticAssumptions.peek();
+            var peek = optimisticAssumptions.peek();
             peek.add(new Assumption(symbol, type));
         }
     }
 
     /**
      * Get the list of optimistic assumptions made
-     * @return optimistic assumptions
      */
-    public List<Assumption> getOptimisticAssumptions() {
+    List<Assumption> getOptimisticAssumptions() {
         return Collections.unmodifiableList(optimisticAssumptions.peek());
     }
 
     /**
      * Does this method have optimistic assumptions made during codegen?
-     * @return true if optimistic assumptions were made
      */
     public boolean hasOptimisticAssumptions() {
         return !optimisticAssumptions.isEmpty() && !getOptimisticAssumptions().isEmpty();
     }
 
     @Override
-    public <T extends LexicalContextNode> T push(final T node) {
+    public <T extends LexicalContextNode> T push(T node) {
         if (isEnabled) {
-            if(node instanceof FunctionNode) {
-                optimisticAssumptions.push(new ArrayList<Assumption>());
+            if (node instanceof FunctionNode) {
+                optimisticAssumptions.push(new ArrayList<>());
             }
         }
-
         return super.push(node);
     }
 
     @Override
-    public <T extends Node> T pop(final T node) {
-        final T popped = super.pop(node);
+    public <T extends Node> T pop(T node) {
+        var popped = super.pop(node);
         if (isEnabled) {
-            if(node instanceof FunctionNode) {
+            if (node instanceof FunctionNode) {
                 optimisticAssumptions.pop();
             }
         }

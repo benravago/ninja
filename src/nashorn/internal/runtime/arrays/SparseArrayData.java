@@ -26,8 +26,8 @@
 package nashorn.internal.runtime.arrays;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.TreeMap;
+
 import nashorn.internal.codegen.types.Type;
 import nashorn.internal.runtime.JSType;
 import nashorn.internal.runtime.ScriptRuntime;
@@ -36,6 +36,7 @@ import nashorn.internal.runtime.ScriptRuntime;
  * Handle arrays where the index is very large.
  */
 class SparseArrayData extends ArrayData {
+
     /** Maximum size for dense arrays */
     static final int MAX_DENSE_LENGTH = 128 * 1024;
 
@@ -48,11 +49,11 @@ class SparseArrayData extends ArrayData {
     /** Sparse elements. */
     private TreeMap<Long, Object> sparseMap;
 
-    SparseArrayData(final ArrayData underlying, final long length) {
+    SparseArrayData(ArrayData underlying, long length) {
         this(underlying, length, new TreeMap<>());
     }
 
-    private SparseArrayData(final ArrayData underlying, final long length, final TreeMap<Long, Object> sparseMap) {
+    private SparseArrayData(ArrayData underlying, long length, TreeMap<Long, Object> sparseMap) {
         super(length);
         assert underlying.length() <= length;
         this.underlying = underlying;
@@ -67,18 +68,18 @@ class SparseArrayData extends ArrayData {
 
     @Override
     public Object[] asObjectArray() {
-        final int len = (int)Math.min(length(), Integer.MAX_VALUE);
-        final int underlyingLength = (int)Math.min(len, underlying.length());
-        final Object[] objArray = new Object[len];
+        var len = (int)Math.min(length(), Integer.MAX_VALUE);
+        var underlyingLength = (int)Math.min(len, underlying.length());
+        var objArray = new Object[len];
 
-        for (int i = 0; i < underlyingLength; i++) {
+        for (var i = 0; i < underlyingLength; i++) {
             objArray[i] = underlying.getObject(i);
         }
 
         Arrays.fill(objArray, underlyingLength, len, ScriptRuntime.UNDEFINED);
 
-        for (final Map.Entry<Long, Object> entry : sparseMap.entrySet()) {
-            final long key = entry.getKey();
+        for (var entry : sparseMap.entrySet()) {
+            long key = entry.getKey();
             if (key < Integer.MAX_VALUE) {
                 objArray[(int)key] = entry.getValue();
             } else {
@@ -90,19 +91,19 @@ class SparseArrayData extends ArrayData {
     }
 
     @Override
-    public ArrayData shiftLeft(final int by) {
+    public ArrayData shiftLeft(int by) {
         underlying = underlying.shiftLeft(by);
 
-        final TreeMap<Long, Object> newSparseMap = new TreeMap<>();
+        var newSparseMap = new TreeMap<Long, Object>();
 
-        for (final Map.Entry<Long, Object> entry : sparseMap.entrySet()) {
-            final long newIndex = entry.getKey() - by;
+        for (var entry : sparseMap.entrySet()) {
+            var newIndex = entry.getKey() - by;
             if (newIndex >= 0) {
                 if (newIndex < maxDenseLength) {
-                    final long oldLength = underlying.length();
+                    var oldLength = underlying.length();
                     underlying = underlying.ensure(newIndex)
-                            .set((int) newIndex, entry.getValue()) // false
-                            .safeDelete(oldLength, newIndex - 1); // false
+                                           .set((int) newIndex, entry.getValue())
+                                           .safeDelete(oldLength, newIndex - 1);
                 } else {
                     newSparseMap.put(newIndex, entry.getValue());
                 }
@@ -116,14 +117,14 @@ class SparseArrayData extends ArrayData {
     }
 
     @Override
-    public ArrayData shiftRight(final int by) {
-        final TreeMap<Long, Object> newSparseMap = new TreeMap<>();
+    public ArrayData shiftRight(int by) {
+        var newSparseMap = new TreeMap<Long, Object>();
         // Move elements from underlying to sparse map if necessary
-        final long len = underlying.length();
+        var len = underlying.length();
         if (len + by > maxDenseLength) {
             // Length of underlying array after shrinking, before right-shifting
-            final long tempLength = Math.max(0, maxDenseLength - by);
-            for (long i = tempLength; i < len; i++) {
+            var tempLength = Math.max(0, maxDenseLength - by);
+            for (var i = tempLength; i < len; i++) {
                 if (underlying.has((int) i)) {
                     newSparseMap.put(i + by, underlying.getObject((int) i));
                 }
@@ -134,8 +135,8 @@ class SparseArrayData extends ArrayData {
 
         underlying = underlying.shiftRight(by);
 
-        for (final Map.Entry<Long, Object> entry : sparseMap.entrySet()) {
-            final long newIndex = entry.getKey() + by;
+        for (var entry : sparseMap.entrySet()) {
+            var newIndex = entry.getKey() + by;
             newSparseMap.put(newIndex, entry.getValue());
         }
 
@@ -146,7 +147,7 @@ class SparseArrayData extends ArrayData {
     }
 
     @Override
-    public ArrayData ensure(final long safeIndex) {
+    public ArrayData ensure(long safeIndex) {
         if (safeIndex >= length()) {
             setLength(safeIndex + 1);
         }
@@ -154,42 +155,26 @@ class SparseArrayData extends ArrayData {
     }
 
     @Override
-    public ArrayData shrink(final long newLength) {
+    public ArrayData shrink(long newLength) {
         if (newLength < underlying.length()) {
             underlying = underlying.shrink(newLength);
             underlying.setLength(newLength);
             sparseMap.clear();
             setLength(newLength);
         }
-
         sparseMap.subMap(newLength, Long.MAX_VALUE).clear();
         setLength(newLength);
         return this;
     }
 
     @Override
-    public ArrayData set(final int index, final Object value) {
+    public ArrayData set(int index, Object value) {
         if (index >= 0 && index < maxDenseLength) {
-            final long oldLength = underlying.length();
+            var oldLength = underlying.length();
             underlying = underlying.ensure(index).set(index, value).safeDelete(oldLength, index - 1);
             setLength(Math.max(underlying.length(), length()));
         } else {
-            final Long longIndex = indexToKey(index);
-            sparseMap.put(longIndex, value);
-            setLength(Math.max(longIndex + 1, length()));
-        }
-
-        return this;
-    }
-
-    @Override
-    public ArrayData set(final int index, final int value) {
-        if (index >= 0 && index < maxDenseLength) {
-            final long oldLength = underlying.length();
-            underlying = underlying.ensure(index).set(index, value).safeDelete(oldLength, index - 1);
-            setLength(Math.max(underlying.length(), length()));
-        } else {
-            final Long longIndex = indexToKey(index);
+            var longIndex = indexToKey(index);
             sparseMap.put(longIndex, value);
             setLength(Math.max(longIndex + 1, length()));
         }
@@ -197,13 +182,13 @@ class SparseArrayData extends ArrayData {
     }
 
     @Override
-    public ArrayData set(final int index, final double value) {
+    public ArrayData set(int index, int value) {
         if (index >= 0 && index < maxDenseLength) {
-            final long oldLength = underlying.length();
+            var oldLength = underlying.length();
             underlying = underlying.ensure(index).set(index, value).safeDelete(oldLength, index - 1);
             setLength(Math.max(underlying.length(), length()));
         } else {
-            final Long longIndex = indexToKey(index);
+            var longIndex = indexToKey(index);
             sparseMap.put(longIndex, value);
             setLength(Math.max(longIndex + 1, length()));
         }
@@ -211,13 +196,27 @@ class SparseArrayData extends ArrayData {
     }
 
     @Override
-    public ArrayData setEmpty(final int index) {
+    public ArrayData set(int index, double value) {
+        if (index >= 0 && index < maxDenseLength) {
+            var oldLength = underlying.length();
+            underlying = underlying.ensure(index).set(index, value).safeDelete(oldLength, index - 1);
+            setLength(Math.max(underlying.length(), length()));
+        } else {
+            var longIndex = indexToKey(index);
+            sparseMap.put(longIndex, value);
+            setLength(Math.max(longIndex + 1, length()));
+        }
+        return this;
+    }
+
+    @Override
+    public ArrayData setEmpty(int index) {
         underlying.setEmpty(index);
         return this;
     }
 
     @Override
-    public ArrayData setEmpty(final long lo, final long hi) {
+    public ArrayData setEmpty(long lo, long hi) {
         underlying.setEmpty(lo, hi);
         return this;
     }
@@ -228,7 +227,7 @@ class SparseArrayData extends ArrayData {
     }
 
     @Override
-    public int getInt(final int index) {
+    public int getInt(int index) {
         if (index >= 0 && index < maxDenseLength) {
             return underlying.getInt(index);
         }
@@ -236,7 +235,7 @@ class SparseArrayData extends ArrayData {
     }
 
     @Override
-    public int getIntOptimistic(final int index, final int programPoint) {
+    public int getIntOptimistic(int index, int programPoint) {
         if (index >= 0 && index < maxDenseLength) {
             return underlying.getIntOptimistic(index, programPoint);
         }
@@ -244,7 +243,7 @@ class SparseArrayData extends ArrayData {
     }
 
     @Override
-    public double getDouble(final int index) {
+    public double getDouble(int index) {
         if (index >= 0 && index < maxDenseLength) {
             return underlying.getDouble(index);
         }
@@ -252,7 +251,7 @@ class SparseArrayData extends ArrayData {
     }
 
     @Override
-    public double getDoubleOptimistic(final int index, final int programPoint) {
+    public double getDoubleOptimistic(int index, int programPoint) {
         if (index >= 0 && index < maxDenseLength) {
             return underlying.getDouble(index);
         }
@@ -260,30 +259,27 @@ class SparseArrayData extends ArrayData {
     }
 
     @Override
-    public Object getObject(final int index) {
+    public Object getObject(int index) {
         if (index >= 0 && index < maxDenseLength) {
             return underlying.getObject(index);
         }
-
-        final Long key = indexToKey(index);
+        var key = indexToKey(index);
         if (sparseMap.containsKey(key)) {
             return sparseMap.get(key);
         }
-
         return ScriptRuntime.UNDEFINED;
     }
 
     @Override
-    public boolean has(final int index) {
+    public boolean has(int index) {
         if (index >= 0 && index < maxDenseLength) {
             return index < underlying.length() && underlying.has(index);
         }
-
         return sparseMap.containsKey(indexToKey(index));
     }
 
     @Override
-    public ArrayData delete(final int index) {
+    public ArrayData delete(int index) {
         if (index >= 0 && index < maxDenseLength) {
             if (index < underlying.length()) {
                 underlying = underlying.delete(index);
@@ -291,12 +287,11 @@ class SparseArrayData extends ArrayData {
         } else {
             sparseMap.remove(indexToKey(index));
         }
-
         return this;
     }
 
     @Override
-    public ArrayData delete(final long fromIndex, final long toIndex) {
+    public ArrayData delete(long fromIndex, long toIndex) {
         if (fromIndex < maxDenseLength && fromIndex < underlying.length()) {
             underlying = underlying.delete(fromIndex, Math.min(toIndex, underlying.length() - 1));
         }
@@ -306,40 +301,40 @@ class SparseArrayData extends ArrayData {
         return this;
     }
 
-    private static Long indexToKey(final int index) {
+    private static Long indexToKey(int index) {
         return ArrayIndex.toLongIndex(index);
     }
 
     @Override
-    public ArrayData convert(final Class<?> type) {
+    public ArrayData convert(Class<?> type) {
         underlying = underlying.convert(type);
         return this;
     }
 
     @Override
     public Object pop() {
-        final long len = length();
-        final long underlyingLen = underlying.length();
+        var len = length();
+        var underlyingLen = underlying.length();
         if (len == 0) {
             return ScriptRuntime.UNDEFINED;
         }
         if (len == underlyingLen) {
-            final Object result = underlying.pop();
+            var result = underlying.pop();
             setLength(underlying.length());
             return result;
         }
         setLength(len - 1);
-        final Long key = len - 1;
+        var key = len - 1;
         return sparseMap.containsKey(key) ? sparseMap.remove(key) : ScriptRuntime.UNDEFINED;
     }
 
     @Override
-    public ArrayData slice(final long from, final long to) {
+    public ArrayData slice(long from, long to) {
         assert to <= length();
-        final long start = from < 0 ? (from + length()) : from;
-        final long newLength = to - start;
+        var start = from < 0 ? (from + length()) : from;
+        var newLength = to - start;
 
-        final long underlyingLength = underlying.length();
+        var underlyingLength = underlying.length();
 
         if (start >= 0 && to <= maxDenseLength) {
             if (newLength <= underlyingLength) {
@@ -348,9 +343,9 @@ class SparseArrayData extends ArrayData {
             return underlying.slice(from, to).ensure(newLength - 1).delete(underlyingLength, newLength);
         }
 
-        ArrayData sliced = EMPTY_ARRAY;
+        var sliced = EMPTY_ARRAY;
         sliced = sliced.ensure(newLength - 1);
-        for (long i = start; i < to; i = nextIndex(i)) {
+        for (var i = start; i < to; i = nextIndex(i)) {
             if (has((int)i)) {
                 sliced = sliced.set((int)(i - start), getObject((int)i)); // false
             }
@@ -360,16 +355,15 @@ class SparseArrayData extends ArrayData {
     }
 
     @Override
-    public long nextIndex(final long index) {
+    public long nextIndex(long index) {
         if (index < underlying.length() - 1) {
             return underlying.nextIndex(index);
         }
-
-        final Long nextKey = sparseMap.higherKey(index);
+        var nextKey = sparseMap.higherKey(index);
         if (nextKey != null) {
             return nextKey;
         }
-
         return length();
     }
+
 }

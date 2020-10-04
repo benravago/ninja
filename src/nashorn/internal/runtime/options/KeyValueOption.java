@@ -31,18 +31,17 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 /**
- * Key Value option such as logger. It comes on the format
- * such as:
+ * Key Value option such as logger.
  *
+ * It comes on the format such as:
  * {@code --log=module1:level1,module2:level2... }
  */
 public class KeyValueOption extends Option<String> {
-    /**
-     * Map of keys given
-     */
+
+    /** Map of keys given */
     protected Map<String, String> map;
 
-    KeyValueOption(final String value) {
+    KeyValueOption(String value) {
         super(value);
         initialize();
     }
@@ -52,20 +51,17 @@ public class KeyValueOption extends Option<String> {
     }
 
     /**
-     * Check if the key value option has a value or if it has not
-     * been initialized
-     * @param key the key
-     * @return value, or null if not initialized
+     * Check if the key value option has a value or if it has not been initialized
      */
-    public boolean hasValue(final String key) {
+    public boolean hasValue(String key) {
         return map != null && map.get(key) != null;
     }
 
-    String getValue(final String key) {
+    String getValue(String key) {
         if (map == null) {
             return null;
         }
-        final String val = map.get(key);
+        var val = map.get(key);
         return "".equals(val) ? null : val;
     }
 
@@ -76,10 +72,10 @@ public class KeyValueOption extends Option<String> {
 
         map = new LinkedHashMap<>();
 
-        final StringTokenizer st = new StringTokenizer(getValue(), ",");
+        var st = new StringTokenizer(getValue(), ",");
         while (st.hasMoreElements()) {
-            final String   token    = st.nextToken();
-            final String[] keyValue = token.split(":");
+            var token = st.nextToken();
+            var keyValue = token.split(":");
 
             if (keyValue.length == 1) {
                 map.put(keyValue[0], "");
@@ -90,4 +86,5 @@ public class KeyValueOption extends Option<String> {
             }
         }
     }
+
 }

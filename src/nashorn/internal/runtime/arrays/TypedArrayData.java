@@ -25,13 +25,16 @@
 
 package nashorn.internal.runtime.arrays;
 
-import static nashorn.internal.lookup.Lookup.MH;
 import java.lang.invoke.MethodHandle;
+
 import java.nio.Buffer;
+
 import jdk.dynalink.CallSiteDescriptor;
 import jdk.dynalink.linker.GuardedInvocation;
 import jdk.dynalink.linker.LinkRequest;
+
 import nashorn.internal.lookup.Lookup;
+import static nashorn.internal.lookup.Lookup.MH;
 
 /**
  * The superclass of all ArrayData used by TypedArrays
@@ -45,17 +48,15 @@ public abstract class TypedArrayData<T extends Buffer> extends ContinuousArrayDa
 
     /**
      * Constructor
-     * @param nb wrapped native buffer
-     * @param elementLength length in elements
      */
-    protected TypedArrayData(final T nb, final int elementLength) {
-        super(elementLength); //TODO is this right?
+    protected TypedArrayData(T nb, int elementLength) {
+        super(elementLength); // TODO is this right?
         this.nb = nb;
     }
 
     /**
-     * Length in number of elements. Accessed from {@code ArrayBufferView}
-     * @return element length
+     * Length in number of elements.
+     * Accessed from {@code ArrayBufferView}
      */
     public final int getElementLength() {
         return (int)length();
@@ -63,7 +64,6 @@ public abstract class TypedArrayData<T extends Buffer> extends ContinuousArrayDa
 
     /**
      * Is this an unsigned array data?
-     * @return true if unsigned
      */
     public boolean isUnsigned() {
         return false;
@@ -71,19 +71,18 @@ public abstract class TypedArrayData<T extends Buffer> extends ContinuousArrayDa
 
     /**
      * Is this a clamped array data?
-     * @return true if clamped
      */
     public boolean isClamped() {
         return false;
     }
 
     @Override
-    public boolean canDelete(final int index) {
+    public boolean canDelete(int index) {
         return false;
     }
 
     @Override
-    public boolean canDelete(final long longIndex) {
+    public boolean canDelete(long longIndex) {
         return false;
     }
 
@@ -98,42 +97,42 @@ public abstract class TypedArrayData<T extends Buffer> extends ContinuousArrayDa
     }
 
     @Override
-    public ArrayData shiftLeft(final int by) {
+    public ArrayData shiftLeft(int by) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public ArrayData shiftRight(final int by) {
+    public ArrayData shiftRight(int by) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public ArrayData ensure(final long safeIndex) {
+    public ArrayData ensure(long safeIndex) {
         return this;
     }
 
     @Override
-    public ArrayData shrink(final long newLength) {
+    public ArrayData shrink(long newLength) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public final boolean has(final int index) {
+    public final boolean has(int index) {
         return 0 <= index && index < length();
     }
 
     @Override
-    public ArrayData delete(final int index) {
+    public ArrayData delete(int index) {
         return this;
     }
 
     @Override
-    public ArrayData delete(final long fromIndex, final long toIndex) {
+    public ArrayData delete(long fromIndex, long toIndex) {
         return this;
     }
 
     @Override
-    public TypedArrayData<T> convert(final Class<?> type) {
+    public TypedArrayData<T> convert(Class<?> type) {
         throw new UnsupportedOperationException();
     }
 
@@ -143,25 +142,23 @@ public abstract class TypedArrayData<T extends Buffer> extends ContinuousArrayDa
     }
 
     @Override
-    public ArrayData slice(final long from, final long to) {
+    public ArrayData slice(long from, long to) {
         throw new UnsupportedOperationException();
     }
 
     /**
      * Element getter method handle
-     * @return getter
      */
     protected abstract MethodHandle getGetElem();
 
     /**
      * Element setter method handle
-     * @return setter
      */
     protected abstract MethodHandle getSetElem();
 
     @Override
-    public MethodHandle getElementGetter(final Class<?> returnType, final int programPoint) {
-        final MethodHandle getter = getContinuousElementGetter(getClass(), getGetElem(), returnType, programPoint);
+    public MethodHandle getElementGetter(Class<?> returnType, int programPoint) {
+        var getter = getContinuousElementGetter(getClass(), getGetElem(), returnType, programPoint);
         if (getter != null) {
             return Lookup.filterReturnType(getter, returnType);
         }
@@ -169,36 +166,24 @@ public abstract class TypedArrayData<T extends Buffer> extends ContinuousArrayDa
     }
 
     @Override
-    public MethodHandle getElementSetter(final Class<?> elementType) {
+    public MethodHandle getElementSetter(Class<?> elementType) {
         return getContinuousElementSetter(getClass(), Lookup.filterArgumentType(getSetElem(), 2, elementType), elementType);
     }
 
     @Override
-    protected MethodHandle getContinuousElementSetter(final Class<? extends ContinuousArrayData> clazz, final MethodHandle setHas, final Class<?> elementType) {
-        final MethodHandle mh = Lookup.filterArgumentType(setHas, 2, elementType);
+    protected MethodHandle getContinuousElementSetter(Class<? extends ContinuousArrayData> clazz, MethodHandle setHas, Class<?> elementType) {
+        var mh = Lookup.filterArgumentType(setHas, 2, elementType);
         return MH.asType(mh, mh.type().changeParameterType(0, clazz));
     }
 
     @Override
-    public GuardedInvocation findFastGetIndexMethod(final Class<? extends ArrayData> clazz, final CallSiteDescriptor desc, final LinkRequest request) {
-        final GuardedInvocation inv = super.findFastGetIndexMethod(clazz, desc, request);
-
-        if (inv != null) {
-            return inv;
-        }
-
-        return null;
+    public GuardedInvocation findFastGetIndexMethod(Class<? extends ArrayData> clazz, CallSiteDescriptor desc, LinkRequest request) {
+        return super.findFastGetIndexMethod(clazz, desc, request);
     }
 
     @Override
-    public GuardedInvocation findFastSetIndexMethod(final Class<? extends ArrayData> clazz, final CallSiteDescriptor desc, final LinkRequest request) { // array, index, value
-        final GuardedInvocation inv = super.findFastSetIndexMethod(clazz, desc, request);
-
-        if (inv != null) {
-            return inv;
-        }
-
-        return null;
+    public GuardedInvocation findFastSetIndexMethod(Class<? extends ArrayData> clazz, CallSiteDescriptor desc, LinkRequest request) { // array, index, value
+        return super.findFastSetIndexMethod(clazz, desc, request);
     }
 
 }

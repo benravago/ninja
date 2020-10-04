@@ -32,9 +32,11 @@ import nashorn.internal.runtime.linker.Bootstrap;
 
 /**
  * Helper class for the various map/apply functions in {@link nashorn.internal.objects.NativeArray}.
+ *
  * @param <T> element type of results from application callback
  */
 public abstract class IteratorAction<T> {
+
     /** Self object */
     protected final Object self;
 
@@ -55,44 +57,31 @@ public abstract class IteratorAction<T> {
 
     /**
      * Constructor
-     *
-     * @param self          self reference to array object
-     * @param callbackfn    callback function for each element
-     * @param thisArg       the reference
-     * @param initialResult result accumulator initialization
      */
-    public IteratorAction(final Object self, final Object callbackfn, final Object thisArg, final T initialResult) {
+    public IteratorAction(Object self, Object callbackfn, Object thisArg, T initialResult) {
         this(self, callbackfn, thisArg, initialResult, ArrayLikeIterator.arrayLikeIterator(self));
     }
 
     /**
      * Constructor
-     *
-     * @param self          self reference to array object
-     * @param callbackfn    callback function for each element
-     * @param thisArg       the reference
-     * @param initialResult result accumulator initialization
-     * @param iter          custom element iterator
      */
-    public IteratorAction(final Object self, final Object callbackfn, final Object thisArg, final T initialResult, final ArrayLikeIterator<Object> iter) {
-        this.self       = self;
-        this.callbackfn = callbackfn;
-        this.result     = initialResult;
-        this.iter       = iter;
-        this.thisArg    = thisArg;
+    public IteratorAction(Object self, Object callbackfn, Object thisArg, T initialResult, ArrayLikeIterator<Object> iter) {
+        this.self       = self;           // self reference to array object
+        this.callbackfn = callbackfn;     // callback function for each element
+        this.result     = initialResult;  // result accumulator initialization
+        this.iter       = iter;           // custom element iterator
+        this.thisArg    = thisArg;        // the reference
     }
 
     /**
-     * An action to be performed once at the start of the apply loop
-     * @param iterator array element iterator
+     * An action to be performed once at the start of the apply loop.
      */
-    protected void applyLoopBegin(final ArrayLikeIterator<Object> iterator) {
+    protected void applyLoopBegin(ArrayLikeIterator<Object> iterator) {
         //empty
     }
 
     /**
      * Apply action main loop.
-     * @return result of apply
      */
     public final T apply() {
 
@@ -100,10 +89,10 @@ public abstract class IteratorAction<T> {
         thisArg = (thisArg == ScriptRuntime.UNDEFINED && !Bootstrap.isCallable(callbackfn)) ? Context.getGlobal() : thisArg;
 
         applyLoopBegin(iter);
-        final boolean reverse = iter.isReverse();
+        var reverse = iter.isReverse();
         while (iter.hasNext()) {
 
-            final Object val = iter.next();
+            var val = iter.next();
             index = iter.nextIndex() + (reverse ? 1 : -1);
 
             try {
@@ -120,14 +109,7 @@ public abstract class IteratorAction<T> {
 
     /**
      * For each callback
-     *
-     * @param val value
-     * @param i   position of value
-     *
-     * @return true if callback invocation return true
-     *
-     * @throws Throwable if invocation throws an exception/error
      */
-    protected abstract boolean forEach(final Object val, final double i) throws Throwable;
+    protected abstract boolean forEach(Object val, double i) throws Throwable;
 
 }

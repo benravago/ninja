@@ -39,37 +39,34 @@ final class FinalScriptFunctionData extends ScriptFunctionData {
     // documentation key for this function, may be null
     private String docKey;
 
-    private static final long serialVersionUID = -930632846167768864L;
 
     /**
      * Constructor - used for bind
-     *
      * @param name      name
      * @param arity     arity
      * @param functions precompiled code
      * @param flags     {@link ScriptFunctionData} flags
      */
-    FinalScriptFunctionData(final String name, final int arity, final List<CompiledFunction> functions, final int flags) {
+    FinalScriptFunctionData(String name, int arity, List<CompiledFunction> functions, int flags) {
         super(name, arity, flags);
         code.addAll(functions);
         assert !needsCallee();
     }
 
     /**
-     * Constructor - used from ScriptFunction. This assumes that we have code already for the
-     * method (typically a native method) and possibly specializations.
-     *
+     * Constructor - used from ScriptFunction.
+     * This assumes that we have code already for the method (typically a native method) and possibly specializations.
      * @param name  name
      * @param mh    method handle for generic version of method
      * @param specs specializations
      * @param flags {@link ScriptFunctionData} flags
      */
-    FinalScriptFunctionData(final String name, final MethodHandle mh, final Specialization[] specs, final int flags) {
+    FinalScriptFunctionData(String name, MethodHandle mh, Specialization[] specs, int flags) {
         super(name, methodHandleArity(mh), flags);
 
         addInvoker(mh);
         if (specs != null) {
-            for (final Specialization spec : specs) {
+            for (var spec : specs) {
                 addInvoker(spec.getMethodHandle(), spec);
             }
         }
@@ -81,27 +78,26 @@ final class FinalScriptFunctionData extends ScriptFunctionData {
     }
 
     @Override
-    void setDocumentationKey(final String docKey) {
+    void setDocumentationKey(String docKey) {
         this.docKey = docKey;
     }
 
     @Override
     String getDocumentation() {
-        final String doc = docKey != null?
-            FunctionDocumentation.getDoc(docKey) : null;
+        var doc = docKey != null ? FunctionDocumentation.getDoc(docKey) : null;
         return doc != null? doc : super.getDocumentation();
     }
 
     @Override
     protected boolean needsCallee() {
-        final boolean needsCallee = code.getFirst().needsCallee();
+        var needsCallee = code.getFirst().needsCallee();
         assert allNeedCallee(needsCallee);
         return needsCallee;
     }
 
-    private boolean allNeedCallee(final boolean needCallee) {
-        for (final CompiledFunction inv : code) {
-            if(inv.needsCallee() != needCallee) {
+    private boolean allNeedCallee(boolean needCallee) {
+        for (var inv : code) {
+            if (inv.needsCallee() != needCallee) {
                 return false;
             }
         }
@@ -109,11 +105,11 @@ final class FinalScriptFunctionData extends ScriptFunctionData {
     }
 
     @Override
-    CompiledFunction getBest(final MethodType callSiteType, final ScriptObject runtimeScope, final Collection<CompiledFunction> forbidden, final boolean linkLogicOkay) {
+    CompiledFunction getBest(MethodType callSiteType, ScriptObject runtimeScope, Collection<CompiledFunction> forbidden, boolean linkLogicOkay) {
         assert isValidCallSite(callSiteType) : callSiteType;
 
         CompiledFunction best = null;
-        for (final CompiledFunction candidate: code) {
+        for (var candidate: code) {
             if (!linkLogicOkay && candidate.hasLinkLogic()) {
                 // Skip! Version with no link logic is desired, but this one has link logic!
                 continue;
@@ -129,19 +125,18 @@ final class FinalScriptFunctionData extends ScriptFunctionData {
 
     @Override
     MethodType getGenericType() {
-        // We need to ask the code for its generic type. We can't just rely on this function data's arity, as it's not
-        // actually correct for lots of built-ins. E.g. ECMAScript 5.1 section 15.5.3.2 prescribes that
-        // Script.fromCharCode([char0[, char1[, ...]]]) has a declared arity of 1 even though it's a variable arity
-        // method.
-        int max = 0;
-        for(final CompiledFunction fn: code) {
-            final MethodType t = fn.type();
-            if(ScriptFunctionData.isVarArg(t)) {
+        // We need to ask the code for its generic type.
+        // We can't just rely on this function data's arity, as it's not actually correct for lots of built-ins.
+        // E.g. ECMAScript 5.1 section 15.5.3.2 prescribes that Script.fromCharCode([char0[, char1[, ...]]]) has a declared arity of 1 even though it's a variable arity method.
+        var max = 0;
+        for (var fn: code) {
+            var t = fn.type();
+            if (ScriptFunctionData.isVarArg(t)) {
                 // 2 for (callee, this, args[])
                 return MethodType.genericMethodType(2, true);
             }
-            final int paramCount = t.parameterCount() - (ScriptFunctionData.needsCallee(t) ? 1 : 0);
-            if(paramCount > max) {
+            var paramCount = t.parameterCount() - (ScriptFunctionData.needsCallee(t) ? 1 : 0);
+            if (paramCount > max) {
                 max = paramCount;
             }
         }
@@ -149,13 +144,14 @@ final class FinalScriptFunctionData extends ScriptFunctionData {
         return MethodType.genericMethodType(max + 1);
     }
 
-    private CompiledFunction addInvoker(final MethodHandle mh, final Specialization specialization) {
+    private CompiledFunction addInvoker(MethodHandle mh, Specialization specialization) {
         assert !needsCallee(mh);
 
-        final CompiledFunction invoker;
+        CompiledFunction invoker;
         if (isConstructor(mh)) {
-            // only nasgen constructors: (boolean, self, args) are subject to binding a boolean newObj. isConstructor
-            // is too conservative a check. However, isConstructor(mh) always implies isConstructor param
+            // Only nasgen constructors: (boolean, self, args) are subject to binding a boolean newObj.
+            // isConstructor is too conservative a check.
+            // However, isConstructor(mh) always implies isConstructor param
             assert isConstructor();
             invoker = CompiledFunction.createBuiltInConstructor(mh);
         } else {
@@ -166,20 +162,20 @@ final class FinalScriptFunctionData extends ScriptFunctionData {
         return invoker;
     }
 
-    private CompiledFunction addInvoker(final MethodHandle mh) {
+    private CompiledFunction addInvoker(MethodHandle mh) {
         return addInvoker(mh, null);
     }
 
-    private static int methodHandleArity(final MethodHandle mh) {
+    private static int methodHandleArity(MethodHandle mh) {
         if (isVarArg(mh)) {
             return MAX_ARITY;
         }
 
-        //drop self, callee and boolean constructor flag to get real arity
+        // drop self, callee and boolean constructor flag to get real arity
         return mh.type().parameterCount() - 1 - (needsCallee(mh) ? 1 : 0) - (isConstructor(mh) ? 1 : 0);
     }
 
-    private static boolean isConstructor(final MethodHandle mh) {
+    private static boolean isConstructor(MethodHandle mh) {
         return mh.type().parameterCount() >= 1 && mh.type().parameterType(0) == boolean.class;
     }
 

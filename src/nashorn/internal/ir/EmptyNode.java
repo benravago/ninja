@@ -33,31 +33,24 @@ import nashorn.internal.ir.visitor.NodeVisitor;
  */
 @Immutable
 public final class EmptyNode extends Statement {
-    private static final long serialVersionUID = 1L;
 
     /**
      * Constructor
-     *
-     * @param node node to wrap
      */
-    public EmptyNode(final Statement node) {
+    public EmptyNode(Statement node) {
         super(node);
     }
 
     /**
      * Constructor
-     *
-     * @param lineNumber line number
-     * @param token      token
-     * @param finish     finish
      */
-    public EmptyNode(final int lineNumber, final long token, final int finish) {
+    public EmptyNode(int lineNumber, long token, int finish) {
         super(lineNumber, token, finish);
     }
 
 
     @Override
-    public Node accept(final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(NodeVisitor<? extends LexicalContext> visitor) {
         if (visitor.enterEmptyNode(this)) {
             return visitor.leaveEmptyNode(this);
         }
@@ -65,7 +58,7 @@ public final class EmptyNode extends Statement {
     }
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printTypes) {
+    public void toString(StringBuilder sb, boolean printTypes) {
         sb.append(';');
     }
 

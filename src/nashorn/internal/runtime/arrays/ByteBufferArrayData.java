@@ -27,41 +27,36 @@ package nashorn.internal.runtime.arrays;
 import static nashorn.internal.runtime.ECMAErrors.typeError;
 
 import java.nio.ByteBuffer;
+
 import nashorn.internal.objects.Global;
 import nashorn.internal.runtime.PropertyDescriptor;
 import nashorn.internal.runtime.ScriptRuntime;
 
 /**
- * Implementation of {@link ArrayData} that wraps a nio ByteBuffer
+ * Implementation of {@link ArrayData} that wraps a nio ByteBuffer.
  */
 final class ByteBufferArrayData extends ArrayData {
+
     private final ByteBuffer buf;
 
-    ByteBufferArrayData(final int length) {
+    ByteBufferArrayData(int length) {
         super(length);
         this.buf = ByteBuffer.allocateDirect(length);
     }
 
     /**
      * Constructor
-     *
-     * @param buf ByteBuffer to create array data with.
      */
-    ByteBufferArrayData(final ByteBuffer buf) {
+    ByteBufferArrayData(ByteBuffer buf) {
         super(buf.capacity());
         this.buf = buf;
     }
 
     /**
      * Returns property descriptor for element at a given index
-     *
-     * @param global the global object
-     * @param index  the index
-     *
-     * @return property descriptor for element
      */
     @Override
-    public PropertyDescriptor getDescriptor(final Global global, final int index) {
+    public PropertyDescriptor getDescriptor(Global global, int index) {
         // make the index properties not configurable
         return global.newDataDescriptor(getObject(index), false, true, true);
     }
@@ -77,98 +72,96 @@ final class ByteBufferArrayData extends ArrayData {
     }
 
     @Override
-    public void setLength(final long length) {
+    public void setLength(long length) {
         throw new UnsupportedOperationException("setLength");
     }
 
     @Override
-    public ArrayData shiftLeft(final int by) {
+    public ArrayData shiftLeft(int by) {
         throw unsupported("shiftLeft");
     }
 
     @Override
-    public ArrayData shiftRight(final int by) {
+    public ArrayData shiftRight(int by) {
         throw unsupported("shiftRight");
     }
 
     @Override
-    public ArrayData ensure(final long safeIndex) {
+    public ArrayData ensure(long safeIndex) {
         if (safeIndex < buf.capacity()) {
             return this;
         }
-
         throw unsupported("ensure");
     }
 
     @Override
-    public ArrayData shrink(final long newLength) {
+    public ArrayData shrink(long newLength) {
         throw unsupported("shrink");
     }
 
     @Override
-    public ArrayData set(final int index, final Object value) {
+    public ArrayData set(int index, Object value) {
         if (value instanceof Number) {
             buf.put(index, ((Number)value).byteValue());
             return this;
         }
-
         throw typeError("not.a.number", ScriptRuntime.safeToString(value));
     }
 
     @Override
-    public ArrayData set(final int index, final int value) {
+    public ArrayData set(int index, int value) {
         buf.put(index, (byte)value);
         return this;
     }
 
     @Override
-    public ArrayData set(final int index, final double value) {
+    public ArrayData set(int index, double value) {
         buf.put(index, (byte)value);
         return this;
     }
 
     @Override
-    public int getInt(final int index) {
+    public int getInt(int index) {
         return 0x0ff & buf.get(index);
     }
 
     @Override
-    public double getDouble(final int index) {
+    public double getDouble(int index) {
         return 0x0ff & buf.get(index);
     }
 
     @Override
-    public Object getObject(final int index) {
+    public Object getObject(int index) {
         return 0x0ff & buf.get(index);
     }
 
     @Override
-    public boolean has(final int index) {
+    public boolean has(int index) {
         return index > -1 && index < buf.capacity();
     }
 
     @Override
-    public boolean canDelete(final int index) {
+    public boolean canDelete(int index) {
         return false;
     }
 
     @Override
-    public boolean canDelete(final long longIndex) {
+    public boolean canDelete(long longIndex) {
         return false;
     }
 
     @Override
-    public ArrayData delete(final int index) {
+    public ArrayData delete(int index) {
         throw unsupported("delete");
     }
 
     @Override
-    public ArrayData delete(final long fromIndex, final long toIndex) {
+    public ArrayData delete(long fromIndex, long toIndex) {
         throw unsupported("delete");
     }
 
     @Override
-    public ArrayData push(final Object... items) {
+    public ArrayData push(Object... items) {
         throw unsupported("push");
     }
 
@@ -178,16 +171,17 @@ final class ByteBufferArrayData extends ArrayData {
     }
 
     @Override
-    public ArrayData slice(final long from, final long to) {
+    public ArrayData slice(long from, long to) {
         throw unsupported("slice");
     }
 
     @Override
-    public ArrayData convert(final Class<?> type) {
+    public ArrayData convert(Class<?> type) {
         throw unsupported("convert");
     }
 
-    private static UnsupportedOperationException unsupported(final String method) {
+    private static UnsupportedOperationException unsupported(String method) {
         return new UnsupportedOperationException(method);
     }
+
 }

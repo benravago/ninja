@@ -40,24 +40,25 @@ import nashorn.internal.ir.LocalVariableConversion;
 import nashorn.internal.ir.UnaryNode;
 
 /**
- * Branch optimizer for CodeGenerator. Given a jump condition this helper
- * class attempts to simplify the control flow
+ * Branch optimizer for CodeGenerator.
+ *
+ * Given a jump condition this helper class attempts to simplify the control flow
  */
 final class BranchOptimizer {
 
     private final CodeGenerator codegen;
     private final MethodEmitter method;
 
-    BranchOptimizer(final CodeGenerator codegen, final MethodEmitter method) {
+    BranchOptimizer(CodeGenerator codegen, MethodEmitter method) {
         this.codegen = codegen;
         this.method  = method;
     }
 
-    void execute(final Expression node, final Label label, final boolean state) {
+    void execute(Expression node, Label label, boolean state) {
         branchOptimizer(node, label, state);
     }
 
-    private void branchOptimizer(final UnaryNode unaryNode, final Label label, final boolean state) {
+    private void branchOptimizer(UnaryNode unaryNode, Label label, boolean state) {
         if (unaryNode.isTokenType(NOT)) {
             branchOptimizer(unaryNode.getExpression(), label, !state);
         } else {
@@ -65,90 +66,89 @@ final class BranchOptimizer {
         }
     }
 
-    private void branchOptimizer(final BinaryNode binaryNode, final Label label, final boolean state) {
-        final Expression lhs = binaryNode.lhs();
-        final Expression rhs = binaryNode.rhs();
+    private void branchOptimizer(BinaryNode binaryNode, Label label, boolean state) {
+        var lhs = binaryNode.lhs();
+        var rhs = binaryNode.rhs();
 
         switch (binaryNode.tokenType()) {
-        case AND:
-            if (state) {
-                final Label skip = new Label("skip");
-                optimizeLogicalOperand(lhs, skip,  false, false);
-                optimizeLogicalOperand(rhs, label, true,  true);
-                method.label(skip);
-            } else {
-                optimizeLogicalOperand(lhs, label, false, false);
-                optimizeLogicalOperand(rhs, label, false, true);
+            // default ->  {}
+
+            case AND -> {
+                if (state) {
+                    var skip = new Label("skip");
+                    optimizeLogicalOperand(lhs, skip,  false, false);
+                    optimizeLogicalOperand(rhs, label, true,  true);
+                    method.label(skip);
+                } else {
+                    optimizeLogicalOperand(lhs, label, false, false);
+                    optimizeLogicalOperand(rhs, label, false, true);
+                }
+                return;
             }
-            return;
-
-        case OR:
-            if (state) {
-                optimizeLogicalOperand(lhs, label, true, false);
-                optimizeLogicalOperand(rhs, label, true, true);
-            } else {
-                final Label skip = new Label("skip");
-                optimizeLogicalOperand(lhs, skip,  true,  false);
-                optimizeLogicalOperand(rhs, label, false, true);
-                method.label(skip);
+            case OR -> {
+                if (state) {
+                    optimizeLogicalOperand(lhs, label, true, false);
+                    optimizeLogicalOperand(rhs, label, true, true);
+                } else {
+                    var skip = new Label("skip");
+                    optimizeLogicalOperand(lhs, skip,  true,  false);
+                    optimizeLogicalOperand(rhs, label, false, true);
+                    method.label(skip);
+                }
+                return;
             }
-            return;
+            case EQ, EQ_STRICT -> {
+                codegen.loadComparisonOperands(binaryNode);
+                method.conditionalJump(state ? EQ : NE, true, label);
+                return;
+            }
+            case NE, NE_STRICT -> {
+                codegen.loadComparisonOperands(binaryNode);
+                method.conditionalJump(state ? NE : EQ, true, label);
+                return;
+            }
+            case GE -> {
+                codegen.loadComparisonOperands(binaryNode);
+                method.conditionalJump(state ? GE : LT, false, label);
+                return;
+            }
+            case GT -> {
+                codegen.loadComparisonOperands(binaryNode);
+                method.conditionalJump(state ? GT : LE, false, label);
+                return;
+            }
+            case LE -> {
+                codegen.loadComparisonOperands(binaryNode);
+                method.conditionalJump(state ? LE : GT, true, label);
+                return;
+            }
 
-        case EQ:
-        case EQ_STRICT:
-            codegen.loadComparisonOperands(binaryNode);
-            method.conditionalJump(state ? EQ : NE, true, label);
-            return;
-
-        case NE:
-        case NE_STRICT:
-            codegen.loadComparisonOperands(binaryNode);
-            method.conditionalJump(state ? NE : EQ, true, label);
-            return;
-
-        case GE:
-            codegen.loadComparisonOperands(binaryNode);
-            method.conditionalJump(state ? GE : LT, false, label);
-            return;
-
-        case GT:
-            codegen.loadComparisonOperands(binaryNode);
-            method.conditionalJump(state ? GT : LE, false, label);
-            return;
-
-        case LE:
-            codegen.loadComparisonOperands(binaryNode);
-            method.conditionalJump(state ? LE : GT, true, label);
-            return;
-
-        case LT:
-            codegen.loadComparisonOperands(binaryNode);
-            method.conditionalJump(state ? LT : GE, true, label);
-            return;
-
-        default:
-            break;
+            case LT -> {
+                codegen.loadComparisonOperands(binaryNode);
+                method.conditionalJump(state ? LT : GE, true, label);
+                return;
+            }
         }
 
         loadTestAndJump(binaryNode, label, state);
     }
 
-    private void optimizeLogicalOperand(final Expression expr, final Label label, final boolean state, final boolean isRhs) {
-        final JoinPredecessorExpression jpexpr = (JoinPredecessorExpression)expr;
-        if(LocalVariableConversion.hasLiveConversion(jpexpr)) {
-            final Label after = new Label("after");
+    private void optimizeLogicalOperand(Expression expr, Label label, boolean state, boolean isRhs) {
+        var jpexpr = (JoinPredecessorExpression)expr;
+        if (LocalVariableConversion.hasLiveConversion(jpexpr)) {
+            var after = new Label("after");
             branchOptimizer(jpexpr.getExpression(), after, !state);
             method.beforeJoinPoint(jpexpr);
             method._goto(label);
             method.label(after);
-            if(isRhs) {
+            if (isRhs) {
                 method.beforeJoinPoint(jpexpr);
             }
         } else {
             branchOptimizer(jpexpr.getExpression(), label, state);
         }
     }
-    private void branchOptimizer(final Expression node, final Label label, final boolean state) {
+    private void branchOptimizer(Expression node, Label label, boolean state) {
         if (node instanceof BinaryNode) {
             branchOptimizer((BinaryNode)node, label, state);
             return;
@@ -162,7 +162,7 @@ final class BranchOptimizer {
         loadTestAndJump(node, label, state);
     }
 
-    private void loadTestAndJump(final Expression node, final Label label, final boolean state) {
+    private void loadTestAndJump(Expression node, Label label, boolean state) {
         codegen.loadExpressionAsBoolean(node);
         if (state) {
             method.ifne(label);
@@ -170,4 +170,5 @@ final class BranchOptimizer {
             method.ifeq(label);
         }
     }
+
 }

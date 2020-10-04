@@ -27,7 +27,6 @@ package nashorn.internal.runtime;
 
 import static nashorn.internal.codegen.CompilerConstants.virtualCallNoLookup;
 
-import java.util.concurrent.atomic.LongAdder;
 import nashorn.internal.codegen.CompilerConstants;
 
 /**
@@ -40,36 +39,34 @@ public class Scope extends ScriptObject {
 
     /** Method handle that points to {@link Scope#getSplitState}. */
     public static final CompilerConstants.Call GET_SPLIT_STATE = virtualCallNoLookup(Scope.class, "getSplitState", int.class);
+
     /** Method handle that points to {@link Scope#setSplitState(int)}. */
     public static final CompilerConstants.Call SET_SPLIT_STATE = virtualCallNoLookup(Scope.class, "setSplitState", void.class, int.class);
 
     /**
      * Constructor
-     *
      * @param map initial property map
      */
-    public Scope(final PropertyMap map) {
+    public Scope(PropertyMap map) {
         super(map);
     }
 
     /**
      * Constructor
-     *
      * @param proto parent scope
      * @param map   initial property map
      */
-    public Scope(final ScriptObject proto, final PropertyMap map) {
+    public Scope(ScriptObject proto, PropertyMap map) {
         super(proto, map);
     }
 
     /**
      * Constructor
-     *
      * @param map            property map
      * @param primitiveSpill primitive spill array
      * @param objectSpill    reference spill array
      */
-    public Scope(final PropertyMap map, final long[] primitiveSpill, final Object[] objectSpill) {
+    public Scope(PropertyMap map, long[] primitiveSpill, Object[] objectSpill) {
         super(map, primitiveSpill, objectSpill);
     }
 
@@ -90,8 +87,6 @@ public class Scope extends ScriptObject {
 
     /**
      * Get the scope's split method state.
-     *
-     * @return current split state
      */
     public int getSplitState() {
         return splitState;
@@ -99,10 +94,8 @@ public class Scope extends ScriptObject {
 
     /**
      * Set the scope's split method state.
-     *
-     * @param state current split state
      */
-    public void setSplitState(final int state) {
+    public void setSplitState(int state) {
         splitState = state;
     }
 

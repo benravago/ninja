@@ -48,6 +48,7 @@ import nashorn.internal.Util;
  * Superclass for Nashorn class loader classes.
  */
 abstract class NashornLoader extends SecureClassLoader {
+
     protected static final String OBJECTS_PKG        = "nashorn.internal.objects";
     protected static final String RUNTIME_PKG        = "nashorn.internal.runtime";
     protected static final String RUNTIME_ARRAYS_PKG = "nashorn.internal.runtime.arrays";
@@ -69,31 +70,28 @@ abstract class NashornLoader extends SecureClassLoader {
     static {
         /*
          * Generated classes get access to runtime, runtime.linker, objects, scripts packages.
-         * Note that the actual scripts can not access these because Java.type, Packages
-         * prevent these restricted packages. And Java reflection and JSR292 access is prevented
-         * for scripts. In other words, nashorn generated portions of script classes can access
-         * classes in these implementation packages.
+         * Note that the actual scripts can not access these because Java.type, Packages prevent these restricted packages.
+         * And Java reflection and JSR292 access is prevented for scripts.
+         * In other words, nashorn generated portions of script classes can access classes in these implementation packages.
          */
         SCRIPT_PERMISSIONS = new Permission[] {
-                new RuntimePermission("accessClassInPackage." + RUNTIME_PKG),
-                new RuntimePermission("accessClassInPackage." + RUNTIME_LINKER_PKG),
-                new RuntimePermission("accessClassInPackage." + OBJECTS_PKG),
-                new RuntimePermission("accessClassInPackage." + SCRIPTS_PKG),
-                new RuntimePermission("accessClassInPackage." + RUNTIME_ARRAYS_PKG)
+            new RuntimePermission("accessClassInPackage." + RUNTIME_PKG),
+            new RuntimePermission("accessClassInPackage." + RUNTIME_LINKER_PKG),
+            new RuntimePermission("accessClassInPackage." + OBJECTS_PKG),
+            new RuntimePermission("accessClassInPackage." + SCRIPTS_PKG),
+            new RuntimePermission("accessClassInPackage." + RUNTIME_ARRAYS_PKG)
         };
     }
 
-    // addExport Method object on ModuleGraphManipulator
-    // class loaded by this loader
+    // addExport Method object on ModuleGraphManipulator class loaded by this loader
     private Method addModuleExport;
 
-    NashornLoader(final ClassLoader parent) {
+    NashornLoader(ClassLoader parent) {
         super(parent);
     }
 
     void loadModuleManipulator() {
-        final Class<?> clazz = defineClass(MODULE_MANIPULATOR_NAME,
-                MODULE_MANIPULATOR_BYTES, 0, MODULE_MANIPULATOR_BYTES.length);
+        var clazz = defineClass(MODULE_MANIPULATOR_NAME, MODULE_MANIPULATOR_BYTES, 0, MODULE_MANIPULATOR_BYTES.length);
         // force class initialization so that <clinit> runs!
         try {
             Class.forName(MODULE_MANIPULATOR_NAME, true, this);
@@ -112,7 +110,7 @@ abstract class NashornLoader extends SecureClassLoader {
         AccessController.doPrivileged(pa);
     }
 
-    final void addModuleExport(final Module to) {
+    final void addModuleExport(Module to) {
         try {
             addModuleExport.invoke(null, to);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
@@ -120,31 +118,25 @@ abstract class NashornLoader extends SecureClassLoader {
         }
     }
 
-    protected static void checkPackageAccess(final String name) {
-        final int i = name.lastIndexOf('.');
+    protected static void checkPackageAccess(String name) {
+        var i = name.lastIndexOf('.');
         if (i != -1) {
-            final SecurityManager sm = System.getSecurityManager();
+            var sm = System.getSecurityManager();
             if (sm != null) {
-                final String pkgName = name.substring(0, i);
+                var pkgName = name.substring(0, i);
                 switch (pkgName) {
-                    case RUNTIME_PKG:
-                    case RUNTIME_ARRAYS_PKG:
-                    case RUNTIME_LINKER_PKG:
-                    case OBJECTS_PKG:
-                    case SCRIPTS_PKG:
-                        // allow it.
-                        break;
-                    default:
-                        sm.checkPackageAccess(pkgName);
+                    case RUNTIME_PKG, RUNTIME_ARRAYS_PKG, RUNTIME_LINKER_PKG, OBJECTS_PKG, SCRIPTS_PKG -> {} // allow it.
+                    default -> sm.checkPackageAccess(pkgName);
                 }
+
             }
         }
     }
 
     @Override
-    protected PermissionCollection getPermissions(final CodeSource codesource) {
-        final Permissions permCollection = new Permissions();
-        for (final Permission perm : SCRIPT_PERMISSIONS) {
+    protected PermissionCollection getPermissions(CodeSource codesource) {
+        var permCollection = new Permissions();
+        for (var perm : SCRIPT_PERMISSIONS) {
             permCollection.add(perm);
         }
         return permCollection;
@@ -156,30 +148,28 @@ abstract class NashornLoader extends SecureClassLoader {
      * @param parent the parent class loader for the new class loader
      * @return the class loader
      */
-    static ClassLoader createClassLoader(final String classPath, final ClassLoader parent) {
-        final URL[] urls = pathToURLs(classPath);
+    static ClassLoader createClassLoader(String classPath, ClassLoader parent) {
+        var urls = pathToURLs(classPath);
         return URLClassLoader.newInstance(urls, parent);
     }
 
     /*
-     * Utility method for converting a search path string to an array
-     * of directory and JAR file URLs.
-     *
+     * Utility method for converting a search path string to an array of directory and JAR file URLs.
      * @param path the search path string
      * @return the resulting array of directory and JAR file URLs
      */
-    private static URL[] pathToURLs(final String path) {
-        final String[] components = path.split(File.pathSeparator);
-        URL[] urls = new URL[components.length];
-        int count = 0;
-        while(count < components.length) {
-            final URL url = fileToURL(new File(components[count]));
+    private static URL[] pathToURLs(String path) {
+        var components = path.split(File.pathSeparator);
+        var urls = new URL[components.length];
+        var count = 0;
+        while (count < components.length) {
+            var url = fileToURL(new File(components[count]));
             if (url != null) {
                 urls[count++] = url;
             }
         }
         if (urls.length != count) {
-            final URL[] tmp = new URL[count];
+            var tmp = new URL[count];
             System.arraycopy(urls, 0, tmp, 0, count);
             urls = tmp;
         }
@@ -187,17 +177,15 @@ abstract class NashornLoader extends SecureClassLoader {
     }
 
     /*
-     * Returns the directory or JAR file URL corresponding to the specified
-     * local file name.
-     *
+     * Returns the directory or JAR file URL corresponding to the specified local file name.
      * @param file the File object
      * @return the resulting directory or JAR file URL, or null if unknown
      */
-    private static URL fileToURL(final File file) {
+    private static URL fileToURL(File file) {
         String name;
         try {
             name = file.getCanonicalPath();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             name = file.getAbsolutePath();
         }
         name = name.replace(File.separatorChar, '/');
@@ -210,21 +198,22 @@ abstract class NashornLoader extends SecureClassLoader {
         }
         try {
             return new URL("file", "", name);
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             throw new IllegalArgumentException("file");
         }
     }
 
     private static byte[] readModuleManipulatorBytes() {
-        final PrivilegedAction<byte[]> pa = () -> {
-            final String res = "/"+ MODULE_MANIPULATOR_NAME.replace('.', '/') + ".class";
+        PrivilegedAction<byte[]> pa = () -> {
+            var res = "/"+ MODULE_MANIPULATOR_NAME.replace('.', '/') + ".class";
             try (InputStream in = NashornLoader.class.getResourceAsStream(res)) {
                 return in.readAllBytes();
-            } catch (final IOException exp) {
+            } catch (IOException exp) {
                 throw new UncheckedIOException(exp);
             }
         };
         return AccessController.doPrivileged(pa);
     }
+
 }
 

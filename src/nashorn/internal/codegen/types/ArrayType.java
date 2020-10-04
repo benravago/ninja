@@ -37,57 +37,52 @@ import org.objectweb.asm.MethodVisitor;
  * This is an array type, i.e. OBJECT_ARRAY, NUMBER_ARRAY.
  */
 public class ArrayType extends ObjectType implements BytecodeArrayOps {
-    private static final long serialVersionUID = 1L;
 
     /**
      * Constructor
-     *
-     * @param clazz the Java class representation of the array
      */
-    protected ArrayType(final Class<?> clazz) {
+    protected ArrayType(Class<?> clazz) {
         super(clazz);
     }
 
     /**
      * Get the element type of the array elements e.g. for OBJECT_ARRAY, this is OBJECT
-     *
-     * @return the element type
      */
     public Type getElementType() {
         return Type.typeFor(getTypeClass().getComponentType());
     }
 
     @Override
-    public void astore(final MethodVisitor method) {
+    public void astore(MethodVisitor method) {
         method.visitInsn(AASTORE);
     }
 
     @Override
-    public Type aload(final MethodVisitor method) {
+    public Type aload(MethodVisitor method) {
         method.visitInsn(AALOAD);
         return getElementType();
     }
 
     @Override
-    public Type arraylength(final MethodVisitor method) {
+    public Type arraylength(MethodVisitor method) {
         method.visitInsn(ARRAYLENGTH);
         return INT;
     }
 
     @Override
-    public Type newarray(final MethodVisitor method) {
+    public Type newarray(MethodVisitor method) {
         method.visitTypeInsn(ANEWARRAY, getElementType().getInternalName());
         return this;
     }
 
     @Override
-    public Type newarray(final MethodVisitor method, final int dims) {
+    public Type newarray(MethodVisitor method, int dims) {
         method.visitMultiANewArrayInsn(getInternalName(), dims);
         return this;
     }
 
     @Override
-    public Type load(final MethodVisitor method, final int slot) {
+    public Type load(MethodVisitor method, int slot) {
         assert slot != -1;
         method.visitVarInsn(ALOAD, slot);
         return this;
@@ -99,7 +94,7 @@ public class ArrayType extends ObjectType implements BytecodeArrayOps {
     }
 
     @Override
-    public Type convert(final MethodVisitor method, final Type to) {
+    public Type convert(MethodVisitor method, Type to) {
         assert to.isObject();
         assert !to.isArray() || ((ArrayType)to).getElementType() == getElementType();
         return to;

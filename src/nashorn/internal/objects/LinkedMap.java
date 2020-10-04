@@ -31,17 +31,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <p>A linked hash map used by the ES6 Map and Set objects. As required by the ECMA specification for these objects,
- * this class allows arbitrary modifications to the base collection while being iterated over. However, note that
- * such modifications are only safe from the same thread performing the iteration; the class is not thread-safe.</p>
- *
- * <p>Deletions and additions that occur during iteration are reflected in the elements visited by the iterator
- * (except for deletion of elements that have already been visited). In non-concurrent Java collections such as
- * {@code java.util.LinkedHashMap} this would result in a {@link java.util.ConcurrentModificationException}
- * being thrown.</p>
- *
- * <p>This class is implemented using a {@link java.util.HashMap} as backing storage with doubly-linked
- * list nodes as values.</p>
+ * A linked hash map used by the ES6 Map and Set objects.
+ * <p>
+ * As required by the ECMA specification for these objects, this class allows arbitrary modifications to the base collection while being iterated over.
+ * However, note that such modifications are only safe from the same thread performing the iteration; the class is not thread-safe.
+ * <p>
+ * Deletions and additions that occur during iteration are reflected in the elements visited by the iterator (except for deletion of elements that have already been visited).
+ * In non-concurrent Java collections such as {@code java.util.LinkedHashMap} this would result in a {@link java.util.ConcurrentModificationException} being thrown.
+ * <p>
+ * This class is implemented using a {@link java.util.HashMap} as backing storage with doubly-linked list nodes as values.</p>
  *
  * @see <a href="http://www.ecma-international.org/ecma-262/6.0/#sec-map.prototype.foreach">Map.prototype.forEach</a>
  * @see <a href="http://www.ecma-international.org/ecma-262/6.0/#sec-set.prototype.foreach">Set.prototype.forEach</a>
@@ -51,13 +49,14 @@ public class LinkedMap {
     // We use a plain hash map as our hash storage.
     private final Map<Object, Node> data = new HashMap<>();
 
-    // The head and tail of our doubly-linked list. We use the same node to represent both the head and the
-    // tail of the list, so the list is circular. This node is never unlinked and thus always remain alive.
+    // The head and tail of our doubly-linked list.
+    // We use the same node to represent both the head and the tail of the list, so the list is circular.
+    // This node is never unlinked and thus always remain alive.
     private final Node head = new Node();
 
     /**
-     * A node of a linked list that is used as value in our map. The linked list uses insertion order
-     * and allows fast iteration over its element even while the map is modified.
+     * A node of a linked list that is used as value in our map.
+     * The linked list uses insertion order and allows fast iteration over its element even while the map is modified.
      */
     static class Node {
         private final Object key;
@@ -68,7 +67,8 @@ public class LinkedMap {
         private volatile Node next;
 
         /**
-         * Constructor for the list head. This creates an empty circular list.
+         * Constructor for the list head.
+         * This creates an empty circular list.
          */
         private Node() {
             this(null, null);
@@ -78,18 +78,14 @@ public class LinkedMap {
 
         /**
          * Constructor for value nodes.
-         *
-         * @param key the key
-         * @param value the value
          */
-        private Node(final Object key, final Object value) {
+        private Node(Object key, Object value) {
             this.key = key;
             this.value = value;
         }
 
         /**
          * Get the node's key.
-         * @return the hash key
          */
         public Object getKey() {
             return key;
@@ -97,7 +93,6 @@ public class LinkedMap {
 
         /**
          * Get the node's value.
-         * @return the value
          */
         public Object getValue() {
             return value;
@@ -105,9 +100,8 @@ public class LinkedMap {
 
         /**
          * Set the node's value
-         * @param value the new value
          */
-        void setValue(final Object value) {
+        void setValue(Object value) {
             this.value = value;
         }
     }
@@ -124,11 +118,9 @@ public class LinkedMap {
         }
 
         /**
-         * Get the next node in this iteration. Changes in the underlying map are reflected in the iteration
-         * as required by the ES6 specification. Note that this method could return a deleted node if deletion
-         * occurred concurrently on another thread.
-         *
-         * @return the next node
+         * Get the next node in this iteration.
+         * Changes in the underlying map are reflected in the iteration as required by the ES6 specification.
+         * Note that this method could return a deleted node if deletion occurred concurrently on another thread.
          */
         public Node next() {
 
@@ -153,11 +145,9 @@ public class LinkedMap {
 
     /**
      * Add a key-value pair to the map.
-     * @param key the key
-     * @param value the value
      */
-    public void set(final Object key, final Object value) {
-        Node node = data.get(key);
+    public void set(Object key, Object value) {
+        var node = data.get(key);
         if (node != null) {
             node.setValue(value);
         } else {
@@ -169,30 +159,24 @@ public class LinkedMap {
 
     /**
      * Get the value associated with {@code key}.
-     * @param key the key
-     * @return the associated value, or {@code null} if {@code key} is not contained in the map
      */
-    public Object get(final Object key) {
-        final Node node = data.get(key);
+    public Object get(Object key) {
+        var node = data.get(key);
         return node == null ? Undefined.getUndefined() : node.getValue();
     }
 
     /**
      * Returns {@code true} if {@code key} is contained in the map.
-     * @param key the key
-     * @return {@code true} if {@code key} is contained
      */
-    public boolean has(final Object key) {
+    public boolean has(Object key) {
         return data.containsKey(key);
     }
 
     /**
      * Delete the node associated with {@code key} from the map.
-     * @param key the key
-     * @return {@code true} if {@code key} was contained in the map
      */
-    public boolean delete (final Object key) {
-        final Node node = data.remove(key);
+    public boolean delete (Object key) {
+        var node = data.remove(key);
         if (node != null) {
             unlink(node);
             return true;
@@ -205,7 +189,7 @@ public class LinkedMap {
      */
     public void clear() {
         data.clear();
-        for (Node node = head.next; node != head; node = node.next) {
+        for (var node = head.next; node != head; node = node.next) {
             node.alive = false;
         }
         head.next = head;
@@ -214,7 +198,6 @@ public class LinkedMap {
 
     /**
      * Return the current number of key-value pairs in the map.
-     * @return the map size
      */
     public int size() {
         return data.size();
@@ -222,13 +205,12 @@ public class LinkedMap {
 
     /**
      * Get an iterator over the key-value pairs in the map.
-     * @return an iterator
      */
     public LinkedMapIterator getIterator() {
         return new LinkedMapIterator();
     }
 
-    private void link(final Node newNode) {
+    private void link(Node newNode) {
         // We always insert at the end (head == tail)
         newNode.next = head;
         newNode.prev = head.prev;
@@ -236,10 +218,10 @@ public class LinkedMap {
         head.prev = newNode;
     }
 
-    private void unlink(final Node oldNode) {
+    private void unlink(Node oldNode) {
         // Note that we unlink references to the node being deleted, but keep the references from the deleted node.
-        // This is necessary to allow iterators to go back to the last live node in case the current node has been
-        // deleted. Also, the forward link of a deleted node may still be followed by an iterator and must not be null.
+        // This is necessary to allow iterators to go back to the last live node in case the current node has been deleted.
+        // Also, the forward link of a deleted node may still be followed by an iterator and must not be null.
         oldNode.prev.next = oldNode.next;
         oldNode.next.prev = oldNode.prev;
         oldNode.alive = false;

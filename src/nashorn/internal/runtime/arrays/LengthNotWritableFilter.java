@@ -29,25 +29,27 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
 import nashorn.internal.runtime.JSType;
 import nashorn.internal.runtime.ScriptRuntime;
 
 /**
  * Filter to use for ArrayData where the length is not writable.
+ *
  * The default behavior is just to ignore {@link ArrayData#setLength}
  */
 final class LengthNotWritableFilter extends ArrayFilter {
+
     private final SortedMap<Long, Object> extraElements; //elements with index >= length
 
     /**
      * Constructor
-     * @param underlying array
      */
-    LengthNotWritableFilter(final ArrayData underlying) {
+    LengthNotWritableFilter(ArrayData underlying) {
         this(underlying, new TreeMap<Long, Object>());
     }
 
-    private LengthNotWritableFilter(final ArrayData underlying, final SortedMap<Long, Object> extraElements) {
+    private LengthNotWritableFilter(ArrayData underlying, SortedMap<Long, Object> extraElements) {
         super(underlying);
         this.extraElements = extraElements;
     }
@@ -58,32 +60,30 @@ final class LengthNotWritableFilter extends ArrayFilter {
     }
 
     @Override
-    public boolean has(final int index) {
+    public boolean has(int index) {
         return super.has(index) || extraElements.containsKey((long)index);
     }
 
     /**
      * Set the length of the data array
-     *
-     * @param length the new length for the data array
      */
     @Override
-    public void setLength(final long length) {
+    public void setLength(long length) {
         //empty - setting length for a LengthNotWritableFilter is always a nop
     }
 
     @Override
-    public ArrayData ensure(final long index) {
+    public ArrayData ensure(long index) {
         return this;
     }
 
     @Override
-    public ArrayData slice(final long from, final long to) {
+    public ArrayData slice(long from, long to) {
         //return array[from...to), or array[from...length] if undefined, in this case not as we are an ArrayData
         return new LengthNotWritableFilter(underlying.slice(from, to), extraElements.subMap(from, to));
     }
 
-    private boolean checkAdd(final long index, final Object value) {
+    private boolean checkAdd(long index, Object value) {
         if (index >= length()) {
             extraElements.put(index, value);
             return true;
@@ -91,8 +91,8 @@ final class LengthNotWritableFilter extends ArrayFilter {
         return false;
     }
 
-    private Object get(final long index) {
-        final Object obj = extraElements.get(index);
+    private Object get(long index) {
+        var obj = extraElements.get(index);
         if (obj == null) {
             return ScriptRuntime.UNDEFINED;
         }
@@ -100,7 +100,7 @@ final class LengthNotWritableFilter extends ArrayFilter {
     }
 
     @Override
-    public int getInt(final int index) {
+    public int getInt(int index) {
         if (index >= length()) {
             return JSType.toInt32(get(index));
         }
@@ -108,7 +108,7 @@ final class LengthNotWritableFilter extends ArrayFilter {
     }
 
     @Override
-    public int getIntOptimistic(final int index, final int programPoint) {
+    public int getIntOptimistic(int index, int programPoint) {
         if (index >= length()) {
             return JSType.toInt32Optimistic(get(index), programPoint);
         }
@@ -116,7 +116,7 @@ final class LengthNotWritableFilter extends ArrayFilter {
     }
 
     @Override
-    public double getDouble(final int index) {
+    public double getDouble(int index) {
         if (index >= length()) {
             return JSType.toNumber(get(index));
         }
@@ -124,7 +124,7 @@ final class LengthNotWritableFilter extends ArrayFilter {
     }
 
     @Override
-    public double getDoubleOptimistic(final int index, final int programPoint) {
+    public double getDoubleOptimistic(int index, int programPoint) {
         if (index >= length()) {
             return JSType.toNumberOptimistic(get(index), programPoint);
         }
@@ -132,7 +132,7 @@ final class LengthNotWritableFilter extends ArrayFilter {
     }
 
     @Override
-    public Object getObject(final int index) {
+    public Object getObject(int index) {
         if (index >= length()) {
             return get(index);
         }
@@ -140,7 +140,7 @@ final class LengthNotWritableFilter extends ArrayFilter {
     }
 
     @Override
-    public ArrayData set(final int index, final Object value) {
+    public ArrayData set(int index, Object value) {
         if (checkAdd(index, value)) {
             return this;
         }
@@ -149,7 +149,7 @@ final class LengthNotWritableFilter extends ArrayFilter {
     }
 
     @Override
-    public ArrayData set(final int index, final int value) {
+    public ArrayData set(int index, int value) {
         if (checkAdd(index, value)) {
             return this;
         }
@@ -158,7 +158,7 @@ final class LengthNotWritableFilter extends ArrayFilter {
     }
 
     @Override
-    public ArrayData set(final int index, final double value) {
+    public ArrayData set(int index, double value) {
         if (checkAdd(index, value)) {
             return this;
         }
@@ -167,16 +167,16 @@ final class LengthNotWritableFilter extends ArrayFilter {
     }
 
     @Override
-    public ArrayData delete(final int index) {
+    public ArrayData delete(int index) {
         extraElements.remove(ArrayIndex.toLongIndex(index));
         underlying = underlying.delete(index);
         return this;
     }
 
     @Override
-    public ArrayData delete(final long fromIndex, final long toIndex) {
-        for (final Iterator<Long> iter = extraElements.keySet().iterator(); iter.hasNext();) {
-            final long next = iter.next();
+    public ArrayData delete(long fromIndex, long toIndex) {
+        for (var iter = extraElements.keySet().iterator(); iter.hasNext();) {
+            var next = iter.next();
             if (next >= fromIndex && next <= toIndex) {
                 iter.remove();
             }
@@ -190,7 +190,7 @@ final class LengthNotWritableFilter extends ArrayFilter {
 
     @Override
     public Iterator<Long> indexIterator() {
-        final List<Long> keys = computeIteratorKeys();
+        var keys = computeIteratorKeys();
         keys.addAll(extraElements.keySet()); //even if they are outside length this is fine
         return keys.iterator();
     }

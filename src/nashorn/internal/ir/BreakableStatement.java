@@ -27,12 +27,12 @@ package nashorn.internal.ir;
 
 import java.util.Collections;
 import java.util.List;
+
 import nashorn.internal.codegen.Label;
 import nashorn.internal.ir.annotations.Immutable;
 
 @Immutable
 abstract class BreakableStatement extends LexicalContextStatement implements BreakableNode {
-    private static final long serialVersionUID = 1L;
 
     /** break label. */
     protected final Label breakLabel;
@@ -41,13 +41,8 @@ abstract class BreakableStatement extends LexicalContextStatement implements Bre
 
     /**
      * Constructor
-     *
-     * @param lineNumber line number
-     * @param token      token
-     * @param finish     finish
-     * @param breakLabel break label
      */
-    protected BreakableStatement(final int lineNumber, final long token, final int finish, final Label breakLabel) {
+    protected BreakableStatement(int lineNumber, long token, int finish, Label breakLabel) {
         super(lineNumber, token, finish);
         this.breakLabel = breakLabel;
         this.conversion = null;
@@ -55,11 +50,8 @@ abstract class BreakableStatement extends LexicalContextStatement implements Bre
 
     /**
      * Copy constructor
-     *
-     * @param breakableNode source node
-     * @param conversion the potentially new local variable conversion
      */
-    protected BreakableStatement(final BreakableStatement breakableNode, final LocalVariableConversion conversion) {
+    protected BreakableStatement(BreakableStatement breakableNode, LocalVariableConversion conversion) {
         super(breakableNode);
         this.breakLabel = new Label(breakableNode.getBreakLabel());
         this.conversion = conversion;
@@ -67,8 +59,6 @@ abstract class BreakableStatement extends LexicalContextStatement implements Bre
 
     /**
      * Check whether this can be broken out from without using a label,
-     * e.g. everything but Blocks, basically
-     * @return true if breakable without label
      */
     @Override
     public boolean isBreakableWithoutLabel() {
@@ -77,7 +67,6 @@ abstract class BreakableStatement extends LexicalContextStatement implements Bre
 
     /**
      * Return the break label, i.e. the location to go to on break.
-     * @return the break label
      */
     @Override
     public Label getBreakLabel() {
@@ -85,10 +74,8 @@ abstract class BreakableStatement extends LexicalContextStatement implements Bre
     }
 
     /**
-     * Return the labels associated with this node. Breakable nodes that
-     * aren't LoopNodes only have a break label - the location immediately
-     * afterwards the node in code
-     * @return list of labels representing locations around this node
+     * Return the labels associated with this node.
+     * Breakable nodes that aren't LoopNodes only have a break label - the location immediately afterwards the node in code
      */
     @Override
     public List<Label> getLabels() {
@@ -96,8 +83,8 @@ abstract class BreakableStatement extends LexicalContextStatement implements Bre
     }
 
     @Override
-    public JoinPredecessor setLocalVariableConversion(final LexicalContext lc, final LocalVariableConversion conversion) {
-        if(this.conversion == conversion) {
+    public JoinPredecessor setLocalVariableConversion(LexicalContext lc, LocalVariableConversion conversion) {
+        if (this.conversion == conversion) {
             return this;
         }
         return setLocalVariableConversionChanged(lc, conversion);
@@ -109,4 +96,5 @@ abstract class BreakableStatement extends LexicalContextStatement implements Bre
     }
 
     abstract JoinPredecessor setLocalVariableConversionChanged(LexicalContext lc, LocalVariableConversion conversion);
+
 }

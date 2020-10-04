@@ -39,7 +39,6 @@ import nashorn.internal.parser.TokenType;
  */
 @Immutable
 public abstract class BaseNode extends Expression implements FunctionCall, Optimistic {
-    private static final long serialVersionUID = 1L;
 
     /** Base Node. */
     protected final Expression base;
@@ -57,43 +56,30 @@ public abstract class BaseNode extends Expression implements FunctionCall, Optim
 
     /**
      * Constructor
-     *
-     * @param token  token
-     * @param finish finish
-     * @param base   base node
-     * @param isFunction is this a function
-     * @param isSuper is this a super property access
      */
-    public BaseNode(final long token, final int finish, final Expression base, final boolean isFunction, final boolean isSuper) {
+    public BaseNode(long token, int finish, Expression base, boolean isFunction, boolean isSuper) {
         super(token, base.getStart(), finish);
-        this.base           = base;
-        this.isFunction     = isFunction;
+        this.base = base;
+        this.isFunction = isFunction;
         this.type = null;
-        this.programPoint   = INVALID_PROGRAM_POINT;
-        this.isSuper        = isSuper;
+        this.programPoint = INVALID_PROGRAM_POINT;
+        this.isSuper = isSuper;
     }
 
     /**
      * Copy constructor for immutable nodes
-     * @param baseNode node to inherit from
-     * @param base base
-     * @param isFunction is this a function
-     * @param callSiteType  the callsite type for this base node, either optimistic or conservative
-     * @param programPoint  program point id
-     * @param isSuper is this a super property access
      */
-    protected BaseNode(final BaseNode baseNode, final Expression base, final boolean isFunction, final Type callSiteType, final int programPoint, final boolean isSuper) {
+    protected BaseNode(BaseNode baseNode, Expression base, boolean isFunction, Type callSiteType, int programPoint, boolean isSuper) {
         super(baseNode);
-        this.base           = base;
-        this.isFunction     = isFunction;
+        this.base = base;
+        this.isFunction = isFunction;
         this.type = callSiteType;
-        this.programPoint   = programPoint;
-        this.isSuper        = isSuper;
+        this.programPoint = programPoint;
+        this.isSuper = isSuper;
     }
 
     /**
      * Get the base node for this access
-     * @return the base node
      */
     public Expression getBase() {
         return base;
@@ -131,7 +117,6 @@ public abstract class BaseNode extends Expression implements FunctionCall, Optim
 
     /**
      * Return true if this node represents an index operation normally represented as {@link IndexNode}.
-     * @return true if an index access.
      */
     public boolean isIndex() {
         return isTokenType(TokenType.LBRACKET);
@@ -139,12 +124,11 @@ public abstract class BaseNode extends Expression implements FunctionCall, Optim
 
     /**
      * Mark this node as being the callee operand of a {@link CallNode}.
-     * @return a base node identical to this one in all aspects except with its function flag set.
      */
     public abstract BaseNode setIsFunction();
 
     /**
-     * @return {@code true} if a SuperProperty access.
+     * Returns {@code true} if a SuperProperty access.
      */
     public boolean isSuper() {
         return isSuper;
@@ -152,8 +136,7 @@ public abstract class BaseNode extends Expression implements FunctionCall, Optim
 
     /**
      * Mark this node as being a SuperProperty access.
-     *
-     * @return  a base node identical to this one in all aspects except with its super flag set.
      */
     public abstract BaseNode setIsSuper();
+
 }

@@ -27,16 +27,18 @@ package nashorn.internal.runtime.linker;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+
 import jdk.dynalink.support.ChainedCallSite;
 
 /**
  * Relinkable form of call site.
  */
 public class LinkerCallSite extends ChainedCallSite {
+
     /** Maximum number of arguments passed directly. */
     public static final int ARGLIMIT = 125;
 
-    LinkerCallSite(final NashornCallSiteDescriptor descriptor) {
+    LinkerCallSite(NashornCallSiteDescriptor descriptor) {
         super(descriptor);
     }
 
@@ -47,7 +49,7 @@ public class LinkerCallSite extends ChainedCallSite {
      * @param flags    Call site specific flags.
      * @return New LinkerCallSite.
      */
-    static LinkerCallSite newLinkerCallSite(final MethodHandles.Lookup lookup, final String name, final MethodType type, final int flags) {
+    static LinkerCallSite newLinkerCallSite(MethodHandles.Lookup lookup, String name, MethodType type, int flags) {
         final NashornCallSiteDescriptor desc = NashornCallSiteDescriptor.get(lookup, name, type, flags);
         return new LinkerCallSite(desc);
     }

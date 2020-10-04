@@ -37,15 +37,14 @@ import nashorn.internal.runtime.options.Options;
  * The format is a standard Java serialization stream, deflated.
  */
 final class AstSerializer {
-    // Experimentally, we concluded that compression level 4 gives a good tradeoff between serialization speed
-    // and size.
+    // Experimentally, we concluded that compression level 4 gives a good tradeoff between serialization speed and size.
     private static final int COMPRESSION_LEVEL = Options.getIntProperty("nashorn.serialize.compression", 4);
-    static byte[] serialize(final FunctionNode fn) {
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        final Deflater deflater = new Deflater(COMPRESSION_LEVEL);
-        try (final ObjectOutputStream oout = new ObjectOutputStream(new DeflaterOutputStream(out, deflater))) {
+    static byte[] serialize(FunctionNode fn) {
+        var out = new ByteArrayOutputStream();
+        var deflater = new Deflater(COMPRESSION_LEVEL);
+        try (ObjectOutputStream oout = new ObjectOutputStream(new DeflaterOutputStream(out, deflater))) {
             oout.writeObject(fn);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new AssertionError("Unexpected exception serializing function", e);
         } finally {
             deflater.end();

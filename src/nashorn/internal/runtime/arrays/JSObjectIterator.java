@@ -26,6 +26,7 @@
 package nashorn.internal.runtime.arrays;
 
 import java.util.NoSuchElementException;
+
 import nashorn.api.scripting.JSObject;
 import nashorn.internal.runtime.JSType;
 
@@ -37,11 +38,11 @@ class JSObjectIterator extends ArrayLikeIterator<Object> {
     protected final JSObject obj;
     private final long length;
 
-    JSObjectIterator(final JSObject obj, final boolean includeUndefined) {
+    JSObjectIterator(JSObject obj, boolean includeUndefined) {
         super(includeUndefined);
-        this.obj    = obj;
+        this.obj = obj;
         this.length = JSType.toUint32(obj.hasMember("length")? obj.getMember("length") : 0);
-        this.index  = 0;
+        this.index = 0;
     }
 
     protected boolean indexInArray() {
@@ -56,7 +57,7 @@ class JSObjectIterator extends ArrayLikeIterator<Object> {
     @Override
     public boolean hasNext() {
         if (length == 0L) {
-            return false; //return empty string if toUint32(length) == 0
+            return false; // return empty string if toUint32(length) == 0
         }
 
         while (indexInArray()) {
@@ -77,5 +78,6 @@ class JSObjectIterator extends ArrayLikeIterator<Object> {
 
         throw new NoSuchElementException();
     }
+
 }
 

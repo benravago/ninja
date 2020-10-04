@@ -31,28 +31,29 @@ import nashorn.internal.runtime.Undefined;
 import nashorn.internal.runtime.linker.Bootstrap;
 
 /**
- * Base class for array filters. Implements all core routines so that the
- * filter only has to implement those needed.
+ * Base class for array filters.
+ *
+ * Implements all core routines so that the filter only has to implement those needed.
  */
 abstract class ArrayFilter extends ArrayData {
+
     /** Underlying array. */
     protected ArrayData underlying;
 
-    ArrayFilter(final ArrayData underlying) {
+    ArrayFilter(ArrayData underlying) {
         super(underlying.length());
         this.underlying = underlying;
     }
 
     /**
      * Get the underlying {@link ArrayData} that this filter wraps
-     * @return array data
      */
     protected ArrayData getUnderlying() {
         return underlying;
     }
 
     @Override
-    public void setLength(final long length) {
+    public void setLength(long length) {
         super.setLength(length);
         underlying.setLength(length);
     }
@@ -63,67 +64,67 @@ abstract class ArrayFilter extends ArrayData {
     }
 
     @Override
-    public Object asArrayOfType(final Class<?> componentType) {
+    public Object asArrayOfType(Class<?> componentType) {
         return underlying.asArrayOfType(componentType);
     }
 
     @Override
-    public ArrayData shiftLeft(final int by) {
+    public ArrayData shiftLeft(int by) {
         underlying.shiftLeft(by);
         setLength(underlying.length());
         return this;
     }
 
     @Override
-    public ArrayData shiftRight(final int by) {
+    public ArrayData shiftRight(int by) {
         underlying = underlying.shiftRight(by);
         setLength(underlying.length());
         return this;
     }
 
     @Override
-    public ArrayData ensure(final long safeIndex) {
+    public ArrayData ensure(long safeIndex) {
         underlying = underlying.ensure(safeIndex);
         setLength(underlying.length());
         return this;
     }
 
     @Override
-    public ArrayData shrink(final long newLength) {
+    public ArrayData shrink(long newLength) {
         underlying = underlying.shrink(newLength);
         setLength(underlying.length());
         return this;
     }
 
     @Override
-    public ArrayData set(final int index, final Object value) {
+    public ArrayData set(int index, Object value) {
         underlying = underlying.set(index, value);
         setLength(underlying.length());
         return this;
     }
 
     @Override
-    public ArrayData set(final int index, final int value) {
+    public ArrayData set(int index, int value) {
         underlying = underlying.set(index, value);
         setLength(underlying.length());
         return this;
     }
 
     @Override
-    public ArrayData set(final int index, final double value) {
+    public ArrayData set(int index, double value) {
         underlying = underlying.set(index, value);
         setLength(underlying.length());
         return this;
     }
 
     @Override
-    public ArrayData setEmpty(final int index) {
+    public ArrayData setEmpty(int index) {
         underlying.setEmpty(index);
         return this;
     }
 
     @Override
-    public ArrayData setEmpty(final long lo, final long hi) {
+    public ArrayData setEmpty(long lo, long hi) {
         underlying.setEmpty(lo, hi);
         return this;
     }
@@ -134,51 +135,51 @@ abstract class ArrayFilter extends ArrayData {
     }
 
     @Override
-    public int getInt(final int index) {
+    public int getInt(int index) {
         return underlying.getInt(index);
     }
 
     @Override
-    public int getIntOptimistic(final int index, final int programPoint) {
+    public int getIntOptimistic(int index, int programPoint) {
         return underlying.getIntOptimistic(index, programPoint);
     }
 
     @Override
-    public double getDouble(final int index) {
+    public double getDouble(int index) {
         return underlying.getDouble(index);
     }
 
     @Override
-    public double getDoubleOptimistic(final int index, final int programPoint) {
+    public double getDoubleOptimistic(int index, int programPoint) {
         return underlying.getDoubleOptimistic(index, programPoint);
     }
 
     @Override
-    public Object getObject(final int index) {
+    public Object getObject(int index) {
         return underlying.getObject(index);
     }
 
     @Override
-    public boolean has(final int index) {
+    public boolean has(int index) {
         return underlying.has(index);
     }
 
     @Override
-    public ArrayData delete(final int index) {
+    public ArrayData delete(int index) {
         underlying = underlying.delete(index);
         setLength(underlying.length());
         return this;
     }
 
     @Override
-    public ArrayData delete(final long from, final long to) {
+    public ArrayData delete(long from, long to) {
         underlying = underlying.delete(from, to);
         setLength(underlying.length());
         return this;
     }
 
     @Override
-    public ArrayData convert(final Class<?> type) {
+    public ArrayData convert(Class<?> type) {
         underlying = underlying.convert(type);
         setLength(underlying.length());
         return this;
@@ -186,18 +187,18 @@ abstract class ArrayFilter extends ArrayData {
 
     @Override
     public Object pop() {
-        final Object value = underlying.pop();
+        var value = underlying.pop();
         setLength(underlying.length());
         return value;
     }
 
     @Override
-    public long nextIndex(final long index) {
+    public long nextIndex(long index) {
         return underlying.nextIndex(index);
     }
 
-    static Object convertUndefinedValue(final Class<?> targetType) {
-        return invoke(Bootstrap.getLinkerServices().getTypeConverter(Undefined.class, targetType),
-                ScriptRuntime.UNDEFINED);
+    static Object convertUndefinedValue(Class<?> targetType) {
+        return invoke(Bootstrap.getLinkerServices().getTypeConverter(Undefined.class, targetType), ScriptRuntime.UNDEFINED);
     }
+
 }

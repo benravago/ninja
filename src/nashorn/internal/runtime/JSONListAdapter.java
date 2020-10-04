@@ -33,19 +33,18 @@ import nashorn.api.scripting.ScriptObjectMirror;
 import nashorn.internal.objects.Global;
 
 /**
- * A {@link ListAdapter} that also implements {@link JSObject}. Named {@code JSONListAdapter} as it is used as a
- * {@code JSObject} implementing the {@link List} interface, which is the expected interface to be implemented by
- * JSON-parsed arrays when they are handled in Java. We aren't implementing {@link JSObject} on {@link ListAdapter}
- * directly since that'd have implications for other uses of list adapter (e.g. interferences of JSObject default
- * value calculation vs. List's {@code toString()} etc.)
+ * A {@link ListAdapter} that also implements {@link JSObject}.
+ * Named {@code JSONListAdapter} as it is used as a {@code JSObject} implementing the {@link List} interface, which is the expected interface to be implemented by JSON-parsed arrays when they are handled in Java.
+ * We aren't implementing {@link JSObject} on {@link ListAdapter} directly since that'd have implications for other uses of list adapter (e.g. interferences of JSObject default value calculation vs. List's {@code toString()} etc.)
  */
 public final class JSONListAdapter extends ListAdapter implements JSObject {
+
     /**
      * Creates a new JSON list adapter.
      * @param obj the underlying object being exposed as a list.
      * @param global the home global of the underlying object.
      */
-    public JSONListAdapter(final JSObject obj, final Global global) {
+    public JSONListAdapter(JSObject obj, Global global) {
         super(obj, global);
     }
 
@@ -54,58 +53,58 @@ public final class JSONListAdapter extends ListAdapter implements JSObject {
      * @param homeGlobal the home global for unwrapping
      * @return either the unwrapped object or this if it should not be unwrapped in the specified global.
      */
-    public Object unwrap(final Object homeGlobal) {
-        final Object unwrapped = ScriptObjectMirror.unwrap(obj, homeGlobal);
+    public Object unwrap(Object homeGlobal) {
+        var unwrapped = ScriptObjectMirror.unwrap(obj, homeGlobal);
         return unwrapped != obj ? unwrapped : this;
     }
 
     @Override
-    public Object call(final Object thiz, final Object... args) {
+    public Object call(Object thiz, Object... args) {
         return obj.call(thiz, args);
     }
 
     @Override
-    public Object newObject(final Object... args) {
+    public Object newObject(Object... args) {
         return obj.newObject(args);
     }
 
     @Override
-    public Object eval(final String s) {
+    public Object eval(String s) {
         return obj.eval(s);
     }
 
     @Override
-    public Object getMember(final String name) {
+    public Object getMember(String name) {
         return obj.getMember(name);
     }
 
     @Override
-    public Object getSlot(final int index) {
+    public Object getSlot(int index) {
         return obj.getSlot(index);
     }
 
     @Override
-    public boolean hasMember(final String name) {
+    public boolean hasMember(String name) {
         return obj.hasMember(name);
     }
 
     @Override
-    public boolean hasSlot(final int slot) {
+    public boolean hasSlot(int slot) {
         return obj.hasSlot(slot);
     }
 
     @Override
-    public void removeMember(final String name) {
+    public void removeMember(String name) {
         obj.removeMember(name);
     }
 
     @Override
-    public void setMember(final String name, final Object value) {
+    public void setMember(String name, Object value) {
         obj.setMember(name, value);
     }
 
     @Override
-    public void setSlot(final int index, final Object value) {
+    public void setSlot(int index, Object value) {
         obj.setSlot(index, value);
     }
 
@@ -120,12 +119,12 @@ public final class JSONListAdapter extends ListAdapter implements JSObject {
     }
 
     @Override
-    public boolean isInstance(final Object instance) {
+    public boolean isInstance(Object instance) {
         return obj.isInstance(instance);
     }
 
     @Override
-    public boolean isInstanceOf(final Object clazz) {
+    public boolean isInstanceOf(Object clazz) {
         return obj.isInstanceOf(clazz);
     }
 
@@ -145,7 +144,8 @@ public final class JSONListAdapter extends ListAdapter implements JSObject {
     }
 
     @Override
-    public Object getDefaultValue(final Class<?> hint) throws UnsupportedOperationException {
+    public Object getDefaultValue(Class<?> hint) throws UnsupportedOperationException {
         return obj.getDefaultValue(hint);
     }
+
 }

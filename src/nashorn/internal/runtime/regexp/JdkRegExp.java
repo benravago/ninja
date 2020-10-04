@@ -32,13 +32,13 @@ import static java.util.regex.Pattern.UNICODE_CASE;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
 import nashorn.internal.runtime.ParserException;
 
 /**
  * Default regular expression implementation based on java.util.regex package.
  *
- * Note that this class is not thread-safe as it stores the current match result
- * and the string being matched in instance fields.
+ * Note that this class is not thread-safe as it stores the current match result and the string being matched in instance fields.
  */
 public class JdkRegExp extends RegExp {
 
@@ -47,15 +47,11 @@ public class JdkRegExp extends RegExp {
 
     /**
      * Construct a Regular expression from the given {@code source} and {@code flags} strings.
-     *
-     * @param source RegExp source string
-     * @param flags RegExp flag string
-     * @throws ParserException if flags is invalid or source string has syntax error.
      */
-    public JdkRegExp(final String source, final String flags) throws ParserException {
+    public JdkRegExp(String source, String flags) throws ParserException {
         super(source, flags);
 
-        int intFlags = 0;
+        var intFlags = 0;
 
         if (isIgnoreCase()) {
             intFlags |= CASE_INSENSITIVE | UNICODE_CASE;
@@ -69,9 +65,8 @@ public class JdkRegExp extends RegExp {
 
             try {
                 parsed = RegExpScanner.scan(source);
-            } catch (final PatternSyntaxException e) {
-                // refine the exception with a better syntax error, if this
-                // passes, just rethrow what we have
+            } catch (PatternSyntaxException e) {
+                // refine the exception with a better syntax error, if this passes, just rethrow what we have
                 Pattern.compile(source, intFlags);
                 throw e;
             }
@@ -80,13 +75,13 @@ public class JdkRegExp extends RegExp {
                 this.pattern = Pattern.compile(parsed.getJavaPattern(), intFlags);
                 this.groupsInNegativeLookahead = parsed.getGroupsInNegativeLookahead();
             }
-        } catch (final PatternSyntaxException e2) {
+        } catch (PatternSyntaxException e2) {
             throwParserException("syntax", e2.getMessage());
         }
     }
 
     @Override
-    public RegExpMatcher match(final String str) {
+    public RegExpMatcher match(String str) {
         if (pattern == null) {
             return null; // never matches or similar, e.g. a[]
         }
@@ -98,13 +93,13 @@ public class JdkRegExp extends RegExp {
         final String input;
         final Matcher defaultMatcher;
 
-        DefaultMatcher(final String input) {
+        DefaultMatcher(String input) {
             this.input = input;
             this.defaultMatcher = pattern.matcher(input);
         }
 
         @Override
-        public boolean search(final int start) {
+        public boolean search(int start) {
             return defaultMatcher.find(start);
         }
 
@@ -119,7 +114,7 @@ public class JdkRegExp extends RegExp {
         }
 
         @Override
-        public int start(final int group) {
+        public int start(int group) {
             return defaultMatcher.start(group);
         }
 
@@ -129,7 +124,7 @@ public class JdkRegExp extends RegExp {
         }
 
         @Override
-        public int end(final int group) {
+        public int end(int group) {
             return defaultMatcher.end(group);
         }
 
@@ -139,7 +134,7 @@ public class JdkRegExp extends RegExp {
         }
 
         @Override
-        public String group(final int group) {
+        public String group(int group) {
             return defaultMatcher.group(group);
         }
 

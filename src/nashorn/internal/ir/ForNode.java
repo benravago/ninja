@@ -33,10 +33,8 @@ import nashorn.internal.ir.visitor.NodeVisitor;
  */
 @Immutable
 public final class ForNode extends LoopNode {
-    private static final long serialVersionUID = 1L;
 
-    /** Initialize expression for an ordinary for statement, or the LHS expression receiving iterated-over values in a
-     * for-in statement. */
+    /** Initialize expression for an ordinary for statement, or the LHS expression receiving iterated-over values in a for-in statement. */
     private final Expression init;
 
     /** Modify expression for an ordinary statement, or the source of the iterator in the for-in statement. */
@@ -61,30 +59,15 @@ public final class ForNode extends LoopNode {
 
     /**
      * Constructs a ForNode
-     *
-     * @param lineNumber The line number of header
-     * @param token      The for token
-     * @param finish     The last character of the for node
-     * @param body       The body of the for node
-     * @param flags      The flags
      */
-    public ForNode(final int lineNumber, final long token, final int finish, final Block body, final int flags){
+    public ForNode(int lineNumber, long token, int finish, Block body, int flags){
         this(lineNumber, token, finish, body, flags, null, null, null);
     }
 
     /**
      * Constructor
-     *
-     * @param lineNumber The line number of header
-     * @param token      The for token
-     * @param finish     The last character of the for node
-     * @param body       The body of the for node
-     * @param flags      The flags
-     * @param init       The initial expression
-     * @param test       The test expression
-     * @param modify     The modify expression
      */
-    public ForNode(final int lineNumber, final long token, final int finish, final Block body, final int flags, final Expression init, final JoinPredecessorExpression test, final JoinPredecessorExpression modify) {
+    public ForNode(int lineNumber, long token, int finish, Block body, int flags, Expression init, JoinPredecessorExpression test, JoinPredecessorExpression modify) {
         super(lineNumber, token, finish, body, test, false);
         this.flags  = flags;
         this.init = init;
@@ -92,9 +75,7 @@ public final class ForNode extends LoopNode {
         this.iterator = null;
     }
 
-    private ForNode(final ForNode forNode, final Expression init, final JoinPredecessorExpression test,
-            final Block body, final JoinPredecessorExpression modify, final int flags,
-            final boolean controlFlowEscapes, final LocalVariableConversion conversion, final Symbol iterator) {
+    private ForNode(ForNode forNode, Expression init, JoinPredecessorExpression test, Block body, JoinPredecessorExpression modify, int flags, boolean controlFlowEscapes, LocalVariableConversion conversion, Symbol iterator) {
         super(forNode, test, body, controlFlowEscapes, conversion);
         this.init   = init;
         this.modify = modify;
@@ -103,12 +84,12 @@ public final class ForNode extends LoopNode {
     }
 
     @Override
-    public Node ensureUniqueLabels(final LexicalContext lc) {
+    public Node ensureUniqueLabels(LexicalContext lc) {
         return Node.replaceInLexicalContext(lc, this, new ForNode(this, init, test, body, modify, flags, controlFlowEscapes, conversion, iterator));
     }
 
     @Override
-    public Node accept(final LexicalContext lc, final NodeVisitor<? extends LexicalContext> visitor) {
+    public Node accept(LexicalContext lc, NodeVisitor<? extends LexicalContext> visitor) {
         if (visitor.enterForNode(this)) {
             return visitor.leaveForNode(
                 setInit(lc, init == null ? null : (Expression)init.accept(visitor)).
@@ -116,12 +97,11 @@ public final class ForNode extends LoopNode {
                 setModify(lc, modify == null ? null : (JoinPredecessorExpression)modify.accept(visitor)).
                 setBody(lc, (Block)body.accept(visitor)));
         }
-
         return this;
     }
 
     @Override
-    public void toString(final StringBuilder sb, final boolean printTypes) {
+    public void toString(StringBuilder sb, boolean printTypes) {
         sb.append("for");
         LocalVariableConversion.toString(conversion, sb).append(' ');
 
@@ -158,14 +138,13 @@ public final class ForNode extends LoopNode {
     @Override
     public boolean mustEnter() {
         if (isForInOrOf()) {
-            return false; //may be an empty set to iterate over, then we skip the loop
+            return false; // may be an empty set to iterate over, then we skip the loop
         }
         return test == null;
     }
 
     /**
      * Get the initialization expression for this for loop
-     * @return the initialization expression
      */
     public Expression getInit() {
         return init;
@@ -173,11 +152,8 @@ public final class ForNode extends LoopNode {
 
     /**
      * Reset the initialization expression for this for loop
-     * @param lc lexical context
-     * @param init new initialization expression
-     * @return new for node if changed or existing if not
      */
-    public ForNode setInit(final LexicalContext lc, final Expression init) {
+    public ForNode setInit(LexicalContext lc, Expression init) {
         if (this.init == init) {
             return this;
         }
@@ -186,7 +162,6 @@ public final class ForNode extends LoopNode {
 
     /**
      * Is this a for in construct rather than a standard init;condition;modification one
-     * @return true if this is a for in constructor
      */
     public boolean isForIn() {
         return (flags & IS_FOR_IN) != 0;
@@ -194,7 +169,6 @@ public final class ForNode extends LoopNode {
 
     /**
      * Is this a for-of loop?
-     * @return true if this is a for-of loop
      */
     public boolean isForOf() {
         return (flags & IS_FOR_OF) != 0;
@@ -202,16 +176,14 @@ public final class ForNode extends LoopNode {
 
     /**
      * Is this a for-in or for-of statement?
-     * @return true if this is a for-in or for-of loop
      */
     public boolean isForInOrOf() {
         return isForIn() || isForOf();
     }
 
     /**
-     * Is this a for each construct, known from e.g. Rhino. This will be a for of construct
-     * in ECMAScript 6
-     * @return true if this is a for each construct
+     * Is this a for each construct, known from e.g. Rhino.
+     * This will be a for of construct in ECMAScript 6
      */
     public boolean isForEach() {
         return (flags & IS_FOR_EACH) != 0;
@@ -219,7 +191,6 @@ public final class ForNode extends LoopNode {
 
     /**
      * If this is a for in or for each construct, there is an iterator symbol
-     * @return the symbol for the iterator to be used, or null if none exists
      */
     public Symbol getIterator() {
         return iterator;
@@ -227,11 +198,8 @@ public final class ForNode extends LoopNode {
 
     /**
      * Assign an iterator symbol to this ForNode. Used for for in and for each constructs
-     * @param lc the current lexical context
-     * @param iterator the iterator symbol
-     * @return a ForNode with the iterator set
      */
-    public ForNode setIterator(final LexicalContext lc, final Symbol iterator) {
+    public ForNode setIterator(LexicalContext lc, Symbol iterator) {
         if (this.iterator == iterator) {
             return this;
         }
@@ -240,7 +208,6 @@ public final class ForNode extends LoopNode {
 
     /**
      * Get the modification expression for this ForNode
-     * @return the modification expression
      */
     public JoinPredecessorExpression getModify() {
         return modify;
@@ -248,11 +215,8 @@ public final class ForNode extends LoopNode {
 
     /**
      * Reset the modification expression for this ForNode
-     * @param lc lexical context
-     * @param modify new modification expression
-     * @return new for node if changed or existing if not
      */
-    public ForNode setModify(final LexicalContext lc, final JoinPredecessorExpression modify) {
+    public ForNode setModify(LexicalContext lc, JoinPredecessorExpression modify) {
         if (this.modify == modify) {
             return this;
         }
@@ -260,7 +224,7 @@ public final class ForNode extends LoopNode {
     }
 
     @Override
-    public ForNode setTest(final LexicalContext lc, final JoinPredecessorExpression test) {
+    public ForNode setTest(LexicalContext lc, JoinPredecessorExpression test) {
         if (this.test == test) {
             return this;
         }
@@ -273,7 +237,7 @@ public final class ForNode extends LoopNode {
     }
 
     @Override
-    public ForNode setBody(final LexicalContext lc, final Block body) {
+    public ForNode setBody(LexicalContext lc, Block body) {
         if (this.body == body) {
             return this;
         }
@@ -281,7 +245,7 @@ public final class ForNode extends LoopNode {
     }
 
     @Override
-    public ForNode setControlFlowEscapes(final LexicalContext lc, final boolean controlFlowEscapes) {
+    public ForNode setControlFlowEscapes(LexicalContext lc, boolean controlFlowEscapes) {
         if (this.controlFlowEscapes == controlFlowEscapes) {
             return this;
         }
@@ -289,7 +253,7 @@ public final class ForNode extends LoopNode {
     }
 
     @Override
-    JoinPredecessor setLocalVariableConversionChanged(final LexicalContext lc, final LocalVariableConversion conversion) {
+    JoinPredecessor setLocalVariableConversionChanged(LexicalContext lc, LocalVariableConversion conversion) {
         return Node.replaceInLexicalContext(lc, this, new ForNode(this, init, test, body, modify, flags, controlFlowEscapes, conversion, iterator));
     }
 
@@ -299,13 +263,11 @@ public final class ForNode extends LoopNode {
     }
 
     /**
-     * Returns true if this for-node needs the scope creator of its containing block to create
-     * per-iteration scope. This is only true for for-in loops with lexical declarations.
-     *
-     * @see Block#providesScopeCreator()
-     * @return true if the containing block's scope object creator is required in codegen
+     * Returns true if this for-node needs the scope creator of its containing block to create per-iteration scope.
+     * This is only true for for-in loops with lexical declarations.
      */
     public boolean needsScopeCreator() {
         return isForInOrOf() && hasPerIterationScope();
     }
+
 }

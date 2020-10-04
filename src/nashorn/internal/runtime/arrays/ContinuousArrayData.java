@@ -24,83 +24,68 @@
 
 package nashorn.internal.runtime.arrays;
 
-import static nashorn.internal.codegen.CompilerConstants.staticCall;
-import static nashorn.internal.lookup.Lookup.MH;
-import static nashorn.internal.runtime.JSType.getAccessorTypeIndex;
-import static nashorn.internal.runtime.UnwarrantedOptimismException.INVALID_PROGRAM_POINT;
-import static nashorn.internal.runtime.UnwarrantedOptimismException.isValid;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.lang.invoke.SwitchPoint;
+
 import jdk.dynalink.CallSiteDescriptor;
 import jdk.dynalink.linker.GuardedInvocation;
 import jdk.dynalink.linker.LinkRequest;
+
 import nashorn.internal.codegen.types.Type;
 import nashorn.internal.lookup.Lookup;
 import nashorn.internal.runtime.ScriptObject;
 import nashorn.internal.runtime.linker.NashornCallSiteDescriptor;
 import nashorn.internal.runtime.logging.Logger;
+import static nashorn.internal.codegen.CompilerConstants.staticCall;
+import static nashorn.internal.lookup.Lookup.MH;
+import static nashorn.internal.runtime.JSType.getAccessorTypeIndex;
+import static nashorn.internal.runtime.UnwarrantedOptimismException.INVALID_PROGRAM_POINT;
+import static nashorn.internal.runtime.UnwarrantedOptimismException.isValid;
 
 /**
- * Interface implemented by all arrays that are directly accessible as underlying
- * native arrays
+ * Interface implemented by all arrays that are directly accessible as underlying native arrays
  */
 @Logger(name="arrays")
 public abstract class ContinuousArrayData extends ArrayData {
+
     /**
      * Constructor
      * @param length length (elementLength)
      */
-    protected ContinuousArrayData(final long length) {
+    protected ContinuousArrayData(long length) {
         super(length);
     }
 
     /**
-     * Check if we can put one more element at the end of this continuous
-     * array without reallocating, or if we are overwriting an already
-     * allocated element
-     *
-     * @param index index to check
-     * @return true if we don't need to do any array reallocation to fit an element at index
+     * Check if we can put one more element at the end of this continuous array without reallocating, or if we are overwriting an already allocated element.
+     * Returns true if we don't need to do any array reallocation to fit an element at index
      */
-    public final boolean hasRoomFor(final int index) {
+    public final boolean hasRoomFor(int index) {
         return has(index) || (index == length() && ensure(index) == this);
     }
 
     /**
      * Check if an arraydata is empty
-     * @return true if empty
      */
     public boolean isEmpty() {
         return length() == 0L;
     }
 
     /**
-     * Return element getter for a certain type at a certain program point
-     * @param returnType   return type
-     * @param programPoint program point
-     * @return element getter or null if not supported (used to implement slow linkage instead
-     *   as fast isn't possible)
+     * Return element getter for a certain type at a certain program point, or null if not supported (used to implement slow linkage instead as fast isn't possible)
      */
-    public abstract MethodHandle getElementGetter(final Class<?> returnType, final int programPoint);
+    public abstract MethodHandle getElementGetter(Class<?> returnType, int programPoint);
 
     /**
-     * Return element getter for a certain type at a certain program point
-     * @param elementType element type
-     * @return element setter or null if not supported (used to implement slow linkage instead
-     *   as fast isn't possible)
+     * Return element setter for a certain type at a certain program point, or null if not supported (used to implement slow linkage instead as fast isn't possible)
      */
-    public abstract MethodHandle getElementSetter(final Class<?> elementType);
+    public abstract MethodHandle getElementSetter(Class<?> elementType);
 
     /**
-     * Version of has that throws a class cast exception if element does not exist
-     * used for relinking
-     *
-     * @param index index to check - currently only int indexes
-     * @return index
+     * Version of has that throws a class cast exception if element does not exist (used for relinking)
      */
-    protected final int throwHas(final int index) {
+    protected final int throwHas(int index) {
         if (!has(index)) {
             throw new ClassCastException();
         }
@@ -112,7 +97,6 @@ public abstract class ContinuousArrayData extends ArrayData {
 
     /**
      * Returns the type used to store an element in this array
-     * @return element type
      */
     public abstract Class<?> getElementType();
 
@@ -123,57 +107,42 @@ public abstract class ContinuousArrayData extends ArrayData {
 
     /**
      * Returns the boxed type of the type used to store an element in this array
-     * @return element type
      */
     public abstract Class<?> getBoxedElementType();
 
     /**
-     * Get the widest element type of two arrays. This can be done faster in subclasses, but
-     * this works for all ContinuousArrayDatas and for where more optimal checks haven't been
-     * implemented.
-     *
-     * @param otherData another ContinuousArrayData
-     * @return the widest boxed element type
+     * Get the widest element type of two arrays.
+     * This can be done faster in subclasses, but this works for all ContinuousArrayDatas and for where more optimal checks haven't been implemented.
      */
-    public ContinuousArrayData widest(final ContinuousArrayData otherData) {
-        final Class<?> elementType = getElementType();
+    public ContinuousArrayData widest(ContinuousArrayData otherData) {
+        var elementType = getElementType();
         return Type.widest(elementType, otherData.getElementType()) == elementType ? this : otherData;
     }
 
     /**
-     * Look up a continuous array element getter
-     * @param get          getter, sometimes combined with a has check that throws CCE on failure for relink
-     * @param returnType   return type
-     * @param programPoint program point
-     * @return array getter
+     * Look up a continuous array element getter.
+     * 'get' is a getter, sometimes combined with a has check that throws CCE on failure for relink
      */
-    protected final MethodHandle getContinuousElementGetter(final MethodHandle get, final Class<?> returnType, final int programPoint) {
+    protected final MethodHandle getContinuousElementGetter(MethodHandle get, Class<?> returnType, int programPoint) {
         return getContinuousElementGetter(getClass(), get, returnType, programPoint);
     }
 
     /**
-     * Look up a continuous array element setter
-     * @param set          setter, sometimes combined with a has check that throws CCE on failure for relink
-     * @param returnType   return type
-     * @return array setter
+     * Look up a continuous array element setter.
+     * 'set' is a setter, sometimes combined with a has check that throws CCE on failure for relink
      */
-    protected final MethodHandle getContinuousElementSetter(final MethodHandle set, final Class<?> returnType) {
+    protected final MethodHandle getContinuousElementSetter(MethodHandle set, Class<?> returnType) {
         return getContinuousElementSetter(getClass(), set, returnType);
     }
 
     /**
      * Return element getter for a {@link ContinuousArrayData}
-     * @param clazz        clazz for exact type guard
-     * @param getHas       has getter
-     * @param returnType   return type
-     * @param programPoint program point
-     * @return method handle for element setter
      */
-    protected MethodHandle getContinuousElementGetter(final Class<? extends ContinuousArrayData> clazz, final MethodHandle getHas, final Class<?> returnType, final int programPoint) {
-        final boolean isOptimistic = isValid(programPoint);
-        final int     fti          = getAccessorTypeIndex(getHas.type().returnType());
-        final int     ti           = getAccessorTypeIndex(returnType);
-        MethodHandle  mh           = getHas;
+    protected MethodHandle getContinuousElementGetter(Class<? extends ContinuousArrayData> clazz, MethodHandle getHas, Class<?> returnType, int programPoint) {
+        var isOptimistic = isValid(programPoint);
+        var fti = getAccessorTypeIndex(getHas.type().returnType());
+        var ti = getAccessorTypeIndex(returnType);
+        var mh = getHas;
 
         if (isOptimistic) {
             if (ti < fti) {
@@ -191,57 +160,43 @@ public abstract class ContinuousArrayData extends ArrayData {
 
     /**
      * Return element setter for a {@link ContinuousArrayData}
-     * @param clazz        class for exact type guard
-     * @param setHas       set has guard
-     * @param elementType  element type
-     * @return method handle for element setter
      */
-    protected MethodHandle getContinuousElementSetter(final Class<? extends ContinuousArrayData> clazz, final MethodHandle setHas, final Class<?> elementType) {
+    protected MethodHandle getContinuousElementSetter(Class<? extends ContinuousArrayData> clazz, MethodHandle setHas, Class<?> elementType) {
         return MH.asType(setHas, setHas.type().changeParameterType(2, elementType).changeParameterType(0, clazz));
     }
 
-    /** Fast access guard - it is impractical for JIT performance reasons to use only CCE asType as guard :-(, also we need
-      the null case explicitly, which is the one that CCE doesn't handle */
-    protected static final MethodHandle FAST_ACCESS_GUARD =
-            MH.dropArguments(
-                    staticCall(
-                            MethodHandles.lookup(),
-                            ContinuousArrayData.class,
-                            "guard",
-                            boolean.class,
-                            Class.class,
-                            ScriptObject.class).methodHandle(),
-                    2,
-                    int.class);
+    /**
+     * Fast access guard - it is impractical for JIT performance reasons to use only CCE asType as guard :-(, also we need the null case explicitly, which is the one that CCE doesn't handle
+     */
+    protected static final MethodHandle FAST_ACCESS_GUARD = MH.dropArguments(
+        staticCall(MethodHandles.lookup(), ContinuousArrayData.class, "guard", boolean.class, Class.class, ScriptObject.class).methodHandle(),
+        2, int.class);
 
     @SuppressWarnings("unused")
-    private static boolean guard(final Class<? extends ContinuousArrayData> clazz, final ScriptObject sobj) {
+    private static boolean guard(Class<? extends ContinuousArrayData> clazz, ScriptObject sobj) {
         return sobj != null && sobj.getArray().getClass() == clazz;
     }
 
     /**
-     * Return a fast linked array getter, or null if we have to dispatch to super class
-     * @param desc     descriptor
-     * @param request  link request
-     * @return invocation or null if needs to be sent to slow relink
+     * Return a fast linked array getter, or null if we have to dispatch to super class (needs to be sent to slow relink)
      */
     @Override
-    public GuardedInvocation findFastGetIndexMethod(final Class<? extends ArrayData> clazz, final CallSiteDescriptor desc, final LinkRequest request) {
-        final MethodType callType   = desc.getMethodType();
-        final Class<?>   indexType  = callType.parameterType(1);
-        final Class<?>   returnType = callType.returnType();
+    public GuardedInvocation findFastGetIndexMethod(Class<? extends ArrayData> clazz, CallSiteDescriptor desc, LinkRequest request) {
+        var callType = desc.getMethodType();
+        var indexType = callType.parameterType(1);
+        var returnType = callType.returnType();
 
         if (ContinuousArrayData.class.isAssignableFrom(clazz) && indexType == int.class) {
-            final Object[] args  = request.getArguments();
-            final int      index = (int)args[args.length - 1];
+            var args = request.getArguments();
+            var index = (int)args[args.length - 1];
 
             if (has(index)) {
-                final MethodHandle getArray     = ScriptObject.GET_ARRAY.methodHandle();
-                final int          programPoint = NashornCallSiteDescriptor.isOptimistic(desc) ? NashornCallSiteDescriptor.getProgramPoint(desc) : INVALID_PROGRAM_POINT;
-                MethodHandle       getElement   = getElementGetter(returnType, programPoint);
+                var getArray = ScriptObject.GET_ARRAY.methodHandle();
+                var programPoint = NashornCallSiteDescriptor.isOptimistic(desc) ? NashornCallSiteDescriptor.getProgramPoint(desc) : INVALID_PROGRAM_POINT;
+                var getElement = getElementGetter(returnType, programPoint);
                 if (getElement != null) {
                     getElement = MH.filterArguments(getElement, 0, MH.asType(getArray, getArray.type().changeReturnType(clazz)));
-                    final MethodHandle guard = MH.insertArguments(FAST_ACCESS_GUARD, 0, clazz);
+                    var guard = MH.insertArguments(FAST_ACCESS_GUARD, 0, clazz);
                     return new GuardedInvocation(getElement, guard, (SwitchPoint)null, ClassCastException.class);
                 }
             }
@@ -251,30 +206,27 @@ public abstract class ContinuousArrayData extends ArrayData {
     }
 
     /**
-     * Return a fast linked array setter, or null if we have to dispatch to super class
-     * @param desc     descriptor
-     * @param request  link request
-     * @return invocation or null if needs to be sent to slow relink
+     * Return a fast linked array setter, or null if we have to dispatch to super class (needs to be sent to slow relink)
      */
     @Override
-    public GuardedInvocation findFastSetIndexMethod(final Class<? extends ArrayData> clazz, final CallSiteDescriptor desc, final LinkRequest request) { // array, index, value
-        final MethodType callType    = desc.getMethodType();
-        final Class<?>   indexType   = callType.parameterType(1);
-        final Class<?>   elementType = callType.parameterType(2);
+    public GuardedInvocation findFastSetIndexMethod(Class<? extends ArrayData> clazz, CallSiteDescriptor desc, LinkRequest request) { // array, index, value
+        var callType = desc.getMethodType();
+        var indexType = callType.parameterType(1);
+        var elementType = callType.parameterType(2);
 
         if (ContinuousArrayData.class.isAssignableFrom(clazz) && indexType == int.class) {
-            final Object[]        args  = request.getArguments();
-            final int             index = (int)args[args.length - 2];
+            var args = request.getArguments();
+            var index = (int)args[args.length - 2];
 
             if (hasRoomFor(index)) {
-                MethodHandle setElement = getElementSetter(elementType); //Z(continuousarraydata, int, int), return true if successful
+                var setElement = getElementSetter(elementType); // Z(continuousarraydata, int, int), return true if successful
                 if (setElement != null) {
                     //else we are dealing with a wider type than supported by this callsite
-                    MethodHandle getArray = ScriptObject.GET_ARRAY.methodHandle();
-                    getArray   = MH.asType(getArray, getArray.type().changeReturnType(getClass()));
+                    var getArray = ScriptObject.GET_ARRAY.methodHandle();
+                    getArray = MH.asType(getArray, getArray.type().changeReturnType(getClass()));
                     setElement = MH.filterArguments(setElement, 0, getArray);
-                    final MethodHandle guard = MH.insertArguments(FAST_ACCESS_GUARD, 0, clazz);
-                    return new GuardedInvocation(setElement, guard, (SwitchPoint)null, ClassCastException.class); //CCE if not a scriptObject anymore
+                    var guard = MH.insertArguments(FAST_ACCESS_GUARD, 0, clazz);
+                    return new GuardedInvocation(setElement, guard, (SwitchPoint)null, ClassCastException.class); // CCE if not a scriptObject anymore
                 }
             }
         }
@@ -284,70 +236,58 @@ public abstract class ContinuousArrayData extends ArrayData {
 
     /**
      * Specialization - fast push implementation
-     * @param arg argument
-     * @return new array length
      */
-    public double fastPush(final int arg) {
-        throw new ClassCastException(String.valueOf(getClass())); //type is wrong, relink
+    public double fastPush(int arg) {
+        throw new ClassCastException(String.valueOf(getClass())); // type is wrong, relink
     }
 
     /**
      * Specialization - fast push implementation
-     * @param arg argument
-     * @return new array length
      */
-    public double fastPush(final long arg) {
-        throw new ClassCastException(String.valueOf(getClass())); //type is wrong, relink
+    public double fastPush(long arg) {
+        throw new ClassCastException(String.valueOf(getClass())); // type is wrong, relink
     }
 
     /**
      * Specialization - fast push implementation
-     * @param arg argument
-     * @return new array length
      */
-    public double fastPush(final double arg) {
-        throw new ClassCastException(String.valueOf(getClass())); //type is wrong, relink
+    public double fastPush(double arg) {
+        throw new ClassCastException(String.valueOf(getClass())); // type is wrong, relink
     }
 
     /**
      * Specialization - fast push implementation
-     * @param arg argument
-     * @return new array length
      */
-    public double fastPush(final Object arg) {
-        throw new ClassCastException(String.valueOf(getClass())); //type is wrong, relink
+    public double fastPush(Object arg) {
+        throw new ClassCastException(String.valueOf(getClass())); // type is wrong, relink
     }
 
     /**
      * Specialization - fast pop implementation
-     * @return element value
      */
     public int fastPopInt() {
-        throw new ClassCastException(String.valueOf(getClass())); //type is wrong, relink
+        throw new ClassCastException(String.valueOf(getClass())); // type is wrong, relink
     }
 
     /**
      * Specialization - fast pop implementation
-     * @return element value
      */
     public double fastPopDouble() {
-       throw new ClassCastException(String.valueOf(getClass())); //type is wrong, relink
+       throw new ClassCastException(String.valueOf(getClass())); // type is wrong, relink
     }
 
     /**
      * Specialization - fast pop implementation
-     * @return element value
      */
     public Object fastPopObject() {
-        throw new ClassCastException(String.valueOf(getClass())); //type is wrong, relink
+        throw new ClassCastException(String.valueOf(getClass())); // type is wrong, relink
     }
 
     /**
      * Specialization - fast concat implementation
-     * @param otherData data to concat
-     * @return new arraydata
      */
-    public ContinuousArrayData fastConcat(final ContinuousArrayData otherData) {
+    public ContinuousArrayData fastConcat(ContinuousArrayData otherData) {
         throw new ClassCastException(String.valueOf(getClass()) + " != " + String.valueOf(otherData.getClass()));
     }
+
 }
